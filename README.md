@@ -1,6 +1,13 @@
-# [Squoosh]!
+# SquooshPlus
 
-[Squoosh] is an image compression web app that reduces image sizes through numerous formats.
+SquooshPlus is a fork of [Squoosh], an image compression web app that reduces image sizes through numerous formats. This fork is focused on making the app easier to maintain and adding practical bulk image optimization workflows.
+
+## Project docs
+
+- [Project overview](docs/overview.md)
+- [Build and runtime map](docs/build-and-runtime.md)
+- [Road map](docs/road-map.md)
+- [Cleanup todo](docs/todo.md)
 
 # Privacy
 
@@ -15,21 +22,27 @@ However, Squoosh utilizes Google Analytics to collect the following:
 
 # Developing
 
-To develop for Squoosh:
+Use the Node version in [.nvmrc](.nvmrc).
 
-1. Clone the repository
-1. To install node packages, run:
+1. Install Node dependencies:
    ```sh
    npm install
    ```
-1. Then build the app by running:
+1. Build the app:
    ```sh
    npm run build
    ```
-1. After building, start the development server by running:
+1. Start the development server:
    ```sh
    npm run dev
    ```
+
+Useful maintenance commands:
+
+```sh
+npm run typecheck
+npm run format:check
+```
 
 # Contributing
 

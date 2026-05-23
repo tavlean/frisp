@@ -98,7 +98,8 @@ export class Options extends Component<Props, State> {
           lossyPalette: optionState.lossless ? optionState.slightLoss : false,
           decodingSpeedTier: optionState.decodingSpeedTier,
           photonNoiseIso: optionState.photonNoiseIso,
-          lossyModular: optionState.quality < 7 ? true : optionState.alternativeLossy,
+          lossyModular:
+            optionState.quality < 7 ? true : optionState.alternativeLossy,
         };
 
         // Updating options, so we don't recalculate in getDerivedStateFromProps.
