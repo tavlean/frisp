@@ -14,7 +14,7 @@ Project homepage metadata: `https://sqush.app`.
 
 Old fork: `tavlean/SquooshPlus`, archived and kept as historical reference.
 
-Working tree at last update: pending commit for generated feature smoke checks.
+Working tree at last update: pending commit for issue-list documentation.
 
 Latest committed work:
 
@@ -27,7 +27,8 @@ Latest committed work:
 - `9a9f50b` Strengthen build smoke checks
 - `c40b73f` Keep CI matrix jobs independent
 - `fb33d27` Add npm test alias
-- Pending: generated feature smoke checks
+- `c34598c` Verify generated feature files
+- Pending: issue-list documentation
 - Pending: npm test alias
 - `b9b7f0f` Add macOS CI coverage
 - `45f3050` Declare supported Node engine
@@ -64,6 +65,7 @@ Next recommended tasks:
 ## Completed baseline cleanup
 
 - Added project documentation and a road map.
+- Added an issue-list backlog seed.
 - Added `npm run typecheck`.
 - Added `npm test` as an alias for the full baseline check.
 - Added Node and npm engine metadata matching `.nvmrc`.

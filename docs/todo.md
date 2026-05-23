@@ -121,9 +121,10 @@ This list is ordered by priority. Do the high-priority items before building new
     - The app uses modern browser APIs, PWA APIs, WebAssembly, workers, and optional threaded codecs.
     - Decide which browsers matter for this fork before spending time on compatibility fixes.
 
-20. Create an issue list from this todo.
-    - Keep each task small enough to review.
-    - Start with scripts, audit triage, analytics decision, and saved-settings hardening.
+20. Completed: create an issue list from this todo.
+
+    - Initial backlog seed lives in [Issue list](issue-list.md).
+    - Convert items to GitHub issues when the project workflow is ready.
 
 ## Current product-design hold
 

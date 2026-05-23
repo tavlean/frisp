@@ -14,6 +14,7 @@ Website: [sqush.app](https://sqush.app)
 - [Manual QA checklist](docs/manual-qa.md)
 - [Road map](docs/road-map.md)
 - [Cleanup todo](docs/todo.md)
+- [Issue list](docs/issue-list.md)
 - [Upstream PR notes](docs/upstream-pr-notes.md)
 - [Maintenance status](docs/maintenance-status.md)
 
