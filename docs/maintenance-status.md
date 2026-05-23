@@ -14,7 +14,7 @@ Project homepage metadata: `https://sqush.app`.
 
 Old fork: `tavlean/SquooshPlus`, archived and kept as historical reference.
 
-Working tree at last update: pending commit for bulk processor orchestration.
+Working tree at last update: pending commit for bulk runner orchestration.
 
 Latest committed work:
 
@@ -79,6 +79,7 @@ Next recommended tasks:
 - Expanded the lightweight helper test to cover `clean-modify` and `pretty-bytes`.
 - Extracted single-image decode/process/encode/SVG pipeline helpers into `src/client/lazy-app/image-pipeline.ts`.
 - Added `src/client/lazy-app/bulk/processor.ts` to process one bulk image job through the shared image pipeline without UI coupling.
+- Added `src/client/lazy-app/bulk/runner.ts` to process queued bulk jobs up to the concurrency limit.
 - Removed the noisy Rollup unused external import warning by narrowing `path` imports in build plugins.
 - Refreshed low-risk dependencies while keeping Preact pinned because the newer Preact 10 typings require a separate migration.
 - Refreshed compatible Rollup 2 plugins and set `@rollup/plugin-replace` `preventAssignment` explicitly.

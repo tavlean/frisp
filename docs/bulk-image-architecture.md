@@ -290,6 +290,8 @@ When implementation resumes, the safest technical path is:
 
    - `WorkerBridge` queues work per bridge.
    - Bulk mode should use a small pool aligned with `defaultBulkConcurrency`.
+   - Initial runner module: `src/client/lazy-app/bulk/runner.ts`
+   - Current status: runner processes queued jobs up to the concurrency limit, stores per-job failures, and propagates aborts.
 
 4. Detect multi-file import at the app boundary later.
 
