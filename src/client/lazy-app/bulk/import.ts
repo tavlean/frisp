@@ -1,5 +1,17 @@
 import { createImageJob, ImageJob } from './session';
 
+export interface BulkImportResult {
+  accepted: ImageJob[];
+  rejected: File[];
+}
+
+export interface BulkImportSummary {
+  accepted: number;
+  rejected: number;
+  totalAcceptedSize: number;
+  totalRejectedSize: number;
+}
+
 const supportedImageExtensions = new Set([
   'avif',
   'gif',
@@ -28,10 +40,7 @@ export function createImageJobId(file: File, index: number): string {
   return `${index}-${file.name}-${file.size}-${file.lastModified}`;
 }
 
-export function createImageJobs(files: Iterable<File>): {
-  accepted: ImageJob[];
-  rejected: File[];
-} {
+export function createImageJobs(files: Iterable<File>): BulkImportResult {
   const accepted: ImageJob[] = [];
   const rejected: File[] = [];
 
@@ -47,4 +56,21 @@ export function createImageJobs(files: Iterable<File>): {
   }
 
   return { accepted, rejected };
+}
+
+export function getBulkImportSummary(
+  result: BulkImportResult,
+): BulkImportSummary {
+  return {
+    accepted: result.accepted.length,
+    rejected: result.rejected.length,
+    totalAcceptedSize: result.accepted.reduce(
+      (total, job) => total + job.originalSize,
+      0,
+    ),
+    totalRejectedSize: result.rejected.reduce(
+      (total, file) => total + file.size,
+      0,
+    ),
+  };
 }

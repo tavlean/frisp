@@ -14,7 +14,7 @@ Project homepage metadata: `https://sqush.app`.
 
 Old fork: `tavlean/SquooshPlus`, archived and kept as historical reference.
 
-Working tree at last update: pending commit for unit test alias.
+Working tree at last update: pending commit for bulk import summary helper.
 
 Latest committed work:
 
@@ -31,7 +31,8 @@ Latest committed work:
 - `ed740b0` Add maintenance issue list
 - `d1eb2db` Update local handoff status
 - `5f038f9` Document browser support policy
-- Pending: unit test alias
+- `b17bb09` Add unit test alias
+- Pending: bulk import summary helper
 - Pending: npm test alias
 - `b9b7f0f` Add macOS CI coverage
 - `45f3050` Declare supported Node engine
@@ -101,6 +102,7 @@ Next recommended tasks:
 - Added detailed bulk progress counters for future batch status displays.
 - Hardened bulk session imports so repeated files receive unique job IDs.
 - Added a bulk import extension fallback for image files with missing MIME types.
+- Added a bulk import summary helper for accepted/rejected counts and byte totals.
 - Added a session helper to remove jobs while preserving valid selection and active-job counts.
 - Added a session helper to mark encoded jobs exported without double-counting repeat exports.
 - Added a lightweight Node assertion test for bulk helper behavior.
