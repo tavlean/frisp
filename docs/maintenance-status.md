@@ -14,7 +14,7 @@ Project homepage metadata: `https://sqush.app`.
 
 Old fork: `tavlean/SquooshPlus`, archived and kept as historical reference.
 
-Working tree at last update: pending commit for stricter bulk override detection.
+Working tree at last update: pending commit for package engine metadata.
 
 Latest committed work:
 
@@ -26,7 +26,8 @@ Latest committed work:
 - `9002729` Document codec provenance
 - `383705e` Add bulk job removal helper
 - `3eff941` Guard bulk queue transitions
-- Pending: stricter bulk override detection
+- `559b118` Tighten bulk override detection
+- Pending: package engine metadata
 
 Latest verification run:
 
@@ -51,6 +52,7 @@ Next recommended tasks:
 
 - Added project documentation and a road map.
 - Added `npm run typecheck`.
+- Added Node and npm engine metadata matching `.nvmrc`.
 - Added `npm run format` and `npm run format:check`.
 - Added `npm run smoke:build` to verify generated build output.
 - Added `npm run preview` to serve the production `build/` directory.

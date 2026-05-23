@@ -4,9 +4,10 @@ This list is ordered by priority. Do the high-priority items before building new
 
 ## Priority 0: protect the working baseline
 
-1. Decide the supported Node version.
+1. Completed: decide the supported Node version.
 
    - `.nvmrc` says `20.16.0`.
+   - `package.json` declares Node `>=20.16.0 <21` and npm `>=10`.
    - The baseline now builds on Node 20 without the previous TypeScript spawn deprecation warning.
    - Keep the required Node/npm versions documented in `README.md`.
 

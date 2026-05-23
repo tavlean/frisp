@@ -25,7 +25,7 @@ Sqush does not include the inherited Google Analytics integration from upstream 
 
 # Developing
 
-Use the Node version in [.nvmrc](.nvmrc).
+Use the Node version in [.nvmrc](.nvmrc). The package metadata expects Node `>=20.16.0 <21` and npm `>=10`.
 
 1. Install Node dependencies:
    ```sh
