@@ -98,7 +98,7 @@ export async function resize(
 }
 
 interface Props {
-  isVector: Boolean;
+  isVector: boolean;
   inputWidth: number;
   inputHeight: number;
   options: ResizeOptions;

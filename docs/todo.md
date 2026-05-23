@@ -76,9 +76,9 @@ This list is ordered by priority. Do the high-priority items before building new
 - Missing/unknown encoders are rejected before applying the settings.
 
 13. Fix small code quality issues while touching nearby code.
-    - `Boolean` should be `boolean` in Preact state types.
-    - Some comments contain typos such as `catched`.
-    - Some browser APIs used here are older, for example `matchMedia().addListener`.
+
+    - Completed: replace the remaining `Boolean` prop type with primitive `boolean`.
+    - No remaining `catched`, `matchMedia().addListener`, or `matchMedia().removeListener` matches were found in `src/`.
 
 ## Priority 3: tests and release confidence
 
