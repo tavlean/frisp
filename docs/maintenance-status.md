@@ -14,7 +14,7 @@ Project homepage metadata: `https://sqush.app`.
 
 Old fork: `tavlean/SquooshPlus`, archived and kept as historical reference.
 
-Working tree at last update: clean, local branch ahead of `origin/main` by 12 commits.
+Working tree at last update: clean, `main` matches `origin/main`.
 
 Latest committed work:
 
@@ -36,10 +36,10 @@ Latest committed work:
 - `ec853a0` List bulk setting overrides
 - `2d72944` Test bulk override paths
 - `a4683c5` Refresh local progress status
-- Pending: progress dashboard
 - `f75c99a` Add progress dashboard
 - `23e005e` Extract processor state comparison
 - `4fa0db9` Add agent guide
+- `67a6ed5` Update handoff after agent guide
 - `b9b7f0f` Add macOS CI coverage
 - `45f3050` Declare supported Node engine
 - `559b118` Tighten bulk override detection
@@ -65,12 +65,13 @@ Latest verification run:
 - Browser production-preview smoke: passed after shared image pipeline extraction; app shell, Sqush logo, and drop target rendered.
 - Playwright CLI production-build smoke: passed after the Sqush rename, with `Sqush` title, file input present, Sqush logo alt text present, and zero console messages.
 
-Next recommended tasks:
+Next recommended tasks when work resumes:
 
-1. Continue bulk-image feature design in framework-neutral TypeScript modules before touching UI heavily.
-2. Do not implement bulk UI until the workflow design has been discussed and iterated.
-3. Use `docs/dependency-modernization.md` for dependency cleanup order; do not use `npm audit fix --force` blindly.
-4. Use `docs/upstream-pr-notes.md` as reference material for useful abandoned upstream PRs.
+1. Keep progress tied to [Progress dashboard](progress-dashboard.md) and [Agent guide](../AGENTS.md).
+2. Continue extracting/tested framework-neutral logic from Preact components where it clearly reduces future Svelte migration risk.
+3. Add browser smoke tests before significant UI or codec-surface changes.
+4. Do not implement bulk UI until the workflow design has been discussed and iterated.
+5. Use `docs/dependency-modernization.md` for dependency cleanup order; do not use `npm audit fix --force` blindly.
 
 ## Completed baseline cleanup
 
