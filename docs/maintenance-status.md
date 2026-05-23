@@ -110,6 +110,7 @@ Quick investigation note:
 - Replaced the editor encoder options render cast with typed encoder option component dispatch.
 - Replaced avoidable `any` casts in the result cache processor-state comparison.
 - Added framework-neutral bulk settings, session, import, queue, and stale-output helpers.
+- Hardened bulk session construction so initial active and exported jobs derive matching counters.
 - Extracted and tested processor-state equivalence logic from the Preact editor component.
 - Tightened bulk override detection so empty nested override objects are not treated as real overrides.
 - Tightened bulk settings merging so falsy overrides such as `false` and `0` remain valid per-image overrides.

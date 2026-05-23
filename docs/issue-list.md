@@ -20,6 +20,7 @@ Use this as a backlog seed. Keep each issue small enough to review in one focuse
    - Started: bulk export now covers invalid/path-like batch archive names.
    - Started: bulk queue/session tests now cover exported-count consistency when exported jobs are removed or requeued as stale.
    - Started: bulk queue/session tests now cover exported-count consistency when one exported job is manually requeued.
+   - Started: bulk session tests now cover active/exported counters when constructing a session from existing jobs.
    - Started: bulk object URL cleanup now covers duplicate URL revocation.
    - Started: bulk runner tests now cover pre-aborted batch cancellation before processors are called.
    - Started: saved-settings parsing now rejects missing or array-shaped encoder options and invalid processor enabled/null values.

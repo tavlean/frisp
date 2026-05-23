@@ -58,8 +58,8 @@ export function createBulkSession(
     globalSettings,
     jobs,
     selectedJobId: jobs[0]?.id,
-    activeJobs: 0,
-    exportedCount: 0,
+    activeJobs: jobs.filter(isActiveJob).length,
+    exportedCount: jobs.filter((job) => job.status === 'exported').length,
   };
 }
 
