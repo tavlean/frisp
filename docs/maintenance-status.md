@@ -14,22 +14,22 @@ Project homepage metadata: `https://sqush.app`.
 
 Old fork: `tavlean/SquooshPlus`, archived and kept as historical reference.
 
-Working tree at last update: pending commit for duplicate bulk job ID handling.
+Working tree at last update: clean after `0e4118d`.
 
 Latest committed work:
 
-- `6032bee` Document audit command
-- `352c6dc` Version saved side settings
-- `7eef5e4` Use primitive resize boolean prop
-- `d5e32ea` Add bulk export entries
-- `e7542ae` Track exported bulk jobs
-- `9002729` Document codec provenance
-- `383705e` Add bulk job removal helper
-- `3eff941` Guard bulk queue transitions
-- `559b118` Tighten bulk override detection
-- `45f3050` Declare supported Node engine
+- `0e4118d` Ensure unique bulk job IDs
 - `b9b7f0f` Add macOS CI coverage
-- Pending: duplicate bulk job ID handling
+- `45f3050` Declare supported Node engine
+- `559b118` Tighten bulk override detection
+- `3eff941` Guard bulk queue transitions
+- `383705e` Add bulk job removal helper
+- `9002729` Document codec provenance
+- `e7542ae` Track exported bulk jobs
+- `d5e32ea` Add bulk export entries
+- `7eef5e4` Use primitive resize boolean prop
+- `352c6dc` Version saved side settings
+- `6032bee` Document audit command
 
 Latest verification run:
 
@@ -37,8 +37,9 @@ Latest verification run:
 - `npm run typecheck`: passed.
 - `npm run build && npm run smoke:build`: passed.
 - `npm run test:helpers`: passed.
-- `npm run check`: passed after extracting versioned saved settings.
+- `npm run check`: passed after duplicate bulk job ID handling.
 - `npm audit --audit-level=low`: passed, 0 vulnerabilities.
+- Latest observed GitHub Actions state: commits through `559b118` passed; newer matrix runs were still in progress when this file was updated.
 - `npm run serve` wrapper: launched successfully on port 55194.
 - Browser production-preview smoke: passed after shared image pipeline extraction; app shell, Sqush logo, and drop target rendered.
 - Playwright CLI production-build smoke: passed after the Sqush rename, with `Sqush` title, file input present, Sqush logo alt text present, and zero console messages.
