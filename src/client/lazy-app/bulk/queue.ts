@@ -65,6 +65,7 @@ export function completeJob(
   const job = getJob(session, jobId);
   if (!job) return session;
   const activeJobDelta = isActiveStatus(job.status) ? 1 : 0;
+  const exportedJobDelta = job.status === 'exported' ? 1 : 0;
 
   return {
     ...updateJob(session, jobId, (job) => ({
@@ -74,6 +75,7 @@ export function completeJob(
       error: undefined,
     })),
     activeJobs: Math.max(0, session.activeJobs - activeJobDelta),
+    exportedCount: Math.max(0, session.exportedCount - exportedJobDelta),
   };
 }
 
@@ -85,6 +87,7 @@ export function failJob(
   const job = getJob(session, jobId);
   if (!job) return session;
   const activeJobDelta = isActiveStatus(job.status) ? 1 : 0;
+  const exportedJobDelta = job.status === 'exported' ? 1 : 0;
 
   return {
     ...updateJob(session, jobId, (job) => ({
@@ -93,6 +96,7 @@ export function failJob(
       error,
     })),
     activeJobs: Math.max(0, session.activeJobs - activeJobDelta),
+    exportedCount: Math.max(0, session.exportedCount - exportedJobDelta),
   };
 }
 
