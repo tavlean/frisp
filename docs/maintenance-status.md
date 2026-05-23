@@ -58,4 +58,4 @@ sudo chown -R 501:20 "/Users/tav/.npm"
 npm cache verify
 ```
 
-`npm cache verify` now succeeds.
+`npm cache verify` now succeeds in the user's normal terminal. The Codex sandbox may still report `EPERM` against individual cache files, so use a temporary npm cache for Codex-run install/update commands if that reappears.
