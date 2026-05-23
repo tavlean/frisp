@@ -100,6 +100,7 @@ Quick investigation note:
 - Added `npm run smoke:build` to verify generated build output.
 - Expanded `npm run smoke:build` to check generated Sqush metadata and absence of analytics code.
 - Expanded `npm run smoke:build` to verify generated feature metadata and worker entry files exist.
+- Expanded `npm run smoke:build` to guard against accidental external runtime scripts, runtime links, and manifest media.
 - Added `npm run preview` to serve the production `build/` directory.
 - Updated CI to use current checkout/setup-node actions and run the baseline checks.
 - Expanded CI to cover Ubuntu, Windows, and macOS.

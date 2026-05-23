@@ -9,6 +9,7 @@ Use this as a backlog seed. Keep each issue small enough to review in one focuse
    - Verify the app loads from a production build.
    - Verify a file can open the editor.
    - Verify output generation for at least WebP.
+   - Started: `npm run smoke:build` now checks that production runtime scripts, runtime links, and manifest media stay local so the offline/local-processing promise does not silently regress.
 
 2. Expand pure helper tests.
 
