@@ -8,11 +8,19 @@ import { getEffectiveSettings, settingsHash } from './settings';
 
 export const defaultBulkConcurrency = 2;
 
+function normalizeBulkConcurrency(concurrency: number): number {
+  if (!Number.isFinite(concurrency)) return defaultBulkConcurrency;
+  return Math.max(0, Math.floor(concurrency));
+}
+
 export function getRunnableJobs(
   session: BulkSession,
   concurrency = defaultBulkConcurrency,
 ): ImageJob[] {
-  const openSlots = Math.max(0, concurrency - session.activeJobs);
+  const openSlots = Math.max(
+    0,
+    normalizeBulkConcurrency(concurrency) - session.activeJobs,
+  );
   if (openSlots === 0) return [];
 
   return session.jobs

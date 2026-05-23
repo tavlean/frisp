@@ -26,6 +26,7 @@ Use this as a backlog seed. Keep each issue small enough to review in one focuse
    - Started: bulk session tests now cover active/exported counters when constructing a session from existing jobs.
    - Started: bulk object URL cleanup now covers duplicate URL revocation.
    - Started: bulk runner tests now cover pre-aborted batch cancellation before processors are called.
+   - Started: bulk queue tests now cover invalid concurrency values before future UI controls can pass them through.
    - Started: shared abort helper tests now cover listener cleanup on resolve and abort.
    - Started: saved-settings parsing now rejects missing, array-shaped, or null-valued encoder options and invalid processor enabled/null values.
    - Add more saved-settings migration cases when the schema changes again.

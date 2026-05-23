@@ -12,7 +12,7 @@ Make Sqush a lean, maintainable, secure image optimization tool that is comforta
 | ------------------------------------ | -------: | ----------------------------------------------------------------------------------------------------------------- |
 | Stabilization, CI, and security      |      85% | Audit is clean, CI covers Ubuntu, Windows, and macOS, and WebP output has manual production-build smoke coverage. |
 | Documentation and handoff clarity    |      78% | Core docs exist. Progress, roadmap, issue list, codec provenance, QA, and maintenance status are tracked.         |
-| Bulk backend foundation              |      57% | Framework-neutral import/session/settings/queue/export/processor/runner/URL helpers exist with tests.             |
+| Bulk backend foundation              |      58% | Framework-neutral import/session/settings/queue/export/processor/runner/URL helpers exist with stronger tests.    |
 | Repo simplification                  |      33% | Dependency and script cleanup started. Codec surface, Preact coupling, and custom Rollup complexity still remain. |
 | Svelte/SvelteKit migration readiness |      22% | Shared pipeline and bulk logic extraction has started. UI migration should wait until behavior is better tested.  |
 

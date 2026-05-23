@@ -14,7 +14,7 @@ Project homepage metadata: `https://sqush.app`.
 
 Old fork: `tavlean/SquooshPlus`, archived and kept as historical reference.
 
-Working tree at last update: docs updated after a focused WebP production-build smoke. Local work may be ahead of `origin/main`; run `git status --short --branch` and `git log --oneline origin/main..HEAD` for the exact local-only list.
+Working tree at last update: bulk queue concurrency normalization changed and docs updated. Local work may be ahead of `origin/main`; run `git status --short --branch` and `git log --oneline origin/main..HEAD` for the exact local-only list.
 
 Latest local-only committed work at last update:
 
@@ -54,13 +54,14 @@ Latest local-only committed work at last update:
 Latest verification run:
 
 - `npm run format:check`: passed.
-- `npm run typecheck`: passed.
-- `npm run test:unit`: passed.
+- `npm run typecheck`: passed, including after bulk queue concurrency normalization.
+- `npm run test:unit`: passed, including after bulk queue concurrency normalization.
 - `npm run build && npm run smoke:build`: passed.
 - `npm run test:helpers`: passed.
 - `npm run check`: passed after CI matrix diagnostics.
 - `npm audit --audit-level=low`: passed, 0 vulnerabilities.
 - Latest observed GitHub Actions state: pushed commits through `63adddf` passed on Ubuntu, Windows, and macOS.
+- Latest observed GitHub Actions state after the WebP smoke documentation push: `995c9b2` passed on Ubuntu, Windows, and macOS.
 - `npm run serve` wrapper: launched successfully on port 55194.
 - Browser production-preview smoke: passed after shared image pipeline extraction; app shell, Sqush logo, and drop target rendered.
 - Playwright CLI production-build smoke: passed after the Sqush rename, with `Sqush` title, file input present, Sqush logo alt text present, and zero console messages.
@@ -132,6 +133,7 @@ Quick investigation note:
 - Tightened bulk settings merging so falsy overrides such as `false` and `0` remain valid per-image overrides.
 - Added a settings override path helper for future per-image override highlighting.
 - Hardened bulk queue transitions so missing or repeated jobs do not corrupt active-job counts.
+- Hardened bulk queue scheduling so invalid, fractional, negative, or infinite concurrency values do not produce surprising runnable-job lists.
 - Hardened bulk queue/session bookkeeping so removed or stale exported jobs keep exported counts consistent.
 - Hardened bulk queue completion/failure transitions so exported-count bookkeeping recovers if an exported job is overwritten.
 - Hardened bulk queue failure transitions so failed jobs do not retain stale output download data.
