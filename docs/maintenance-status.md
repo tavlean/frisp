@@ -156,6 +156,7 @@ Quick investigation note:
 - Guarded bulk processor percent-change calculation for zero-byte inputs.
 - Added `src/client/lazy-app/bulk/runner.ts` to process queued bulk jobs up to the concurrency limit.
 - Added `src/client/lazy-app/bulk/urls.ts` to collect and revoke bulk preview, thumbnail, and download object URLs.
+- Hardened bulk object URL cleanup so duplicate preview, thumbnail, and download URLs are only revoked once.
 - Fixed SVG `viewBox` size parsing for comma-separated values using a tested helper.
 - Replaced POSIX-only `dev` and `serve` script syntax with Node wrappers for better Windows compatibility.
 - Documented the full current upstream open PR audit in `docs/upstream-pr-notes.md`.
