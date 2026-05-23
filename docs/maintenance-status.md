@@ -14,7 +14,7 @@ Project homepage metadata: `https://sqush.app`.
 
 Old fork: `tavlean/SquooshPlus`, archived and kept as historical reference.
 
-Working tree at last update: pending commit for CI audit check.
+Working tree at last update: pending commit for README audit command note.
 
 Latest committed work:
 
