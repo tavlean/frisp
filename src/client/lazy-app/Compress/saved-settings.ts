@@ -28,6 +28,7 @@ function isEncoderState(value: unknown): value is EncoderState | undefined {
   if (typeof value.type !== 'string') return false;
   return (
     isRecord(value.options) &&
+    Object.values(value.options).every((option) => option != null) &&
     Object.prototype.hasOwnProperty.call(encoderMap, value.type)
   );
 }

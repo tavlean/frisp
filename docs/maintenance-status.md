@@ -103,6 +103,7 @@ Quick investigation note:
 - Added versioned saved side settings serialization while preserving legacy saved settings.
 - Hardened saved settings parsing to reject array-shaped payloads.
 - Hardened saved settings parsing to reject missing or array-shaped encoder options.
+- Hardened saved settings parsing to reject null encoder option values.
 - Hardened saved settings parsing to reject invalid processor enabled values and null option values.
 - Modernized one editor media query listener path.
 - Hardened the shared abort helper so it removes abort listeners when wrapped work settles.
