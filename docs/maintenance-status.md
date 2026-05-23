@@ -14,7 +14,7 @@ Project homepage metadata: `https://sqush.app`.
 
 Old fork: `tavlean/SquooshPlus`, archived and kept as historical reference.
 
-Working tree at last update: pending commit for Rollup 2 plugin patch refresh.
+Working tree at last update: pending commit for non-force audit lockfile fix.
 
 Latest committed work:
 
@@ -77,6 +77,7 @@ Next recommended tasks:
 - Removed the noisy Rollup unused external import warning by narrowing `path` imports in build plugins.
 - Refreshed low-risk dependencies while keeping Preact pinned because the newer Preact 10 typings require a separate migration.
 - Refreshed compatible Rollup 2 plugins and set `@rollup/plugin-replace` `preventAssignment` explicitly.
+- Applied the non-force `npm audit fix` lockfile update for `brace-expansion`.
 
 ## Current verification commands
 
@@ -97,7 +98,7 @@ On a fresh checkout, run `npm run build` before `npm run typecheck` because the 
 
 ## Remaining audit state
 
-`npm audit` is reduced to 48 findings but still not clean. The remaining findings are mainly in old build tooling:
+`npm audit` is reduced to 47 findings but still not clean. The remaining findings are mainly in old build tooling:
 
 - PostCSS/cssnano ecosystem packages.
 - Rollup/terser-related packages.

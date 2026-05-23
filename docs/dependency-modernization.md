@@ -6,12 +6,12 @@ The cleanup goal is to reduce audit risk without destabilizing workers, WASM, CS
 
 ## Current audit shape
 
-Recent `npm audit` state after the first safe dependency refresh:
+Recent `npm audit` state after safe dependency refreshes and non-force audit fix:
 
-- 48 total issues.
+- 47 total issues.
 - 0 critical.
 - 5 high.
-- 43 moderate.
+- 42 moderate.
 - 0 low.
 
 Most findings are development/build-chain transitive dependencies, mainly from:
