@@ -21,9 +21,16 @@ export const isSafari =
  * Compare two objects, returning a boolean indicating if
  * they have the same properties and strictly equal values.
  */
-export function shallowEqual(one: any, two: any) {
-  for (const i in one) if (one[i] !== two[i]) return false;
-  for (const i in two) if (!(i in one)) return false;
+export function shallowEqual(one: object, two: object): boolean {
+  const oneRecord = one as Record<string, unknown>;
+  const twoRecord = two as Record<string, unknown>;
+
+  for (const i in oneRecord) {
+    if (oneRecord[i] !== twoRecord[i]) return false;
+  }
+  for (const i in twoRecord) {
+    if (!(i in oneRecord)) return false;
+  }
   return true;
 }
 
