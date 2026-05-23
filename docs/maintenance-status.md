@@ -146,6 +146,7 @@ Quick investigation note:
 - Added `npm run audit` and CI audit enforcement.
 - Removed the noisy Rollup unused external import warning by narrowing `path` imports in build plugins.
 - Refreshed low-risk dependencies while keeping Preact pinned because the newer Preact 10 typings require a separate migration.
+- Refreshed `preact-render-to-string` within major 5 for static prerendering without starting the Preact migration.
 - Refreshed compatible Rollup 2 plugins and set `@rollup/plugin-replace` `preventAssignment` explicitly.
 - Applied the non-force `npm audit fix` lockfile update for `brace-expansion`.
 - Migrated the CSS build stack to PostCSS 8-era packages.

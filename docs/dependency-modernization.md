@@ -38,7 +38,7 @@ Keep these as small batches and run `npm run check` after each batch:
 
 Keep Prettier on v2 initially to avoid formatting churn.
 
-Status: first safe refresh completed for OMT, Comlink, MIME packages, Prettier 2, TypeScript 4, wasm-feature-detect, and small dev/type patch updates.
+Status: first safe refresh completed for OMT, Comlink, MIME packages, Prettier 2, TypeScript 4, wasm-feature-detect, same-major `preact-render-to-string` 5.x, and small dev/type patch updates.
 
 Do not include Preact in this safe batch. A trial upgrade from Preact `10.5.5` to `10.29.2` failed TypeScript checks because newer Preact JSX types conflict with this app's old custom option component prop typing. Treat Preact as a separate migration.
 
