@@ -14,7 +14,7 @@ Project homepage metadata: `https://sqush.app`.
 
 Old fork: `tavlean/SquooshPlus`, archived and kept as historical reference.
 
-Working tree at last update: clean, local branch ahead of `origin/main` by 8 commits.
+Working tree at last update: pending commit for progress dashboard.
 
 Latest committed work:
 
@@ -35,6 +35,8 @@ Latest committed work:
 - `e2b0bc5` Add bulk import summary
 - `ec853a0` List bulk setting overrides
 - `2d72944` Test bulk override paths
+- `a4683c5` Refresh local progress status
+- Pending: progress dashboard
 - `b9b7f0f` Add macOS CI coverage
 - `45f3050` Declare supported Node engine
 - `559b118` Tighten bulk override detection
@@ -71,6 +73,7 @@ Next recommended tasks:
 
 - Added project documentation and a road map.
 - Added an issue-list backlog seed.
+- Added a progress dashboard to keep cleanup, simplification, bulk, and Svelte migration readiness aligned.
 - Added an initial browser support policy note.
 - Added `npm run typecheck`.
 - Added `npm test` as an alias for the full baseline check.
