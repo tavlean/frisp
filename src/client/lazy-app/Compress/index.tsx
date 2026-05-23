@@ -36,6 +36,7 @@ import {
   parseSavedSideSettings,
   serializeSavedSideSettings,
 } from './saved-settings';
+import { processorStateEquivalent } from './processor-state';
 
 export type OutputType = EncoderType | 'identity';
 export type { SourceImage } from '../image-pipeline';
@@ -135,24 +136,6 @@ function stateForNewSourceData(state: State): State {
   }
 
   return newState;
-}
-
-/**
- * If two processors are disabled, they're considered equivalent, otherwise
- * equivalence is based on ===
- */
-function processorStateEquivalent(a: ProcessorState, b: ProcessorState) {
-  // Quick exit
-  if (a === b) return true;
-
-  // All processors have the same keys
-  for (const key of Object.keys(a) as Array<keyof ProcessorState>) {
-    // If both processors are disabled, they're the same.
-    if (!a[key].enabled && !b[key].enabled) continue;
-    if (a !== b) return false;
-  }
-
-  return true;
 }
 
 const loadingIndicator = '⏳ ';

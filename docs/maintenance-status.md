@@ -14,7 +14,7 @@ Project homepage metadata: `https://sqush.app`.
 
 Old fork: `tavlean/SquooshPlus`, archived and kept as historical reference.
 
-Working tree at last update: pending commit for progress dashboard.
+Working tree at last update: pending commit for processor-state helper extraction.
 
 Latest committed work:
 
@@ -37,6 +37,8 @@ Latest committed work:
 - `2d72944` Test bulk override paths
 - `a4683c5` Refresh local progress status
 - Pending: progress dashboard
+- `f75c99a` Add progress dashboard
+- Pending: processor-state helper extraction
 - `b9b7f0f` Add macOS CI coverage
 - `45f3050` Declare supported Node engine
 - `559b118` Tighten bulk override detection
@@ -97,6 +99,7 @@ Next recommended tasks:
 - Added versioned saved side settings serialization while preserving legacy saved settings.
 - Modernized one editor media query listener path.
 - Added framework-neutral bulk settings, session, import, queue, and stale-output helpers.
+- Extracted and tested processor-state equivalence logic from the Preact editor component.
 - Tightened bulk override detection so empty nested override objects are not treated as real overrides.
 - Added a settings override path helper for future per-image override highlighting.
 - Hardened bulk queue transitions so missing or repeated jobs do not corrupt active-job counts.
