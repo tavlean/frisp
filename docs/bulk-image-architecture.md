@@ -260,6 +260,8 @@ Later implementation:
 
 8. Add export-all.
    - Start with individual downloads.
+   - Export helper module: `src/client/lazy-app/bulk/export.ts`
+   - Export helper can list ready jobs and report ready, failed, skipped, pending, and total size-change counts.
    - Add ZIP later.
 
 ## Test plan

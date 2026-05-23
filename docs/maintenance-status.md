@@ -14,7 +14,7 @@ Project homepage metadata: `https://sqush.app`.
 
 Old fork: `tavlean/SquooshPlus`, archived and kept as historical reference.
 
-Working tree at last update: clean after `193e462`.
+Working tree at last update: pending commit for bulk export helpers.
 
 Latest committed work:
 
@@ -65,6 +65,7 @@ Next recommended tasks:
 - Hardened saved side settings against invalid `localStorage` data.
 - Modernized one editor media query listener path.
 - Added framework-neutral bulk settings, session, import, queue, and stale-output helpers.
+- Added framework-neutral bulk export helpers for exportable jobs and batch size summaries.
 - Added a lightweight Node assertion test for bulk helper behavior.
 - Removed the noisy Rollup unused external import warning by narrowing `path` imports in build plugins.
 
