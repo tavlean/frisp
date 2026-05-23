@@ -14,7 +14,7 @@ Project homepage metadata: `https://sqush.app`.
 
 Old fork: `tavlean/SquooshPlus`, archived and kept as historical reference.
 
-Working tree at last update: pending commit for macOS CI coverage.
+Working tree at last update: pending commit for duplicate bulk job ID handling.
 
 Latest committed work:
 
@@ -28,7 +28,8 @@ Latest committed work:
 - `3eff941` Guard bulk queue transitions
 - `559b118` Tighten bulk override detection
 - `45f3050` Declare supported Node engine
-- Pending: macOS CI coverage
+- `b9b7f0f` Add macOS CI coverage
+- Pending: duplicate bulk job ID handling
 
 Latest verification run:
 
@@ -74,6 +75,7 @@ Next recommended tasks:
 - Added framework-neutral bulk export helpers for exportable jobs and batch size summaries.
 - Added bulk export entry naming helpers for duplicate-safe future batch downloads.
 - Added session helpers for global setting changes and per-image override changes.
+- Hardened bulk session imports so repeated files receive unique job IDs.
 - Added a session helper to remove jobs while preserving valid selection and active-job counts.
 - Added a session helper to mark encoded jobs exported without double-counting repeat exports.
 - Added a lightweight Node assertion test for bulk helper behavior.

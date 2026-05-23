@@ -62,8 +62,29 @@ export function createImageJob(id: string, sourceFile: File): ImageJob {
   };
 }
 
+function createUniqueJobId(jobId: string, usedJobIds: Set<string>): string {
+  if (!usedJobIds.has(jobId)) {
+    usedJobIds.add(jobId);
+    return jobId;
+  }
+
+  let suffix = 2;
+  let nextJobId = `${jobId}-${suffix}`;
+  while (usedJobIds.has(nextJobId)) {
+    suffix += 1;
+    nextJobId = `${jobId}-${suffix}`;
+  }
+  usedJobIds.add(nextJobId);
+  return nextJobId;
+}
+
 export function addJobs(session: BulkSession, jobs: ImageJob[]): BulkSession {
-  const nextJobs = [...session.jobs, ...jobs];
+  const usedJobIds = new Set(session.jobs.map((job) => job.id));
+  const newJobs = jobs.map((job) => ({
+    ...job,
+    id: createUniqueJobId(job.id, usedJobIds),
+  }));
+  const nextJobs = [...session.jobs, ...newJobs];
   return {
     ...session,
     jobs: nextJobs,
