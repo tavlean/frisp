@@ -8,6 +8,7 @@ import {
   assertSignal,
   ImageMimeTypes,
 } from './util';
+import { parseSvgViewBoxSize } from './util/svg';
 import {
   PreprocessorState,
   ProcessorState,
@@ -150,9 +151,10 @@ export async function processSvg(
   const viewBox = svg.getAttribute('viewBox');
   if (viewBox === null) throw Error('SVG must have width/height or viewBox');
 
-  const viewboxParts = viewBox.split(/\s+/);
-  svg.setAttribute('width', viewboxParts[2]);
-  svg.setAttribute('height', viewboxParts[3]);
+  const viewBoxSize = parseSvgViewBoxSize(viewBox);
+  if (!viewBoxSize) throw Error('Invalid SVG viewBox');
+  svg.setAttribute('width', viewBoxSize.width);
+  svg.setAttribute('height', viewBoxSize.height);
 
   const serializer = new XMLSerializer();
   const newSource = serializer.serializeToString(document);

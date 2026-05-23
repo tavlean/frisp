@@ -14,6 +14,7 @@ The original `GoogleChromeLabs/squoosh` repository has many open pull requests. 
 
    - Small import compatibility fix.
    - Worth cherry-picking manually after testing comma-separated and whitespace-separated `viewBox` values.
+   - Current status: implemented in Sqush with a tested `parseSvgViewBoxSize` helper.
 
 3. `GoogleChromeLabs/squoosh#1339`: copy settings as JSON.
 
