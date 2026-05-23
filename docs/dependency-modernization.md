@@ -1,18 +1,18 @@
 # Dependency modernization
 
-The current toolchain is old but coherent: Rollup 2, TypeScript 4.4, PostCSS 7, cssnano 4, Prettier 2, and Preact 10.5.
+The current toolchain is old but coherent: Rollup 2, TypeScript 4.9, PostCSS 7, cssnano 4, Prettier 2, and Preact 10.5.
 
 The cleanup goal is to reduce audit risk without destabilizing workers, WASM, CSS modules, service-worker output, or static prerendering.
 
 ## Current audit shape
 
-Recent `npm audit` state:
+Recent `npm audit` state after the first safe dependency refresh:
 
-- 56 total issues.
+- 48 total issues.
 - 0 critical.
 - 5 high.
 - 43 moderate.
-- 8 low.
+- 0 low.
 
 Most findings are development/build-chain transitive dependencies, mainly from:
 
@@ -31,13 +31,16 @@ Keep these as small batches and run `npm run check` after each batch:
 
 - `@surma/rollup-plugin-off-main-thread`
 - `comlink`
-- `preact`
 - `mime-types`
 - `prettier` within v2
 - `typescript` within v4
 - `wasm-feature-detect`
 
 Keep Prettier on v2 initially to avoid formatting churn.
+
+Status: first safe refresh completed for OMT, Comlink, MIME packages, Prettier 2, TypeScript 4, wasm-feature-detect, and small dev/type patch updates.
+
+Do not include Preact in this safe batch. A trial upgrade from Preact `10.5.5` to `10.29.2` failed TypeScript checks because newer Preact JSX types conflict with this app's old custom option component prop typing. Treat Preact as a separate migration.
 
 ### 2. CSS stack migration
 
@@ -81,6 +84,7 @@ Do these later and separately:
 
 - Rollup 2 to Rollup 4;
 - TypeScript 4 to TypeScript 5 or newer;
+- Preact 10.5 to newer Preact 10 releases;
 - Prettier 2 to Prettier 3;
 - `del` 5 to newer versions;
 - `dedent` 0.7 to 1.x;

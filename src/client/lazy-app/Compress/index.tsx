@@ -125,7 +125,7 @@ function isSideSettings(value: unknown): value is SavedSideSettings {
 }
 
 function readSideSettings(
-  key: typeof savedSettingsKeys[number],
+  key: (typeof savedSettingsKeys)[number],
 ): SavedSideSettings | undefined {
   const serializedSettings = localStorage.getItem(key);
   if (!serializedSettings) return;

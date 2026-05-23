@@ -14,10 +14,15 @@ Project homepage metadata: `https://sqush.app`.
 
 Old fork: `tavlean/SquooshPlus`, archived and kept as historical reference.
 
-Working tree at last update: pending commit for agent research docs.
+Working tree at last update: pending commit for safe dependency refresh.
 
 Latest committed work:
 
+- `c68336a` Document maintenance research findings
+- `53a76f3` Update cleanup docs for design hold
+- `26b1d2a` Add bulk settings mutation helpers
+- `6fb9c0c` Add bulk export helpers
+- `16080fa` Update maintenance handoff
 - `246a8f2` Add Sqush domain metadata
 - `193e462` Clean up Rollup path imports
 - `078b0fd` Add bulk helper tests
@@ -39,7 +44,7 @@ Latest verification run:
 - `npm run typecheck`: passed.
 - `npm run build && npm run smoke:build`: passed.
 - `npm run test:bulk`: passed.
-- `npm run check`: passed after removing the Rollup unused external import warning.
+- `npm run check`: passed after the first safe dependency refresh.
 - Playwright CLI production-build smoke: passed after the Sqush rename, with `Sqush` title, file input present, Sqush logo alt text present, and zero console messages.
 
 Next recommended tasks:
@@ -70,6 +75,7 @@ Next recommended tasks:
 - Added session helpers for global setting changes and per-image override changes.
 - Added a lightweight Node assertion test for bulk helper behavior.
 - Removed the noisy Rollup unused external import warning by narrowing `path` imports in build plugins.
+- Refreshed low-risk dependencies while keeping Preact pinned because the newer Preact 10 typings require a separate migration.
 
 ## Current verification commands
 
@@ -90,7 +96,7 @@ On a fresh checkout, run `npm run build` before `npm run typecheck` because the 
 
 ## Remaining audit state
 
-`npm audit` is reduced but still not clean. The remaining findings are mainly in old build tooling:
+`npm audit` is reduced to 48 findings but still not clean. The remaining findings are mainly in old build tooling:
 
 - PostCSS/cssnano ecosystem packages.
 - Rollup/terser-related packages.
