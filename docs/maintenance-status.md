@@ -14,7 +14,7 @@ Project homepage metadata: `https://sqush.app`.
 
 Old fork: `tavlean/SquooshPlus`, archived and kept as historical reference.
 
-Working tree at last update: pending commit for issue-list documentation.
+Working tree at last update: clean, local branch ahead of `origin/main` by 2 commits.
 
 Latest committed work:
 
@@ -28,7 +28,7 @@ Latest committed work:
 - `c40b73f` Keep CI matrix jobs independent
 - `fb33d27` Add npm test alias
 - `c34598c` Verify generated feature files
-- Pending: issue-list documentation
+- `ed740b0` Add maintenance issue list
 - Pending: npm test alias
 - `b9b7f0f` Add macOS CI coverage
 - `45f3050` Declare supported Node engine
@@ -50,7 +50,7 @@ Latest verification run:
 - `npm run test:helpers`: passed.
 - `npm run check`: passed after CI matrix diagnostics.
 - `npm audit --audit-level=low`: passed, 0 vulnerabilities.
-- Latest observed GitHub Actions state: commits through `9a9f50b` passed. `0fd84c0` failed, but later commits containing that code passed; `c40b73f` was still in progress.
+- Latest observed GitHub Actions state before local-only commits: commits through `c40b73f` passed. `0fd84c0` failed, but later commits containing that code passed.
 - `npm run serve` wrapper: launched successfully on port 55194.
 - Browser production-preview smoke: passed after shared image pipeline extraction; app shell, Sqush logo, and drop target rendered.
 - Playwright CLI production-build smoke: passed after the Sqush rename, with `Sqush` title, file input present, Sqush logo alt text present, and zero console messages.
