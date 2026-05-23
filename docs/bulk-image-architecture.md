@@ -229,6 +229,7 @@ Later implementation:
 
    - Keep them framework-neutral.
    - Do not bind them to Preact lifecycle.
+   - Initial module: `src/client/lazy-app/bulk/session.ts`
 
 3. Add multi-file import.
 
