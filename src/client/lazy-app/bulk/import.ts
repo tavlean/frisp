@@ -14,13 +14,17 @@ export interface BulkImportSummary {
 
 const supportedImageExtensions = new Set([
   'avif',
+  'bmp',
   'gif',
+  'jfif',
   'jpeg',
   'jpg',
   'jxl',
   'png',
   'qoi',
   'svg',
+  'tif',
+  'tiff',
   'webp',
   'wp2',
 ]);
@@ -28,7 +32,7 @@ const supportedImageExtensions = new Set([
 function getFileExtension(fileName: string): string {
   const lastDot = fileName.lastIndexOf('.');
   if (lastDot === -1 || lastDot === fileName.length - 1) return '';
-  return fileName.slice(lastDot + 1).toLocaleLowerCase();
+  return fileName.slice(lastDot + 1).toLowerCase();
 }
 
 export function isSupportedBulkImage(file: File): boolean {

@@ -13,7 +13,7 @@ Use this as a backlog seed. Keep each issue small enough to review in one focuse
 
 2. Expand pure helper tests.
 
-   - Add MIME and extension edge cases around bulk import.
+   - Started: bulk import now covers extension-only AVIF, JFIF, TIFF, and BMP inputs plus trailing-dot rejection.
    - Add more export naming edge cases.
    - Add saved-settings migration cases when the schema changes again.
 

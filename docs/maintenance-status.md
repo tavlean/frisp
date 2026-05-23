@@ -130,6 +130,7 @@ Quick investigation note:
 - Added detailed bulk progress counters for future batch status displays.
 - Hardened bulk session imports so repeated files receive unique job IDs.
 - Added a bulk import extension fallback for image files with missing MIME types.
+- Expanded bulk import extension fallback to accept extension-only JFIF, BMP, TIFF, and TIF files.
 - Added a bulk import summary helper for accepted/rejected counts and byte totals.
 - Added a session helper to remove jobs while preserving valid selection and active-job counts.
 - Added a session helper to mark encoded jobs exported without double-counting repeat exports.
