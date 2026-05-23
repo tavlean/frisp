@@ -36,6 +36,7 @@ Next recommended tasks:
 - Added `npm run typecheck`.
 - Added `npm run format` and `npm run format:check`.
 - Added `npm run smoke:build` to verify generated build output.
+- Added `npm run preview` to serve the production `build/` directory.
 - Updated CI to use current checkout/setup-node actions and run the baseline checks.
 - Removed the inherited upstream Google Analytics integration.
 - Refreshed Browserslist data.
@@ -58,6 +59,7 @@ npm run smoke:build
 ```
 
 For UI-sensitive changes, also run a browser smoke check against `build/` after `npm run build`.
+Use `npm run preview` for that production-build browser check; `npm run serve` is for dev output in `.tmp/build/static`.
 
 ## Current known warnings
 
