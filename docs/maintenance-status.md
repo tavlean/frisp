@@ -221,6 +221,8 @@ Latest verification run:
 - `npm run test:helpers`: passed after hardening runnable side job records for missing job-state entries.
 - `npm run dashboard`: confirmed the dashboard is already running at `http://localhost:4177`; local dashboard HTML shows runnable job hardening, five top cards, and no stale top-card deltas.
 - `gh run list --repo tavlean/sqush --branch main --limit 1`: latest pushed CI run `26375595677` completed successfully for `72ef7ba`.
+- `npm run format:check`: passed after documenting local codec source references.
+- `npm run dashboard`: confirmed the dashboard is already running at `http://localhost:4177`; local dashboard HTML shows codec source references, five top cards, and only the Documentation `+1` top-card delta.
 - `npm run test:helpers`: passed after extracting result initial loading state.
 - `npm run typecheck`: passed after extracting result initial loading state.
 - `npm run check`: passed after extracting result initial loading state and updating dashboard/docs.

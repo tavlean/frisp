@@ -51,6 +51,26 @@ The top-level codec package files currently advertise these build entry points:
 
 Some package names are inherited and do not uniquely identify their folder, such as `codecs/png` declaring `oxipng` and `codecs/visdif` declaring `avif`. Use folder paths, feature imports, and generated asset references as the source of truth when planning codec cleanup.
 
+## Local source references
+
+The build recipes record these upstream source references. Treat them as the rebuild recipe inputs, not as proof that every committed `.wasm` was generated from exactly these inputs, because the repository still carries inherited generated artifacts.
+
+| Codec folder        | Upstream source recorded locally                      | Reference recorded locally                                          | Notes                                                                                                  |
+| ------------------- | ----------------------------------------------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `codecs/avif`       | AOMediaCodec/libavif                                  | `v1.0.1` tarball                                                    | Uses libaom `v3.7.0` and libwebp commit `e2c85878f6a33f29948b43d3492d9cdaf801aa54` for libsharpyuv.    |
+| `codecs/webp`       | webmproject/libwebp                                   | commit `d2e245ea9e959a5a79e1db0ed2085206947e98f2` tarball           | Builds baseline and SIMD browser artifacts plus Node encoder/decoder artifacts.                        |
+| `codecs/jxl`        | libjxl/libjxl                                         | commit `9f544641ec83f6abd9da598bdd08178ee8a003e0`                   | Fetches submodules recursively and builds single-thread, multithread, SIMD, and Node-targeted outputs. |
+| `codecs/wp2`        | Chromium libwebp2                                     | commit `413df7caeca5013fa9a51401660f7efd8572e0ae` archive           | Builds baseline, multithread, SIMD, and Node-targeted outputs.                                         |
+| `codecs/qoi`        | phoboslab/qoi                                         | commit `8d35d93cdca85d2868246c2a8a80a1e2c16ba2a8` tarball           | Builds encoder and decoder outputs.                                                                    |
+| `codecs/mozjpeg`    | mozilla/mozjpeg                                       | `v3.3.1` tarball                                                    | Configures with `--with-build-date=squoosh` for reproducible version strings.                          |
+| `codecs/imagequant` | ImageOptim/libimagequant                              | `2.12.1` tarball                                                    | Configures with `--disable-sse`.                                                                       |
+| `codecs/visdif`     | google/butteraugli                                    | commit `71b18b636b9c7d1ae0c1d3730b85b3c127eb4511` tarball           | Node-targeted visual-difference utility; not wired as a current app feature.                           |
+| `codecs/hqx`        | CryZe/wasmboy-rs `hqx` crate                          | git tag `v0.1.3`                                                    | Rust wrapper package is `squooshhqx` `0.1.0`; lockfile should be preserved when rebuilding.            |
+| `codecs/resize`     | crates.io `resize` crate                              | `0.5.5`                                                             | Rust wrapper package is `squoosh-resize` `0.1.0`; lockfile should be preserved when rebuilding.        |
+| `codecs/png`        | crates.io `png`, `wasm-bindgen`, `web-sys`, and `rgb` | `png 0.16.7`, `wasm-bindgen 0.2.68`, `web-sys 0.3.45`, `rgb 0.8.25` | Rust wrapper package is `squoosh-png` `0.1.0`; active PNG optimization uses OxiPNG today.              |
+| `codecs/oxipng`     | crates.io `oxipng`                                    | `9.0`                                                               | Builds normal and parallel wasm-pack outputs; uses a pinned Rust Docker image in `package.json`.       |
+| `codecs/rotate`     | local Rust source                                     | local `squoosh-rotate` `0.1.0`                                      | Build uses `codecs/rotate/Dockerfile`, WABT `1.0.11`, and `wasm-opt`.                                  |
+
 ## App codec inventory
 
 | Area                | Feature path                        | Codec assets                                                    | Current status                                                             |
@@ -102,9 +122,9 @@ Before deleting any codec family, also record:
 - whether browser smoke covers an equivalent replacement path;
 - the exact files removed and the post-removal `npm run check` result.
 
-## Missing provenance
+## Remaining provenance gaps
 
-The repo does not currently record exact upstream codec commits for most committed `.wasm` files. Before upgrading or replacing any codec, add:
+The repo now records the source references present in local build recipes, but it still does not prove that each committed `.wasm` file came from those exact inputs. Before upgrading or replacing any codec, add:
 
 - upstream project URL;
 - exact upstream commit/tag;
