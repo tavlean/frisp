@@ -157,6 +157,14 @@ export function applySavedSideSettings<Side extends SavedSettingsSide>(
   };
 }
 
+export function restoreSide<Side>(
+  sides: [Side, Side],
+  index: SideIndex,
+  side: Side,
+): [Side, Side] {
+  return cleanSet(sides, index, side);
+}
+
 export function setSideEncoderType<Side extends LatestSettingsSide>(
   sides: [Side, Side],
   index: SideIndex,

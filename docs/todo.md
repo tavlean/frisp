@@ -89,6 +89,7 @@ This list is ordered by priority. Do the high-priority items before building new
     - Single-image preprocessing completion now leaves side download URL revocation to the shared side-reset helper instead of revoking twice.
     - Single-image side encoder/processor setting mutations now live in pure helpers instead of inline Preact component logic.
     - Single-image side loading, intermediate processed result, and final encoded result updates now live in pure helpers instead of inline Preact component logic.
+    - Single-image side undo restoration now uses a side-state helper instead of raw immutable path updates in the Preact component.
     - Processor enabled toggles and option merges now go through pure helpers instead of direct option-panel path updates.
     - Orientation-change resize updates for both sides now go through a pure helper instead of inline Preact component mapping.
     - No remaining `catched`, `matchMedia().addListener`, or `matchMedia().removeListener` matches were found in `src/`.
@@ -151,6 +152,7 @@ This list is ordered by priority. Do the high-priority items before building new
     - Single-image side-state tests now cover default side setup and saved initial side overrides.
     - Single-image side-state tests now cover loading transitions, intermediate processed output, final encoded output, and old blob URL revocation.
     - Single-image side-state tests now cover preprocessing completion state updates and old side output cleanup.
+    - Single-image side-state tests now cover restoring a previous side during undo.
     - Output filename tests now cover extensionless sources, trailing dots, hidden names, path-like source names, punctuation-only names, and Windows reserved names.
     - Single-image and bulk export filenames now share the same basename sanitization helper.
     - Added `docs/progress-dashboard.html` as a clean direct-open visual progress dashboard for ongoing project status, with expandable detail sections.

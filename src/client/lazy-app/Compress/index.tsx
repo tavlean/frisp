@@ -21,7 +21,6 @@ import {
   shouldUpdateDocumentTitle,
   type LoadingFileInfo,
 } from './document-title';
-import { cleanSet } from '../util/clean-modify';
 import { copySideToOther, getOtherSideIndex } from './side-copy';
 import './custom-els/MultiPanel';
 import Results from './Results';
@@ -44,6 +43,7 @@ import {
 import {
   applySavedSideSettings,
   getInitialSideState,
+  restoreSide,
   resetSidesForNewSourceData,
   setPreprocessedSourceState,
   setSideEncoderOptions,
@@ -212,7 +212,7 @@ export default class Compress extends Component<Props, State> {
     if (snackbarResult !== 'undo') return;
 
     this.setState({
-      sides: cleanSet(
+      sides: restoreSide(
         this.state.sides,
         getOtherSideIndex(index),
         result.oldSide,
@@ -287,7 +287,7 @@ export default class Compress extends Component<Props, State> {
     );
     if (result === 'undo') {
       this.setState({
-        sides: cleanSet(this.state.sides, index, update.oldSide),
+        sides: restoreSide(this.state.sides, index, update.oldSide),
       });
     }
   };
