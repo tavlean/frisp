@@ -88,6 +88,15 @@ export function setJobStatus(
   return updateJob(session, jobId, (job) => ({ ...job, status }));
 }
 
+export function resetJobForQueue(job: ImageJob): ImageJob {
+  return {
+    ...job,
+    status: 'queued',
+    output: undefined,
+    error: undefined,
+  };
+}
+
 function getJob(session: BulkSession, jobId: string): ImageJob | undefined {
   return session.jobs.find((job) => job.id === jobId);
 }
@@ -176,12 +185,7 @@ export function requeueJob(session: BulkSession, jobId: string): BulkSession {
   if (!job) return normalizedSession;
 
   return applyBulkJobCounterDelta(
-    updateJob(normalizedSession, jobId, (job) => ({
-      ...job,
-      status: 'queued',
-      output: undefined,
-      error: undefined,
-    })),
+    updateJob(normalizedSession, jobId, resetJobForQueue),
     getBulkJobCounterDelta(job),
   );
 }
@@ -201,12 +205,7 @@ export function requeueStaleJobs(session: BulkSession): BulkSession {
           return job;
         }
         addBulkJobCounterDelta(counterDelta, job);
-        return {
-          ...job,
-          status: 'queued',
-          output: undefined,
-          error: undefined,
-        };
+        return resetJobForQueue(job);
       }),
     },
     counterDelta,
@@ -230,12 +229,7 @@ export function requeueIncompleteJobs(session: BulkSession): BulkSession {
           isActiveImageJobStatus(job.status);
         if (!shouldRequeue) return job;
         addBulkJobCounterDelta(counterDelta, job);
-        return {
-          ...job,
-          status: 'queued',
-          output: undefined,
-          error: undefined,
-        };
+        return resetJobForQueue(job);
       }),
     },
     counterDelta,
@@ -255,12 +249,7 @@ export function cancelActiveJobs(session: BulkSession): BulkSession {
       jobs: normalizedSession.jobs.map((job) => {
         if (!isActiveImageJobStatus(job.status)) return job;
         addBulkJobCounterDelta(counterDelta, job);
-        return {
-          ...job,
-          status: 'queued',
-          output: undefined,
-          error: undefined,
-        };
+        return resetJobForQueue(job);
       }),
     },
     counterDelta,

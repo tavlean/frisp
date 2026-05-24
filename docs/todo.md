@@ -108,6 +108,7 @@ This list is ordered by priority. Do the high-priority items before building new
     - Bulk normal import and MIME-sniffed import now share accepted/rejected result recording so future import surfaces do not duplicate job ID or rejection bookkeeping.
     - Bulk active status checks now come from the session model and are reused by queue and snapshot logic.
     - Bulk current-output and export-readiness checks now come from the session model and are reused by queue/export flows.
+    - Bulk queued reset behavior now goes through one helper for retry, stale-output requeue, incomplete-job requeue, and active-job cancellation.
     - No remaining `catched`, `matchMedia().addListener`, or `matchMedia().removeListener` matches were found in `src/`.
     - Removed obsolete TS suppressions from option controls and icon props by using element-specific Preact JSX attribute types.
     - Removed the remaining maintained app/lib `@ts-ignore` by making worker-bridge dispatch explicit.
@@ -142,6 +143,7 @@ This list is ordered by priority. Do the high-priority items before building new
     - Bulk processing now uses the shared source decode helper, including the SVG/vector path used by the single-image editor.
     - Bulk queue tests now cover derived queue state for normalized concurrency, active counts, open slots, queued counts, and runnable job ids.
     - Bulk queue tests now cover shared job counter deltas for queued, active, and exported states; direct and batch queue transitions now reuse those deltas.
+    - Bulk queue tests now cover shared queued reset behavior for status, output, and error cleanup.
     - Bulk requeue tests now cover active jobs being reset and active counters being decremented.
     - Bulk cancellation tests now cover resetting only active jobs while preserving failed, skipped, and completed jobs.
     - Bulk settings-change tests now cover safe workflow helpers that update global/per-image settings and requeue stale outputs.

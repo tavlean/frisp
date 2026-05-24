@@ -12,6 +12,8 @@ Active bulk statuses are defined by the session model. Queue transitions and sna
 
 Queue status transitions should use the shared job counter delta helper when removing a job from an active or exported state. That keeps direct completion/failure/requeue and batch stale/incomplete/cancel transitions aligned if persisted session counters drift from the job list.
 
+Queue retry, stale-output requeue, incomplete-job requeue, and active-job cancellation should use the shared queued reset helper so output/error cleanup stays consistent.
+
 Import UI should create sessions through the import-to-session helper so rejected files are kept out of the live session consistently and the first accepted image is selected by the same session rules everywhere.
 
 Import results keep the legacy rejected file list and also include structured rejection reasons. The import summary aggregates those reasons. Future UI should use those reasons to distinguish unsupported files from unreadable files instead of showing a generic failure.
