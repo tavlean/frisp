@@ -99,6 +99,7 @@ This list is ordered by priority. Do the high-priority items before building new
     - Bulk helper tests now cover settings merge/hash behavior, session changes, queue stale detection, and export summaries.
     - Bulk import tests now cover injected MIME sniffing for extensionless, misnamed, rejected, and unreadable image files.
     - Bulk runner tests now cover no-op runs when no jobs are runnable or concurrency is zero.
+    - Bulk runner tests now cover draining the full queue across multiple concurrency-limited batches.
     - Bulk export tests now cover Windows reserved output names.
     - Bulk export summary tests now cover already-exported jobs separately from pending jobs.
     - Bulk export plan tests now cover selected job subsets, missing IDs, duplicate-safe names, and selected export totals.

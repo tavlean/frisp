@@ -14,7 +14,7 @@ Project homepage metadata: `https://sqush.app`.
 
 Old fork: `tavlean/SquooshPlus`, archived and kept as historical reference.
 
-Working tree at last update: decode failures no longer log raw errors to the browser console before throwing the user-facing decode error, and CI has passed for that cleanup. Run `git status --short --branch` for the exact state.
+Working tree at last update: bulk runner now has a framework-neutral helper for draining the full queue across concurrency-limited batches. Run `git status --short --branch` for the exact state.
 
 Latest recent committed work at last update:
 
@@ -153,6 +153,8 @@ Latest verification run:
 - `npm run test:helpers`: passed after removing raw decode failure console logging.
 - `npm run check`: passed after removing raw decode failure console logging.
 - GitHub Actions passed on Ubuntu, Windows, and macOS for `95c2a25` (`Stop logging raw decode failures`).
+- `npm run test:helpers`: passed after adding full bulk queue draining.
+- `npm run check`: passed after adding full bulk queue draining.
 - `npm run build && npm run smoke:build`: passed.
 - `npm run test:helpers`: passed.
 - `npm run check`: passed after CI matrix diagnostics.

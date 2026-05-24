@@ -77,3 +77,16 @@ export async function processRunnableBulkJobs(
 
   return nextSession;
 }
+
+export async function processBulkQueue(
+  session: BulkSession,
+  options: BulkRunnerOptions,
+): Promise<BulkSession> {
+  let nextSession = session;
+
+  while (getRunnableJobs(nextSession, options.concurrency).length > 0) {
+    nextSession = await processRunnableBulkJobs(nextSession, options);
+  }
+
+  return nextSession;
+}
