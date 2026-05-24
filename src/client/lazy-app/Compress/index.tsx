@@ -63,11 +63,7 @@ import {
   getPreprocessorChangeState,
 } from './source-state';
 import {
-  getImageWorkPlan,
-  getLatestMainJobState,
-  getLatestSideJobStates,
-  getMainJobState,
-  getSideJobStates,
+  getPlannedImageWork,
   type MainJobState,
   type SideJobState,
 } from './work-plan';
@@ -336,29 +332,11 @@ export default class Compress extends Component<Props, State> {
   private async updateImage() {
     const currentState = this.state;
 
-    // State of the last completed job, or ongoing job
-    const latestMainJobState = getLatestMainJobState(
+    const { mainJobState, sideJobStates, workPlan } = getPlannedImageWork(
       this.activeMainJob,
-      currentState.source && currentState.source.file,
-      currentState.encodedPreprocessorState,
-    );
-    const latestSideJobStates = getLatestSideJobStates(
       this.activeSideJobs,
-      currentState.sides,
-    );
-
-    // State for this job
-    const mainJobState = getMainJobState(
       this.sourceFile,
-      currentState.preprocessorState,
-    );
-    const sideJobStates = getSideJobStates(currentState.sides);
-
-    const workPlan = getImageWorkPlan(
-      latestMainJobState,
-      mainJobState,
-      latestSideJobStates,
-      sideJobStates,
+      currentState,
     );
 
     // Abort running tasks & cycle the controllers

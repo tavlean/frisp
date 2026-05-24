@@ -34,6 +34,19 @@ export interface WorkPlanSideInput {
   encodedSettings?: SideSettings;
 }
 
+export interface ImageWorkState {
+  source?: { file: File };
+  encodedPreprocessorState?: PreprocessorState;
+  preprocessorState: PreprocessorState;
+  sides: readonly WorkPlanSideInput[];
+}
+
+export interface PlannedImageWork {
+  mainJobState: MainJobState;
+  sideJobStates: SideJobState[];
+  workPlan: ImageWorkPlan;
+}
+
 export function getLatestMainJobState(
   activeMainJob: MainJobState | undefined,
   sourceFile: File | undefined,
@@ -120,5 +133,35 @@ export function getImageWorkPlan(
     needsPreprocessing,
     sideWorksNeeded,
     jobNeeded: needsDecoding || needsPreprocessing || sideJobNeeded,
+  };
+}
+
+export function getPlannedImageWork(
+  activeMainJob: MainJobState | undefined,
+  activeSideJobs: readonly (SideJobState | undefined)[],
+  sourceFile: File,
+  state: ImageWorkState,
+): PlannedImageWork {
+  const latestMainJobState = getLatestMainJobState(
+    activeMainJob,
+    state.source && state.source.file,
+    state.encodedPreprocessorState,
+  );
+  const latestSideJobStates = getLatestSideJobStates(
+    activeSideJobs,
+    state.sides,
+  );
+  const mainJobState = getMainJobState(sourceFile, state.preprocessorState);
+  const sideJobStates = getSideJobStates(state.sides);
+
+  return {
+    mainJobState,
+    sideJobStates,
+    workPlan: getImageWorkPlan(
+      latestMainJobState,
+      mainJobState,
+      latestSideJobStates,
+      sideJobStates,
+    ),
   };
 }
