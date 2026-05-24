@@ -69,6 +69,10 @@ import {
   type SideJobState,
 } from './work-plan';
 import { getCompressionDisplayState } from './display-state';
+import {
+  getCompressionPanelLayout,
+  type CompressionPanelSlot,
+} from './layout-state';
 
 export type OutputType = EncoderType | 'identity';
 export type { SourceImage } from '../image-pipeline';
@@ -567,6 +571,7 @@ export default class Compress extends Component<Props, State> {
       mobileView,
       (encoderState) => encoderMap[encoderState.type].meta.label,
     );
+    const panelLayout = getCompressionPanelLayout(mobileView);
 
     const options = sides.map((side, index) => (
       <Options
@@ -594,6 +599,8 @@ export default class Compress extends Component<Props, State> {
         typeLabel={resultDisplay.typeLabel}
       />
     ));
+    const renderPanelSlot = (slot: CompressionPanelSlot) =>
+      slot.content === 'options' ? options[slot.side] : results[slot.side];
 
     return (
       <div class={style.compress}>
@@ -620,26 +627,30 @@ export default class Compress extends Component<Props, State> {
             />
           </svg>
         </button>
-        {mobileView ? (
+        {panelLayout.mode === 'mobile' ? (
           <div class={style.options}>
             <multi-panel class={style.multiPanel} open-one-only>
-              <div class={style.options1Theme}>{results[0]}</div>
-              <div class={style.options1Theme}>{options[0]}</div>
-              <div class={style.options2Theme}>{results[1]}</div>
-              <div class={style.options2Theme}>{options[1]}</div>
+              {panelLayout.mobileSlots.map((slot) => (
+                <div
+                  class={
+                    slot.side === 0 ? style.options1Theme : style.options2Theme
+                  }
+                  key={slot.key}
+                >
+                  {renderPanelSlot(slot)}
+                </div>
+              ))}
             </multi-panel>
           </div>
         ) : (
-          [
-            <div class={style.options1} key="options1">
-              {options[0]}
-              {results[0]}
-            </div>,
-            <div class={style.options2} key="options2">
-              {options[1]}
-              {results[1]}
-            </div>,
-          ]
+          panelLayout.desktopColumns.map((column) => (
+            <div
+              class={column.side === 0 ? style.options1 : style.options2}
+              key={column.key}
+            >
+              {column.slots.map(renderPanelSlot)}
+            </div>
+          ))
         )}
       </div>
     );
