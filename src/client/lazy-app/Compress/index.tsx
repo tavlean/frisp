@@ -68,6 +68,9 @@ import {
 import {
   getDefaultResizeSides,
   getPreprocessorChangeState,
+  getSourceDecodeStartState,
+  getSourcePreprocessErrorState,
+  getSourcePreprocessStartState,
 } from './source-state';
 import { getImageProcessingErrorMessage } from './processing-errors';
 import {
@@ -383,10 +386,7 @@ export default class Compress extends Component<Props, State> {
     if (workPlan.needsDecoding) {
       try {
         assertSignal(mainSignal);
-        this.setState({
-          source: undefined,
-          loading: true,
-        });
+        this.setState(getSourceDecodeStartState());
 
         const decodedSource = await decodeSourceImage(
           mainSignal,
@@ -424,9 +424,7 @@ export default class Compress extends Component<Props, State> {
     if (workPlan.needsPreprocessing) {
       try {
         assertSignal(mainSignal);
-        this.setState({
-          loading: true,
-        });
+        this.setState(getSourcePreprocessStartState());
 
         const preprocessed = await preprocessImage(
           mainSignal,
@@ -455,7 +453,7 @@ export default class Compress extends Component<Props, State> {
         });
       } catch (err) {
         if (isAbortError(err)) return;
-        this.setState({ loading: false });
+        this.setState(getSourcePreprocessErrorState());
         this.props.showSnack(
           getImageProcessingErrorMessage('preprocessing', err),
         );

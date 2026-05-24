@@ -6,6 +6,19 @@ export interface SourceDimensions {
   height: number;
 }
 
+export interface SourceDecodeStartState {
+  source: undefined;
+  loading: true;
+}
+
+export interface SourcePreprocessStartState {
+  loading: true;
+}
+
+export interface SourcePreprocessErrorState {
+  loading: false;
+}
+
 export interface ResizeSettingsSide {
   latestSettings: {
     processorState: {
@@ -72,6 +85,25 @@ export function getOrientationAdjustedSides<Side extends ResizeSettingsSide>(
       getOrientationAdjustedResizeState(currentResizeSettings),
     );
   }) as [Side, Side];
+}
+
+export function getSourceDecodeStartState(): SourceDecodeStartState {
+  return {
+    source: undefined,
+    loading: true,
+  };
+}
+
+export function getSourcePreprocessStartState(): SourcePreprocessStartState {
+  return {
+    loading: true,
+  };
+}
+
+export function getSourcePreprocessErrorState(): SourcePreprocessErrorState {
+  return {
+    loading: false,
+  };
 }
 
 export function getPreprocessorChangeState<

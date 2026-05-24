@@ -177,6 +177,7 @@ This list is ordered by priority. Do the high-priority items before building new
     - Single-image work-plan tests now cover no-op decisions, first decode/preprocess work, original-to-encoded transitions, encoder-only updates, planned image work assembly, active-job precedence, work-start scheduling, active job bookkeeping, work abort planning, side job run selection, side job execution planning, side encode planning, and side result/cache assembly.
     - Single-image source-state tests now cover default raster and vector resize settings for newly decoded source images.
     - Single-image source-state tests now cover applying default resize settings to both comparison sides without mutating the old side state.
+    - Single-image source-state tests now cover source decode/preprocess loading lifecycle patches.
     - Single-image source-state tests now cover orientation-change detection and resize width/height swapping after rotation.
     - Single-image document-title tests now cover idle, loading, and loaded file title text.
     - Single-image document-title tests now cover loading-state detection, file info derivation, and update gating.
