@@ -41,7 +41,7 @@ import {
 } from './saved-settings';
 import {
   applySavedSideSettings,
-  getInitialSideState,
+  getInitialSideStates,
   restoreSide,
   resetSidesForNewSourceData,
   revokeSideDownloadUrls,
@@ -108,10 +108,10 @@ export default class Compress extends Component<Props, State> {
     source: undefined,
     loading: false,
     preprocessorState: defaultPreprocessorState,
-    sides: [
-      getInitialSideState(0, readSavedSideSettings(getSavedSideSettingsKey(0))),
-      getInitialSideState(1, readSavedSideSettings(getSavedSideSettingsKey(1))),
-    ],
+    sides: getInitialSideStates([
+      readSavedSideSettings(getSavedSideSettingsKey(0)),
+      readSavedSideSettings(getSavedSideSettingsKey(1)),
+    ]),
     mobileView: this.widthQuery.matches,
   };
 

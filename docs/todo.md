@@ -102,6 +102,7 @@ This list is ordered by priority. Do the high-priority items before building new
     - Single-image editor update effects for new files, title refreshes, and work scheduling now go through a tested helper instead of inline Preact lifecycle logic.
     - Single-image supported encoder filtering now lives in a tested helper instead of inline Preact options module setup.
     - Single-image saved-settings import availability now lives in a tested helper instead of inline Preact option-render logic.
+    - Single-image initial side-state setup now lives in a tested helper instead of inline Preact state initialization.
     - Bulk normal import and MIME-sniffed import now share accepted/rejected result recording so future import surfaces do not duplicate job ID or rejection bookkeeping.
     - Bulk active status checks now come from the session model and are reused by queue and snapshot logic.
     - No remaining `catched`, `matchMedia().addListener`, or `matchMedia().removeListener` matches were found in `src/`.
@@ -162,7 +163,7 @@ This list is ordered by priority. Do the high-priority items before building new
     - Single-image document-title tests now cover loading-state detection, file info derivation, and update gating.
     - Single-image side-copy tests now cover side index lookup and blob URL regeneration when copying one side to the other.
     - Single-image side-state tests now cover saved-settings import while preserving live output fields for undo.
-    - Single-image side-state tests now cover default side setup and saved initial side overrides.
+    - Single-image side-state tests now cover default side setup, paired initial sides, and saved initial side overrides.
     - Single-image side-state tests now cover loading transitions, intermediate processed output, final encoded output, and old blob URL revocation.
     - Single-image side-state tests now cover preprocessing completion state updates and old side output cleanup.
     - Single-image side-state tests now cover restoring a previous side during undo.

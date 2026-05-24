@@ -91,6 +91,18 @@ export function getInitialSideState(
   };
 }
 
+export function getInitialSideStates(
+  savedSettings: readonly [
+    SavedSideSettings | undefined,
+    SavedSideSettings | undefined,
+  ] = [undefined, undefined],
+): [InitialSideState, InitialSideState] {
+  return [
+    getInitialSideState(0, savedSettings[0]),
+    getInitialSideState(1, savedSettings[1]),
+  ];
+}
+
 export function resetSidesForNewSourceData<
   Side extends ResettableSideState,
   State extends ResettableTwoSideState<Side>,
