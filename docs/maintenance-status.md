@@ -139,6 +139,8 @@ Latest verification run:
 - `npm run test:helpers`: passed after extracting and covering single-image side reset logic.
 - `npm run typecheck`: passed after extracting and covering single-image side reset logic.
 - `npm run check`: passed after extracting and covering single-image side reset logic.
+- `npm run smoke:browser`: passed after extracting and covering single-image side reset logic.
+- GitHub Actions passed on Ubuntu, Windows, and macOS for `baed797` (`Reset both editor sides on new source`).
 - `npm run build && npm run smoke:build`: passed.
 - `npm run test:helpers`: passed.
 - `npm run check`: passed after CI matrix diagnostics.
@@ -171,6 +173,7 @@ Latest verification run:
 - Latest observed GitHub Actions state after bulk exported-count summaries: `207589f` passed on Ubuntu, Windows, and macOS.
 - Latest observed GitHub Actions state after selected bulk export plans: `e68caee` passed on Ubuntu, Windows, and macOS.
 - Latest observed GitHub Actions state after selected bulk export summaries: `54a12b5` passed on Ubuntu, Windows, and macOS.
+- Latest observed GitHub Actions state after single-image side reset cleanup: `baed797` passed on Ubuntu, Windows, and macOS.
 - `npm run serve` wrapper: launched successfully on port 55194.
 - Browser production-preview smoke: passed after shared image pipeline extraction; app shell, Sqush logo, and drop target rendered.
 - Playwright CLI production-build smoke: passed after the Sqush rename, with `Sqush` title, file input present, Sqush logo alt text present, and zero console messages.
