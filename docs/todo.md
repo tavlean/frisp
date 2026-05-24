@@ -104,6 +104,7 @@ This list is ordered by priority. Do the high-priority items before building new
 
     - CI targets Ubuntu, Windows, and macOS.
     - GitHub Actions checkout/setup-node actions are on current major versions.
+    - CI cancels superseded runs, has read-only repository permissions, and has a 15-minute job timeout.
 
 17. Partially completed: track codec provenance.
 

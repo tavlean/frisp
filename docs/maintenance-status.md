@@ -164,6 +164,7 @@ Quick investigation note:
 - Updated CI to use current checkout/setup-node actions and run the baseline checks.
 - Expanded CI to cover Ubuntu, Windows, and macOS.
 - CI matrix fail-fast is disabled so one platform failure does not hide the other platform results.
+- CI uses read-only repository permissions, a 15-minute job timeout, and concurrency cancellation so superseded runs do not keep running after newer pushes.
 - Removed the inherited upstream Google Analytics integration.
 - Refreshed Browserslist data.
 - Removed the Node 20 `DEP0190` warning from the TypeScript build spawn.
