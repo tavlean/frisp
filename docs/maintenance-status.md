@@ -14,7 +14,7 @@ Project homepage metadata: `https://sqush.app`.
 
 Old fork: `tavlean/SquooshPlus`, archived and kept as historical reference.
 
-Working tree at last update: AVIF MIME sniffing relaxed to accept normal `ftypavif` headers and locally verified. Run `git status --short --branch` for the exact state.
+Working tree at last update: async bulk import MIME sniffing helper added and locally verified. Run `git status --short --branch` for the exact state.
 
 Latest recent committed work at last update:
 
@@ -123,6 +123,7 @@ Latest verification run:
 - `npm run check`: passed after adding MIME sniffing coverage for PNG, JPEG, WebP, JPEG XL, and unknown data.
 - `npm run check`: passed after tightening TIFF MIME sniffing and adding little-endian, big-endian, and false-positive coverage.
 - `npm run check`: passed after relaxing AVIF MIME sniffing and adding AVIF/non-AVIF `ftyp` coverage.
+- `npm run check`: passed after adding async bulk import MIME sniffing support.
 - `npm run build && npm run smoke:build`: passed.
 - `npm run test:helpers`: passed.
 - `npm run check`: passed after CI matrix diagnostics.
@@ -149,6 +150,7 @@ Latest verification run:
 - Latest observed GitHub Actions state after saved-settings availability cleanup: `1644efa` passed on Ubuntu, Windows, and macOS.
 - Latest observed GitHub Actions state after blocked saved-settings storage handling: `019de22` passed on Ubuntu, Windows, and macOS.
 - Latest observed GitHub Actions state after MIME sniffing coverage and TIFF sniffing cleanup: `eae6859` passed on Ubuntu, Windows, and macOS.
+- Latest observed GitHub Actions state after AVIF MIME sniffing cleanup: `51553da` passed on Ubuntu, Windows, and macOS.
 - `npm run serve` wrapper: launched successfully on port 55194.
 - Browser production-preview smoke: passed after shared image pipeline extraction; app shell, Sqush logo, and drop target rendered.
 - Playwright CLI production-build smoke: passed after the Sqush rename, with `Sqush` title, file input present, Sqush logo alt text present, and zero console messages.
@@ -224,6 +226,7 @@ Quick investigation note:
 - Added MIME sniffing helper coverage for PNG, JPEG, WebP, JPEG XL, and unknown data.
 - Tightened TIFF MIME sniffing to require real little-endian or big-endian TIFF headers instead of loose `I`/`MM` prefixes.
 - Relaxed AVIF MIME sniffing to accept normal `ftypavif` headers regardless of box size while still rejecting non-AVIF `ftyp` data.
+- Added an async bulk import helper that can accept extensionless or misnamed image files through injected MIME sniffing.
 - Replaced avoidable `any` usage and optional Promise entries in service-worker cache cleanup and shared ref utilities.
 - Added framework-neutral bulk settings, session, import, queue, and stale-output helpers.
 - Hardened bulk session construction so initial active and exported jobs derive matching counters.

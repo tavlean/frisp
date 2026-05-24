@@ -12,6 +12,8 @@ export interface BulkImportSummary {
   totalRejectedSize: number;
 }
 
+export type BulkMimeSniffer = (file: File) => Promise<string>;
+
 const supportedImageExtensions = new Set([
   'avif',
   'bmp',
@@ -50,6 +52,35 @@ export function createImageJobs(files: Iterable<File>): BulkImportResult {
 
   for (const file of files) {
     if (!isSupportedBulkImage(file)) {
+      rejected.push(file);
+      continue;
+    }
+
+    accepted.push(
+      createImageJob(createImageJobId(file, accepted.length), file),
+    );
+  }
+
+  return { accepted, rejected };
+}
+
+export async function createImageJobsWithMimeSniffing(
+  files: Iterable<File>,
+  sniffMimeType: BulkMimeSniffer,
+): Promise<BulkImportResult> {
+  const accepted: ImageJob[] = [];
+  const rejected: File[] = [];
+
+  for (const file of files) {
+    if (isSupportedBulkImage(file)) {
+      accepted.push(
+        createImageJob(createImageJobId(file, accepted.length), file),
+      );
+      continue;
+    }
+
+    const detectedType = await sniffMimeType(file);
+    if (!detectedType.startsWith('image/')) {
       rejected.push(file);
       continue;
     }
