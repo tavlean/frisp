@@ -124,6 +124,7 @@ This list is ordered by priority. Do the high-priority items before building new
     - Single-image document-title tests now cover idle, loading, and loaded file title text.
     - Single-image document-title tests now cover loading-state detection, file info derivation, and update gating.
     - Single-image side-copy tests now cover side index lookup and blob URL regeneration when copying one side to the other.
+    - Single-image side-state tests now cover saved-settings import while preserving live output fields for undo.
     - Output filename tests now cover extensionless sources, trailing dots, hidden names, and path-like source names.
     - Single-image side reset tests now cover clearing both side outputs and revoking both side download URLs when a new source image is loaded.
     - MIME sniffing tests now cover PNG, JPEG, WebP, TIFF, AVIF, JPEG XL, unknown data, a TIFF false-positive guard, and a non-AVIF `ftyp` guard.

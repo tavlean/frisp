@@ -1,4 +1,4 @@
-import { cleanMerge } from '../util/clean-modify';
+import { cleanMerge, cleanSet } from '../util/clean-modify';
 
 export interface ResettableSideState {
   file?: unknown;
@@ -10,6 +10,16 @@ export interface ResettableSideState {
 
 export interface ResettableTwoSideState<Side extends ResettableSideState> {
   sides: [Side, Side];
+}
+
+export interface SavedSettingsSide {
+  latestSettings: unknown;
+  encodedSettings?: unknown;
+}
+
+export interface SavedSideSettingsUpdate<Side extends SavedSettingsSide> {
+  sides: [Side, Side];
+  oldSide: Side;
 }
 
 export function resetSidesForNewSourceData<
@@ -35,4 +45,19 @@ export function resetSidesForNewSourceData<
   }
 
   return nextState;
+}
+
+export function applySavedSideSettings<Side extends SavedSettingsSide>(
+  sides: [Side, Side],
+  index: 0 | 1,
+  savedSettings: SavedSettingsSide,
+): SavedSideSettingsUpdate<Side> {
+  const oldSide = sides[index];
+  return {
+    sides: cleanSet(sides, index, {
+      ...oldSide,
+      ...savedSettings,
+    }),
+    oldSide,
+  };
 }

@@ -47,7 +47,10 @@ import {
   readSavedSideSettings,
   writeSavedSideSettings,
 } from './saved-settings';
-import { resetSidesForNewSourceData } from './side-state';
+import {
+  applySavedSideSettings,
+  resetSidesForNewSourceData,
+} from './side-state';
 import {
   didOrientationChange,
   getDefaultResizeState,
@@ -298,13 +301,13 @@ export default class Compress extends Component<Props, State> {
       return;
     }
 
-    const oldSideSettings = this.state.sides[index];
-    const newSideSettings = {
-      ...this.state.sides[index],
-      ...savedSettings,
-    };
+    const update = applySavedSideSettings(
+      this.state.sides,
+      index,
+      savedSettings,
+    );
     this.setState({
-      sides: cleanSet(this.state.sides, index, newSideSettings),
+      sides: update.sides,
     });
     const result = await this.props.showSnack(
       `${sideLabel} side settings imported`,
@@ -315,7 +318,7 @@ export default class Compress extends Component<Props, State> {
     );
     if (result === 'undo') {
       this.setState({
-        sides: cleanSet(this.state.sides, index, oldSideSettings),
+        sides: cleanSet(this.state.sides, index, update.oldSide),
       });
     }
   };

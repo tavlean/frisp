@@ -16,7 +16,7 @@ Historical archived fork, not the current project: `tavlean/SquooshPlus`.
 
 Project identity note: see [Project identity](project-identity.md). The current app/repo/package name is Sqush. The local workspace folder may still be named `SquooshPlus` until the active Codex workspace is closed and reopened from a renamed folder.
 
-Working tree at last update: bulk helpers include a framework-neutral barrel export, strip item selectors, and session summary selectors for future UI/Svelte consumption. Single-image editor work planning, source resize rules, orientation resize adjustment, side-copy URL behavior, and document-title/loading selectors are partly extracted into pure helpers. Project identity is documented so the old local folder/archive name is not confused with current Sqush branding. Run `git status --short --branch` for the exact state.
+Working tree at last update: bulk helpers include a framework-neutral barrel export, strip item selectors, and session summary selectors for future UI/Svelte consumption. Single-image editor work planning, source resize rules, orientation resize adjustment, side-copy URL behavior, saved side-state updates, and document-title/loading selectors are partly extracted into pure helpers. Project identity is documented so the old local folder/archive name is not confused with current Sqush branding. Run `git status --short --branch` for the exact state.
 
 Latest recent committed work at last update:
 
@@ -197,6 +197,7 @@ Latest verification run:
 - `npm run check`: passed after extracting document-title formatting.
 - `npm run check`: passed after extracting side-copy URL behavior.
 - `npm run check`: passed after extracting document-title loading selectors.
+- `npm run check`: passed after extracting saved side-state import updates.
 - `npm audit --audit-level=low`: passed, 0 vulnerabilities.
 - Latest observed GitHub Actions state: pushed commits through `63adddf` passed on Ubuntu, Windows, and macOS.
 - Latest observed GitHub Actions state after the WebP smoke documentation push: `995c9b2` passed on Ubuntu, Windows, and macOS.

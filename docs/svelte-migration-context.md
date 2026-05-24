@@ -97,7 +97,7 @@ Do not remove these early:
 - existing smoke tests;
 - codec files that are still referenced by generated metadata or cache lists.
 
-Single-image editor work planning is now partly extracted into `src/client/lazy-app/Compress/work-plan.ts`, source-image resize rules live in `src/client/lazy-app/Compress/source-state.ts`, side-copy URL behavior lives in `src/client/lazy-app/Compress/side-copy.ts`, and document-title formatting lives in `src/client/lazy-app/Compress/document-title.ts`. Preserve those pure boundaries when changing decode/preprocess/process/encode scheduling so the current optimizer remains testable before any Svelte rewrite.
+Single-image editor work planning is now partly extracted into `src/client/lazy-app/Compress/work-plan.ts`, source-image resize rules live in `src/client/lazy-app/Compress/source-state.ts`, side-copy URL behavior lives in `src/client/lazy-app/Compress/side-copy.ts`, saved side-state updates live in `src/client/lazy-app/Compress/side-state.ts`, and document-title formatting lives in `src/client/lazy-app/Compress/document-title.ts`. Preserve those pure boundaries when changing decode/preprocess/process/encode scheduling so the current optimizer remains testable before any Svelte rewrite.
 
 ## Bulk feature alignment
 
