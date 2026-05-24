@@ -198,6 +198,7 @@ Latest verification run:
 - `npm run check`: passed after extracting side-copy URL behavior.
 - `npm run check`: passed after extracting document-title loading selectors.
 - `npm run check`: passed after extracting saved side-state import updates.
+- `npm run check`: passed after adding saved-settings parser edge-case coverage for latest-only settings, version mismatches, and invalid versioned payloads.
 - `npm audit --audit-level=low`: passed, 0 vulnerabilities.
 - Latest observed GitHub Actions state: pushed commits through `63adddf` passed on Ubuntu, Windows, and macOS.
 - Latest observed GitHub Actions state after the WebP smoke documentation push: `995c9b2` passed on Ubuntu, Windows, and macOS.
