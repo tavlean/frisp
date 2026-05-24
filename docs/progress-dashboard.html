@@ -31,7 +31,7 @@
       }
 
       main {
-        width: min(1080px, calc(100vw - 40px));
+        width: min(1440px, calc(100vw - 40px));
         margin: 0 auto;
         padding: 36px 0 52px;
       }
@@ -94,7 +94,7 @@
 
       .metrics {
         display: grid;
-        grid-template-columns: repeat(4, 1fr);
+        grid-template-columns: repeat(5, 1fr);
         gap: 14px;
         margin-bottom: 18px;
       }
@@ -112,10 +112,18 @@
       }
 
       .metric strong {
-        display: block;
+        display: flex;
+        gap: 8px;
+        align-items: baseline;
         margin-bottom: 6px;
         font-size: 28px;
         line-height: 1;
+      }
+
+      .metric .delta {
+        color: var(--green);
+        font-size: 13px;
+        font-weight: 800;
       }
 
       .metric span {
@@ -357,7 +365,7 @@
         <aside class="meta" aria-label="Dashboard metadata">
           <div class="meta-row">
             <span>Last updated</span>
-            <strong>2026-05-24 22:58 IST</strong>
+            <strong>2026-05-24 23:02 IST</strong>
           </div>
           <div class="meta-row">
             <span>Branch</span>
@@ -369,7 +377,7 @@
           </div>
           <div class="meta-row">
             <span>Current work</span>
-            <strong>Node 24 baseline</strong>
+            <strong>render selectors</strong>
           </div>
           <div class="meta-row">
             <span>Auto refresh</span>
@@ -384,15 +392,19 @@
           <span>Stability, CI, security</span>
         </div>
         <div class="metric">
+          <strong>87%</strong>
+          <span>Documentation and handoff</span>
+        </div>
+        <div class="metric">
           <strong>93%</strong>
           <span>Bulk backend foundation</span>
         </div>
         <div class="metric">
-          <strong>45%</strong>
+          <strong>46% <span class="delta">+1</span></strong>
           <span>Repo simplification</span>
         </div>
         <div class="metric">
-          <strong>32%</strong>
+          <strong>33% <span class="delta">+1</span></strong>
           <span>Svelte readiness</span>
         </div>
       </section>
@@ -518,9 +530,9 @@
               <summary>
                 <div class="progress-top">
                   <span>Repo simplification</span>
-                  <span>45%</span>
+                  <span>46%</span>
                 </div>
-                <div class="bar"><span style="width: 45%"></span></div>
+                <div class="bar"><span style="width: 46%"></span></div>
                 <p class="progress-note">
                   Single-image behavior is being extracted from Preact into
                   tested helpers while preserving the current optimizer.
@@ -569,9 +581,9 @@
               <summary>
                 <div class="progress-top">
                   <span>Svelte/SvelteKit migration readiness</span>
-                  <span>32%</span>
+                  <span>33%</span>
                 </div>
-                <div class="bar"><span style="width: 32%"></span></div>
+                <div class="bar"><span style="width: 33%"></span></div>
                 <p class="progress-note">
                   Migration has not started. Current work is preparing reusable
                   logic so a later migration is smaller and safer.
@@ -584,8 +596,8 @@
                     <li>Svelte 5/SvelteKit guidance captured.</li>
                     <li>Bulk logic is framework-neutral.</li>
                     <li>
-                      Single-image source, preprocessor, side, and display
-                      logic extraction is underway.
+                      Single-image source, preprocessor, side, and display logic
+                      extraction is underway.
                     </li>
                   </ul>
                 </div>

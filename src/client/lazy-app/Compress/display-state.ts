@@ -11,6 +11,29 @@ export interface DisplayLabelSide {
   latestSettings: SideSettings;
 }
 
+export interface DisplayRenderSide
+  extends DisplaySettingsSide,
+    DisplayLabelSide {
+  data?: ImageData;
+  downloadUrl?: string;
+  loading: boolean;
+}
+
+export interface OutputDisplayState {
+  leftCompressed?: ImageData;
+  rightCompressed?: ImageData;
+  leftImgContain: boolean;
+  rightImgContain: boolean;
+}
+
+export interface ResultDisplayState {
+  downloadUrl?: string;
+  imageFile?: File;
+  loading: boolean;
+  flipSide: boolean;
+  typeLabel: string;
+}
+
 export type EncoderLabelGetter = (encoderState: EncoderState) => string;
 
 export function getDisplaySettings(side: DisplaySettingsSide): SideSettings {
@@ -33,4 +56,32 @@ export function shouldContainImage(side: DisplaySettingsSide): boolean {
   return Boolean(
     resizeSettings.enabled && resizeSettings.fitMethod === 'contain',
   );
+}
+
+export function getOutputDisplayState(
+  sides: readonly [DisplayRenderSide, DisplayRenderSide],
+): OutputDisplayState {
+  const [leftSide, rightSide] = sides;
+
+  return {
+    leftCompressed: leftSide.data,
+    rightCompressed: rightSide.data,
+    leftImgContain: shouldContainImage(leftSide),
+    rightImgContain: shouldContainImage(rightSide),
+  };
+}
+
+export function getResultDisplayStates(
+  sides: readonly [DisplayRenderSide, DisplayRenderSide],
+  loading: boolean,
+  mobileView: boolean,
+  getEncoderLabel: EncoderLabelGetter,
+): [ResultDisplayState, ResultDisplayState] {
+  return sides.map((side, index) => ({
+    downloadUrl: side.downloadUrl,
+    imageFile: side.file,
+    loading: loading || side.loading,
+    flipSide: mobileView || index === 1,
+    typeLabel: getSideTypeLabel(side, getEncoderLabel),
+  })) as [ResultDisplayState, ResultDisplayState];
 }

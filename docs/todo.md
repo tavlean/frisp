@@ -85,7 +85,7 @@ This list is ordered by priority. Do the high-priority items before building new
     - Completed: replace the remaining `Boolean` prop type with primitive `boolean`.
     - Static build file writing now returns a promise from the utility and keeps process-exit handling in the build entry point.
     - Single-image image-work job-state derivation now lives in pure helpers instead of inline Preact component logic.
-    - Single-image display settings, result labels, and image-contain decisions now live in pure helpers instead of inline Preact render logic.
+    - Single-image display settings, result labels, image-contain decisions, and output/result render selectors now live in pure helpers instead of inline Preact render logic.
     - Single-image preprocessing completion now leaves side download URL revocation to the shared side-reset helper instead of revoking twice.
     - Single-image side encoder/processor setting mutations now live in pure helpers instead of inline Preact component logic.
     - Single-image side loading, intermediate processed result, and final encoded result updates now live in pure helpers instead of inline Preact component logic.

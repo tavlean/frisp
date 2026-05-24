@@ -70,7 +70,7 @@ import {
   type MainJobState,
   type SideJobState,
 } from './work-plan';
-import { getSideTypeLabel, shouldContainImage } from './display-state';
+import { getOutputDisplayState, getResultDisplayStates } from './display-state';
 
 export type OutputType = EncoderType | 'identity';
 export type { SourceImage } from '../image-pipeline';
@@ -579,8 +579,13 @@ export default class Compress extends Component<Props, State> {
     { onBack }: Props,
     { loading, sides, source, mobileView, preprocessorState }: State,
   ) {
-    const [leftSide, rightSide] = sides;
-    const [leftImageData, rightImageData] = sides.map((i) => i.data);
+    const outputDisplay = getOutputDisplayState(sides);
+    const resultDisplays = getResultDisplayStates(
+      sides,
+      loading,
+      mobileView,
+      (encoderState) => encoderMap[encoderState.type].meta.label,
+    );
 
     const options = sides.map((side, index) => (
       <Options
@@ -598,17 +603,14 @@ export default class Compress extends Component<Props, State> {
       />
     ));
 
-    const results = sides.map((side, index) => (
+    const results = resultDisplays.map((resultDisplay) => (
       <Results
-        downloadUrl={side.downloadUrl}
-        imageFile={side.file}
+        downloadUrl={resultDisplay.downloadUrl}
+        imageFile={resultDisplay.imageFile}
         source={source}
-        loading={loading || side.loading}
-        flipSide={mobileView || index === 1}
-        typeLabel={getSideTypeLabel(
-          side,
-          (encoderState) => encoderMap[encoderState.type].meta.label,
-        )}
+        loading={resultDisplay.loading}
+        flipSide={resultDisplay.flipSide}
+        typeLabel={resultDisplay.typeLabel}
       />
     ));
 
@@ -617,10 +619,10 @@ export default class Compress extends Component<Props, State> {
         <Output
           source={source}
           mobileView={mobileView}
-          leftCompressed={leftImageData}
-          rightCompressed={rightImageData}
-          leftImgContain={shouldContainImage(leftSide)}
-          rightImgContain={shouldContainImage(rightSide)}
+          leftCompressed={outputDisplay.leftCompressed}
+          rightCompressed={outputDisplay.rightCompressed}
+          leftImgContain={outputDisplay.leftImgContain}
+          rightImgContain={outputDisplay.rightImgContain}
           preprocessorState={preprocessorState}
           onPreprocessorChange={this.onPreprocessorChange}
         />
