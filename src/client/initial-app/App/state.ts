@@ -55,6 +55,10 @@ export function getPopStateRouteState(
   return { isEditorOpen: pathname === ROUTE_EDITOR };
 }
 
+export function getEditorOpenState(): Pick<InitialAppState, 'isEditorOpen'> {
+  return { isEditorOpen: true };
+}
+
 export function getEditorUrl(href: string): string {
   const editorURL = new URL(href);
   editorURL.pathname = ROUTE_EDITOR;

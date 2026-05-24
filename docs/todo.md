@@ -111,6 +111,7 @@ This list is ordered by priority. Do the high-priority items before building new
     - Orientation-change resize updates for both sides now go through a pure helper instead of inline Preact component mapping.
     - Single-image preprocessor-change state updates now go through a pure helper instead of inline Preact component logic.
     - Single-image current/latest job-state derivation and work-plan assembly now go through a pure helper instead of inline Preact component logic.
+    - Initial app editor-open state now comes from a pure helper instead of inline app-shell state construction.
     - Single-image active job completion bookkeeping now goes through pure helpers instead of direct Preact component field mutation.
     - Single-image work-start scheduling now goes through a pure helper instead of inline Preact component logic.
     - Single-image side encode decisions for original passthrough, cache hits, and new encodes now go through a pure helper instead of inline Preact component logic.
@@ -210,7 +211,7 @@ This list is ordered by priority. Do the high-priority items before building new
     - Range input tests now cover text focus state, focused/unfocused display values, and blank-input commit suppression.
     - Options state tests now cover initial saved-settings availability composition and supported encoder map load state.
     - Option expander tests now cover closing, replacing children, and no-op derived state.
-    - Initial app entry-state tests now cover share-target detection, editor route URLs, file-entry state, and spinner/editor/intro render modes.
+    - Initial app entry-state tests now cover share-target detection, editor route URLs, file-entry state, editor-open state, and spinner/editor/intro render modes.
     - Single-image panel layout tests now cover desktop column ordering and mobile multi-panel ordering.
     - Single-image viewport-state tests now cover the mobile media query and mobile-view state derivation.
     - Single-image options render-state tests now cover original and encoded option panel decisions.

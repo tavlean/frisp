@@ -13,6 +13,7 @@ import Intro from 'shared/prerendered-app/Intro';
 import 'shared/custom-els/loading-spinner';
 import {
   getCompressLoadedState,
+  getEditorOpenState,
   getEditorUrl,
   getFileEntryState,
   getInitialAppRenderState,
@@ -106,7 +107,7 @@ export default class App extends Component<Props, State> {
     if (this.state.isEditorOpen) return;
     // Change path, but preserve query string.
     history.pushState(null, '', getEditorUrl(location.href));
-    this.setState({ isEditorOpen: true });
+    this.setState(getEditorOpenState());
   };
 
   render(
