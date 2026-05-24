@@ -30,6 +30,10 @@ import {
   canImportSavedSideSettings,
   getSavedSideSettingsAvailability,
 } from './saved-settings-state';
+import {
+  getProcessorTypeFromControlName,
+  getResizeOptionsState,
+} from './processor-controls-state';
 
 interface Props {
   index: 0 | 1;
@@ -102,7 +106,7 @@ export default class Options extends Component<Props, State> {
 
   private onProcessorEnabledChange = (event: Event) => {
     const el = event.currentTarget as HTMLInputElement;
-    const processor = el.name.split('.')[0] as keyof ProcessorState;
+    const processor = getProcessorTypeFromControlName(el.name);
 
     this.props.onProcessorOptionsChange(
       this.props.index,
@@ -208,6 +212,7 @@ export default class Options extends Component<Props, State> {
       this.state,
       this.props.index,
     );
+    const resizeOptionsState = getResizeOptionsState(source);
 
     return (
       <div
@@ -261,9 +266,9 @@ export default class Options extends Component<Props, State> {
               <Expander>
                 {processorState.resize.enabled ? (
                   <ResizeOptionsComponent
-                    isVector={Boolean(source && source.vectorImage)}
-                    inputWidth={source ? source.preprocessed.width : 1}
-                    inputHeight={source ? source.preprocessed.height : 1}
+                    isVector={resizeOptionsState.isVector}
+                    inputWidth={resizeOptionsState.inputWidth}
+                    inputHeight={resizeOptionsState.inputHeight}
                     options={processorState.resize}
                     onChange={this.onResizeOptionsChange}
                   />
