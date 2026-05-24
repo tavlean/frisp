@@ -85,6 +85,19 @@ export interface SideEncodingPlanInput {
   sourcePreprocessed: ImageData;
 }
 
+export interface SideJobExecutionPlanInput {
+  currentProcessed?: ImageData;
+  getCacheResult: (
+    preprocessed: ImageData,
+    processorState: ProcessorState,
+    encoderState: EncoderState,
+  ) => SideEncodingResult | undefined;
+  jobState: SideJobState;
+  sideWorkNeeded: SideWorkNeeded;
+  sourceFile: File;
+  sourcePreprocessed: ImageData;
+}
+
 export function getLatestMainJobState(
   activeMainJob: MainJobState | undefined,
   sourceFile: File | undefined,
@@ -235,6 +248,32 @@ export function getSideEncodingPlan({
     processed: sideWorkNeeded.processing ? undefined : currentProcessed,
     processorState: jobState.processorState,
   };
+}
+
+export function getSideJobExecutionPlan({
+  currentProcessed,
+  getCacheResult,
+  jobState,
+  sideWorkNeeded,
+  sourceFile,
+  sourcePreprocessed,
+}: SideJobExecutionPlanInput): SideEncodingPlan {
+  const cacheResult = jobState.encoderState
+    ? getCacheResult(
+        sourcePreprocessed,
+        jobState.processorState,
+        jobState.encoderState,
+      )
+    : undefined;
+
+  return getSideEncodingPlan({
+    cacheResult,
+    currentProcessed,
+    jobState,
+    sideWorkNeeded,
+    sourceFile,
+    sourcePreprocessed,
+  });
 }
 
 export function getPlannedImageWork(

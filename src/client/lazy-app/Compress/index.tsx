@@ -64,7 +64,7 @@ import {
 import { getImageProcessingErrorMessage } from './processing-errors';
 import {
   getImageWorkAbortPlan,
-  getSideEncodingPlan,
+  getSideJobExecutionPlan,
   getPlannedImageWork,
   type MainJobState,
   type SideJobState,
@@ -464,16 +464,9 @@ export default class Compress extends Component<Props, State> {
         let file: File;
         let data: ImageData;
         let processed: ImageData | undefined = undefined;
-        const cacheResult = jobState.encoderState
-          ? this.encodeCache.match(
-              source.preprocessed,
-              jobState.processorState,
-              jobState.encoderState,
-            )
-          : undefined;
-        const sidePlan = getSideEncodingPlan({
-          cacheResult,
+        const sidePlan = getSideJobExecutionPlan({
           currentProcessed: currentState.sides[sideIndex].processed,
+          getCacheResult: (...args) => this.encodeCache.match(...args),
           jobState,
           sideWorkNeeded,
           sourceFile: source.file,
