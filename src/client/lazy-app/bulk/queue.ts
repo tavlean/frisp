@@ -20,6 +20,11 @@ export interface BulkQueueState {
   runnableJobs: ImageJob[];
 }
 
+export interface BulkJobCounterDelta {
+  activeJobs: number;
+  exportedCount: number;
+}
+
 function normalizeBulkConcurrency(concurrency: number): number {
   if (!Number.isFinite(concurrency)) return defaultBulkConcurrency;
   return Math.max(0, Math.floor(concurrency));
@@ -88,6 +93,24 @@ function isActiveStatus(status: ImageJobStatus): boolean {
   return status === 'decoding' || status === 'processing';
 }
 
+export function getBulkJobCounterDelta(job: ImageJob): BulkJobCounterDelta {
+  return {
+    activeJobs: isActiveStatus(job.status) ? 1 : 0,
+    exportedCount: job.status === 'exported' ? 1 : 0,
+  };
+}
+
+function applyBulkJobCounterDelta(
+  session: BulkSession,
+  delta: BulkJobCounterDelta,
+): BulkSession {
+  return {
+    ...session,
+    activeJobs: Math.max(0, session.activeJobs - delta.activeJobs),
+    exportedCount: Math.max(0, session.exportedCount - delta.exportedCount),
+  };
+}
+
 export function startJob(session: BulkSession, jobId: string): BulkSession {
   const normalizedSession = normalizeBulkSessionCounters(session);
   const job = getJob(normalizedSession, jobId);
@@ -107,22 +130,16 @@ export function completeJob(
   const normalizedSession = normalizeBulkSessionCounters(session);
   const job = getJob(normalizedSession, jobId);
   if (!job) return normalizedSession;
-  const activeJobDelta = isActiveStatus(job.status) ? 1 : 0;
-  const exportedJobDelta = job.status === 'exported' ? 1 : 0;
 
-  return {
-    ...updateJob(normalizedSession, jobId, (job) => ({
+  return applyBulkJobCounterDelta(
+    updateJob(normalizedSession, jobId, (job) => ({
       ...job,
       status: 'encoded',
       output,
       error: undefined,
     })),
-    activeJobs: Math.max(0, normalizedSession.activeJobs - activeJobDelta),
-    exportedCount: Math.max(
-      0,
-      normalizedSession.exportedCount - exportedJobDelta,
-    ),
-  };
+    getBulkJobCounterDelta(job),
+  );
 }
 
 export function failJob(
@@ -133,44 +150,32 @@ export function failJob(
   const normalizedSession = normalizeBulkSessionCounters(session);
   const job = getJob(normalizedSession, jobId);
   if (!job) return normalizedSession;
-  const activeJobDelta = isActiveStatus(job.status) ? 1 : 0;
-  const exportedJobDelta = job.status === 'exported' ? 1 : 0;
 
-  return {
-    ...updateJob(normalizedSession, jobId, (job) => ({
+  return applyBulkJobCounterDelta(
+    updateJob(normalizedSession, jobId, (job) => ({
       ...job,
       status: 'failed',
       error,
       output: undefined,
     })),
-    activeJobs: Math.max(0, normalizedSession.activeJobs - activeJobDelta),
-    exportedCount: Math.max(
-      0,
-      normalizedSession.exportedCount - exportedJobDelta,
-    ),
-  };
+    getBulkJobCounterDelta(job),
+  );
 }
 
 export function requeueJob(session: BulkSession, jobId: string): BulkSession {
   const normalizedSession = normalizeBulkSessionCounters(session);
   const job = getJob(normalizedSession, jobId);
   if (!job) return normalizedSession;
-  const activeJobDelta = isActiveStatus(job.status) ? 1 : 0;
-  const exportedJobDelta = job.status === 'exported' ? 1 : 0;
 
-  return {
-    ...updateJob(normalizedSession, jobId, (job) => ({
+  return applyBulkJobCounterDelta(
+    updateJob(normalizedSession, jobId, (job) => ({
       ...job,
       status: 'queued',
       output: undefined,
       error: undefined,
     })),
-    activeJobs: Math.max(0, normalizedSession.activeJobs - activeJobDelta),
-    exportedCount: Math.max(
-      0,
-      normalizedSession.exportedCount - exportedJobDelta,
-    ),
-  };
+    getBulkJobCounterDelta(job),
+  );
 }
 
 export function isJobOutputStale(session: BulkSession, job: ImageJob): boolean {

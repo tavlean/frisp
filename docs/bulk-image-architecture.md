@@ -8,6 +8,8 @@ The helper surface now includes pure strip item selectors, selected-job detail s
 
 Queue UI should consume the queue-state selector rather than calculating active jobs, open slots, or runnable jobs itself. That keeps concurrency behavior consistent between the runner and future controls.
 
+Queue status transitions should use the shared job counter delta helper when removing a job from an active or exported state. That keeps completion, failure, and requeue behavior aligned if persisted session counters drift from the job list.
+
 Import UI should create sessions through the import-to-session helper so rejected files are kept out of the live session consistently and the first accepted image is selected by the same session rules everywhere.
 
 Import results keep the legacy rejected file list and also include structured rejection reasons. The import summary aggregates those reasons. Future UI should use those reasons to distinguish unsupported files from unreadable files instead of showing a generic failure.

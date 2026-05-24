@@ -131,6 +131,7 @@ This list is ordered by priority. Do the high-priority items before building new
     - Bulk processor tests now cover pure process-plan creation before decode starts.
     - Bulk processing now uses the shared source decode helper, including the SVG/vector path used by the single-image editor.
     - Bulk queue tests now cover derived queue state for normalized concurrency, active counts, open slots, queued counts, and runnable job ids.
+    - Bulk queue tests now cover shared job counter deltas for queued, active, and exported states.
     - Bulk requeue tests now cover active jobs being reset and active counters being decremented.
     - Bulk cancellation tests now cover resetting only active jobs while preserving failed, skipped, and completed jobs.
     - Bulk settings-change tests now cover safe workflow helpers that update global/per-image settings and requeue stale outputs.

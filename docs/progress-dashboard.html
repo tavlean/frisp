@@ -12,6 +12,7 @@
         --muted: #6b756f;
         --line: #dfe4df;
         --green: #178461;
+        --green-soft: #eef7f2;
         --blue: #3266c8;
         --amber: #a96a12;
         --track: #e9ede9;
@@ -71,25 +72,42 @@
 
       .meta {
         min-width: 250px;
-        padding: 14px 16px;
+        padding: 13px 16px;
         border: 1px solid var(--line);
-        border-radius: 8px;
+        border-radius: 10px;
         background: var(--panel);
         box-shadow: var(--shadow);
       }
 
       .meta-row {
-        display: flex;
-        justify-content: space-between;
+        display: grid;
+        grid-template-columns: 1fr auto;
         gap: 18px;
+        align-items: center;
         color: var(--muted);
         font-size: 13px;
         line-height: 1.8;
       }
 
+      .meta-label {
+        display: inline-flex;
+        gap: 8px;
+        align-items: center;
+      }
+
+      .mini-icon {
+        width: 16px;
+        height: 16px;
+        color: var(--muted);
+      }
+
       .meta-row strong {
         color: var(--text);
         font-weight: 650;
+      }
+
+      .meta-row .is-passing {
+        color: var(--green);
       }
 
       .metrics {
@@ -108,14 +126,52 @@
       }
 
       .metric {
-        padding: 16px;
+        display: grid;
+        min-height: 118px;
+        padding: 18px;
+        align-content: space-between;
+      }
+
+      .metric-body {
+        display: grid;
+        grid-template-columns: 52px 1fr;
+        gap: 14px;
+        align-items: center;
+      }
+
+      .metric-icon,
+      .progress-icon {
+        display: inline-grid;
+        place-items: center;
+        flex: 0 0 auto;
+        border: 1px solid #dbeae2;
+        border-radius: 10px;
+        background: var(--green-soft);
+        color: var(--green);
+      }
+
+      .metric-icon {
+        width: 52px;
+        height: 52px;
+      }
+
+      .metric-icon svg,
+      .progress-icon svg,
+      .badge svg {
+        width: 24px;
+        height: 24px;
+      }
+
+      .metric .bar {
+        height: 5px;
+        margin-top: 15px;
       }
 
       .metric strong {
         display: flex;
         gap: 8px;
         align-items: baseline;
-        margin-bottom: 6px;
+        margin-bottom: 5px;
         font-size: 28px;
         line-height: 1;
       }
@@ -130,6 +186,11 @@
         color: var(--muted);
         font-size: 13px;
         line-height: 1.35;
+      }
+
+      .metric .metric-icon,
+      .progress-title .progress-icon {
+        color: var(--green);
       }
 
       .layout {
@@ -157,15 +218,22 @@
 
       .badge {
         display: inline-flex;
+        gap: 7px;
         align-items: center;
         min-height: 24px;
-        padding: 3px 9px;
-        border-radius: 999px;
+        padding: 4px 10px;
+        border: 1px solid #dbeae2;
+        border-radius: 8px;
         background: #edf4ef;
         color: var(--green);
         font-size: 12px;
         font-weight: 700;
         white-space: nowrap;
+      }
+
+      .badge svg {
+        width: 15px;
+        height: 15px;
       }
 
       .badge.warn {
@@ -179,7 +247,7 @@
       }
 
       details.progress-item {
-        padding: 13px;
+        padding: 13px 14px;
         border: 1px solid var(--line);
         border-radius: 8px;
         background: #fbfcfb;
@@ -197,22 +265,41 @@
       details.progress-item summary::after {
         float: right;
         color: var(--muted);
-        font-size: 12px;
+        font-size: 18px;
         font-weight: 800;
-        content: 'Open';
+        line-height: 1;
+        content: '⌄';
       }
 
       details.progress-item[open] summary::after {
-        content: 'Close';
+        content: '⌃';
       }
 
       .progress-top {
-        display: flex;
-        justify-content: space-between;
-        gap: 64px;
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 20px;
+        align-items: center;
         margin-bottom: 7px;
         font-size: 14px;
         font-weight: 650;
+      }
+
+      .progress-title {
+        display: inline-flex;
+        gap: 12px;
+        align-items: center;
+      }
+
+      .progress-icon {
+        width: 34px;
+        height: 34px;
+        border-radius: 9px;
+      }
+
+      .progress-icon svg {
+        width: 19px;
+        height: 19px;
       }
 
       .progress-top span:last-child {
@@ -254,7 +341,19 @@
         border-top: 1px solid var(--line);
       }
 
+      details.progress-item[open] .detail-grid {
+        gap: 0;
+      }
+
+      details.progress-item[open] .detail-box + .detail-box {
+        padding-left: 18px;
+        border-left: 1px solid var(--line);
+      }
+
       .detail-box h3 {
+        display: inline-flex;
+        gap: 8px;
+        align-items: center;
         margin: 0 0 8px;
         font-size: 13px;
         line-height: 1.25;
@@ -308,6 +407,12 @@
       }
 
       .status {
+        display: inline-flex;
+        min-height: 24px;
+        align-items: center;
+        padding: 3px 9px;
+        border-radius: 7px;
+        background: #f0f4ff;
         color: var(--muted);
         font-size: 12px;
         font-weight: 700;
@@ -319,10 +424,12 @@
       }
 
       .status.done {
+        background: #edf8f0;
         color: var(--green);
       }
 
       .status.wait {
+        background: #fff4e3;
         color: var(--amber);
       }
 
@@ -364,23 +471,91 @@
         </div>
         <aside class="meta" aria-label="Dashboard metadata">
           <div class="meta-row">
-            <span>Last updated</span>
-            <strong>2026-05-24 23:29 IST</strong>
+            <span class="meta-label">
+              <svg class="mini-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  d="M12 6v6l4 2m5-2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+              Last updated
+            </span>
+            <strong>2026-05-24 23:33 IST</strong>
           </div>
           <div class="meta-row">
-            <span>Branch</span>
+            <span class="meta-label">
+              <svg class="mini-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  d="M6 3v12m0 0a3 3 0 1 0 0 6 3 3 0 0 0 0-6Zm12-12v6a3 3 0 0 1-3 3H9m9-9a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+              Branch
+            </span>
             <strong>main</strong>
           </div>
           <div class="meta-row">
-            <span>Local gate</span>
-            <strong>passing</strong>
+            <span class="meta-label">
+              <svg class="mini-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  d="M12 3 20 7v6c0 5-3.5 7.5-8 8-4.5-.5-8-3-8-8V7l8-4Z"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+                <path
+                  d="m9 12 2 2 4-5"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+              Local gate
+            </span>
+            <strong class="is-passing">passing</strong>
           </div>
           <div class="meta-row">
-            <span>Current work</span>
-            <strong>abort guards</strong>
+            <span class="meta-label">
+              <svg class="mini-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  d="m15 18 6-6-6-6M9 6l-6 6 6 6"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+              Current work
+            </span>
+            <strong>bulk queue counters</strong>
           </div>
           <div class="meta-row">
-            <span>Auto refresh</span>
+            <span class="meta-label">
+              <svg class="mini-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  d="M21 12a9 9 0 0 1-15.5 6.2M3 12A9 9 0 0 1 18.5 5.8M3 19v-5h5m13-9v5h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+              Auto refresh
+            </span>
             <strong>on change</strong>
           </div>
         </aside>
@@ -388,24 +563,125 @@
 
       <section class="metrics" aria-label="Headline metrics">
         <div class="metric">
-          <strong>98%</strong>
-          <span>Stability, CI, security</span>
+          <div class="metric-body">
+            <span class="metric-icon">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  d="M12 3 20 7v6c0 5-3.5 7.5-8 8-4.5-.5-8-3-8-8V7l8-4Z"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+                <path
+                  d="m9 12 2 2 4-5"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </span>
+            <div>
+              <strong>98%</strong>
+              <span>Stability, CI, security</span>
+            </div>
+          </div>
+          <div class="bar"><span style="width: 98%"></span></div>
         </div>
         <div class="metric">
-          <strong>87%</strong>
-          <span>Documentation and handoff</span>
+          <div class="metric-body">
+            <span class="metric-icon">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6Z"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+                <path
+                  d="M14 2v6h6"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </span>
+            <div>
+              <strong>87%</strong>
+              <span>Documentation and handoff</span>
+            </div>
+          </div>
+          <div class="bar"><span style="width: 87%"></span></div>
         </div>
         <div class="metric">
-          <strong>93%</strong>
-          <span>Bulk backend foundation</span>
+          <div class="metric-body">
+            <span class="metric-icon">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  d="M4 6c0-1.7 3.6-3 8-3s8 1.3 8 3-3.6 3-8 3-8-1.3-8-3Zm0 0v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </span>
+            <div>
+              <strong>94% <span class="delta">+1</span></strong>
+              <span>Bulk backend foundation</span>
+            </div>
+          </div>
+          <div class="bar"><span style="width: 94%"></span></div>
         </div>
         <div class="metric">
-          <strong>51% <span class="delta">+1</span></strong>
-          <span>Repo simplification</span>
+          <div class="metric-body">
+            <span class="metric-icon">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  d="M6 3v12m0 0a3 3 0 1 0 0 6 3 3 0 0 0 0-6Zm12-12v6a3 3 0 0 1-3 3H9m9-9a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </span>
+            <div>
+              <strong>51%</strong>
+              <span>Repo simplification</span>
+            </div>
+          </div>
+          <div class="bar"><span style="width: 51%"></span></div>
         </div>
         <div class="metric">
-          <strong>36%</strong>
-          <span>Svelte readiness</span>
+          <div class="metric-body">
+            <span class="metric-icon">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  d="m15 18 6-6-6-6M9 6l-6 6 6 6"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </span>
+            <div>
+              <strong>36%</strong>
+              <span>Svelte readiness</span>
+            </div>
+          </div>
+          <div class="bar"><span style="width: 36%"></span></div>
         </div>
       </section>
 
@@ -413,13 +689,47 @@
         <section class="panel">
           <div class="panel-head">
             <h2>Progress</h2>
-            <span class="badge">click for details</span>
+            <span class="badge">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  d="m4 16 5-5 4 4 7-7m0 0v5m0-5h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+              View details
+            </span>
           </div>
           <div class="progress-list">
-            <details class="progress-item" id="stability">
+            <details class="progress-item" id="stability" open>
               <summary>
                 <div class="progress-top">
-                  <span>Stability, CI, and security</span>
+                  <span class="progress-title">
+                    <span class="progress-icon">
+                      <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                          d="M12 3 20 7v6c0 5-3.5 7.5-8 8-4.5-.5-8-3-8-8V7l8-4Z"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        />
+                        <path
+                          d="m9 12 2 2 4-5"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        />
+                      </svg>
+                    </span>
+                    Stability, CI, and security
+                  </span>
                   <span>98%</span>
                 </div>
                 <div class="bar"><span style="width: 98%"></span></div>
@@ -430,7 +740,10 @@
               </summary>
               <div class="detail-grid">
                 <div class="detail-box">
-                  <h3>Done</h3>
+                  <h3>
+                    <span aria-hidden="true">✓</span>
+                    Done
+                  </h3>
                   <ul>
                     <li>Audit cleanup completed.</li>
                     <li>Node 24 is the supported local build baseline.</li>
@@ -442,7 +755,10 @@
                   </ul>
                 </div>
                 <div class="detail-box">
-                  <h3>Left</h3>
+                  <h3>
+                    <span aria-hidden="true">••</span>
+                    Left
+                  </h3>
                   <ul>
                     <li>Keep sampling CI after runtime changes.</li>
                     <li>Add targeted smoke coverage when bulk UI begins.</li>
@@ -455,7 +771,29 @@
             <details class="progress-item" id="documentation">
               <summary>
                 <div class="progress-top">
-                  <span>Documentation and handoff</span>
+                  <span class="progress-title">
+                    <span class="progress-icon">
+                      <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                          d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6Z"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        />
+                        <path
+                          d="M14 2v6h6"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        />
+                      </svg>
+                    </span>
+                    Documentation and handoff
+                  </span>
                   <span>87%</span>
                 </div>
                 <div class="bar"><span style="width: 87%"></span></div>
@@ -492,13 +830,28 @@
             <details class="progress-item" id="bulk">
               <summary>
                 <div class="progress-top">
-                  <span>Bulk backend foundation</span>
-                  <span>93%</span>
+                  <span class="progress-title">
+                    <span class="progress-icon">
+                      <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                          d="M4 6c0-1.7 3.6-3 8-3s8 1.3 8 3-3.6 3-8 3-8-1.3-8-3Zm0 0v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        />
+                      </svg>
+                    </span>
+                    Bulk backend foundation
+                  </span>
+                  <span>94%</span>
                 </div>
-                <div class="bar"><span style="width: 93%"></span></div>
+                <div class="bar"><span style="width: 94%"></span></div>
                 <p class="progress-note">
                   Import, queue, processing, summaries, export planning,
-                  snapshots, and selected-job view models are framework-neutral.
+                  snapshots, selected-job view models, and counter transitions
+                  are framework-neutral.
                 </p>
               </summary>
               <div class="detail-grid">
@@ -512,6 +865,7 @@
                     <li>
                       Per-image overrides and summaries have pure selectors.
                     </li>
+                    <li>Counter deltas are shared across queue transitions.</li>
                     <li>Bulk processing uses the shared image pipeline.</li>
                   </ul>
                 </div>
@@ -526,10 +880,24 @@
               </div>
             </details>
 
-            <details class="progress-item" id="simplification" open>
+            <details class="progress-item" id="simplification">
               <summary>
                 <div class="progress-top">
-                  <span>Repo simplification</span>
+                  <span class="progress-title">
+                    <span class="progress-icon">
+                      <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                          d="M6 3v12m0 0a3 3 0 1 0 0 6 3 3 0 0 0 0-6Zm12-12v6a3 3 0 0 1-3 3H9m9-9a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        />
+                      </svg>
+                    </span>
+                    Repo simplification
+                  </span>
                   <span>51%</span>
                 </div>
                 <div class="bar"><span style="width: 51%"></span></div>
@@ -582,7 +950,21 @@
             <details class="progress-item" id="svelte">
               <summary>
                 <div class="progress-top">
-                  <span>Svelte/SvelteKit migration readiness</span>
+                  <span class="progress-title">
+                    <span class="progress-icon">
+                      <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                          d="m15 18 6-6-6-6M9 6l-6 6 6 6"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        />
+                      </svg>
+                    </span>
+                    Svelte/SvelteKit migration readiness
+                  </span>
                   <span>36%</span>
                 </div>
                 <div class="bar"><span style="width: 36%"></span></div>
