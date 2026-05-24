@@ -11,13 +11,24 @@ export function getOutputFileName(
     trimmedName.lastIndexOf('/'),
     trimmedName.lastIndexOf('\\'),
   );
-  const directory = lastSlash === -1 ? '' : trimmedName.slice(0, lastSlash + 1);
   const fileName =
     lastSlash === -1 ? trimmedName : trimmedName.slice(lastSlash + 1);
   const lastDot = fileName.lastIndexOf('.');
   const baseName =
     lastDot > 0 ? fileName.slice(0, lastDot) : fileName.replace(/\.+$/, '');
-  const safeBaseName = baseName || 'image';
+  const sanitizedBaseName = baseName
+    .replace(/[\\/:*?"<>|\x00-\x1f]+/g, '-')
+    .replace(/\s+/g, ' ')
+    .replace(/-+/g, '-')
+    .replace(/\s*-\s*/g, '-')
+    .replace(/^[\s-]+|[\s-]+$/g, '')
+    .trim();
+  const safeBaseName = sanitizedBaseName || 'image';
+  const reservedSafeBaseName = /^(con|prn|aux|nul|com[1-9]|lpt[1-9])$/i.test(
+    safeBaseName,
+  )
+    ? `${safeBaseName}-file`
+    : safeBaseName;
 
-  return `${directory}${safeBaseName}.${normalizedExtension}`;
+  return `${reservedSafeBaseName}.${normalizedExtension}`;
 }
