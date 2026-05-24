@@ -77,6 +77,7 @@ This list is ordered by priority. Do the high-priority items before building new
 - New saved side settings use a versioned wrapper.
 - Legacy unversioned saved settings still import.
 - Missing/unknown encoders are rejected before applying the settings.
+- Invalid stored settings are not treated as available for import.
 
 13. Fix small code quality issues while touching nearby code.
 

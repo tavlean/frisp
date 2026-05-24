@@ -14,7 +14,7 @@ Project homepage metadata: `https://sqush.app`.
 
 Old fork: `tavlean/SquooshPlus`, archived and kept as historical reference.
 
-Working tree at last update: Node runtime type definitions aligned to the supported Node 20 baseline and locally verified. Run `git status --short --branch` for the exact state.
+Working tree at last update: saved-settings availability now ignores invalid stored data and is locally verified. Run `git status --short --branch` for the exact state.
 
 Latest recent committed work at last update:
 
@@ -114,6 +114,7 @@ Latest verification run:
 - `npm run smoke:browser`: passed after adding real-editor saved side settings verification.
 - `npm run check`: passed after adding real-editor saved side settings verification.
 - `npm run check`: passed after updating `@types/node` from Node 16 types to Node 20 types.
+- `npm run check`: passed after requiring saved-settings availability checks to parse successfully.
 - `npm run build && npm run smoke:build`: passed.
 - `npm run test:helpers`: passed.
 - `npm run check`: passed after CI matrix diagnostics.
@@ -194,6 +195,7 @@ Quick investigation note:
 - Hardened saved settings parsing to reject missing or array-shaped encoder options.
 - Hardened saved settings parsing to reject null encoder option values.
 - Hardened saved settings parsing to reject invalid processor enabled values and null option values.
+- Hardened saved settings availability checks so corrupt `localStorage` data is not treated as importable settings.
 - Centralized saved-settings storage reads/writes and fixed the right-side settings event listener cleanup path.
 - Modernized one editor media query listener path.
 - Hardened the shared abort helper so it removes abort listeners when wrapped work settles.

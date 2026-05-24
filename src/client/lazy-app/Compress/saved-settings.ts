@@ -91,7 +91,7 @@ export function readSavedSideSettings(
 }
 
 export function hasSavedSideSettings(key: LocalStorageKey): boolean {
-  return readLocalStorage(key) !== undefined;
+  return readSavedSideSettings(key) !== undefined;
 }
 
 export function writeSavedSideSettings(
