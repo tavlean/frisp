@@ -58,39 +58,53 @@ export function createImageJobId(file: File, index: number): string {
   return `${index}-${file.name}-${file.size}-${file.lastModified}`;
 }
 
+function createBulkImportResult(): BulkImportResult {
+  return {
+    accepted: [],
+    rejected: [],
+    rejections: [],
+  };
+}
+
+function acceptBulkImportFile(result: BulkImportResult, file: File): void {
+  result.accepted.push(
+    createImageJob(createImageJobId(file, result.accepted.length), file),
+  );
+}
+
+function rejectBulkImportFile(
+  result: BulkImportResult,
+  file: File,
+  reason: BulkImportRejectionReason,
+): void {
+  result.rejected.push(file);
+  result.rejections.push({ file, reason });
+}
+
 export function createImageJobs(files: Iterable<File>): BulkImportResult {
-  const accepted: ImageJob[] = [];
-  const rejected: File[] = [];
-  const rejections: BulkImportRejection[] = [];
+  const result = createBulkImportResult();
 
   for (const file of files) {
     if (!isSupportedBulkImage(file)) {
-      rejected.push(file);
-      rejections.push({ file, reason: 'unsupported-type' });
+      rejectBulkImportFile(result, file, 'unsupported-type');
       continue;
     }
 
-    accepted.push(
-      createImageJob(createImageJobId(file, accepted.length), file),
-    );
+    acceptBulkImportFile(result, file);
   }
 
-  return { accepted, rejected, rejections };
+  return result;
 }
 
 export async function createImageJobsWithMimeSniffing(
   files: Iterable<File>,
   sniffMimeType: BulkMimeSniffer,
 ): Promise<BulkImportResult> {
-  const accepted: ImageJob[] = [];
-  const rejected: File[] = [];
-  const rejections: BulkImportRejection[] = [];
+  const result = createBulkImportResult();
 
   for (const file of files) {
     if (isSupportedBulkImage(file)) {
-      accepted.push(
-        createImageJob(createImageJobId(file, accepted.length), file),
-      );
+      acceptBulkImportFile(result, file);
       continue;
     }
 
@@ -98,23 +112,19 @@ export async function createImageJobsWithMimeSniffing(
     try {
       detectedType = await sniffMimeType(file);
     } catch (err) {
-      rejected.push(file);
-      rejections.push({ file, reason: 'unreadable' });
+      rejectBulkImportFile(result, file, 'unreadable');
       continue;
     }
 
     if (!detectedType.startsWith('image/')) {
-      rejected.push(file);
-      rejections.push({ file, reason: 'unsupported-type' });
+      rejectBulkImportFile(result, file, 'unsupported-type');
       continue;
     }
 
-    accepted.push(
-      createImageJob(createImageJobId(file, accepted.length), file),
-    );
+    acceptBulkImportFile(result, file);
   }
 
-  return { accepted, rejected, rejections };
+  return result;
 }
 
 export function getBulkImportSummary(

@@ -14,6 +14,8 @@ Import UI should create sessions through the import-to-session helper so rejecte
 
 Import results keep the legacy rejected file list and also include structured rejection reasons. The import summary aggregates those reasons. Future UI should use those reasons to distinguish unsupported files from unreadable files instead of showing a generic failure.
 
+Normal import and MIME-sniffed import record accepted jobs and rejected files through the same internal path. That keeps accepted job IDs, rejection lists, and structured rejection reasons aligned if future bulk import surfaces add drag-and-drop, directory import, or retry flows.
+
 If users add more images after a batch already exists, UI should append through the import append helper. That keeps rejected files out of the session and reuses the same duplicate-safe job ID rules as normal session additions.
 
 Export UI should create an export plan and then mark that plan exported through the plan helper after downloads are triggered. The helper reuses the stale-output guard, so changed global or per-image settings cannot mark old output as exported.
