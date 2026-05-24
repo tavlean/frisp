@@ -61,6 +61,7 @@ import {
   getDefaultResizeSides,
   getPreprocessorChangeState,
 } from './source-state';
+import { getImageProcessingErrorMessage } from './processing-errors';
 import {
   getSideEncodingPlan,
   getPlannedImageWork,
@@ -385,7 +386,9 @@ export default class Compress extends Component<Props, State> {
         });
       } catch (err) {
         if (isAbortError(err)) return;
-        this.props.showSnack(`Source decoding error: ${err}`);
+        this.props.showSnack(
+          getImageProcessingErrorMessage('source-decoding', err),
+        );
         throw err;
       }
     } else {
@@ -430,7 +433,9 @@ export default class Compress extends Component<Props, State> {
       } catch (err) {
         if (isAbortError(err)) return;
         this.setState({ loading: false });
-        this.props.showSnack(`Preprocessing error: ${err}`);
+        this.props.showSnack(
+          getImageProcessingErrorMessage('preprocessing', err),
+        );
         throw err;
       }
     } else {
@@ -546,7 +551,7 @@ export default class Compress extends Component<Props, State> {
             sides: setSideLoading(currentState.sides, sideIndex, false),
           };
         });
-        this.props.showSnack(`Processing error: ${err}`);
+        this.props.showSnack(getImageProcessingErrorMessage('processing', err));
         throw err;
       }
     });
