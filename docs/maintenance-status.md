@@ -18,7 +18,7 @@ Project identity note: see [Project identity](project-identity.md). The current 
 
 Active-thread path note: this chat is still attached in Codex to the old project entry `/Users/tav/Development/Tavlean/SquooshPlus`, which is a symlink to the real checkout at `/Users/tav/Development/Tavlean/Sqush`. For uninterrupted work in this chat, use the symlink path as the working directory. Best long-term fix is to start a new Codex chat from the real `Sqush` project entry and use this document plus `docs/progress-dashboard.html`, `docs/progress-dashboard.md`, `docs/todo.md`, and `docs/svelte-migration-context.md` as the handoff source.
 
-Working tree at last update: progress dashboard reflects browser smoke coverage for saved-settings import, real resize processing to a `64x64` WebP blob, service-worker-disabled app-shell loading, service-worker controller guards, refreshed browser support policy, static-build utility cleanup, shared filename sanitization, local folder rename to Sqush, a direct-open HTML dashboard at `docs/progress-dashboard.html`, `npm run dashboard` for change-triggered dashboard reloads, and expanded single-image pure helpers. Bulk helpers include a framework-neutral barrel export, import-to-session helper, append-import helper, structured import rejection reasons and summary counts, shared SVG-aware source decode path, process-plan helper, selected-job detail selector, queue-state selector, export-plan completion helper, drift-tolerant session counters, strip item selectors, queue-aware session summary selectors, and metadata-only snapshot restore from parsed or serialized snapshots for future UI/Svelte consumption. Single-image editor work planning, latest/current image job-state derivation, display settings, result labels, image-contain decisions, processor enabled toggles, processor option merges, default source resize side updates, orientation resize side updates, side loading/result updates, side undo restoration, saved-settings key/label lookup, side-copy URL behavior, side reset URL cleanup, side settings mutations, default/saved side-state updates, and document-title/loading selectors are partly extracted into pure helpers. Browser smoke now covers real saved-settings import. Project identity is documented so the old archive name is not confused with current Sqush branding. Run `git status --short --branch` for the exact state.
+Working tree at last update: progress dashboard reflects the Node 24 build baseline, browser smoke coverage for saved-settings import, real resize processing to a `64x64` WebP blob, service-worker-disabled app-shell loading, service-worker controller guards, refreshed browser support policy, static-build utility cleanup, shared filename sanitization, local folder rename to Sqush, a direct-open HTML dashboard at `docs/progress-dashboard.html`, `npm run dashboard` for change-triggered dashboard reloads, and expanded single-image pure helpers. Bulk helpers include a framework-neutral barrel export, import-to-session helper, append-import helper, structured import rejection reasons and summary counts, shared SVG-aware source decode path, process-plan helper, selected-job detail selector, queue-state selector, export-plan completion helper, drift-tolerant session counters, strip item selectors, queue-aware session summary selectors, and metadata-only snapshot restore from parsed or serialized snapshots for future UI/Svelte consumption. Single-image editor work planning, latest/current image job-state derivation, display settings, result labels, image-contain decisions, processor enabled toggles, processor option merges, default source resize side updates, orientation resize side updates, side loading/result updates, side undo restoration, saved-settings key/label lookup, side-copy URL behavior, side reset URL cleanup, side settings mutations, default/saved side-state updates, unmount URL cleanup, and document-title/loading selectors are partly extracted into pure helpers. Browser smoke now covers real saved-settings import. Project identity is documented so the old archive name is not confused with current Sqush branding. Run `git status --short --branch` for the exact state.
 
 Latest recent committed work at last update:
 
@@ -80,6 +80,14 @@ Latest recent committed work at last update:
 
 Latest verification run:
 
+- `npm run typecheck`: passed after moving the project baseline to Node 24 with `@types/node@22.9.3`, the newest Node type package compatible with the current TypeScript 4.9 toolchain.
+- `npm run test:helpers`: passed after adding single-image unmount download URL cleanup coverage.
+- `npm ci`: passed after pinning `@types/node` to the TypeScript 4.9-compatible release.
+- `npm run check`: passed on Node 24.12.0 after the Node baseline and unmount cleanup changes.
+- `npm audit --audit-level=low`: passed after the Node 24 type update.
+- `npm run smoke:browser`: passed after single-image unmount cleanup and the Node 24 baseline update.
+- Initial pushed Node 24 CI caught that `@types/node@24.12.4` is not compatible with the current TypeScript 4.9 toolchain on a clean install; this was corrected by pinning `@types/node@22.9.3` until a TypeScript migration is handled separately.
+- GitHub Actions passed on Ubuntu, Windows, and macOS for the Node type correction before the workflow action-runtime opt-in was folded into the same checkpoint.
 - `npm run format:check`: passed.
 - `npm run typecheck`: passed, including after bulk queue concurrency normalization and retry stale-output cleanup.
 - `npm run test:unit`: passed, including after bulk queue concurrency normalization and retry stale-output cleanup.
@@ -316,7 +324,7 @@ Quick investigation note:
 - Added `npm test` as an alias for the full baseline check.
 - Added `npm run test:unit` as an alias for pure-helper tests.
 - Added Node and npm engine metadata matching `.nvmrc`.
-- Updated Node type definitions to match the supported Node 20 runtime baseline.
+- Updated Node type definitions to the newest release compatible with the current TypeScript 4.9 toolchain while moving the runtime baseline to Node 24.
 - Added `npm run format` and `npm run format:check`.
 - Added `npm run smoke:build` to verify generated build output.
 - Expanded `npm run smoke:build` to check generated Sqush metadata and absence of analytics code.
@@ -334,7 +342,7 @@ Quick investigation note:
 - CI uses read-only repository permissions, a 15-minute job timeout, and concurrency cancellation so superseded runs do not keep running after newer pushes.
 - Removed the inherited upstream Google Analytics integration.
 - Refreshed Browserslist data.
-- Removed the Node 20 `DEP0190` warning from the TypeScript build spawn.
+- Removed the old Node `DEP0190` warning from the TypeScript build spawn.
 - Upgraded the local static server from `serve@11` to `serve@14`.
 - Applied compatible `npm audit fix` updates.
 - Replaced `npm-run-all` with a local dev runner script.

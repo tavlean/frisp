@@ -116,6 +116,15 @@ export function resetSidesForNewSourceData<
   return nextState;
 }
 
+export function revokeSideDownloadUrls<Side extends ResettableSideState>(
+  sides: readonly Side[],
+  revokeObjectUrl: (url: string) => void = URL.revokeObjectURL,
+): void {
+  for (const side of sides) {
+    if (side.downloadUrl) revokeObjectUrl(side.downloadUrl);
+  }
+}
+
 export function setPreprocessedSourceState<
   Side extends ResettableSideState,
   State extends PreprocessedSourceState<Side>,

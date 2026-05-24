@@ -17,7 +17,7 @@ Recent `npm audit` state after the terser plugin upgrade:
 Latest `npm outdated --cache /private/tmp/sqush-npm-cache` snapshot on 2026-05-24:
 
 - No same-range package updates were available through the current semver ranges.
-- Node runtime type definitions are aligned with the supported Node 20 baseline.
+- Node runtime type definitions are pinned to the newest `@types/node` release compatible with the current TypeScript 4.9 toolchain while the supported runtime baseline is Node 24.
 - Remaining visible drift is mostly major-version work: Rollup 4, TypeScript 6, Prettier 3, Preact 10.29, cssnano 8, idb-keyval 6, Husky 9, lint-staged 17, `del` 8, and related Rollup plugin majors.
 - Treat those as migration tasks, not routine patch cleanup.
 

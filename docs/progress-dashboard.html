@@ -357,7 +357,7 @@
         <aside class="meta" aria-label="Dashboard metadata">
           <div class="meta-row">
             <span>Last updated</span>
-            <strong>2026-05-24 22:35 IST</strong>
+            <strong>2026-05-24 22:44 IST</strong>
           </div>
           <div class="meta-row">
             <span>Branch</span>
@@ -369,7 +369,7 @@
           </div>
           <div class="meta-row">
             <span>Current work</span>
-            <strong>handoff ready</strong>
+            <strong>Node 24 baseline</strong>
           </div>
           <div class="meta-row">
             <span>Auto refresh</span>
@@ -380,7 +380,7 @@
 
       <section class="metrics" aria-label="Headline metrics">
         <div class="metric">
-          <strong>97%</strong>
+          <strong>98%</strong>
           <span>Stability, CI, security</span>
         </div>
         <div class="metric">
@@ -388,7 +388,7 @@
           <span>Bulk backend foundation</span>
         </div>
         <div class="metric">
-          <strong>43%</strong>
+          <strong>44%</strong>
           <span>Repo simplification</span>
         </div>
         <div class="metric">
@@ -408,12 +408,12 @@
               <summary>
                 <div class="progress-top">
                   <span>Stability, CI, and security</span>
-                  <span>97%</span>
+                  <span>98%</span>
                 </div>
-                <div class="bar"><span style="width: 97%"></span></div>
+                <div class="bar"><span style="width: 98%"></span></div>
                 <p class="progress-note">
-                  Audit clean, CI active, and local smoke coverage protects the
-                  core optimizer path.
+                  Audit clean, Node 24 baseline active, CI active, and local
+                  smoke coverage protects the core optimizer path.
                 </p>
               </summary>
               <div class="detail-grid">
@@ -421,6 +421,7 @@
                   <h3>Done</h3>
                   <ul>
                     <li>Audit cleanup completed.</li>
+                    <li>Node 24 is the supported local build baseline.</li>
                     <li>CI runs on Ubuntu, Windows, and macOS.</li>
                     <li>Browser smoke verifies WebP export and resize.</li>
                     <li>
@@ -517,9 +518,9 @@
               <summary>
                 <div class="progress-top">
                   <span>Repo simplification</span>
-                  <span>43%</span>
+                  <span>44%</span>
                 </div>
-                <div class="bar"><span style="width: 43%"></span></div>
+                <div class="bar"><span style="width: 44%"></span></div>
                 <p class="progress-note">
                   Single-image behavior is being extracted from Preact into
                   tested helpers while preserving the current optimizer.
@@ -535,6 +536,10 @@
                     </li>
                     <li>
                       Side result and object URL lifecycle helpers are tested.
+                    </li>
+                    <li>
+                      Single-image unmount now clears queued work and revokes
+                      side download URLs.
                     </li>
                     <li>
                       SVG-aware source decode moved into the shared pipeline.

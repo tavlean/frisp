@@ -47,6 +47,7 @@ import {
   getInitialSideState,
   restoreSide,
   resetSidesForNewSourceData,
+  revokeSideDownloadUrls,
   setPreprocessedSourceState,
   setSideEncoderOptions,
   setSideEncoderType,
@@ -178,10 +179,12 @@ export default class Compress extends Component<Props, State> {
   componentWillUnmount(): void {
     updateDocumentTitle({ loading: false });
     this.widthQuery.removeEventListener('change', this.onMobileWidthChange);
+    clearTimeout(this.updateImageTimeout);
     this.mainAbortController.abort();
     for (const controller of this.sideAbortControllers) {
       controller.abort();
     }
+    revokeSideDownloadUrls(this.state.sides);
   }
 
   componentDidUpdate(prevProps: Props, prevState: State): void {

@@ -6,10 +6,10 @@ This list is ordered by priority. Do the high-priority items before building new
 
 1. Completed: decide the supported Node version.
 
-   - `.nvmrc` says `20.16.0`.
-   - `package.json` declares Node `>=20.16.0 <21` and npm `>=10`.
-   - `@types/node` is aligned to Node 20 instead of the inherited Node 16 type baseline.
-   - The baseline now builds on Node 20 without the previous TypeScript spawn deprecation warning.
+   - `.nvmrc` says `24.12.0`.
+   - `package.json` declares Node `>=24.12.0 <25` and npm `>=11`.
+   - `@types/node` is pinned to the newest release compatible with the current TypeScript 4.9 toolchain; exact Node 24 typings should wait for the TypeScript migration.
+   - The baseline now builds on Node 24 without the previous TypeScript spawn deprecation warning.
    - Keep the required Node/npm versions documented in `README.md`.
 
 2. Completed: add basic project scripts.
