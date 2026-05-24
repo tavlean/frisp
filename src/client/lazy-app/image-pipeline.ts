@@ -17,6 +17,7 @@ import {
 } from './feature-meta';
 import WorkerBridge from './worker-bridge';
 import { resize } from 'features/processors/resize/client';
+import { getOutputFileName } from './output-filename';
 
 export interface SourceImage {
   file: File;
@@ -203,7 +204,7 @@ export async function compressImage(
 
   return new File(
     [compressedData],
-    sourceFilename.replace(/.[^.]*$/, `.${encoder.meta.extension}`),
+    getOutputFileName(sourceFilename, encoder.meta.extension),
     { type },
   );
 }

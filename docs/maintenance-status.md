@@ -14,7 +14,7 @@ Project homepage metadata: `https://sqush.app`.
 
 Old fork: `tavlean/SquooshPlus`, archived and kept as historical reference.
 
-Working tree at last update: single-image side reset logic has been extracted and covered so both editor sides clear stale output data when a new source image loads. Run `git status --short --branch` for the exact state.
+Working tree at last update: compressed output filename generation now preserves extensionless source names instead of producing names like `.webp`. Run `git status --short --branch` for the exact state.
 
 Latest recent committed work at last update:
 
@@ -141,6 +141,8 @@ Latest verification run:
 - `npm run check`: passed after extracting and covering single-image side reset logic.
 - `npm run smoke:browser`: passed after extracting and covering single-image side reset logic.
 - GitHub Actions passed on Ubuntu, Windows, and macOS for `baed797` (`Reset both editor sides on new source`).
+- `npm run test:helpers`: passed after extracting compressed output filename generation.
+- `npm run check`: passed after extracting compressed output filename generation.
 - `npm run build && npm run smoke:build`: passed.
 - `npm run test:helpers`: passed.
 - `npm run check`: passed after CI matrix diagnostics.
