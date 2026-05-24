@@ -105,6 +105,7 @@ This list is ordered by priority. Do the high-priority items before building new
     - Single-image result size, original-output detection, percent, and direction display state now come from a pure helper instead of inline Preact result logic.
     - Single-image result loading lifecycle decisions now come from a pure helper instead of inline Preact result lifecycle branching.
     - Single-image result loading visibility patches now come from a helper and delayed timers are cleared on unmount.
+    - Single-image result initial loading visibility state now comes from a helper instead of inline Preact result state construction.
     - Single-image result side/download link display state now comes from a pure helper instead of inline Preact result JSX.
     - Processor enabled toggles and option merges now go through pure helpers instead of direct option-panel path updates.
     - Orientation-change resize updates for both sides now go through a pure helper instead of inline Preact component mapping.
@@ -201,6 +202,7 @@ This list is ordered by priority. Do the high-priority items before building new
     - Single-image result size tests now cover empty, original, smaller, and larger output display states.
     - Single-image result loading tests now cover initial loading state plus hide, delayed-show, and no-op transitions.
     - Single-image result loading tests now cover visibility state patches.
+    - Single-image result loading tests now cover initial visibility state patches.
     - Single-image result download tests now cover empty original left output and disabled right-side blob output.
     - Single-image output preview tests now cover desktop/mobile orientation plus canvas sizing and contain state.
     - Single-image output control tests now cover zoom scale math, scale-percent parsing, and rotation state wrapping.

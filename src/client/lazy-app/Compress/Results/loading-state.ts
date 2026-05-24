@@ -1,12 +1,22 @@
 export type ResultLoadingEffect = 'hide' | 'delay-show' | 'none';
 
+export interface ResultLoadingState {
+  showLoadingState: boolean;
+}
+
 export function getInitialResultLoadingState(loading: boolean): boolean {
   return loading;
 }
 
-export function getResultLoadingVisibilityState(showLoadingState: boolean): {
-  showLoadingState: boolean;
-} {
+export function getInitialResultLoadingVisibilityState(
+  loading: boolean,
+): ResultLoadingState {
+  return getResultLoadingVisibilityState(getInitialResultLoadingState(loading));
+}
+
+export function getResultLoadingVisibilityState(
+  showLoadingState: boolean,
+): ResultLoadingState {
   return { showLoadingState };
 }
 

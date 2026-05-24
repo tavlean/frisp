@@ -5,9 +5,10 @@ import 'add-css:./style.css';
 import 'shared/custom-els/loading-spinner';
 import { SourceImage } from '../';
 import {
-  getInitialResultLoadingState,
+  getInitialResultLoadingVisibilityState,
   getResultLoadingEffect,
   getResultLoadingVisibilityState,
+  type ResultLoadingState,
 } from './loading-state';
 import { getResultDownloadState } from './download-state';
 import { getResultSizeState } from './size-state';
@@ -22,16 +23,12 @@ interface Props {
   typeLabel: string;
 }
 
-interface State {
-  showLoadingState: boolean;
-}
+type State = ResultLoadingState;
 
 const loadingReactionDelay = 500;
 
 export default class Results extends Component<Props, State> {
-  state: State = {
-    showLoadingState: getInitialResultLoadingState(this.props.loading),
-  };
+  state: State = getInitialResultLoadingVisibilityState(this.props.loading);
 
   /** The timeout ID between entering the loading state, and changing UI */
   private loadingTimeoutId: number = 0;
