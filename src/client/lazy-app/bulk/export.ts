@@ -1,5 +1,6 @@
 import type { BulkSession, ImageJob } from './session';
 import { isJobOutputStale } from './queue';
+import { getPercentChange } from './size';
 
 export interface BulkExportSummary {
   ready: number;
@@ -109,9 +110,7 @@ export function getBulkExportSummary(session: BulkSession): BulkExportSummary {
     skipped,
     totalOriginalSize,
     totalOutputSize,
-    percentChange: totalOriginalSize
-      ? (totalOutputSize / totalOriginalSize - 1) * 100
-      : 0,
+    percentChange: getPercentChange(totalOriginalSize, totalOutputSize),
   };
 }
 
@@ -139,9 +138,7 @@ export function getBulkOutputSummary(session: BulkSession): BulkOutputSummary {
     stale,
     totalOriginalSize,
     totalOutputSize,
-    percentChange: totalOriginalSize
-      ? (totalOutputSize / totalOriginalSize - 1) * 100
-      : 0,
+    percentChange: getPercentChange(totalOriginalSize, totalOutputSize),
   };
 }
 

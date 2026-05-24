@@ -11,6 +11,7 @@ import type WorkerBridge from '../worker-bridge';
 import { getEffectiveSettings, settingsHash } from './settings';
 import type { BulkImageSettings } from './settings';
 import type { ImageJob, ImageOutput } from './session';
+import { getPercentChange } from './size';
 
 export interface BulkProcessorPipeline {
   decodeImage: typeof decodeImage;
@@ -85,9 +86,7 @@ export async function processBulkImageJob({
     file,
     size: file.size,
     downloadUrl: createDownloadUrl(file),
-    percentChange: job.originalSize
-      ? (file.size / job.originalSize - 1) * 100
-      : 0,
+    percentChange: getPercentChange(job.originalSize, file.size),
     settingsHash: settingsHash(effectiveSettings),
   };
 }

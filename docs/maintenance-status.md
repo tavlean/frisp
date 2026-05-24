@@ -14,7 +14,7 @@ Project homepage metadata: `https://sqush.app`.
 
 Old fork: `tavlean/SquooshPlus`, archived and kept as historical reference.
 
-Working tree at last update: clean after add-jobs counter derivation and CI verification. Local work may be ahead of `origin/main`; run `git status --short --branch` and `git log --oneline origin/main..HEAD` for the exact local-only list.
+Working tree at last update: shared bulk percent-change helper changed and docs updated. Local work may be ahead of `origin/main`; run `git status --short --branch` and `git log --oneline origin/main..HEAD` for the exact local-only list.
 
 Latest local-only committed work at last update:
 
@@ -68,6 +68,8 @@ Latest verification run:
 - `npm run test:unit`: passed after empty per-image override normalization.
 - `npm run typecheck`: passed after add-jobs counter derivation.
 - `npm run test:unit`: passed after add-jobs counter derivation.
+- `npm run typecheck`: passed after shared bulk percent-change helper.
+- `npm run test:unit`: passed after shared bulk percent-change helper.
 - `npm run build && npm run smoke:build`: passed.
 - `npm run test:helpers`: passed.
 - `npm run check`: passed after CI matrix diagnostics.
@@ -158,6 +160,7 @@ Quick investigation note:
 - Added a bulk queue retry helper for failed and skipped jobs.
 - Added framework-neutral bulk export helpers for exportable jobs and batch size summaries.
 - Added a framework-neutral bulk output summary helper for valid optimized bytes, stale outputs, and already-exported jobs.
+- Added a shared bulk percent-change helper used by processing and summary code.
 - Added bulk export entry naming helpers for duplicate-safe future batch downloads.
 - Hardened bulk export entry naming so names generated to resolve earlier collisions are also reserved against later files.
 - Hardened bulk export archive names so batch IDs cannot create path-like or invalid download names.
