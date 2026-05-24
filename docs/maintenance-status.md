@@ -14,10 +14,11 @@ Project homepage metadata: `https://sqush.app`.
 
 Old fork: `tavlean/SquooshPlus`, archived and kept as historical reference.
 
-Working tree at last update: bulk per-job size summary helper prepared and locally verified. Run `git status --short --branch` for the exact state.
+Working tree at last update: automated browser smoke command prepared and locally verified. Run `git status --short --branch` for the exact state.
 
 Latest recent committed work at last update:
 
+- `7243559` Summarize bulk job sizes
 - `6f007fe` Add bulk job settings lookup
 - `08cb06a` Add bulk selected job context
 - `6608e75` Add bulk action selectors
@@ -98,6 +99,8 @@ Latest verification run:
 - `npm run format:check`: passed after bulk per-job size summary helper.
 - `npm run typecheck`: passed after bulk per-job size summary helper.
 - `npm run test:unit`: passed after bulk per-job size summary helper.
+- `npm run smoke:browser`: passed locally after automating the production-build Playwright CLI WebP output smoke.
+- `npm run check`: passed after adding the automated browser smoke command.
 - `npm run build && npm run smoke:build`: passed.
 - `npm run test:helpers`: passed.
 - `npm run check`: passed after CI matrix diagnostics.
@@ -113,6 +116,7 @@ Latest verification run:
 - Latest observed GitHub Actions state after latest handoff update: `281521b` passed on Ubuntu, Windows, and macOS.
 - Latest observed GitHub Actions state after bulk action/selection/effective-settings cleanup: `6f007fe` passed on Ubuntu, Windows, and macOS.
 - Latest observed GitHub Actions state after latest handoff update: `677750f` passed on Ubuntu, Windows, and macOS.
+- Latest observed GitHub Actions state after bulk per-job size summaries: `7243559` passed on Ubuntu, Windows, and macOS.
 - `npm run serve` wrapper: launched successfully on port 55194.
 - Browser production-preview smoke: passed after shared image pipeline extraction; app shell, Sqush logo, and drop target rendered.
 - Playwright CLI production-build smoke: passed after the Sqush rename, with `Sqush` title, file input present, Sqush logo alt text present, and zero console messages.
@@ -152,6 +156,7 @@ Quick investigation note:
 - Added `npm run preview` to serve the production `build/` directory.
 - Documented and verified a Playwright CLI smoke flow for the production app shell and local-image editor import path.
 - Documented and verified a Playwright CLI smoke flow for explicit WebP output generation and export-link presence.
+- Added `npm run smoke:browser` to automate the local production-build Playwright CLI smoke without adding Playwright as a project dependency.
 - Updated CI to use current checkout/setup-node actions and run the baseline checks.
 - Expanded CI to cover Ubuntu, Windows, and macOS.
 - CI matrix fail-fast is disabled so one platform failure does not hide the other platform results.

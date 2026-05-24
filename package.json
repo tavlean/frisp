@@ -17,6 +17,7 @@
     "format": "prettier --write \"**/*.{js,css,json,md,ts,tsx}\"",
     "format:check": "prettier --check \"**/*.{js,css,json,md,ts,tsx}\"",
     "preview": "node lib/preview-server.js",
+    "smoke:browser": "node lib/browser-smoke.js",
     "smoke:build": "node lib/smoke-build.js",
     "test": "npm run check",
     "test:bulk": "npm run test:helpers",

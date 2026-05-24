@@ -56,6 +56,16 @@ Use this checklist before releases and after changes touching build tooling, wor
 
 Use the system `playwright-cli` setup documented at `/Users/tav/Development/docs/playwright-cli-system-setup.md`. Do not add Playwright packages to this repo just to run this local smoke flow.
 
+Automated path:
+
+```sh
+npm run smoke:browser
+```
+
+This command builds the app, starts a production preview server, opens the app with `playwright-cli`, imports `src/static-build/assets/icon-large.png`, switches the output side to WebP, checks for an `icon-large.webp` blob download, and fails if console errors are emitted during the flow.
+
+Manual fallback:
+
 1. Run `npm run build`.
 2. Run `PREVIEW_PORT=5001 npm run preview`.
 3. In another terminal, run:
