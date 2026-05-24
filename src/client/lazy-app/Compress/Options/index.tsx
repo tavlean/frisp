@@ -22,6 +22,11 @@ import {
   type SupportedEncoderMap,
 } from './encoder-support';
 import {
+  getEncoderSelectOptions,
+  getEncoderSelectValue,
+  getOriginalImageOptionLabel,
+} from './encoder-select-state';
+import {
   canImportSavedSideSettings,
   getSavedSideSettingsAvailability,
 } from './saved-settings-state';
@@ -290,15 +295,15 @@ export default class Options extends Component<Props, State> {
         <section class={`${style.optionOneCell} ${style.optionsSection}`}>
           {supportedEncoderMap ? (
             <Select
-              value={encoderState ? encoderState.type : 'identity'}
+              value={getEncoderSelectValue(encoderState)}
               onChange={this.onEncoderTypeChange}
               large
             >
-              <option value="identity">{`Original Image ${
-                this.props.source ? `(${this.props.source.file.name})` : ''
-              }`}</option>
-              {Object.entries(supportedEncoderMap).map(([type, encoder]) => (
-                <option value={type}>{encoder.meta.label}</option>
+              <option value="identity">
+                {getOriginalImageOptionLabel(source)}
+              </option>
+              {getEncoderSelectOptions(supportedEncoderMap).map((option) => (
+                <option value={option.value}>{option.label}</option>
               ))}
             </Select>
           ) : (

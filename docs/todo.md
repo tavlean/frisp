@@ -96,6 +96,7 @@ This list is ordered by priority. Do the high-priority items before building new
     - Single-image saved-settings save/import feedback actions now come from pure helpers instead of inline Preact component branches.
     - Single-image side-copy feedback now comes from a pure helper instead of inline Preact component snackbar options.
     - Single-image processing error messages now come from a pure helper instead of inline Preact component strings.
+    - Single-image encoder dropdown value, original-image label, and supported option list now come from a pure helper instead of inline Preact render logic.
     - Processor enabled toggles and option merges now go through pure helpers instead of direct option-panel path updates.
     - Orientation-change resize updates for both sides now go through a pure helper instead of inline Preact component mapping.
     - Single-image preprocessor-change state updates now go through a pure helper instead of inline Preact component logic.
@@ -177,6 +178,7 @@ This list is ordered by priority. Do the high-priority items before building new
     - Single-image display-state tests now cover the composed output/result render model consumed by the editor.
     - Single-image side-copy tests now cover side index lookup, feedback action data, and blob URL regeneration when copying one side to the other.
     - Single-image processing error tests now cover source decode, preprocessing, and side processing messages.
+    - Single-image encoder select tests now cover identity/WebP values, original-image filename labels, and supported encoder option mapping.
     - Single-image side-state tests now cover saved-settings import while preserving live output fields for undo.
     - Single-image side-state tests now cover default side setup, paired initial sides, and saved initial side overrides.
     - Single-image side-state tests now cover loading transitions, intermediate processed output, final encoded output, and old blob URL revocation.
