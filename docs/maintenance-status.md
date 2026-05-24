@@ -156,6 +156,7 @@ Latest verification run:
 - Latest observed GitHub Actions state after MIME sniffing coverage and TIFF sniffing cleanup: `eae6859` passed on Ubuntu, Windows, and macOS.
 - Latest observed GitHub Actions state after AVIF MIME sniffing cleanup: `51553da` passed on Ubuntu, Windows, and macOS.
 - Latest observed GitHub Actions state after async bulk import MIME sniffing support: `bbdb8ea` passed on Ubuntu, Windows, and macOS.
+- Latest observed GitHub Actions state after bulk runner no-op and reserved export name cleanup: `b7d0f3b` passed on Ubuntu, Windows, and macOS.
 - `npm run serve` wrapper: launched successfully on port 55194.
 - Browser production-preview smoke: passed after shared image pipeline extraction; app shell, Sqush logo, and drop target rendered.
 - Playwright CLI production-build smoke: passed after the Sqush rename, with `Sqush` title, file input present, Sqush logo alt text present, and zero console messages.
