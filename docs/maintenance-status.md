@@ -137,6 +137,7 @@ Latest verification run:
 - Latest observed GitHub Actions state after saved-settings storage refactor: `68d03b4` passed on Ubuntu, Windows, and macOS.
 - Latest observed GitHub Actions state after latest handoff update: `ae72c6c` passed on Ubuntu, Windows, and macOS.
 - Latest observed GitHub Actions state after saved-settings browser smoke: `bc78e14` passed on Ubuntu, Windows, and macOS.
+- Latest observed GitHub Actions state after Node type alignment: `b66bda1` passed on Ubuntu, Windows, and macOS.
 - `npm run serve` wrapper: launched successfully on port 55194.
 - Browser production-preview smoke: passed after shared image pipeline extraction; app shell, Sqush logo, and drop target rendered.
 - Playwright CLI production-build smoke: passed after the Sqush rename, with `Sqush` title, file input present, Sqush logo alt text present, and zero console messages.
