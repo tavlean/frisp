@@ -1,8 +1,14 @@
 import { cleanMerge, cleanSet } from '../util/clean-modify';
 import { defaultProcessorState, encoderMap } from '../feature-meta';
+import type {
+  EncoderOptions,
+  EncoderType,
+  ProcessorState,
+} from '../feature-meta';
 import type { SavedSideSettings, SideSettings } from './saved-settings';
 
 export type SideIndex = 0 | 1;
+export type SideOutputType = EncoderType | 'identity';
 
 export interface ResettableSideState {
   file?: unknown;
@@ -19,6 +25,10 @@ export interface ResettableTwoSideState<Side extends ResettableSideState> {
 export interface SavedSettingsSide {
   latestSettings: unknown;
   encodedSettings?: unknown;
+}
+
+export interface LatestSettingsSide {
+  latestSettings: SideSettings;
 }
 
 export interface InitialSideState {
@@ -97,4 +107,45 @@ export function applySavedSideSettings<Side extends SavedSettingsSide>(
     }),
     oldSide,
   };
+}
+
+export function setSideEncoderType<Side extends LatestSettingsSide>(
+  sides: [Side, Side],
+  index: SideIndex,
+  newType: SideOutputType,
+): [Side, Side] {
+  return cleanSet(
+    sides,
+    `${index}.latestSettings.encoderState`,
+    newType === 'identity'
+      ? undefined
+      : {
+          type: newType,
+          options: encoderMap[newType].meta.defaultOptions,
+        },
+  );
+}
+
+export function setSideEncoderOptions<Side extends LatestSettingsSide>(
+  sides: [Side, Side],
+  index: SideIndex,
+  options: EncoderOptions,
+): [Side, Side] {
+  return cleanSet(
+    sides,
+    `${index}.latestSettings.encoderState.options`,
+    options,
+  );
+}
+
+export function setSideProcessorState<Side extends LatestSettingsSide>(
+  sides: [Side, Side],
+  index: SideIndex,
+  processorState: ProcessorState,
+): [Side, Side] {
+  return cleanSet(
+    sides,
+    `${index}.latestSettings.processorState`,
+    processorState,
+  );
 }

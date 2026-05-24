@@ -46,6 +46,9 @@ import {
   applySavedSideSettings,
   getInitialSideState,
   resetSidesForNewSourceData,
+  setSideEncoderOptions,
+  setSideEncoderType,
+  setSideProcessorState,
   type SideIndex,
 } from './side-state';
 import {
@@ -144,16 +147,7 @@ export default class Compress extends Component<Props, State> {
 
   private onEncoderTypeChange = (index: 0 | 1, newType: OutputType): void => {
     this.setState({
-      sides: cleanSet(
-        this.state.sides,
-        `${index}.latestSettings.encoderState`,
-        newType === 'identity'
-          ? undefined
-          : {
-              type: newType,
-              options: encoderMap[newType].meta.defaultOptions,
-            },
-      ),
+      sides: setSideEncoderType(this.state.sides, index, newType),
     });
   };
 
@@ -162,11 +156,7 @@ export default class Compress extends Component<Props, State> {
     options: ProcessorState,
   ): void => {
     this.setState({
-      sides: cleanSet(
-        this.state.sides,
-        `${index}.latestSettings.processorState`,
-        options,
-      ),
+      sides: setSideProcessorState(this.state.sides, index, options),
     });
   };
 
@@ -175,11 +165,7 @@ export default class Compress extends Component<Props, State> {
     options: EncoderOptions,
   ): void => {
     this.setState({
-      sides: cleanSet(
-        this.state.sides,
-        `${index}.latestSettings.encoderState.options`,
-        options,
-      ),
+      sides: setSideEncoderOptions(this.state.sides, index, options),
     });
   };
 
