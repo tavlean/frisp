@@ -106,6 +106,7 @@ This list is ordered by priority. Do the high-priority items before building new
     - Bulk action-state tests now cover process, retry, cancel, queued, active, and incomplete command flags.
     - Bulk session mutation tests now cover drift-tolerant remove/export counter normalization.
     - Bulk import tests now cover injected MIME sniffing for extensionless, misnamed, rejected, and unreadable image files.
+    - Bulk import tests now cover structured rejection reasons for unsupported and unreadable files.
     - Bulk import tests now cover creating a bulk session from accepted import jobs while ignoring rejected files.
     - Bulk runner tests now cover no-op runs when no jobs are runnable or concurrency is zero.
     - Bulk runner tests now cover draining the full queue across multiple concurrency-limited batches.

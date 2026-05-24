@@ -2,9 +2,17 @@ import { createBulkSession, createImageJob } from './session';
 import type { BulkSession, ImageJob } from './session';
 import type { BulkImageSettings } from './settings';
 
+export type BulkImportRejectionReason = 'unsupported-type' | 'unreadable';
+
+export interface BulkImportRejection {
+  file: File;
+  reason: BulkImportRejectionReason;
+}
+
 export interface BulkImportResult {
   accepted: ImageJob[];
   rejected: File[];
+  rejections: BulkImportRejection[];
 }
 
 export interface BulkImportSummary {
@@ -51,10 +59,12 @@ export function createImageJobId(file: File, index: number): string {
 export function createImageJobs(files: Iterable<File>): BulkImportResult {
   const accepted: ImageJob[] = [];
   const rejected: File[] = [];
+  const rejections: BulkImportRejection[] = [];
 
   for (const file of files) {
     if (!isSupportedBulkImage(file)) {
       rejected.push(file);
+      rejections.push({ file, reason: 'unsupported-type' });
       continue;
     }
 
@@ -63,7 +73,7 @@ export function createImageJobs(files: Iterable<File>): BulkImportResult {
     );
   }
 
-  return { accepted, rejected };
+  return { accepted, rejected, rejections };
 }
 
 export async function createImageJobsWithMimeSniffing(
@@ -72,6 +82,7 @@ export async function createImageJobsWithMimeSniffing(
 ): Promise<BulkImportResult> {
   const accepted: ImageJob[] = [];
   const rejected: File[] = [];
+  const rejections: BulkImportRejection[] = [];
 
   for (const file of files) {
     if (isSupportedBulkImage(file)) {
@@ -86,11 +97,13 @@ export async function createImageJobsWithMimeSniffing(
       detectedType = await sniffMimeType(file);
     } catch (err) {
       rejected.push(file);
+      rejections.push({ file, reason: 'unreadable' });
       continue;
     }
 
     if (!detectedType.startsWith('image/')) {
       rejected.push(file);
+      rejections.push({ file, reason: 'unsupported-type' });
       continue;
     }
 
@@ -99,7 +112,7 @@ export async function createImageJobsWithMimeSniffing(
     );
   }
 
-  return { accepted, rejected };
+  return { accepted, rejected, rejections };
 }
 
 export function getBulkImportSummary(
