@@ -1,3 +1,4 @@
+import { getFileNameParts, getSafeFileNameBase } from '../output-filename';
 import { markJobsExported } from './session';
 import type { BulkSession, ImageJob } from './session';
 import { isJobOutputStale } from './queue';
@@ -45,43 +46,11 @@ export interface BulkExportPlan {
   summary: BulkExportSummary;
 }
 
-function splitFileName(fileName: string): {
-  baseName: string;
-  extension: string;
-} {
-  const normalizedName = fileName.trim() || 'image';
-  const lastDot = normalizedName.lastIndexOf('.');
-  if (lastDot <= 0 || lastDot === normalizedName.length - 1) {
-    return {
-      baseName: normalizedName,
-      extension: '',
-    };
-  }
-  return {
-    baseName: normalizedName.slice(0, lastDot),
-    extension: normalizedName.slice(lastDot + 1),
-  };
-}
-
-function sanitizeFileNamePart(value: string): string {
-  const sanitized = value
-    .replace(/[\\/:*?"<>|\x00-\x1f]+/g, '-')
-    .replace(/\s+/g, ' ')
-    .replace(/-+/g, '-')
-    .replace(/\s*-\s*/g, '-')
-    .replace(/^[\s.-]+|[\s.-]+$/g, '')
-    .trim();
-  if (/^(con|prn|aux|nul|com[1-9]|lpt[1-9])$/i.test(sanitized)) {
-    return `${sanitized}-file`;
-  }
-  return sanitized;
-}
-
 function createDuplicateSafeName(
   fileName: string,
   knownNames: Set<string>,
 ): string {
-  const { baseName, extension } = splitFileName(fileName);
+  const { baseName, extension } = getFileNameParts(fileName);
   let suffix = 1;
   let candidate = fileName;
 
@@ -232,15 +201,15 @@ export function getBulkOutputSummary(session: BulkSession): BulkOutputSummary {
 }
 
 export function getBulkExportName(session: BulkSession): string {
-  const safeSessionName = sanitizeFileNamePart(session.id) || 'sqush-bulk';
+  const safeSessionName = getSafeFileNameBase(session.id, 'sqush-bulk');
   return `${safeSessionName}-optimized`;
 }
 
 export function getBulkOutputFileName(job: ImageJob): string {
-  const { baseName } = splitFileName(job.sourceFile.name);
+  const { baseName } = getFileNameParts(job.sourceFile.name);
   const outputName = job.output?.file.name ?? '';
-  const { extension } = splitFileName(outputName);
-  const safeBaseName = sanitizeFileNamePart(baseName) || 'image';
+  const { extension } = getFileNameParts(outputName);
+  const safeBaseName = getSafeFileNameBase(baseName);
   return extension ? `${safeBaseName}.${extension}` : safeBaseName;
 }
 
