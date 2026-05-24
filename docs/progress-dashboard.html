@@ -540,7 +540,7 @@
               </svg>
               Current work
             </span>
-            <strong>custom element observer cleanup</strong>
+            <strong>custom element listener cleanup</strong>
           </div>
           <div class="meta-row">
             <span class="meta-label">
@@ -975,6 +975,10 @@
                     <li>
                       Preview and options custom elements now disconnect child
                       observers when they leave the DOM.
+                    </li>
+                    <li>
+                      Preview and range custom elements now clear removable
+                      listeners and pending animation frames on disconnect.
                     </li>
                     <li>
                       Stateless checkbox, toggle, select, and revealer option

@@ -94,6 +94,7 @@ export default class PinchZoom extends HTMLElement {
   private readonly _childrenObserver = new MutationObserver(() =>
     this._stageElChange(),
   );
+  private readonly _onWheelBound = (event: WheelEvent) => this._onWheel(event);
 
   constructor() {
     super();
@@ -120,19 +121,19 @@ export default class PinchZoom extends HTMLElement {
       // https://bugs.webkit.org/show_bug.cgi?id=220196
       avoidPointerEvents: isSafari,
     });
-
-    this.addEventListener('wheel', (event) => this._onWheel(event));
   }
 
   connectedCallback() {
     // Watch for children changes. This won't fire for initial contents,
     // so _stageElChange is also called below.
     this._childrenObserver.observe(this, { childList: true });
+    this.addEventListener('wheel', this._onWheelBound);
     this._stageElChange();
   }
 
   disconnectedCallback() {
     this._childrenObserver.disconnect();
+    this.removeEventListener('wheel', this._onWheelBound);
   }
 
   get x() {

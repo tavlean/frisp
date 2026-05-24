@@ -37,6 +37,7 @@ export default class TwoUp extends HTMLElement {
   private readonly _childrenObserver = new MutationObserver(() =>
     this._childrenChange(),
   );
+  private _resetPositionFrame = 0;
   private _resizeObserver?: ResizeObserver;
 
   constructor() {
@@ -90,6 +91,8 @@ export default class TwoUp extends HTMLElement {
 
   disconnectedCallback() {
     this._childrenObserver.disconnect();
+    cancelAnimationFrame(this._resetPositionFrame);
+    this._resetPositionFrame = 0;
     window.removeEventListener('keydown', this._onKeyDown);
     if (this._resizeObserver) this._resizeObserver.disconnect();
   }
@@ -130,7 +133,9 @@ export default class TwoUp extends HTMLElement {
 
   private _resetPosition() {
     // Set the initial position of the handle.
-    requestAnimationFrame(() => {
+    cancelAnimationFrame(this._resetPositionFrame);
+    this._resetPositionFrame = requestAnimationFrame(() => {
+      this._resetPositionFrame = 0;
       const bounds = this.getBoundingClientRect();
       const dimensionAxis =
         this.orientation === 'vertical' ? 'height' : 'width';

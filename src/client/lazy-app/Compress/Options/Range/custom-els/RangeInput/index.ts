@@ -29,6 +29,7 @@ class RangeInputElement extends HTMLElement {
   private _input: HTMLInputElement;
   private _valueDisplay?: HTMLSpanElement;
   private _ignoreChange = false;
+  private _activePointer?: number;
 
   static get observedAttributes() {
     return REFLECTED_ATTRIBUTES;
@@ -40,23 +41,8 @@ class RangeInputElement extends HTMLElement {
     this._input.type = 'range';
     this._input.className = style.input;
 
-    let activePointer: number | undefined;
-
     // Not using pointer-tracker here due to https://bugs.webkit.org/show_bug.cgi?id=219636.
-    this.addEventListener('pointerdown', (event) => {
-      if (activePointer) return;
-      activePointer = event.pointerId;
-      this._input.classList.add(style.touchActive);
-      const pointerUp = (event: PointerEvent) => {
-        if (event.pointerId !== activePointer) return;
-        activePointer = undefined;
-        this._input.classList.remove(style.touchActive);
-        window.removeEventListener('pointerup', pointerUp);
-        window.removeEventListener('pointercancel', pointerUp);
-      };
-      window.addEventListener('pointerup', pointerUp);
-      window.addEventListener('pointercancel', pointerUp);
-    });
+    this.addEventListener('pointerdown', this._onPointerDown);
 
     for (const event of RETARGETED_EVENTS) {
       this._input.addEventListener(event, this._retargetEvent, true);
@@ -81,6 +67,10 @@ class RangeInputElement extends HTMLElement {
     ) as HTMLSpanElement;
     // Set inline styles (this is useful when used with frameworks which might clear inline styles)
     this._update();
+  }
+
+  disconnectedCallback() {
+    this._clearActivePointer();
   }
 
   get labelPrecision(): string {
@@ -111,6 +101,27 @@ class RangeInputElement extends HTMLElement {
     const retargetted = new Event(event.type, event);
     this.dispatchEvent(retargetted);
   };
+
+  private _onPointerDown = (event: PointerEvent) => {
+    if (this._activePointer !== undefined) return;
+    this._activePointer = event.pointerId;
+    this._input.classList.add(style.touchActive);
+    window.addEventListener('pointerup', this._onPointerUp);
+    window.addEventListener('pointercancel', this._onPointerUp);
+  };
+
+  private _onPointerUp = (event: PointerEvent) => {
+    if (event.pointerId !== this._activePointer) return;
+    this._clearActivePointer();
+  };
+
+  private _clearActivePointer() {
+    if (this._activePointer === undefined) return;
+    this._activePointer = undefined;
+    this._input.classList.remove(style.touchActive);
+    window.removeEventListener('pointerup', this._onPointerUp);
+    window.removeEventListener('pointercancel', this._onPointerUp);
+  }
 
   private _getDisplayValue(value: number): string {
     if (value >= 10000) return (value / 1000).toFixed(1) + 'k';
