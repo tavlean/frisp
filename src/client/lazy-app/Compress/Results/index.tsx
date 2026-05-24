@@ -8,6 +8,7 @@ import {
   getInitialResultLoadingState,
   getResultLoadingEffect,
 } from './loading-state';
+import { getResultDownloadState } from './download-state';
 import { getResultSizeState } from './size-state';
 import { Arrow, DownloadIcon } from 'client/lazy-app/icons';
 
@@ -58,13 +59,22 @@ export default class Results extends Component<Props, State> {
     { showLoadingState }: State,
   ) {
     const sizeState = getResultSizeState(source, imageFile);
+    const downloadState = getResultDownloadState(
+      flipSide,
+      sizeState.isOriginal,
+      showLoadingState,
+      downloadUrl,
+      imageFile,
+    );
 
     return (
       <div
         class={
-          (flipSide ? style.resultsRight : style.resultsLeft) +
+          (downloadState.side === 'right'
+            ? style.resultsRight
+            : style.resultsLeft) +
           ' ' +
-          (sizeState.isOriginal ? style.isOriginal : '')
+          (downloadState.isOriginal ? style.isOriginal : '')
         }
       >
         <div class={style.expandArrow}>
@@ -106,9 +116,11 @@ export default class Results extends Component<Props, State> {
           </div>
         </div>
         <a
-          class={showLoadingState ? style.downloadDisable : style.download}
-          href={downloadUrl}
-          download={imageFile ? imageFile.name : ''}
+          class={
+            downloadState.disabled ? style.downloadDisable : style.download
+          }
+          href={downloadState.href}
+          download={downloadState.downloadName}
           title="Download"
         >
           <svg class={style.downloadBlobs} viewBox="0 0 89.6 86.9">

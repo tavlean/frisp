@@ -100,6 +100,7 @@ This list is ordered by priority. Do the high-priority items before building new
     - Single-image processor control parsing and resize input state now come from a pure helper instead of inline Preact option logic.
     - Single-image result size, original-output detection, percent, and direction display state now come from a pure helper instead of inline Preact result logic.
     - Single-image result loading lifecycle decisions now come from a pure helper instead of inline Preact result lifecycle branching.
+    - Single-image result side/download link display state now comes from a pure helper instead of inline Preact result JSX.
     - Processor enabled toggles and option merges now go through pure helpers instead of direct option-panel path updates.
     - Orientation-change resize updates for both sides now go through a pure helper instead of inline Preact component mapping.
     - Single-image preprocessor-change state updates now go through a pure helper instead of inline Preact component logic.
@@ -185,6 +186,7 @@ This list is ordered by priority. Do the high-priority items before building new
     - Single-image processor control tests now cover resize/quantize control parsing, default resize option inputs, and vector resize option inputs.
     - Single-image result size tests now cover empty, original, smaller, and larger output display states.
     - Single-image result loading tests now cover initial loading state plus hide, delayed-show, and no-op transitions.
+    - Single-image result download tests now cover empty original left output and disabled right-side blob output.
     - Single-image side-state tests now cover saved-settings import while preserving live output fields for undo.
     - Single-image side-state tests now cover default side setup, paired initial sides, and saved initial side overrides.
     - Single-image side-state tests now cover loading transitions, intermediate processed output, final encoded output, and old blob URL revocation.
