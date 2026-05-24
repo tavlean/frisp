@@ -117,6 +117,7 @@ This list is ordered by priority. Do the high-priority items before building new
     - Editor copy/import undo snackbar callbacks now guard against post-unmount state updates.
     - Editor processing error callbacks now guard against post-unmount snackbar and state updates.
     - Worker bridges now expose explicit disposal and the editor disposes them on unmount after aborting active work.
+    - Option expander transition completion now uses a tested state helper and skips post-unmount updates.
     - Initial app file-drop custom element handler typing now uses `void` instead of `any`.
     - Single-image active job completion bookkeeping now goes through pure helpers instead of direct Preact component field mutation.
     - Single-image work-start scheduling now goes through a pure helper instead of inline Preact component logic.

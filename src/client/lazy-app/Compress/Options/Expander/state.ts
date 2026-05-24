@@ -19,3 +19,7 @@ export function getExpanderDerivedState(
 
   return null;
 }
+
+export function getExpanderTransitionCompleteState(): Partial<ExpanderState> {
+  return { outgoingChildren: undefined };
+}

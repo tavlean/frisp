@@ -540,7 +540,7 @@
               </svg>
               Current work
             </span>
-            <strong>worker bridge dispose cleanup</strong>
+            <strong>expander transition cleanup</strong>
           </div>
           <div class="meta-row">
             <span class="meta-label">
@@ -967,6 +967,10 @@
                       Worker bridges now expose explicit disposal, and the
                       editor disposes them on unmount after aborting active
                       work.
+                    </li>
+                    <li>
+                      Option expander transition completion now uses a tested
+                      state helper and skips post-unmount updates.
                     </li>
                     <li>
                       Stateless checkbox, toggle, select, and revealer option

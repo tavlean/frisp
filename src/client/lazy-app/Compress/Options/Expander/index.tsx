@@ -2,7 +2,11 @@ import { h, Component, ComponentChild, ComponentChildren } from 'preact';
 import * as style from './style.css';
 import 'add-css:./style.css';
 import { transitionHeight } from '../../../util';
-import { getExpanderDerivedState, type ExpanderState } from './state';
+import {
+  getExpanderDerivedState,
+  getExpanderTransitionCompleteState,
+  type ExpanderState,
+} from './state';
 
 interface Props {
   children: ComponentChildren;
@@ -10,6 +14,8 @@ interface Props {
 type State = ExpanderState;
 
 export default class Expander extends Component<Props, State> {
+  private isUnmounted = false;
+
   static getDerivedStateFromProps(
     props: Props,
     state: State,
@@ -39,11 +45,17 @@ export default class Expander extends Component<Props, State> {
       to: heightTo,
     });
 
+    if (this.isUnmounted) return;
+
     // Unset the height & overflow, so element changes do the right thing.
     (this.base as HTMLElement).style.height = '';
     (this.base as HTMLElement).style.overflow = '';
 
-    this.setState({ outgoingChildren: undefined });
+    this.setState(getExpanderTransitionCompleteState());
+  }
+
+  componentWillUnmount(): void {
+    this.isUnmounted = true;
   }
 
   render({}: Props, { children, outgoingChildren }: State) {
