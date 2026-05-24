@@ -58,6 +58,11 @@ export interface ImageWorkAbortPlan {
   sides: boolean[];
 }
 
+export interface ActiveImageJobs {
+  mainJob?: MainJobState;
+  sideJobs: readonly (SideJobState | undefined)[];
+}
+
 export interface SideEncodingResult {
   processed?: ImageData;
   data: ImageData;
@@ -228,6 +233,18 @@ export function getImageWorkAbortPlan(
   return {
     main: Boolean(workStarts.mainJobState),
     sides: workStarts.sideJobStates.map(Boolean),
+  };
+}
+
+export function getActiveImageJobsAfterStarts(
+  activeJobs: ActiveImageJobs,
+  workStarts: ImageWorkStarts,
+): ActiveImageJobs {
+  return {
+    mainJob: workStarts.mainJobState || activeJobs.mainJob,
+    sideJobs: activeJobs.sideJobs.map(
+      (sideJob, index) => workStarts.sideJobStates[index] || sideJob,
+    ),
   };
 }
 

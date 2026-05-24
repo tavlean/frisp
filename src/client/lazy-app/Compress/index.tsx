@@ -63,6 +63,7 @@ import {
 } from './source-state';
 import { getImageProcessingErrorMessage } from './processing-errors';
 import {
+  getActiveImageJobsAfterStarts,
   getImageWorkAbortPlan,
   getSideJobCacheEntry,
   getSideJobEncodedResult,
@@ -343,16 +344,23 @@ export default class Compress extends Component<Props, State> {
 
     // Abort running tasks & cycle the controllers
     const abortPlan = getImageWorkAbortPlan(workStarts);
+    const activeJobs = getActiveImageJobsAfterStarts(
+      {
+        mainJob: this.activeMainJob,
+        sideJobs: this.activeSideJobs,
+      },
+      workStarts,
+    );
     if (abortPlan.main) {
       this.mainAbortController.abort();
       this.mainAbortController = new AbortController();
-      this.activeMainJob = workStarts.mainJobState!;
     }
-    for (const [i, sideJobState] of workStarts.sideJobStates.entries()) {
-      if (abortPlan.sides[i]) {
+    this.activeMainJob = activeJobs.mainJob;
+    for (const [i, shouldAbort] of abortPlan.sides.entries()) {
+      if (shouldAbort) {
         this.sideAbortControllers[i].abort();
         this.sideAbortControllers[i] = new AbortController();
-        this.activeSideJobs[i] = sideJobState!;
+        this.activeSideJobs[i] = activeJobs.sideJobs[i];
       }
     }
 

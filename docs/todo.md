@@ -173,7 +173,7 @@ This list is ordered by priority. Do the high-priority items before building new
     - Bulk session summary tests now cover progress, selected-job context, action state, queue state, override totals, output totals, and export readiness from one pure selector.
     - Bulk selected-job detail tests now cover effective settings, output state, override paths, and missing selections.
     - Result-cache tests now cover cache hits, mismatched image data, mismatched encoder options, and mismatched processor options.
-    - Single-image work-plan tests now cover no-op decisions, first decode/preprocess work, original-to-encoded transitions, encoder-only updates, planned image work assembly, active-job precedence, work-start scheduling, work abort planning, side job execution planning, side encode planning, and side result/cache assembly.
+    - Single-image work-plan tests now cover no-op decisions, first decode/preprocess work, original-to-encoded transitions, encoder-only updates, planned image work assembly, active-job precedence, work-start scheduling, active job bookkeeping, work abort planning, side job execution planning, side encode planning, and side result/cache assembly.
     - Single-image source-state tests now cover default raster and vector resize settings for newly decoded source images.
     - Single-image source-state tests now cover applying default resize settings to both comparison sides without mutating the old side state.
     - Single-image source-state tests now cover orientation-change detection and resize width/height swapping after rotation.
