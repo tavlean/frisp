@@ -14,7 +14,7 @@ Project homepage metadata: `https://sqush.app`.
 
 Old fork: `tavlean/SquooshPlus`, archived and kept as historical reference.
 
-Working tree at last update: bulk runner no-op behavior for empty runnable sets and zero concurrency added and locally verified. Run `git status --short --branch` for the exact state.
+Working tree at last update: bulk export names now avoid Windows reserved device names and are locally verified. Run `git status --short --branch` for the exact state.
 
 Latest recent committed work at last update:
 
@@ -127,6 +127,7 @@ Latest verification run:
 - `npm run check`: passed after making async bulk import MIME sniffing reject unreadable files without failing the whole batch.
 - `npm run check`: passed after making the bulk runner return the session unchanged when no jobs are runnable, even if no worker bridge is available.
 - `npm run check`: passed after adding explicit zero-concurrency no-op coverage for the bulk runner.
+- `npm run check`: passed after hardening bulk export names against Windows reserved device names.
 - `npm run build && npm run smoke:build`: passed.
 - `npm run test:helpers`: passed.
 - `npm run check`: passed after CI matrix diagnostics.
@@ -234,6 +235,7 @@ Quick investigation note:
 - Hardened async bulk import MIME sniffing so one unreadable file is rejected without aborting the whole batch.
 - Hardened the bulk runner so empty runnable sets are no-ops and do not require worker bridge availability.
 - Added explicit bulk runner coverage for zero-concurrency no-op scheduling.
+- Hardened bulk export filename sanitization so Windows reserved device names such as `CON` and `LPT1` are not emitted directly.
 - Replaced avoidable `any` usage and optional Promise entries in service-worker cache cleanup and shared ref utilities.
 - Added framework-neutral bulk settings, session, import, queue, and stale-output helpers.
 - Hardened bulk session construction so initial active and exported jobs derive matching counters.

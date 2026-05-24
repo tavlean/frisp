@@ -56,13 +56,17 @@ function splitFileName(fileName: string): {
 }
 
 function sanitizeFileNamePart(value: string): string {
-  return value
+  const sanitized = value
     .replace(/[\\/:*?"<>|\x00-\x1f]+/g, '-')
     .replace(/\s+/g, ' ')
     .replace(/-+/g, '-')
     .replace(/\s*-\s*/g, '-')
     .replace(/^[\s.-]+|[\s.-]+$/g, '')
     .trim();
+  if (/^(con|prn|aux|nul|com[1-9]|lpt[1-9])$/i.test(sanitized)) {
+    return `${sanitized}-file`;
+  }
+  return sanitized;
 }
 
 function createDuplicateSafeName(

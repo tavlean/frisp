@@ -99,6 +99,7 @@ This list is ordered by priority. Do the high-priority items before building new
     - Bulk helper tests now cover settings merge/hash behavior, session changes, queue stale detection, and export summaries.
     - Bulk import tests now cover injected MIME sniffing for extensionless, misnamed, rejected, and unreadable image files.
     - Bulk runner tests now cover no-op runs when no jobs are runnable or concurrency is zero.
+    - Bulk export tests now cover Windows reserved output names.
     - Result-cache tests now cover cache hits, mismatched image data, mismatched encoder options, and mismatched processor options.
     - MIME sniffing tests now cover PNG, JPEG, WebP, TIFF, AVIF, JPEG XL, unknown data, a TIFF false-positive guard, and a non-AVIF `ftyp` guard.
     - `npm run test:unit` runs the current pure-helper test suite.
