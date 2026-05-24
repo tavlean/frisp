@@ -44,7 +44,13 @@ export interface ImageWorkState {
 export interface PlannedImageWork {
   mainJobState: MainJobState;
   sideJobStates: SideJobState[];
+  workStarts: ImageWorkStarts;
   workPlan: ImageWorkPlan;
+}
+
+export interface ImageWorkStarts {
+  mainJobState?: MainJobState;
+  sideJobStates: (SideJobState | undefined)[];
 }
 
 export function getLatestMainJobState(
@@ -136,6 +142,24 @@ export function getImageWorkPlan(
   };
 }
 
+export function getImageWorkStarts(
+  workPlan: ImageWorkPlan,
+  mainJobState: MainJobState,
+  sideJobStates: readonly SideJobState[],
+): ImageWorkStarts {
+  return {
+    mainJobState:
+      workPlan.needsDecoding || workPlan.needsPreprocessing
+        ? mainJobState
+        : undefined,
+    sideJobStates: workPlan.sideWorksNeeded.map((sideWorkNeeded, index) =>
+      sideWorkNeeded.processing || sideWorkNeeded.encoding
+        ? sideJobStates[index]
+        : undefined,
+    ),
+  };
+}
+
 export function getPlannedImageWork(
   activeMainJob: MainJobState | undefined,
   activeSideJobs: readonly (SideJobState | undefined)[],
@@ -153,15 +177,17 @@ export function getPlannedImageWork(
   );
   const mainJobState = getMainJobState(sourceFile, state.preprocessorState);
   const sideJobStates = getSideJobStates(state.sides);
+  const workPlan = getImageWorkPlan(
+    latestMainJobState,
+    mainJobState,
+    latestSideJobStates,
+    sideJobStates,
+  );
 
   return {
     mainJobState,
     sideJobStates,
-    workPlan: getImageWorkPlan(
-      latestMainJobState,
-      mainJobState,
-      latestSideJobStates,
-      sideJobStates,
-    ),
+    workStarts: getImageWorkStarts(workPlan, mainJobState, sideJobStates),
+    workPlan,
   };
 }

@@ -332,24 +332,25 @@ export default class Compress extends Component<Props, State> {
   private async updateImage() {
     const currentState = this.state;
 
-    const { mainJobState, sideJobStates, workPlan } = getPlannedImageWork(
-      this.activeMainJob,
-      this.activeSideJobs,
-      this.sourceFile,
-      currentState,
-    );
+    const { mainJobState, sideJobStates, workPlan, workStarts } =
+      getPlannedImageWork(
+        this.activeMainJob,
+        this.activeSideJobs,
+        this.sourceFile,
+        currentState,
+      );
 
     // Abort running tasks & cycle the controllers
-    if (workPlan.needsDecoding || workPlan.needsPreprocessing) {
+    if (workStarts.mainJobState) {
       this.mainAbortController.abort();
       this.mainAbortController = new AbortController();
-      this.activeMainJob = mainJobState;
+      this.activeMainJob = workStarts.mainJobState;
     }
-    for (const [i, sideWorkNeeded] of workPlan.sideWorksNeeded.entries()) {
-      if (sideWorkNeeded.processing || sideWorkNeeded.encoding) {
+    for (const [i, sideJobState] of workStarts.sideJobStates.entries()) {
+      if (sideJobState) {
         this.sideAbortControllers[i].abort();
         this.sideAbortControllers[i] = new AbortController();
-        this.activeSideJobs[i] = sideJobStates[i];
+        this.activeSideJobs[i] = sideJobState;
       }
     }
 

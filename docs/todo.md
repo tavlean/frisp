@@ -95,6 +95,7 @@ This list is ordered by priority. Do the high-priority items before building new
     - Orientation-change resize updates for both sides now go through a pure helper instead of inline Preact component mapping.
     - Single-image preprocessor-change state updates now go through a pure helper instead of inline Preact component logic.
     - Single-image current/latest job-state derivation and work-plan assembly now go through a pure helper instead of inline Preact component logic.
+    - Single-image work-start scheduling now goes through a pure helper instead of inline Preact component logic.
     - No remaining `catched`, `matchMedia().addListener`, or `matchMedia().removeListener` matches were found in `src/`.
     - Removed obsolete TS suppressions from option controls and icon props by using element-specific Preact JSX attribute types.
     - Removed the remaining maintained app/lib `@ts-ignore` by making worker-bridge dispatch explicit.
@@ -144,7 +145,7 @@ This list is ordered by priority. Do the high-priority items before building new
     - Bulk session summary tests now cover progress, selected-job context, action state, queue state, override totals, output totals, and export readiness from one pure selector.
     - Bulk selected-job detail tests now cover effective settings, output state, override paths, and missing selections.
     - Result-cache tests now cover cache hits, mismatched image data, mismatched encoder options, and mismatched processor options.
-    - Single-image work-plan tests now cover no-op decisions, first decode/preprocess work, original-to-encoded transitions, encoder-only updates, planned image work assembly, and active-job precedence.
+    - Single-image work-plan tests now cover no-op decisions, first decode/preprocess work, original-to-encoded transitions, encoder-only updates, planned image work assembly, active-job precedence, and work-start scheduling.
     - Single-image source-state tests now cover default raster and vector resize settings for newly decoded source images.
     - Single-image source-state tests now cover applying default resize settings to both comparison sides without mutating the old side state.
     - Single-image source-state tests now cover orientation-change detection and resize width/height swapping after rotation.
