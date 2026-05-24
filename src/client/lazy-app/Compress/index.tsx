@@ -63,6 +63,7 @@ import {
   getPreprocessorChangeState,
 } from './source-state';
 import {
+  getSideEncodingPlan,
   getPlannedImageWork,
   type MainJobState,
   type SideJobState,
@@ -460,72 +461,76 @@ export default class Compress extends Component<Props, State> {
         let file: File;
         let data: ImageData;
         let processed: ImageData | undefined = undefined;
+        const cacheResult = jobState.encoderState
+          ? this.encodeCache.match(
+              source.preprocessed,
+              jobState.processorState,
+              jobState.encoderState,
+            )
+          : undefined;
+        const sidePlan = getSideEncodingPlan({
+          cacheResult,
+          currentProcessed: currentState.sides[sideIndex].processed,
+          jobState,
+          sideWorkNeeded,
+          sourceFile: source.file,
+          sourcePreprocessed: source.preprocessed,
+        });
 
-        // If there's no encoder state, this is "original image", which also
-        // doesn't allow processing.
-        if (!jobState.encoderState) {
-          file = source.file;
-          data = source.preprocessed;
+        if (sidePlan.kind === 'skip') return;
+
+        if (sidePlan.kind === 'original' || sidePlan.kind === 'cache') {
+          ({ file, processed, data } = sidePlan.result);
         } else {
-          const cacheResult = this.encodeCache.match(
-            source.preprocessed,
-            jobState.processorState,
-            jobState.encoderState,
-          );
+          // Set loading state for this side
+          this.setState((currentState) => {
+            if (signal.aborted) return {};
+            return {
+              sides: setSideLoading(currentState.sides, sideIndex, true),
+            };
+          });
 
-          if (cacheResult) {
-            ({ file, processed, data } = cacheResult);
-          } else {
-            // Set loading state for this side
+          if (sidePlan.needsProcessing) {
+            processed = await processImage(
+              signal,
+              source,
+              sidePlan.processorState,
+              workerBridge,
+            );
+
+            // Update state for process completion, including intermediate render
             this.setState((currentState) => {
               if (signal.aborted) return {};
               return {
-                sides: setSideLoading(currentState.sides, sideIndex, true),
+                sides: setSideProcessedResult(
+                  currentState.sides,
+                  sideIndex,
+                  processed,
+                  sidePlan.processorState,
+                ),
               };
             });
-
-            if (sideWorkNeeded.processing) {
-              processed = await processImage(
-                signal,
-                source,
-                jobState.processorState,
-                workerBridge,
-              );
-
-              // Update state for process completion, including intermediate render
-              this.setState((currentState) => {
-                if (signal.aborted) return {};
-                return {
-                  sides: setSideProcessedResult(
-                    currentState.sides,
-                    sideIndex,
-                    processed,
-                    jobState.processorState,
-                  ),
-                };
-              });
-            } else {
-              processed = currentState.sides[sideIndex].processed!;
-            }
-
-            file = await compressImage(
-              signal,
-              processed,
-              jobState.encoderState,
-              source.file.name,
-              workerBridge,
-            );
-            data = await decodeImage(signal, file, workerBridge);
-
-            this.encodeCache.add({
-              data,
-              processed,
-              file,
-              preprocessed: source.preprocessed,
-              encoderState: jobState.encoderState,
-              processorState: jobState.processorState,
-            });
+          } else {
+            processed = sidePlan.processed!;
           }
+
+          file = await compressImage(
+            signal,
+            processed,
+            sidePlan.encoderState,
+            source.file.name,
+            workerBridge,
+          );
+          data = await decodeImage(signal, file, workerBridge);
+
+          this.encodeCache.add({
+            data,
+            processed,
+            file,
+            preprocessed: source.preprocessed,
+            encoderState: sidePlan.encoderState,
+            processorState: sidePlan.processorState,
+          });
         }
 
         this.setState((currentState) => {

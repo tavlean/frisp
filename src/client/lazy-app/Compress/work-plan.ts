@@ -53,6 +53,33 @@ export interface ImageWorkStarts {
   sideJobStates: (SideJobState | undefined)[];
 }
 
+export interface SideEncodingResult {
+  processed?: ImageData;
+  data: ImageData;
+  file: File;
+}
+
+export type SideEncodingPlan =
+  | { kind: 'skip' }
+  | { kind: 'original'; result: SideEncodingResult }
+  | { kind: 'cache'; result: SideEncodingResult }
+  | {
+      kind: 'encode';
+      encoderState: EncoderState;
+      needsProcessing: boolean;
+      processed?: ImageData;
+      processorState: ProcessorState;
+    };
+
+export interface SideEncodingPlanInput {
+  cacheResult?: SideEncodingResult;
+  currentProcessed?: ImageData;
+  jobState: SideJobState;
+  sideWorkNeeded: SideWorkNeeded;
+  sourceFile: File;
+  sourcePreprocessed: ImageData;
+}
+
 export function getLatestMainJobState(
   activeMainJob: MainJobState | undefined,
   sourceFile: File | undefined,
@@ -157,6 +184,42 @@ export function getImageWorkStarts(
         ? sideJobStates[index]
         : undefined,
     ),
+  };
+}
+
+export function getSideEncodingPlan({
+  cacheResult,
+  currentProcessed,
+  jobState,
+  sideWorkNeeded,
+  sourceFile,
+  sourcePreprocessed,
+}: SideEncodingPlanInput): SideEncodingPlan {
+  if (!sideWorkNeeded.encoding) return { kind: 'skip' };
+
+  if (!jobState.encoderState) {
+    return {
+      kind: 'original',
+      result: {
+        file: sourceFile,
+        data: sourcePreprocessed,
+      },
+    };
+  }
+
+  if (cacheResult) {
+    return {
+      kind: 'cache',
+      result: cacheResult,
+    };
+  }
+
+  return {
+    kind: 'encode',
+    encoderState: jobState.encoderState,
+    needsProcessing: sideWorkNeeded.processing,
+    processed: sideWorkNeeded.processing ? undefined : currentProcessed,
+    processorState: jobState.processorState,
   };
 }
 
