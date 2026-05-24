@@ -116,6 +116,7 @@ This list is ordered by priority. Do the high-priority items before building new
     - Bulk export summary tests now cover already-exported jobs separately from pending jobs.
     - Bulk export summary tests now cover stale exported outputs being treated as pending instead of current exports.
     - Bulk export plan tests now cover selected job subsets, missing IDs, duplicate-safe names, and selected export totals.
+    - Bulk export plan tests now cover marking planned exports complete without marking stale outputs.
     - Bulk export state tests now prevent stale encoded outputs from being marked exported.
     - Bulk snapshot tests now cover metadata-only session snapshots that exclude live blob download URLs and validate serialized snapshot parsing.
     - Bulk snapshot tests now cover restoring metadata-only snapshots as regeneration-ready sessions without stale blob URLs or false exported counts.

@@ -10,6 +10,8 @@ Queue UI should consume the queue-state selector rather than calculating active 
 
 Import UI should create sessions through the import-to-session helper so rejected files are kept out of the live session consistently and the first accepted image is selected by the same session rules everywhere.
 
+Export UI should create an export plan and then mark that plan exported through the plan helper after downloads are triggered. The helper reuses the stale-output guard, so changed global or per-image settings cannot mark old output as exported.
+
 Snapshot restore is metadata-only. It can restore the batch list, original file metadata, settings, selection, errors, and overrides, but it cannot restore live decoded images or optimized output blobs. Restored jobs that depended on live processing output return to `queued` so the app regenerates outputs before export. Use the serialized restore helper when loading a saved snapshot string so parsing and restoration share the same validation path.
 
 ## Product goal

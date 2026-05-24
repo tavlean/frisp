@@ -1,3 +1,4 @@
+import { markJobsExported } from './session';
 import type { BulkSession, ImageJob } from './session';
 import { isJobOutputStale } from './queue';
 import { getPercentChange } from './size';
@@ -270,4 +271,14 @@ export function createBulkExportPlan(
     entries,
     summary: getBulkExportSummary(session, jobIds),
   };
+}
+
+export function markBulkExportPlanExported(
+  session: BulkSession,
+  plan: BulkExportPlan,
+): BulkSession {
+  return markJobsExported(
+    session,
+    plan.entries.map((entry) => entry.job.id),
+  );
 }
