@@ -6,6 +6,8 @@ The framework-neutral helper surface is exported from `src/client/lazy-app/bulk/
 
 The helper surface now includes pure strip item selectors, selected-job detail selectors, and a session summary selector. Future UI should consume those selectors instead of recomputing selected state, effective settings, output state, export readiness, override counts, or progress inside components.
 
+Snapshot restore is metadata-only. It can restore the batch list, original file metadata, settings, selection, errors, and overrides, but it cannot restore live decoded images or optimized output blobs. Restored jobs that depended on live processing output return to `queued` so the app regenerates outputs before export.
+
 ## Product goal
 
 The user should be able to:

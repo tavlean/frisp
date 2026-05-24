@@ -171,6 +171,36 @@ function parseJobSnapshot(value: unknown): BulkJobSnapshot | undefined {
   };
 }
 
+function restoreFileSnapshot(snapshot: BulkFileSnapshot): File {
+  return new File([''], snapshot.name, {
+    type: snapshot.type,
+    lastModified: snapshot.lastModified,
+  });
+}
+
+function getRestoredJobStatus(status: ImageJobStatus): ImageJobStatus {
+  if (
+    status === 'decoding' ||
+    status === 'processing' ||
+    status === 'encoded' ||
+    status === 'exported'
+  ) {
+    return 'queued';
+  }
+  return status;
+}
+
+function restoreJobSnapshot(snapshot: BulkJobSnapshot): ImageJob {
+  return {
+    id: snapshot.id,
+    sourceFile: restoreFileSnapshot(snapshot.sourceFile),
+    status: getRestoredJobStatus(snapshot.status),
+    originalSize: snapshot.originalSize,
+    overrides: snapshot.overrides,
+    error: snapshot.error,
+  };
+}
+
 function getSnapshotCounters(
   jobs: readonly BulkJobSnapshot[],
 ): Pick<BulkSessionSnapshot, 'activeJobs' | 'exportedCount'> {
@@ -244,5 +274,27 @@ export function parseBulkSessionSnapshot(
     jobs: validJobs,
     selectedJobId: parsedSnapshot.selectedJobId,
     ...getSnapshotCounters(validJobs),
+  };
+}
+
+export function restoreBulkSessionSnapshot(
+  snapshot: BulkSessionSnapshot,
+): BulkSession {
+  const jobs = snapshot.jobs.map(restoreJobSnapshot);
+  const session = normalizeBulkSessionCounters({
+    id: snapshot.id,
+    globalSettings: snapshot.globalSettings,
+    jobs,
+    selectedJobId: jobs.some((job) => job.id === snapshot.selectedJobId)
+      ? snapshot.selectedJobId
+      : jobs[0]?.id,
+    activeJobs: 0,
+    exportedCount: 0,
+  });
+
+  return {
+    ...session,
+    activeJobs: 0,
+    exportedCount: 0,
   };
 }

@@ -16,7 +16,7 @@ Historical archived fork, not the current project: `tavlean/SquooshPlus`.
 
 Project identity note: see [Project identity](project-identity.md). The current app/repo/package name is Sqush. The local workspace folder may still be named `SquooshPlus` until the active Codex workspace is closed and reopened from a renamed folder.
 
-Working tree at last update: progress dashboard reflects browser smoke coverage for saved-settings import and expanded single-image pure helpers. Bulk helpers include a framework-neutral barrel export, selected-job detail selector, strip item selectors, and session summary selectors for future UI/Svelte consumption. Single-image editor work planning, source resize rules, orientation resize adjustment, side-copy URL behavior, default/saved side-state updates, and document-title/loading selectors are partly extracted into pure helpers. Browser smoke now covers real saved-settings import. Project identity is documented so the old local folder/archive name is not confused with current Sqush branding. Run `git status --short --branch` for the exact state.
+Working tree at last update: progress dashboard reflects browser smoke coverage for saved-settings import and expanded single-image pure helpers. Bulk helpers include a framework-neutral barrel export, selected-job detail selector, strip item selectors, session summary selectors, and metadata-only snapshot restore for future UI/Svelte consumption. Single-image editor work planning, source resize rules, orientation resize adjustment, side-copy URL behavior, default/saved side-state updates, and document-title/loading selectors are partly extracted into pure helpers. Browser smoke now covers real saved-settings import. Project identity is documented so the old local folder/archive name is not confused with current Sqush branding. Run `git status --short --branch` for the exact state.
 
 Latest recent committed work at last update:
 
@@ -203,6 +203,7 @@ Latest verification run:
 - `npm run check`: passed after expanding saved-settings import browser smoke coverage.
 - `npm run check`: passed after extracting default and initial side state helpers.
 - `npm run check`: passed after adding the bulk selected-job detail selector.
+- `npm run check`: passed after adding metadata-only bulk snapshot restore.
 - `npm audit --audit-level=low`: passed, 0 vulnerabilities.
 - Latest observed GitHub Actions state: pushed commits through `63adddf` passed on Ubuntu, Windows, and macOS.
 - Latest observed GitHub Actions state after the WebP smoke documentation push: `995c9b2` passed on Ubuntu, Windows, and macOS.
