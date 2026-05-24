@@ -37,6 +37,8 @@ import {
 import {
   SavedSideSettings,
   SideSettings,
+  getSavedSideSettingsKey,
+  getSideLabel,
   readSavedSideSettings,
   writeSavedSideSettings,
 } from './saved-settings';
@@ -69,7 +71,6 @@ import {
   type SideJobState,
 } from './work-plan';
 import { getSideTypeLabel, shouldContainImage } from './display-state';
-import type { LocalStorageKey } from '../storage';
 
 export type OutputType = EncoderType | 'identity';
 export type { SourceImage } from '../image-pipeline';
@@ -100,11 +101,6 @@ interface State {
   encodedPreprocessorState?: PreprocessorState;
 }
 
-const savedSettingsKeys: readonly [LocalStorageKey, LocalStorageKey] = [
-  'leftSideSettings',
-  'rightSideSettings',
-];
-
 const originalDocumentTitle = document.title;
 
 function updateDocumentTitle(loadingFileInfo: LoadingFileInfo): void {
@@ -119,8 +115,8 @@ export default class Compress extends Component<Props, State> {
     loading: false,
     preprocessorState: defaultPreprocessorState,
     sides: [
-      getInitialSideState(0, readSavedSideSettings(savedSettingsKeys[0])),
-      getInitialSideState(1, readSavedSideSettings(savedSettingsKeys[1])),
+      getInitialSideState(0, readSavedSideSettings(getSavedSideSettingsKey(0))),
+      getInitialSideState(1, readSavedSideSettings(getSavedSideSettingsKey(1))),
     ],
     mobileView: this.widthQuery.matches,
   };
@@ -225,8 +221,8 @@ export default class Compress extends Component<Props, State> {
    * @returns
    */
   private onSaveSideSettingsClick = async (index: 0 | 1) => {
-    const key = savedSettingsKeys[index];
-    const sideLabel = index === 0 ? 'Left' : 'Right';
+    const key = getSavedSideSettingsKey(index);
+    const sideLabel = getSideLabel(index);
     const settingsSaved = writeSavedSideSettings(key, {
       encodedSettings: this.state.sides[index].encodedSettings,
       latestSettings: this.state.sides[index].latestSettings,
@@ -256,8 +252,8 @@ export default class Compress extends Component<Props, State> {
    * @returns
    */
   private onImportSideSettingsClick = async (index: 0 | 1) => {
-    const key = savedSettingsKeys[index];
-    const sideLabel = index === 0 ? 'Left' : 'Right';
+    const key = getSavedSideSettingsKey(index);
+    const sideLabel = getSideLabel(index);
     const savedSettings = readSavedSideSettings(key);
     if (!savedSettings) {
       await this.props.showSnack(

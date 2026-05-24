@@ -39,8 +39,8 @@ Most C/C++ codecs use Docker-based Makefiles. Rust codecs use `wasm-pack`-style 
 | WebP encoder        | `src/features/encoders/webP`        | `codecs/webp/enc/webp_enc.*`, `webp_enc_simd.*`                 | Used by app; SIMD path exists                                              |
 | JPEG XL decoder     | `src/features/decoders/jxl`         | `codecs/jxl/dec/jxl_dec.*`                                      | Used by app; strategy still undecided                                      |
 | JPEG XL encoder     | `src/features/encoders/jxl`         | `codecs/jxl/enc/jxl_enc.*`, `jxl_enc_mt.*`, `jxl_enc_mt_simd.*` | Used by app; strategy still undecided                                      |
-| WebP 2 decoder      | `src/features/decoders/wp2`         | `codecs/wp2/dec/wp2_dec.*`                                      | Used by app, but product strategy says do not promote as production        |
-| WebP 2 encoder      | `src/features/encoders/wp2`         | `codecs/wp2/enc/wp2_enc.*`, `wp2_enc_mt.*`, `wp2_enc_mt_simd.*` | Used by app, but product strategy says do not promote as production        |
+| WP2 legacy decoder  | `src/features/decoders/wp2`         | `codecs/wp2/dec/wp2_dec.*`                                      | Used by app today; not in the proposed focused codec list                  |
+| WP2 legacy encoder  | `src/features/encoders/wp2`         | `codecs/wp2/enc/wp2_enc.*`, `wp2_enc_mt.*`, `wp2_enc_mt_simd.*` | Used by app today; not in the proposed focused codec list                  |
 | QOI decoder         | `src/features/decoders/qoi`         | `codecs/qoi/dec/qoi_dec.*`                                      | Used by app today; likely removable later if the codec surface is narrowed |
 | QOI encoder         | `src/features/encoders/qoi`         | `codecs/qoi/enc/qoi_enc.*`                                      | Used by app today; likely removable later if the codec surface is narrowed |
 | MozJPEG encoder     | `src/features/encoders/mozJPEG`     | `codecs/mozjpeg/enc/mozjpeg_enc.*`                              | Used by app today; not in the proposed focused codec list                  |
@@ -64,7 +64,6 @@ The focused codec list being considered is:
 - WebP 1
 - AVIF
 - JPEG XL
-- WebP 2 only as an experimental/hidden option, not a promoted production format
 
 To reduce risk, first hide unwanted codecs from product UI after design discussion. Delete codec code only after:
 

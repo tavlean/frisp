@@ -18,7 +18,7 @@ Project identity note: see [Project identity](project-identity.md). The current 
 
 Active-thread path note: this chat is still attached in Codex to the old project entry `/Users/tav/Development/Tavlean/SquooshPlus`, which is a symlink to the real checkout at `/Users/tav/Development/Tavlean/Sqush`. For uninterrupted work in this chat, use the symlink path as the working directory. Best long-term fix is to start a new Codex chat from the real `Sqush` project entry and use this document plus `docs/progress-dashboard.html`, `docs/progress-dashboard.md`, `docs/todo.md`, and `docs/svelte-migration-context.md` as the handoff source.
 
-Working tree at last update: progress dashboard reflects browser smoke coverage for saved-settings import, real resize processing to a `64x64` WebP blob, service-worker-disabled app-shell loading, service-worker controller guards, refreshed browser support policy, static-build utility cleanup, shared filename sanitization, local folder rename to Sqush, a direct-open HTML dashboard at `docs/progress-dashboard.html`, `npm run dashboard` for change-triggered dashboard reloads, and expanded single-image pure helpers. Bulk helpers include a framework-neutral barrel export, import-to-session helper, append-import helper, structured import rejection reasons and summary counts, shared SVG-aware source decode path, process-plan helper, selected-job detail selector, queue-state selector, export-plan completion helper, drift-tolerant session counters, strip item selectors, queue-aware session summary selectors, and metadata-only snapshot restore from parsed or serialized snapshots for future UI/Svelte consumption. Single-image editor work planning, latest/current image job-state derivation, display settings, result labels, image-contain decisions, processor enabled toggles, processor option merges, default source resize side updates, orientation resize side updates, side loading/result updates, side undo restoration, side-copy URL behavior, side reset URL cleanup, side settings mutations, default/saved side-state updates, and document-title/loading selectors are partly extracted into pure helpers. Browser smoke now covers real saved-settings import. Project identity is documented so the old archive name is not confused with current Sqush branding. Run `git status --short --branch` for the exact state.
+Working tree at last update: progress dashboard reflects browser smoke coverage for saved-settings import, real resize processing to a `64x64` WebP blob, service-worker-disabled app-shell loading, service-worker controller guards, refreshed browser support policy, static-build utility cleanup, shared filename sanitization, local folder rename to Sqush, a direct-open HTML dashboard at `docs/progress-dashboard.html`, `npm run dashboard` for change-triggered dashboard reloads, and expanded single-image pure helpers. Bulk helpers include a framework-neutral barrel export, import-to-session helper, append-import helper, structured import rejection reasons and summary counts, shared SVG-aware source decode path, process-plan helper, selected-job detail selector, queue-state selector, export-plan completion helper, drift-tolerant session counters, strip item selectors, queue-aware session summary selectors, and metadata-only snapshot restore from parsed or serialized snapshots for future UI/Svelte consumption. Single-image editor work planning, latest/current image job-state derivation, display settings, result labels, image-contain decisions, processor enabled toggles, processor option merges, default source resize side updates, orientation resize side updates, side loading/result updates, side undo restoration, saved-settings key/label lookup, side-copy URL behavior, side reset URL cleanup, side settings mutations, default/saved side-state updates, and document-title/loading selectors are partly extracted into pure helpers. Browser smoke now covers real saved-settings import. Project identity is documented so the old archive name is not confused with current Sqush branding. Run `git status --short --branch` for the exact state.
 
 Latest recent committed work at last update:
 
@@ -202,6 +202,7 @@ Latest verification run:
 - `npm run check`: passed after sharing source decode behavior and adding `docs/progress-dashboard.html`.
 - `npm run check`: passed after extracting preprocessing completion state and adding the dashboard live-reload server.
 - `npm run check`: passed after extracting side undo restoration and documenting the Codex project path handoff.
+- `npm run check`: passed after extracting saved side settings key/label lookup, removing forward-looking WebP 2 mentions, and updating handoff/dashboard notes.
 - `npm run check`: passed after extracting document-title formatting.
 - `npm run check`: passed after extracting side-copy URL behavior.
 - `npm run check`: passed after extracting document-title loading selectors.
@@ -290,12 +291,13 @@ Latest verification run:
 
 Next recommended tasks when work resumes:
 
-1. Keep progress tied to [Progress dashboard](progress-dashboard.md) and [Agent guide](../AGENTS.md).
+1. Start the next Codex session from the real project folder `/Users/tav/Development/Tavlean/Sqush` if possible. Use this document, [Progress dashboard](progress-dashboard.md), [visual dashboard](progress-dashboard.html), [Todo](todo.md), and [Svelte migration context](svelte-migration-context.md) as handoff context.
 2. Continue extracting/tested framework-neutral logic from Preact components where it clearly reduces future Svelte migration risk.
 3. Use [Svelte migration context](svelte-migration-context.md) before Svelte-adjacent refactors so new helpers stay aligned with Svelte 5/SvelteKit best practices.
 4. Add browser smoke tests before significant UI or codec-surface changes.
 5. Do not implement bulk UI until the workflow design has been discussed and iterated.
 6. Use `docs/dependency-modernization.md` for dependency cleanup order; do not use `npm audit fix --force` blindly.
+7. For live status viewing, run `npm run dashboard` and open the printed `http://localhost:4177` URL. The dashboard reloads only when `docs/progress-dashboard.html` changes.
 
 Quick investigation note:
 

@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
@@ -26,9 +26,8 @@
         margin: 0;
         background: var(--bg);
         color: var(--text);
-        font-family:
-          Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
-          "Segoe UI", sans-serif;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system,
+          BlinkMacSystemFont, 'Segoe UI', sans-serif;
       }
 
       main {
@@ -192,11 +191,11 @@
         color: var(--muted);
         font-size: 12px;
         font-weight: 800;
-        content: "Open";
+        content: 'Open';
       }
 
       details.progress-item[open] summary::after {
-        content: "Close";
+        content: 'Close';
       }
 
       .progress-top {
@@ -273,7 +272,7 @@
         position: absolute;
         left: 0;
         color: var(--green);
-        content: "•";
+        content: '•';
       }
 
       .list {
@@ -358,7 +357,7 @@
         <aside class="meta" aria-label="Dashboard metadata">
           <div class="meta-row">
             <span>Last updated</span>
-            <strong>2026-05-24 22:02 IST</strong>
+            <strong>2026-05-24 22:35 IST</strong>
           </div>
           <div class="meta-row">
             <span>Branch</span>
@@ -370,7 +369,7 @@
           </div>
           <div class="meta-row">
             <span>Current work</span>
-            <strong>preprocess state helper</strong>
+            <strong>handoff ready</strong>
           </div>
           <div class="meta-row">
             <span>Auto refresh</span>
@@ -424,7 +423,9 @@
                     <li>Audit cleanup completed.</li>
                     <li>CI runs on Ubuntu, Windows, and macOS.</li>
                     <li>Browser smoke verifies WebP export and resize.</li>
-                    <li>Offline shell and disabled service worker paths covered.</li>
+                    <li>
+                      Offline shell and disabled service worker paths covered.
+                    </li>
                   </ul>
                 </div>
                 <div class="detail-box">
@@ -454,9 +455,13 @@
                 <div class="detail-box">
                   <h3>Done</h3>
                   <ul>
-                    <li>Overview, roadmap, todo, and maintenance docs exist.</li>
+                    <li>
+                      Overview, roadmap, todo, and maintenance docs exist.
+                    </li>
                     <li>Svelte migration context is documented.</li>
-                    <li>Project identity and codec provenance are documented.</li>
+                    <li>
+                      Project identity and codec provenance are documented.
+                    </li>
                     <li>Direct-open HTML dashboard is available.</li>
                   </ul>
                 </div>
@@ -479,8 +484,8 @@
                 </div>
                 <div class="bar"><span style="width: 93%"></span></div>
                 <p class="progress-note">
-                  Import, queue, processing, summaries, export planning, snapshots,
-                  and selected-job view models are framework-neutral.
+                  Import, queue, processing, summaries, export planning,
+                  snapshots, and selected-job view models are framework-neutral.
                 </p>
               </summary>
               <div class="detail-grid">
@@ -488,8 +493,12 @@
                   <h3>Done</h3>
                   <ul>
                     <li>Bulk job/session model is in place.</li>
-                    <li>Import rejection, queue, runner, and export helpers exist.</li>
-                    <li>Per-image overrides and summaries have pure selectors.</li>
+                    <li>
+                      Import rejection, queue, runner, and export helpers exist.
+                    </li>
+                    <li>
+                      Per-image overrides and summaries have pure selectors.
+                    </li>
                     <li>Bulk processing uses the shared image pipeline.</li>
                   </ul>
                 </div>
@@ -512,25 +521,37 @@
                 </div>
                 <div class="bar"><span style="width: 43%"></span></div>
                 <p class="progress-note">
-                  Single-image behavior is being extracted from Preact into tested
-                  helpers while preserving the current optimizer.
+                  Single-image behavior is being extracted from Preact into
+                  tested helpers while preserving the current optimizer.
                 </p>
               </summary>
               <div class="detail-grid">
                 <div class="detail-box">
                   <h3>Done</h3>
                   <ul>
-                    <li>Work planning, source resize, display, and side-state helpers extracted.</li>
-                    <li>Side result and object URL lifecycle helpers are tested.</li>
-                    <li>SVG-aware source decode moved into the shared pipeline.</li>
+                    <li>
+                      Work planning, source resize, display, and side-state
+                      helpers extracted.
+                    </li>
+                    <li>
+                      Side result and object URL lifecycle helpers are tested.
+                    </li>
+                    <li>
+                      SVG-aware source decode moved into the shared pipeline.
+                    </li>
                   </ul>
                 </div>
                 <div class="detail-box">
                   <h3>Left</h3>
                   <ul>
                     <li>Finish preprocessing completion state helper.</li>
-                    <li>Continue reducing `Compress/index.tsx` responsibility.</li>
-                    <li>Review codec and Rollup complexity after behavior is covered.</li>
+                    <li>
+                      Continue reducing `Compress/index.tsx` responsibility.
+                    </li>
+                    <li>
+                      Review codec and Rollup complexity after behavior is
+                      covered.
+                    </li>
                   </ul>
                 </div>
               </div>
@@ -562,7 +583,9 @@
                   <ul>
                     <li>Do not start UI migration yet.</li>
                     <li>Prototype only after core behavior is cleaner.</li>
-                    <li>Keep current optimizer tests as migration guardrails.</li>
+                    <li>
+                      Keep current optimizer tests as migration guardrails.
+                    </li>
                   </ul>
                 </div>
               </div>
@@ -589,12 +612,12 @@
               </div>
               <div class="item">
                 <strong>
-                  Extract preprocessing completion state
-                  <span class="status active">active</span>
+                  Saved settings helper cleanup
+                  <span class="status done">done</span>
                 </strong>
                 <p>
-                  Moving another source/side state transition out of the Preact
-                  component into a helper with tests.
+                  Storage key and side label lookup now live with saved-settings
+                  helpers instead of the Preact component.
                 </p>
               </div>
               <div class="item">
@@ -603,8 +626,8 @@
                   <span class="status done">done</span>
                 </strong>
                 <p>
-                  Loading, processed result, encoded result, and blob URL cleanup
-                  are now helper-driven and tested.
+                  Loading, processed result, encoded result, and blob URL
+                  cleanup are now helper-driven and tested.
                 </p>
               </div>
             </div>
@@ -618,10 +641,13 @@
             <div class="list">
               <div class="item">
                 <strong>
-                  Finish preprocessing state helper
+                  Start fresh Sqush-attached chat
                   <span class="status active">next</span>
                 </strong>
-                <p>Update tests/docs, run checks, and commit the helper change.</p>
+                <p>
+                  Use the real `/Users/tav/Development/Tavlean/Sqush` project
+                  entry so the app sandbox and project folder agree.
+                </p>
               </div>
               <div class="item">
                 <strong>
@@ -630,26 +656,25 @@
                 </strong>
                 <p>Keep extracting pure state and work-planning behavior.</p>
               </div>
-          <div class="item">
-            <strong>
-              Codec focus decision
-              <span class="status wait">planned</span>
-            </strong>
-            <p>Decide the WebP, AVIF, JPEG XL, and WebP 2 support strategy.</p>
-          </div>
-          <div class="item">
-            <strong>
-              Session path cleanup
-              <span class="status wait">handoff</span>
-            </strong>
-            <p>
-              This chat still belongs to the old SquooshPlus project entry. A
-              fresh Sqush-attached chat is the clean long-term setup.
-            </p>
-          </div>
-        </div>
-      </section>
-
+              <div class="item">
+                <strong>
+                  Codec focus decision
+                  <span class="status wait">planned</span>
+                </strong>
+                <p>Focus future product work on WebP, AVIF, and JPEG XL.</p>
+              </div>
+              <div class="item">
+                <strong>
+                  Session path cleanup
+                  <span class="status wait">handoff</span>
+                </strong>
+                <p>
+                  This chat still belongs to the old SquooshPlus project entry.
+                  A fresh Sqush-attached chat is the clean long-term setup.
+                </p>
+              </div>
+            </div>
+          </section>
         </div>
       </div>
 
@@ -659,8 +684,8 @@
       </footer>
     </main>
     <script>
-      const dashboardDetails = [...document.querySelectorAll("details[id]")];
-      const openStorageKey = "sqush-dashboard-open-sections";
+      const dashboardDetails = [...document.querySelectorAll('details[id]')];
+      const openStorageKey = 'sqush-dashboard-open-sections';
 
       function saveOpenSections() {
         localStorage.setItem(
@@ -675,7 +700,7 @@
 
       try {
         const savedOpenSections = JSON.parse(
-          localStorage.getItem(openStorageKey) || "null",
+          localStorage.getItem(openStorageKey) || 'null',
         );
         if (Array.isArray(savedOpenSections)) {
           for (const details of dashboardDetails) {
@@ -687,12 +712,12 @@
       }
 
       for (const details of dashboardDetails) {
-        details.addEventListener("toggle", saveOpenSections);
+        details.addEventListener('toggle', saveOpenSections);
       }
 
-      if (location.protocol !== "file:" && "EventSource" in window) {
-        const events = new EventSource("/events");
-        events.addEventListener("dashboard-updated", () => {
+      if (location.protocol !== 'file:' && 'EventSource' in window) {
+        const events = new EventSource('/events');
+        events.addEventListener('dashboard-updated', () => {
           location.reload();
         });
       }

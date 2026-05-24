@@ -185,11 +185,6 @@ The current app supports many formats. For this fork, a smaller codec surface pr
    - JPEG XL support has improved recently, including renewed Chromium work, but support and default enablement still need careful tracking.
    - Good candidate for power users and future-proof workflows.
 
-4. WebP 2
-   - Do not treat as a production format.
-   - The current libwebp2 project says WebP 2 will not be released as an image format and is used as an experimental compression playground.
-   - Remove it from the default UI, or hide it behind an experimental/dev flag if useful for research.
-
 ### Formats to consider removing from the main UI
 
 - Browser JPEG
@@ -198,7 +193,7 @@ The current app supports many formats. For this fork, a smaller codec surface pr
 - MozJPEG
 - OxiPNG
 - QOI
-- WP2/WebP 2 from the normal user-facing UI
+- any non-target legacy formats after the focused workflow is stable
 
 Removing them from the visible product will simplify user decisions. Removing the code entirely is a separate technical decision.
 
@@ -303,10 +298,8 @@ These notes should be rechecked periodically because format support changes.
 - WebP 1 is mature and widely supported.
 - AVIF is broadly supported in current major browsers.
 - JPEG XL has improved momentum in 2026, including Chromium work, but exact default browser support should be checked before making it the default output.
-- WebP 2 should not be promoted as a production format because the official libwebp2 project describes it as experimental and not intended for release as an image format.
 
 References:
 
-- WebP 2 official repository: https://chromium.googlesource.com/codecs/libwebp2/
 - AVIF browser support: https://caniuse.com/avif
 - JPEG XL software support: https://jpegxl.info/resources/supported-software.html

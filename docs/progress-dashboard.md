@@ -45,7 +45,7 @@ Bad progress:
 1. Keep strengthening framework-neutral bulk logic.
 2. Add browser smoke tests for the current app, especially single-image import, optimization, preview, and export.
 3. Decide exact browser support before public release.
-4. Keep codec strategy focused: WebP first, AVIF second, JPEG XL advanced, WebP 2 experimental only.
+4. Keep codec strategy focused: WebP first, AVIF second, JPEG XL advanced.
 5. Continue simplifying build and dependency surfaces without breaking the current app.
 
 ## Svelte migration gate

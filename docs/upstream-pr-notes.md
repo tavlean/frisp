@@ -37,17 +37,12 @@ GitHub reported 89 open PRs at audit time. All 89 were inspected through the Git
    - Useful only if PNG remains a serious supported output.
    - Requires Rust/WASM output review and slow-compression UX decisions.
 
-2. `GoogleChromeLabs/squoosh#912`: WebP 2 option tweaks.
-
-   - Treat as historical reference only.
-   - WebP 2 should not be a normal production output unless the codec strategy changes.
-
-3. `GoogleChromeLabs/squoosh#1398`: TIFF decoding.
+2. `GoogleChromeLabs/squoosh#1398`: TIFF decoding.
 
    - Potentially useful for bulk input support.
    - High complexity because it adds another WASM codec/toolchain path.
 
-4. `GoogleChromeLabs/squoosh#1378` and `#1379`: JPEG XL update attempts.
+3. `GoogleChromeLabs/squoosh#1378` and `#1379`: JPEG XL update attempts.
 
    - Useful as historical context.
    - Do a fresh JXL update rather than applying these old failing branches.

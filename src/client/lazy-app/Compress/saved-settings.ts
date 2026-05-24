@@ -2,6 +2,7 @@ import type { EncoderState, ProcessorState } from '../feature-meta';
 import { encoderMap } from '../feature-meta';
 import { readLocalStorage, writeLocalStorage } from '../storage';
 import type { LocalStorageKey } from '../storage';
+import type { SideIndex } from './side-state';
 
 export interface SideSettings {
   processorState: ProcessorState;
@@ -14,6 +15,11 @@ export interface SavedSideSettings {
 }
 
 export const savedSideSettingsVersion = 1;
+
+export const savedSideSettingsKeys: readonly [
+  LocalStorageKey,
+  LocalStorageKey,
+] = ['leftSideSettings', 'rightSideSettings'];
 
 interface VersionedSavedSideSettings {
   version: typeof savedSideSettingsVersion;
@@ -79,6 +85,14 @@ export function parseSavedSideSettings(
   } catch (err) {
     return;
   }
+}
+
+export function getSavedSideSettingsKey(index: SideIndex): LocalStorageKey {
+  return savedSideSettingsKeys[index];
+}
+
+export function getSideLabel(index: SideIndex): 'Left' | 'Right' {
+  return index === 0 ? 'Left' : 'Right';
 }
 
 export function readSavedSideSettings(
