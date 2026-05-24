@@ -62,7 +62,7 @@ Automated path:
 npm run smoke:browser
 ```
 
-This command builds the app, starts a production preview server, opens the app with `playwright-cli`, imports `src/static-build/assets/icon-large.png`, switches the output side to WebP, checks for an `icon-large.webp` blob download, and fails if console errors are emitted during the flow.
+This command builds the app, starts a production preview server, opens the app with `playwright-cli`, imports `src/static-build/assets/icon-large.png`, switches the output side to WebP, checks for an `icon-large.webp` blob download, verifies the output side can save versioned WebP settings, and fails if console errors are emitted during the flow.
 
 Manual fallback:
 
