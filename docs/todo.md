@@ -85,7 +85,7 @@ This list is ordered by priority. Do the high-priority items before building new
     - Completed: replace the remaining `Boolean` prop type with primitive `boolean`.
     - No remaining `catched`, `matchMedia().addListener`, or `matchMedia().removeListener` matches were found in `src/`.
     - Removed obsolete TS suppressions from option controls and icon props by using element-specific Preact JSX attribute types.
-    - Remaining local `@ts-ignore`: generated worker-bridge method dispatch in `src/client/lazy-app/worker-bridge/index.ts`.
+    - Removed the remaining maintained app/lib `@ts-ignore` by making worker-bridge dispatch explicit.
 
 ## Priority 3: tests and release confidence
 

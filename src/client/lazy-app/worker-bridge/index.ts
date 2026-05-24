@@ -55,11 +55,11 @@ for (const methodName of methodNames) {
         const onAbort = () => this._terminateWorker();
         signal.addEventListener('abort', onAbort);
 
-        return abortable(
-          signal,
-          // @ts-ignore - TypeScript can't figure this out
-          this._workerApi![methodName](...args),
-        ).finally(() => {
+        const method = this._workerApi![methodName] as (
+          ...args: unknown[]
+        ) => Promise<unknown>;
+
+        return abortable(signal, method(...args)).finally(() => {
           // No longer care about aborting - this task is complete.
           signal.removeEventListener('abort', onAbort);
 
