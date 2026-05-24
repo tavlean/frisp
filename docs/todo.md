@@ -140,6 +140,7 @@ This list is ordered by priority. Do the high-priority items before building new
     - Started: `npm run smoke:browser` now verifies extensionless PNG input exports as `icon-large.webp`.
     - Started: `npm run smoke:browser` now verifies the app shell reloads while the browser context is offline after the production app has loaded.
     - Started: `npm run smoke:browser` now verifies saved right-side WebP settings can be imported back into the real editor.
+    - Started: `npm run smoke:browser` now retries transient preview-server port collisions before running app assertions.
     - Started: service-worker bridge startup now no-ops when `navigator.serviceWorker` is unavailable.
     - Started: `npm run smoke:browser` now simulates service-worker-disabled mode and verifies the app shell still loads.
     - Started: shared-image service-worker handling now rejects cleanly if no controller is available.
