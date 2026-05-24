@@ -262,9 +262,10 @@ After Phase 3 or Phase 4, decide whether to migrate the UI to Svelte.
 Recommended migration approach:
 
 1. Keep processing logic framework-neutral.
-2. Move the app shell and bulk UI to Svelte or SvelteKit only after the workflow is proven.
-3. Prefer Svelte + Vite unless SvelteKit routing/deployment features are clearly needed.
-4. Preserve worker/WASM/service-worker behavior before rewriting every component.
+2. Use [Svelte migration context](svelte-migration-context.md) as the working guide for Svelte 5 and SvelteKit decisions.
+3. Move the app shell and bulk UI to Svelte or SvelteKit only after the workflow is proven.
+4. Prefer a static/offline SvelteKit build or Svelte + Vite unless a concrete server-side need appears.
+5. Preserve worker/WASM/service-worker behavior before rewriting every component.
 
 Svelte will likely help future feature development, but a migration should not block the main bulk feature.
 

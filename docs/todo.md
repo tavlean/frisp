@@ -127,6 +127,8 @@ This list is ordered by priority. Do the high-priority items before building new
 
     - Vite or another modern bundler may reduce custom code.
     - This is a larger migration because of Web Workers, WASM, generated feature metadata, static prerendering, and service-worker output.
+    - Svelte migration guidance is now tracked in [Svelte migration context](svelte-migration-context.md).
+    - Any Svelte-adjacent extraction should keep logic framework-neutral and avoid adding UI framework assumptions.
 
 19. Partially completed: review browser support.
 

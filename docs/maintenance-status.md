@@ -14,7 +14,7 @@ Project homepage metadata: `https://sqush.app`.
 
 Old fork: `tavlean/SquooshPlus`, archived and kept as historical reference.
 
-Working tree at last update: bulk export summaries now distinguish already-exported jobs from pending jobs and are locally verified. Run `git status --short --branch` for the exact state.
+Working tree at last update: Svelte MCP documentation has been reviewed and a Svelte migration context document is being added. Run `git status --short --branch` for the exact state.
 
 Latest recent committed work at last update:
 
@@ -129,6 +129,8 @@ Latest verification run:
 - `npm run check`: passed after adding explicit zero-concurrency no-op coverage for the bulk runner.
 - `npm run check`: passed after hardening bulk export names against Windows reserved device names.
 - `npm run check`: passed after adding an `exported` count to bulk export summaries and keeping exported jobs out of pending counts.
+- GitHub Actions passed on Ubuntu, Windows, and macOS for `207589f` (`Track exported bulk summary counts`).
+- `npm run check`: passed after adding Svelte migration context documentation.
 - `npm run build && npm run smoke:build`: passed.
 - `npm run test:helpers`: passed.
 - `npm run check`: passed after CI matrix diagnostics.
@@ -158,6 +160,7 @@ Latest verification run:
 - Latest observed GitHub Actions state after AVIF MIME sniffing cleanup: `51553da` passed on Ubuntu, Windows, and macOS.
 - Latest observed GitHub Actions state after async bulk import MIME sniffing support: `bbdb8ea` passed on Ubuntu, Windows, and macOS.
 - Latest observed GitHub Actions state after bulk runner no-op and reserved export name cleanup: `b7d0f3b` passed on Ubuntu, Windows, and macOS.
+- Latest observed GitHub Actions state after bulk exported-count summaries: `207589f` passed on Ubuntu, Windows, and macOS.
 - `npm run serve` wrapper: launched successfully on port 55194.
 - Browser production-preview smoke: passed after shared image pipeline extraction; app shell, Sqush logo, and drop target rendered.
 - Playwright CLI production-build smoke: passed after the Sqush rename, with `Sqush` title, file input present, Sqush logo alt text present, and zero console messages.
@@ -168,9 +171,10 @@ Next recommended tasks when work resumes:
 
 1. Keep progress tied to [Progress dashboard](progress-dashboard.md) and [Agent guide](../AGENTS.md).
 2. Continue extracting/tested framework-neutral logic from Preact components where it clearly reduces future Svelte migration risk.
-3. Add browser smoke tests before significant UI or codec-surface changes.
-4. Do not implement bulk UI until the workflow design has been discussed and iterated.
-5. Use `docs/dependency-modernization.md` for dependency cleanup order; do not use `npm audit fix --force` blindly.
+3. Use [Svelte migration context](svelte-migration-context.md) before Svelte-adjacent refactors so new helpers stay aligned with Svelte 5/SvelteKit best practices.
+4. Add browser smoke tests before significant UI or codec-surface changes.
+5. Do not implement bulk UI until the workflow design has been discussed and iterated.
+6. Use `docs/dependency-modernization.md` for dependency cleanup order; do not use `npm audit fix --force` blindly.
 
 Quick investigation note:
 
@@ -181,6 +185,7 @@ Quick investigation note:
 - Added project documentation and a road map.
 - Added an issue-list backlog seed.
 - Added a progress dashboard to keep cleanup, simplification, bulk, and Svelte migration readiness aligned.
+- Added Svelte migration context based on the Svelte MCP documentation pass.
 - Added an agent guide to keep future work aligned with the product and maintenance mission.
 - Added an initial browser support policy note.
 - Documented first public browser support targets and release gates for local/offline optimization reliability.
