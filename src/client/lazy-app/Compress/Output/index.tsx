@@ -21,6 +21,7 @@ import { cleanSet } from '../../util/clean-modify';
 import type { SourceImage } from '../../Compress';
 import { linkRef } from 'shared/prerendered-app/util';
 import { drawDataToCanvas } from 'client/lazy-app/util/canvas';
+import { getOutputPreviewState } from './preview-state';
 interface Props {
   source?: SourceImage;
   preprocessorState?: PreprocessorState;
@@ -270,6 +271,12 @@ export default class Output extends Component<Props, State> {
     const rightDraw = this.rightDrawable();
     // To keep position stable, the output is put in a square using the longest dimension.
     const originalImage = source && source.preprocessed;
+    const previewState = getOutputPreviewState({
+      mobileView,
+      originalImage,
+      leftImgContain,
+      rightImgContain,
+    });
 
     return (
       <Fragment>
@@ -279,7 +286,7 @@ export default class Output extends Component<Props, State> {
           <two-up
             legacy-clip-compat
             class={style.twoUp}
-            orientation={mobileView ? 'vertical' : 'horizontal'}
+            orientation={previewState.orientation}
             // Event redirecting. See onRetargetableEvent.
             onTouchStartCapture={this.onRetargetableEvent}
             onTouchEndCapture={this.onRetargetableEvent}
@@ -304,11 +311,7 @@ export default class Output extends Component<Props, State> {
                 ref={linkRef(this, 'canvasLeft')}
                 width={leftDraw && leftDraw.width}
                 height={leftDraw && leftDraw.height}
-                style={{
-                  width: originalImage ? originalImage.width : '',
-                  height: originalImage ? originalImage.height : '',
-                  objectFit: leftImgContain ? 'contain' : '',
-                }}
+                style={previewState.leftImage}
               />
             </pinch-zoom>
             <pinch-zoom
@@ -322,11 +325,7 @@ export default class Output extends Component<Props, State> {
                 ref={linkRef(this, 'canvasRight')}
                 width={rightDraw && rightDraw.width}
                 height={rightDraw && rightDraw.height}
-                style={{
-                  width: originalImage ? originalImage.width : '',
-                  height: originalImage ? originalImage.height : '',
-                  objectFit: rightImgContain ? 'contain' : '',
-                }}
+                style={previewState.rightImage}
               />
             </pinch-zoom>
           </two-up>
