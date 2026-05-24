@@ -106,6 +106,7 @@ This list is ordered by priority. Do the high-priority items before building new
     - Bulk runner tests now cover draining the full queue across multiple concurrency-limited batches.
     - Bulk requeue tests now cover active jobs being reset and active counters being decremented.
     - Bulk cancellation tests now cover resetting only active jobs while preserving failed, skipped, and completed jobs.
+    - Bulk settings-change tests now cover safe workflow helpers that update global/per-image settings and requeue stale outputs.
     - Bulk export tests now cover Windows reserved output names.
     - Bulk export summary tests now cover already-exported jobs separately from pending jobs.
     - Bulk export summary tests now cover stale exported outputs being treated as pending instead of current exports.

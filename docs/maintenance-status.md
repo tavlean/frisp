@@ -14,7 +14,7 @@ Project homepage metadata: `https://sqush.app`.
 
 Historical archived fork, not the current project: `tavlean/SquooshPlus`.
 
-Working tree at last update: bulk queue cancellation now has a pure helper for resetting only active jobs, with the full local check passing. Run `git status --short --branch` for the exact state.
+Working tree at last update: bulk settings-change workflow helpers now update settings and requeue stale outputs safely, with the full local check passing. Run `git status --short --branch` for the exact state.
 
 Latest recent committed work at last update:
 
@@ -178,6 +178,7 @@ Latest verification run:
 - `npm run check`: passed after guarding service-worker bridge startup for service-worker-disabled contexts.
 - `npm run smoke:browser`: passed after guarding service-worker bridge startup for service-worker-disabled contexts.
 - `npm run check`: passed after adding a pure bulk active-job cancellation helper.
+- `npm run check`: passed after adding bulk settings-change workflow helpers.
 - `npm run build && npm run smoke:build`: passed.
 - `npm run test:helpers`: passed.
 - `npm run check`: passed after CI matrix diagnostics.

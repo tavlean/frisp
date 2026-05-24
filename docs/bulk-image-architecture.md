@@ -156,6 +156,7 @@ When global settings change:
 - mark outputs stale if their effective settings changed;
 - reprocess images whose effective settings changed;
 - preserve image-specific overrides.
+- Use `src/client/lazy-app/bulk/changes.ts` helpers when UI code wants the safe default behavior: update settings and requeue only outputs that became stale.
 
 ### Per-image override change
 
@@ -164,6 +165,7 @@ When an override changes:
 - update only the selected image job;
 - mark that image output stale;
 - reprocess only that image.
+- Use `applyJobOverrides` or `applyClearJobOverrides` so future UI code does not forget the stale-output requeue step.
 
 ### Concurrency
 
