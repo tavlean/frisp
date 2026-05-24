@@ -54,7 +54,7 @@ import {
 import {
   didOrientationChange,
   getDefaultResizeState,
-  getOrientationAdjustedResizeState,
+  getOrientationAdjustedSides,
 } from './source-state';
 import {
   getImageWorkPlan,
@@ -305,15 +305,7 @@ export default class Compress extends Component<Props, State> {
       // Flip resize values if orientation has changed
       sides: !orientationChanged
         ? state.sides
-        : (state.sides.map((side) => {
-            const currentResizeSettings =
-              side.latestSettings.processorState.resize;
-            return cleanMerge(
-              side,
-              'latestSettings.processorState.resize',
-              getOrientationAdjustedResizeState(currentResizeSettings),
-            );
-          }) as [Side, Side]),
+        : getOrientationAdjustedSides(state.sides),
     }));
   };
 

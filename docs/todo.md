@@ -89,6 +89,7 @@ This list is ordered by priority. Do the high-priority items before building new
     - Single-image preprocessing completion now leaves side download URL revocation to the shared side-reset helper instead of revoking twice.
     - Single-image side encoder/processor setting mutations now live in pure helpers instead of inline Preact component logic.
     - Processor enabled toggles and option merges now go through pure helpers instead of direct option-panel path updates.
+    - Orientation-change resize updates for both sides now go through a pure helper instead of inline Preact component mapping.
     - No remaining `catched`, `matchMedia().addListener`, or `matchMedia().removeListener` matches were found in `src/`.
     - Removed obsolete TS suppressions from option controls and icon props by using element-specific Preact JSX attribute types.
     - Removed the remaining maintained app/lib `@ts-ignore` by making worker-bridge dispatch explicit.

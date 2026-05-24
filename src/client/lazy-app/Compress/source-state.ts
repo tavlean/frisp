@@ -1,8 +1,17 @@
 import type { ProcessorState } from '../feature-meta';
+import { cleanMerge } from '../util/clean-modify';
 
 export interface SourceDimensions {
   width: number;
   height: number;
+}
+
+export interface ResizeSettingsSide {
+  latestSettings: {
+    processorState: {
+      resize: ProcessorState['resize'];
+    };
+  };
 }
 
 export function didOrientationChange(
@@ -32,4 +41,17 @@ export function getOrientationAdjustedResizeState(
     width: resizeState.height,
     height: resizeState.width,
   };
+}
+
+export function getOrientationAdjustedSides<Side extends ResizeSettingsSide>(
+  sides: [Side, Side],
+): [Side, Side] {
+  return sides.map((side) => {
+    const currentResizeSettings = side.latestSettings.processorState.resize;
+    return cleanMerge(
+      side,
+      'latestSettings.processorState.resize',
+      getOrientationAdjustedResizeState(currentResizeSettings),
+    );
+  }) as [Side, Side];
 }
