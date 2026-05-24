@@ -248,6 +248,14 @@ export function getActiveImageJobsAfterStarts(
   };
 }
 
+export function getRunnableSideJobIndexes(
+  sideWorksNeeded: readonly SideWorkNeeded[],
+): number[] {
+  return sideWorksNeeded.flatMap((sideWorkNeeded, index) =>
+    sideWorkNeeded.encoding ? [index] : [],
+  );
+}
+
 export function getSideEncodingPlan({
   cacheResult,
   currentProcessed,

@@ -73,6 +73,7 @@ import {
   getSideJobEncodedResult,
   getSideJobExecutionPlan,
   getPlannedImageWork,
+  getRunnableSideJobIndexes,
   type MainJobState,
   type SideJobState,
 } from './work-plan';
@@ -468,12 +469,15 @@ export default class Compress extends Component<Props, State> {
     // That's the main part of the job done.
     this.activeMainJob = undefined;
 
+    const runnableSideJobIndexes = new Set(
+      getRunnableSideJobIndexes(workPlan.sideWorksNeeded),
+    );
+
     // Allow side jobs to happen in parallel
     workPlan.sideWorksNeeded.forEach(async (sideWorkNeeded, index) => {
       const sideIndex = index as SideIndex;
       try {
-        // If processing is true, encoding is always true.
-        if (!sideWorkNeeded.encoding) return;
+        if (!runnableSideJobIndexes.has(sideIndex)) return;
 
         const signal = sideSignals[sideIndex];
         const jobState = sideJobStates[sideIndex];
