@@ -61,7 +61,7 @@ import {
   type MainJobState,
   type SideJobState,
 } from './work-plan';
-import { getOutputDisplayState, getResultDisplayStates } from './display-state';
+import { getCompressionDisplayState } from './display-state';
 
 export type OutputType = EncoderType | 'identity';
 export type { SourceImage } from '../image-pipeline';
@@ -560,8 +560,7 @@ export default class Compress extends Component<Props, State> {
     { onBack }: Props,
     { loading, sides, source, mobileView, preprocessorState }: State,
   ) {
-    const outputDisplay = getOutputDisplayState(sides);
-    const resultDisplays = getResultDisplayStates(
+    const displayState = getCompressionDisplayState(
       sides,
       loading,
       mobileView,
@@ -584,7 +583,7 @@ export default class Compress extends Component<Props, State> {
       />
     ));
 
-    const results = resultDisplays.map((resultDisplay) => (
+    const results = displayState.results.map((resultDisplay) => (
       <Results
         downloadUrl={resultDisplay.downloadUrl}
         imageFile={resultDisplay.imageFile}
@@ -600,10 +599,10 @@ export default class Compress extends Component<Props, State> {
         <Output
           source={source}
           mobileView={mobileView}
-          leftCompressed={outputDisplay.leftCompressed}
-          rightCompressed={outputDisplay.rightCompressed}
-          leftImgContain={outputDisplay.leftImgContain}
-          rightImgContain={outputDisplay.rightImgContain}
+          leftCompressed={displayState.output.leftCompressed}
+          rightCompressed={displayState.output.rightCompressed}
+          leftImgContain={displayState.output.leftImgContain}
+          rightImgContain={displayState.output.rightImgContain}
           preprocessorState={preprocessorState}
           onPreprocessorChange={this.onPreprocessorChange}
         />

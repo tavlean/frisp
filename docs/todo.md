@@ -86,6 +86,7 @@ This list is ordered by priority. Do the high-priority items before building new
     - Static build file writing now returns a promise from the utility and keeps process-exit handling in the build entry point.
     - Single-image image-work job-state derivation now lives in pure helpers instead of inline Preact component logic.
     - Single-image display settings, result labels, image-contain decisions, and output/result render selectors now live in pure helpers instead of inline Preact render logic.
+    - Single-image composed render state now lives in a pure helper instead of being assembled inline by the Preact component.
     - Single-image preprocessing completion now leaves side download URL revocation to the shared side-reset helper instead of revoking twice.
     - Single-image side encoder/processor setting mutations now live in pure helpers instead of inline Preact component logic.
     - Single-image side loading, intermediate processed result, and final encoded result updates now live in pure helpers instead of inline Preact component logic.
@@ -170,6 +171,7 @@ This list is ordered by priority. Do the high-priority items before building new
     - Single-image source-state tests now cover orientation-change detection and resize width/height swapping after rotation.
     - Single-image document-title tests now cover idle, loading, and loaded file title text.
     - Single-image document-title tests now cover loading-state detection, file info derivation, and update gating.
+    - Single-image display-state tests now cover the composed output/result render model consumed by the editor.
     - Single-image side-copy tests now cover side index lookup and blob URL regeneration when copying one side to the other.
     - Single-image side-state tests now cover saved-settings import while preserving live output fields for undo.
     - Single-image side-state tests now cover default side setup, paired initial sides, and saved initial side overrides.

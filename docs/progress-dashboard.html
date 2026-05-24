@@ -484,7 +484,7 @@
               </svg>
               Last updated
             </span>
-            <strong>2026-05-25 00:21 IST</strong>
+            <strong>2026-05-25 00:25 IST</strong>
           </div>
           <div class="meta-row">
             <span class="meta-label">
@@ -540,7 +540,7 @@
               </svg>
               Current work
             </span>
-            <strong>bulk add counters</strong>
+            <strong>single-image render state</strong>
           </div>
           <div class="meta-row">
             <span class="meta-label">
@@ -635,7 +635,7 @@
               </svg>
             </span>
             <div>
-              <strong>100% <span class="delta">+1</span></strong>
+              <strong>100%</strong>
               <span>Bulk backend foundation</span>
             </div>
           </div>
@@ -656,11 +656,11 @@
               </svg>
             </span>
             <div>
-              <strong>57%</strong>
+              <strong>58% <span class="delta">+1</span></strong>
               <span>Repo simplification</span>
             </div>
           </div>
-          <div class="bar"><span style="width: 57%"></span></div>
+          <div class="bar"><span style="width: 58%"></span></div>
         </div>
         <div class="metric">
           <div class="metric-body">
@@ -677,11 +677,11 @@
               </svg>
             </span>
             <div>
-              <strong>42%</strong>
+              <strong>43% <span class="delta">+1</span></strong>
               <span>Svelte readiness</span>
             </div>
           </div>
-          <div class="bar"><span style="width: 42%"></span></div>
+          <div class="bar"><span style="width: 43%"></span></div>
         </div>
       </section>
 
@@ -900,13 +900,14 @@
                     </span>
                     Repo simplification
                   </span>
-                  <span>57%</span>
+                  <span>58%</span>
                 </div>
-                <div class="bar"><span style="width: 57%"></span></div>
+                <div class="bar"><span style="width: 58%"></span></div>
                 <p class="progress-note">
                   Single-image behavior is being extracted from Preact into
-                  tested helpers and legacy component APIs are being retired
-                  while preserving the current optimizer.
+                  tested helpers, including composed render state, and legacy
+                  component APIs are being retired while preserving the current
+                  optimizer.
                 </p>
               </summary>
               <div class="detail-grid">
@@ -916,8 +917,9 @@
                     <li>
                       Work planning, work-start scheduling, side encode
                       planning, abort guards, job-state derivation, source
-                      resize, display, saved-settings actions, initial
-                      side-state, and side-state mutation helpers extracted.
+                      resize, display, composed render-state, saved-settings
+                      actions, initial side-state, and side-state mutation
+                      helpers extracted.
                     </li>
                     <li>
                       Preprocessor-change state now lives in a tested source
@@ -984,9 +986,9 @@
                     </span>
                     Svelte/SvelteKit migration readiness
                   </span>
-                  <span>42%</span>
+                  <span>43%</span>
                 </div>
-                <div class="bar"><span style="width: 42%"></span></div>
+                <div class="bar"><span style="width: 43%"></span></div>
                 <p class="progress-note">
                   Migration has not started. Current work is preparing reusable
                   logic, reducing legacy Preact assumptions, and documenting the
@@ -1001,8 +1003,8 @@
                     <li>Bulk logic is framework-neutral.</li>
                     <li>
                       Single-image planning, side encode decisions, work-start
-                      scheduling, source, preprocessor, side, and display logic
-                      extraction is underway.
+                      scheduling, source, preprocessor, side, display, and
+                      composed render-state logic extraction is underway.
                     </li>
                     <li>
                       Deprecated prop-change lifecycle usage has been removed

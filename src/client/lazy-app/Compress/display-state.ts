@@ -34,6 +34,11 @@ export interface ResultDisplayState {
   typeLabel: string;
 }
 
+export interface CompressionDisplayState {
+  output: OutputDisplayState;
+  results: [ResultDisplayState, ResultDisplayState];
+}
+
 export type EncoderLabelGetter = (encoderState: EncoderState) => string;
 
 export function getDisplaySettings(side: DisplaySettingsSide): SideSettings {
@@ -84,4 +89,21 @@ export function getResultDisplayStates(
     flipSide: mobileView || index === 1,
     typeLabel: getSideTypeLabel(side, getEncoderLabel),
   })) as [ResultDisplayState, ResultDisplayState];
+}
+
+export function getCompressionDisplayState(
+  sides: readonly [DisplayRenderSide, DisplayRenderSide],
+  loading: boolean,
+  mobileView: boolean,
+  getEncoderLabel: EncoderLabelGetter,
+): CompressionDisplayState {
+  return {
+    output: getOutputDisplayState(sides),
+    results: getResultDisplayStates(
+      sides,
+      loading,
+      mobileView,
+      getEncoderLabel,
+    ),
+  };
 }
