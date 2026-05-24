@@ -117,6 +117,7 @@ This list is ordered by priority. Do the high-priority items before building new
     - Single-image editor update effects for new files, title refreshes, and work scheduling options now go through tested helpers instead of inline Preact lifecycle logic.
     - Single-image supported encoder filtering now lives in a tested helper instead of inline Preact options module setup.
     - Single-image saved-settings import availability now lives in a tested helper instead of inline Preact option-render logic.
+    - Single-image options initial state and supported encoder map load state now live in tested helpers.
     - Single-image saved-settings action tests now cover initial reads, per-side reads, write success, write failure, labels, keys, saved payload construction, save feedback, and import feedback.
     - Single-image initial side-state setup now lives in a tested helper instead of inline Preact state initialization.
     - Bulk normal import and MIME-sniffed import now share accepted/rejected result recording so future import surfaces do not duplicate job ID or rejection bookkeeping.
@@ -201,6 +202,7 @@ This list is ordered by priority. Do the high-priority items before building new
     - Single-image output preview tests now cover desktop/mobile orientation plus canvas sizing and contain state.
     - Single-image output control tests now cover zoom scale math, scale-percent parsing, and rotation state wrapping.
     - Range input tests now cover text focus state, focused/unfocused display values, and blank-input commit suppression.
+    - Options state tests now cover initial saved-settings availability composition and supported encoder map load state.
     - Option expander tests now cover closing, replacing children, and no-op derived state.
     - Initial app entry-state tests now cover share-target detection, editor route URLs, file-entry state, and spinner/editor/intro render modes.
     - Single-image panel layout tests now cover desktop column ordering and mobile multi-panel ordering.

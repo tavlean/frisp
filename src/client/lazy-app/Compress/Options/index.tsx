@@ -16,15 +16,14 @@ import Select from './Select';
 import { Options as QuantOptionsComponent } from 'features/processors/quantize/client';
 import { Options as ResizeOptionsComponent } from 'features/processors/resize/client';
 import { ImportIcon, SaveIcon, SwapIcon } from 'client/lazy-app/icons';
+import { getSupportedEncoderMap } from './encoder-support';
 import {
-  getSupportedEncoderMap,
-  type SupportedEncoderMap,
-} from './encoder-support';
+  getInitialOptionsState,
+  getSupportedEncoderMapLoadedState,
+  type OptionsState,
+} from './state';
 import { getEncoderSelectOptions } from './encoder-select-state';
-import {
-  getSavedSideSettingsAvailability,
-  getSavedSideSettingsAvailabilityUpdate,
-} from './saved-settings-state';
+import { getSavedSideSettingsAvailabilityUpdate } from './saved-settings-state';
 import {
   getProcessorStateWithEnabledControl,
   getProcessorStateWithOptions,
@@ -45,25 +44,20 @@ interface Props {
   onImportSideSettingsClick(index: 0 | 1): void;
 }
 
-interface State {
-  supportedEncoderMap?: SupportedEncoderMap;
-  hasLeftSideSettings: boolean;
-  hasRightSideSettings: boolean;
-}
+type State = OptionsState;
 
 const supportedEncoderMapP = getSupportedEncoderMap();
 
 export default class Options extends Component<Props, State> {
-  state: State = {
-    supportedEncoderMap: undefined,
-    ...getSavedSideSettingsAvailability(),
-  };
+  state: State = getInitialOptionsState();
+  private isUnmounted = false;
 
   constructor() {
     super();
-    supportedEncoderMapP.then((supportedEncoderMap) =>
-      this.setState({ supportedEncoderMap }),
-    );
+    supportedEncoderMapP.then((supportedEncoderMap) => {
+      if (this.isUnmounted) return;
+      this.setState(getSupportedEncoderMapLoadedState(supportedEncoderMap));
+    });
   }
 
   private setLeftSideSettings = () => {
@@ -81,6 +75,7 @@ export default class Options extends Component<Props, State> {
   }
 
   componentWillUnmount(): void {
+    this.isUnmounted = true;
     window.removeEventListener('leftSideSettings', this.setLeftSideSettings);
     window.removeEventListener('rightSideSettings', this.setRightSideSettings);
   }
