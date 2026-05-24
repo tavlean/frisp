@@ -25,6 +25,7 @@ Use this as a backlog seed. Keep each issue small enough to review in one focuse
    - Started: bulk queue/session tests now cover exported-count consistency when an exported job is completed or failed again.
    - Started: bulk queue/session tests now cover clearing stale output when a job fails.
    - Started: bulk session tests now cover normalizing empty per-image overrides away.
+   - Started: bulk session tests now cover job effective-settings lookup for global/per-image override merging.
    - Started: bulk session tests now cover framework-neutral override summaries for future image-strip indicators.
    - Started: bulk queue/session tests now cover exported-count consistency when one exported job is manually requeued.
    - Started: bulk retry tests now cover clearing stale outputs from failed or skipped jobs.

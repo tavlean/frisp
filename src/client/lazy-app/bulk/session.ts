@@ -1,4 +1,4 @@
-import { hasSettingsOverrides } from './settings';
+import { getEffectiveSettings, hasSettingsOverrides } from './settings';
 import type { BulkImageOverrides, BulkImageSettings } from './settings';
 
 export type ImageJobStatus =
@@ -273,6 +273,15 @@ export function markJobsExported(
 export function getSelectedJob(session: BulkSession): ImageJob | undefined {
   if (!session.selectedJobId) return;
   return session.jobs.find((job) => job.id === session.selectedJobId);
+}
+
+export function getJobEffectiveSettings(
+  session: BulkSession,
+  jobId: string,
+): BulkImageSettings | undefined {
+  const job = session.jobs.find((item) => item.id === jobId);
+  if (!job) return;
+  return getEffectiveSettings(session.globalSettings, job.overrides);
 }
 
 export function getSelectedJobContext(

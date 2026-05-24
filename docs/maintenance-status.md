@@ -14,7 +14,7 @@ Project homepage metadata: `https://sqush.app`.
 
 Old fork: `tavlean/SquooshPlus`, archived and kept as historical reference.
 
-Working tree at last update: bulk selected-job context helper work in progress after local helper and type checks. Run `git status --short --branch` for the exact state.
+Working tree at last update: bulk job effective-settings helper work in progress after local helper, type, and format checks. Run `git status --short --branch` for the exact state.
 
 Latest recent committed work at last update:
 
@@ -89,6 +89,9 @@ Latest verification run:
 - `npm run test:unit`: passed after bulk action-state selectors.
 - `npm run typecheck`: passed after bulk selected-job context helper.
 - `npm run test:unit`: passed after bulk selected-job context helper.
+- `npm run format:check`: passed after bulk job effective-settings helper.
+- `npm run typecheck`: passed after bulk job effective-settings helper.
+- `npm run test:unit`: passed after bulk job effective-settings helper.
 - `npm run build && npm run smoke:build`: passed.
 - `npm run test:helpers`: passed.
 - `npm run check`: passed after CI matrix diagnostics.
@@ -175,6 +178,7 @@ Quick investigation note:
 - Added framework-neutral bulk override summary helpers for future image-strip indicators.
 - Added framework-neutral bulk next/previous selection helpers for future image-strip navigation.
 - Added framework-neutral bulk selected-job context for future image-strip navigation state.
+- Added framework-neutral bulk job effective-settings lookup to keep global/override merge rules out of UI code.
 - Added framework-neutral bulk job status grouping for future status labels and controls.
 - Added framework-neutral bulk action-state selectors for future export/retry/activity controls.
 - Tightened bulk settings merging so falsy overrides such as `false` and `0` remain valid per-image overrides.

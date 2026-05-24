@@ -8,13 +8,13 @@ Make Sqush a lean, maintainable, secure image optimization tool that is comforta
 
 ## Current progress
 
-| Area                                 | Progress | State                                                                                                                        |
-| ------------------------------------ | -------: | ---------------------------------------------------------------------------------------------------------------------------- |
-| Stabilization, CI, and security      |      85% | Audit is clean, CI covers Ubuntu, Windows, and macOS, and WebP output has manual production-build smoke coverage.            |
-| Documentation and handoff clarity    |      78% | Core docs exist. Progress, roadmap, issue list, codec provenance, QA, and maintenance status are tracked.                    |
-| Bulk backend foundation              |      63% | Framework-neutral helpers now cover import, settings, queueing, summaries, selection context, actions, processing, and URLs. |
-| Repo simplification                  |      33% | Dependency and script cleanup started. Codec surface, Preact coupling, and custom Rollup complexity still remain.            |
-| Svelte/SvelteKit migration readiness |      22% | Shared pipeline and bulk logic extraction has started. UI migration should wait until behavior is better tested.             |
+| Area                                 | Progress | State                                                                                                                               |
+| ------------------------------------ | -------: | ----------------------------------------------------------------------------------------------------------------------------------- |
+| Stabilization, CI, and security      |      85% | Audit is clean, CI covers Ubuntu, Windows, and macOS, and WebP output has manual production-build smoke coverage.                   |
+| Documentation and handoff clarity    |      78% | Core docs exist. Progress, roadmap, issue list, codec provenance, QA, and maintenance status are tracked.                           |
+| Bulk backend foundation              |      64% | Framework-neutral helpers now cover import, settings lookup, queueing, summaries, selection context, actions, processing, and URLs. |
+| Repo simplification                  |      33% | Dependency and script cleanup started. Codec surface, Preact coupling, and custom Rollup complexity still remain.                   |
+| Svelte/SvelteKit migration readiness |      22% | Shared pipeline and bulk logic extraction has started. UI migration should wait until behavior is better tested.                    |
 
 These percentages are rough planning signals, not release guarantees.
 
