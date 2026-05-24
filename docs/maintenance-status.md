@@ -14,7 +14,7 @@ Project homepage metadata: `https://sqush.app`.
 
 Historical archived fork, not the current project: `tavlean/SquooshPlus`.
 
-Working tree at last update: codec provenance now records the 80 committed JS/WASM codec artifacts and adds a concrete pre-removal checklist. Run `git status --short --branch` for the exact state.
+Working tree at last update: build/runtime docs now describe the current dev, serve, and preview wrapper scripts. Run `git status --short --branch` for the exact state.
 
 Latest recent committed work at last update:
 

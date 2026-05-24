@@ -12,7 +12,9 @@ This document explains how the custom build works in plain language.
 `npm run dev` does two things at the same time:
 
 1. Rollup watches source files and rebuilds `.tmp/build`.
-2. `serve` serves `.tmp/build/static`.
+2. `lib/dev-static-server.js` serves `.tmp/build/static` through `serve`.
+
+`npm run preview` serves the finished `build/` folder through `lib/preview-server.js`. Use it after `npm run build` when testing the production output locally.
 
 ## TypeScript
 
@@ -36,6 +38,12 @@ Important custom plugins:
 - `lib/css-plugin.js`: handles CSS modules and emitted CSS.
 - `lib/url-plugin.js` and `lib/data-url-plugin.js`: handle imported assets.
 - `lib/run-script.js`: runs the generated static-build script so it writes HTML/manifest/header files.
+
+Important local server wrappers:
+
+- `lib/dev-server.js`: starts `npm run watch` and `npm run serve` together, then cleans up both child processes on exit.
+- `lib/dev-static-server.js`: starts the `serve` package against `.tmp/build/static` using the repo's `serve.json`.
+- `lib/preview-server.js`: starts the `serve` package against the finished `build/` directory using the repo's `serve.json`.
 
 ## Generated files
 
