@@ -106,6 +106,7 @@ This list is ordered by priority. Do the high-priority items before building new
     - Bulk export summary tests now cover already-exported jobs separately from pending jobs.
     - Bulk export plan tests now cover selected job subsets, missing IDs, duplicate-safe names, and selected export totals.
     - Bulk export state tests now prevent stale encoded outputs from being marked exported.
+    - Bulk snapshot tests now cover metadata-only session snapshots that exclude live blob download URLs.
     - Result-cache tests now cover cache hits, mismatched image data, mismatched encoder options, and mismatched processor options.
     - Output filename tests now cover extensionless sources, trailing dots, hidden names, and path-like source names.
     - Single-image side reset tests now cover clearing both side outputs and revoking both side download URLs when a new source image is loaded.

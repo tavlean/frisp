@@ -121,6 +121,20 @@ interface ImageOutput {
 
 `settingsHash` lets the app decide whether an image output is still valid after settings change.
 
+### Session snapshots
+
+Bulk session snapshots are metadata records for handoff, diagnostics, and future persistence planning.
+
+Current module: `src/client/lazy-app/bulk/snapshot.ts`.
+
+Snapshot rules:
+
+- Include durable metadata: session id, global settings, selected job id, job ids, file names, MIME types, sizes, last-modified timestamps, statuses, overrides, errors, and output size summaries.
+- Exclude live browser objects: source `File`, output `File`, `ImageData`, `ImageBitmap`, object URLs, blob URLs, workers, and abort controllers.
+- Do not store snapshots in `localStorage` as a complete restore mechanism. A snapshot alone cannot restore the user-selected source files after a page reload.
+- If full bulk restore is added later, use a deliberate browser storage design such as IndexedDB for file/blob data and keep object URLs as runtime-only values.
+- Normalize derived counters before creating a snapshot so persisted/debug metadata does not preserve stale active/exported counts.
+
 ## Processing behavior
 
 ### Import

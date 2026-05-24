@@ -12,9 +12,9 @@ Default branch: `main`.
 
 Project homepage metadata: `https://sqush.app`.
 
-Old fork: `tavlean/SquooshPlus`, archived and kept as historical reference.
+Historical archived fork, not the current project: `tavlean/SquooshPlus`.
 
-Working tree at last update: bulk queue transitions now normalize session counters before status changes, with local checks passing. Run `git status --short --branch` for the exact state.
+Working tree at last update: bulk sessions now have metadata-only snapshots that exclude live browser objects, with helper tests passing. Run `git status --short --branch` for the exact state.
 
 Latest recent committed work at last update:
 
@@ -170,6 +170,7 @@ Latest verification run:
 - `npm run check`: passed after adding canonical bulk session counter derivation and normalization.
 - `npm run check`: passed after making bulk queue scheduling drift-tolerant.
 - `npm run check`: passed after making bulk queue status transitions normalize drifted counters.
+- `npm run test:helpers`: passed after adding metadata-only bulk session snapshots.
 - `npm run build && npm run smoke:build`: passed.
 - `npm run test:helpers`: passed.
 - `npm run check`: passed after CI matrix diagnostics.
