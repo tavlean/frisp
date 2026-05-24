@@ -12,6 +12,14 @@ import { getEffectiveSettings, settingsHash } from './settings';
 
 export const defaultBulkConcurrency = 2;
 
+export interface BulkQueueState {
+  concurrency: number;
+  activeJobs: number;
+  queuedJobs: number;
+  openSlots: number;
+  runnableJobs: ImageJob[];
+}
+
 function normalizeBulkConcurrency(concurrency: number): number {
   if (!Number.isFinite(concurrency)) return defaultBulkConcurrency;
   return Math.max(0, Math.floor(concurrency));
@@ -31,6 +39,26 @@ export function getRunnableJobs(
   return session.jobs
     .filter((job) => job.status === 'queued')
     .slice(0, openSlots);
+}
+
+export function getBulkQueueState(
+  session: BulkSession,
+  concurrency = defaultBulkConcurrency,
+): BulkQueueState {
+  const normalizedConcurrency = normalizeBulkConcurrency(concurrency);
+  const { activeJobs } = getBulkSessionCounters(session.jobs);
+  const queuedJobs = session.jobs.filter(
+    (job) => job.status === 'queued',
+  ).length;
+  const openSlots = Math.max(0, normalizedConcurrency - activeJobs);
+
+  return {
+    concurrency: normalizedConcurrency,
+    activeJobs,
+    queuedJobs,
+    openSlots,
+    runnableJobs: getRunnableJobs(session, normalizedConcurrency),
+  };
 }
 
 export function updateJob(
