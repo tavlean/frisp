@@ -4,6 +4,7 @@ import { getPercentChange } from './size';
 
 export interface BulkExportSummary {
   ready: number;
+  exported: number;
   failed: number;
   pending: number;
   skipped: number;
@@ -128,6 +129,7 @@ export function getBulkJobSizeSummary(
 
 export function getBulkExportSummary(session: BulkSession): BulkExportSummary {
   let ready = 0;
+  let exported = 0;
   let failed = 0;
   let pending = 0;
   let skipped = 0;
@@ -145,6 +147,8 @@ export function getBulkExportSummary(session: BulkSession): BulkExportSummary {
       ready += 1;
       totalOriginalSize += job.originalSize;
       totalOutputSize += job.output.size;
+    } else if (job.status === 'exported' && job.output) {
+      exported += 1;
     } else {
       pending += 1;
     }
@@ -152,6 +156,7 @@ export function getBulkExportSummary(session: BulkSession): BulkExportSummary {
 
   return {
     ready,
+    exported,
     failed,
     pending,
     skipped,
