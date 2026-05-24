@@ -6,6 +6,10 @@ export interface SavedSideSettingsAvailability {
   hasRightSideSettings: boolean;
 }
 
+export type SavedSideSettingsEventKey =
+  | 'leftSideSettings'
+  | 'rightSideSettings';
+
 export function getSavedSideSettingsAvailability(
   hasSettings = hasSavedSideSettings,
 ): SavedSideSettingsAvailability {
@@ -22,4 +26,19 @@ export function canImportSavedSideSettings(
   return index === 0
     ? availability.hasLeftSideSettings
     : availability.hasRightSideSettings;
+}
+
+export function getSavedSideSettingsAvailabilityUpdate(
+  eventKey: SavedSideSettingsEventKey,
+  availability = getSavedSideSettingsAvailability(),
+): Partial<SavedSideSettingsAvailability> {
+  if (eventKey === 'leftSideSettings') {
+    return {
+      hasLeftSideSettings: availability.hasLeftSideSettings,
+    };
+  }
+
+  return {
+    hasRightSideSettings: availability.hasRightSideSettings,
+  };
 }

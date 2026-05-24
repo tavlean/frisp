@@ -186,6 +186,7 @@ This list is ordered by priority. Do the high-priority items before building new
     - Single-image processing error tests now cover source decode, preprocessing, and side processing messages.
     - Single-image encoder select tests now cover identity/WebP values, original-image filename labels, and supported encoder option mapping.
     - Single-image processor control tests now cover resize/quantize control parsing, enable transitions, processor option merges, default resize option inputs, and vector resize option inputs.
+    - Single-image saved-settings availability tests now cover per-side event update patches.
     - Resize preset tests now cover preset size rounding and custom preset detection.
     - Single-image result size tests now cover empty, original, smaller, and larger output display states.
     - Single-image result loading tests now cover initial loading state plus hide, delayed-show, and no-op transitions.

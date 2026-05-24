@@ -21,7 +21,10 @@ import {
   type SupportedEncoderMap,
 } from './encoder-support';
 import { getEncoderSelectOptions } from './encoder-select-state';
-import { getSavedSideSettingsAvailability } from './saved-settings-state';
+import {
+  getSavedSideSettingsAvailability,
+  getSavedSideSettingsAvailabilityUpdate,
+} from './saved-settings-state';
 import {
   getProcessorStateWithEnabledControl,
   getProcessorStateWithOptions,
@@ -64,17 +67,11 @@ export default class Options extends Component<Props, State> {
   }
 
   private setLeftSideSettings = () => {
-    this.setState({
-      hasLeftSideSettings:
-        getSavedSideSettingsAvailability().hasLeftSideSettings,
-    });
+    this.setState(getSavedSideSettingsAvailabilityUpdate('leftSideSettings'));
   };
 
   private setRightSideSettings = () => {
-    this.setState({
-      hasRightSideSettings:
-        getSavedSideSettingsAvailability().hasRightSideSettings,
-    });
+    this.setState(getSavedSideSettingsAvailabilityUpdate('rightSideSettings'));
   };
 
   componentDidMount(): void {
