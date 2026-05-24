@@ -152,7 +152,12 @@ export async function builtinDecode(
     signal,
     'createImageBitmap' in self ? createImageBitmap(blob) : blobToImg(blob),
   );
-  return drawableToImageData(drawable);
+
+  try {
+    return drawableToImageData(drawable);
+  } finally {
+    if ('close' in drawable) drawable.close();
+  }
 }
 
 /**

@@ -14,7 +14,7 @@ Project homepage metadata: `https://sqush.app`.
 
 Old fork: `tavlean/SquooshPlus`, archived and kept as historical reference.
 
-Working tree at last update: compressed output filename generation now preserves extensionless source names instead of producing names like `.webp`. Run `git status --short --branch` for the exact state.
+Working tree at last update: built-in browser decode now closes `ImageBitmap` resources after converting them to `ImageData`. Run `git status --short --branch` for the exact state.
 
 Latest recent committed work at last update:
 
@@ -143,6 +143,9 @@ Latest verification run:
 - GitHub Actions passed on Ubuntu, Windows, and macOS for `baed797` (`Reset both editor sides on new source`).
 - `npm run test:helpers`: passed after extracting compressed output filename generation.
 - `npm run check`: passed after extracting compressed output filename generation.
+- `npm run test:helpers`: passed after adding `ImageBitmap` cleanup to built-in decode.
+- `npm run typecheck`: passed after adding `ImageBitmap` cleanup to built-in decode.
+- `npm run check`: passed after adding `ImageBitmap` cleanup to built-in decode.
 - `npm run build && npm run smoke:build`: passed.
 - `npm run test:helpers`: passed.
 - `npm run check`: passed after CI matrix diagnostics.
