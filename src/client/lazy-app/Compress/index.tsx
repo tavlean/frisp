@@ -8,7 +8,6 @@ import {
   ProcessorState,
   EncoderState,
   encoderMap,
-  defaultPreprocessorState,
   EncoderType,
   EncoderOptions,
 } from '../feature-meta';
@@ -20,6 +19,7 @@ import {
   getEditorUpdateEffects,
   getEditorUpdateScheduleOptions,
 } from './editor-lifecycle';
+import { getInitialCompressionState } from './editor-state';
 import {
   getImageUpdateSchedule,
   type ImageUpdateScheduleOptions,
@@ -52,7 +52,6 @@ import {
 } from './saved-settings';
 import {
   applySavedSideSettings,
-  getInitialSideStates,
   restoreSide,
   resetSidesForNewSourceData,
   revokeSideDownloadUrls,
@@ -129,11 +128,10 @@ export default class Compress extends Component<Props, State> {
   widthQuery = window.matchMedia(mobileWidthMediaQuery);
 
   state: State = {
-    source: undefined,
-    loading: false,
-    preprocessorState: defaultPreprocessorState,
-    sides: getInitialSideStates(readInitialSavedSideSettings()),
-    ...getViewportState(this.widthQuery.matches),
+    ...getInitialCompressionState(
+      readInitialSavedSideSettings(),
+      this.widthQuery.matches,
+    ),
   };
 
   private readonly encodeCache = new ResultCache();
