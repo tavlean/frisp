@@ -14,7 +14,7 @@ Project homepage metadata: `https://sqush.app`.
 
 Historical archived fork, not the current project: `tavlean/SquooshPlus`.
 
-Working tree at last update: serialized bulk session snapshots now parse through a validator that rejects malformed data and normalizes derived counters, with helper tests passing. Run `git status --short --branch` for the exact state.
+Working tree at last update: bulk export summaries now treat stale exported outputs as pending work, with the full local check passing. Run `git status --short --branch` for the exact state.
 
 Latest recent committed work at last update:
 
@@ -172,6 +172,7 @@ Latest verification run:
 - `npm run check`: passed after making bulk queue status transitions normalize drifted counters.
 - `npm run test:helpers`: passed after adding metadata-only bulk session snapshots.
 - `npm run test:helpers`: passed after adding serialized bulk snapshot validation coverage.
+- `npm run check`: passed after making stale exported outputs pending in bulk export summaries.
 - `npm run build && npm run smoke:build`: passed.
 - `npm run test:helpers`: passed.
 - `npm run check`: passed after CI matrix diagnostics.

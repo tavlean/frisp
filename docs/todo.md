@@ -104,6 +104,7 @@ This list is ordered by priority. Do the high-priority items before building new
     - Bulk requeue tests now cover active jobs being reset and active counters being decremented.
     - Bulk export tests now cover Windows reserved output names.
     - Bulk export summary tests now cover already-exported jobs separately from pending jobs.
+    - Bulk export summary tests now cover stale exported outputs being treated as pending instead of current exports.
     - Bulk export plan tests now cover selected job subsets, missing IDs, duplicate-safe names, and selected export totals.
     - Bulk export state tests now prevent stale encoded outputs from being marked exported.
     - Bulk snapshot tests now cover metadata-only session snapshots that exclude live blob download URLs and validate serialized snapshot parsing.

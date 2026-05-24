@@ -179,7 +179,11 @@ export function getBulkExportSummary(
       ready += 1;
       totalOriginalSize += job.originalSize;
       totalOutputSize += job.output.size;
-    } else if (job.status === 'exported' && job.output) {
+    } else if (
+      job.status === 'exported' &&
+      job.output &&
+      !isJobOutputStale(session, job)
+    ) {
       exported += 1;
     } else {
       pending += 1;
