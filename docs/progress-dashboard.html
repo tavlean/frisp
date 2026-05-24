@@ -540,7 +540,7 @@
               </svg>
               Current work
             </span>
-            <strong>stateless option controls</strong>
+            <strong>expander derived state</strong>
           </div>
           <div class="meta-row">
             <span class="meta-label">
@@ -656,11 +656,11 @@
               </svg>
             </span>
             <div>
-              <strong>92% <span class="delta">+1</span></strong>
+              <strong>93% <span class="delta">+1</span></strong>
               <span>Repo simplification</span>
             </div>
           </div>
-          <div class="bar"><span style="width: 92%"></span></div>
+          <div class="bar"><span style="width: 93%"></span></div>
         </div>
         <div class="metric">
           <div class="metric-body">
@@ -677,11 +677,11 @@
               </svg>
             </span>
             <div>
-              <strong>77% <span class="delta">+1</span></strong>
+              <strong>78% <span class="delta">+1</span></strong>
               <span>Svelte readiness</span>
             </div>
           </div>
-          <div class="bar"><span style="width: 77%"></span></div>
+          <div class="bar"><span style="width: 78%"></span></div>
         </div>
       </section>
 
@@ -904,9 +904,9 @@
                     </span>
                     Repo simplification
                   </span>
-                  <span>92%</span>
+                  <span>93%</span>
                 </div>
-                <div class="bar"><span style="width: 92%"></span></div>
+                <div class="bar"><span style="width: 93%"></span></div>
                 <p class="progress-note">
                   Single-image behavior is being extracted from Preact into
                   tested helpers, including the initial app entry state, and
@@ -942,6 +942,9 @@
                     <li>
                       Stateless checkbox, toggle, select, and revealer option
                       controls no longer use class components.
+                    </li>
+                    <li>
+                      Option expander derived state now lives in a tested helper.
                     </li>
                     <li>
                       Preprocessor-change state now lives in a tested source
@@ -1008,9 +1011,9 @@
                     </span>
                     Svelte/SvelteKit migration readiness
                   </span>
-                  <span>77%</span>
+                  <span>78%</span>
                 </div>
-                <div class="bar"><span style="width: 77%"></span></div>
+                <div class="bar"><span style="width: 78%"></span></div>
                 <p class="progress-note">
                   Migration has not started. Current work is preparing reusable
                   logic, reducing legacy Preact assumptions, and documenting the
@@ -1031,6 +1034,10 @@
                     <li>
                       Stateless option controls now use function components
                       instead of empty-state Preact classes.
+                    </li>
+                    <li>
+                      Option expander state transitions are now plain helper
+                      data.
                     </li>
                     <li>
                       Single-image side job state, side settings state, initial

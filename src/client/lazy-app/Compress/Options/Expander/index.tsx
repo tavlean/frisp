@@ -2,29 +2,19 @@ import { h, Component, ComponentChild, ComponentChildren } from 'preact';
 import * as style from './style.css';
 import 'add-css:./style.css';
 import { transitionHeight } from '../../../util';
+import { getExpanderDerivedState, type ExpanderState } from './state';
 
 interface Props {
   children: ComponentChildren;
 }
-interface State {
-  children: ComponentChildren;
-  outgoingChildren: ComponentChildren;
-}
+type State = ExpanderState;
 
 export default class Expander extends Component<Props, State> {
   static getDerivedStateFromProps(
     props: Props,
     state: State,
   ): Partial<State> | null {
-    if (!props.children && state.children) {
-      return { children: props.children, outgoingChildren: state.children };
-    }
-
-    if (props.children !== state.children) {
-      return { children: props.children, outgoingChildren: undefined };
-    }
-
-    return null;
+    return getExpanderDerivedState(props.children, state);
   }
 
   async componentDidUpdate(_: Props, previousState: State) {
