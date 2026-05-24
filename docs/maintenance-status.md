@@ -14,10 +14,13 @@ Project homepage metadata: `https://sqush.app`.
 
 Old fork: `tavlean/SquooshPlus`, archived and kept as historical reference.
 
-Working tree at last update: bulk job effective-settings helper work in progress after local helper, type, and format checks. Run `git status --short --branch` for the exact state.
+Working tree at last update: clean after bulk job effective-settings helper and CI verification. Run `git status --short --branch` for the exact state.
 
 Latest recent committed work at last update:
 
+- `6f007fe` Add bulk job settings lookup
+- `08cb06a` Add bulk selected job context
+- `6608e75` Add bulk action selectors
 - `281521b` Update handoff after status grouping
 - `662808c` Group bulk job statuses
 - `0f9b001` Update handoff after selection navigation
@@ -105,6 +108,7 @@ Latest verification run:
 - Latest observed GitHub Actions state after bulk selection navigation cleanup: `04488dd` passed on Ubuntu, Windows, and macOS.
 - Latest observed GitHub Actions state after bulk status grouping cleanup: `662808c` passed on Ubuntu, Windows, and macOS.
 - Latest observed GitHub Actions state after latest handoff update: `281521b` passed on Ubuntu, Windows, and macOS.
+- Latest observed GitHub Actions state after bulk action/selection/effective-settings cleanup: `6f007fe` passed on Ubuntu, Windows, and macOS.
 - `npm run serve` wrapper: launched successfully on port 55194.
 - Browser production-preview smoke: passed after shared image pipeline extraction; app shell, Sqush logo, and drop target rendered.
 - Playwright CLI production-build smoke: passed after the Sqush rename, with `Sqush` title, file input present, Sqush logo alt text present, and zero console messages.
