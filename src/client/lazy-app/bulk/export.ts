@@ -38,6 +38,12 @@ export interface BulkExportEntry {
   size: number;
 }
 
+export interface BulkExportPlan {
+  archiveName: string;
+  entries: BulkExportEntry[];
+  summary: BulkExportSummary;
+}
+
 function splitFileName(fileName: string): {
   baseName: string;
   extension: string;
@@ -94,8 +100,28 @@ export function getExportableJobs(session: BulkSession): ImageJob[] {
   );
 }
 
-export function canExportBulkSession(session: BulkSession): boolean {
-  return getExportableJobs(session).length > 0;
+function getRequestedJobIds(
+  jobIds?: Iterable<string>,
+): Set<string> | undefined {
+  if (!jobIds) return;
+  return new Set(jobIds);
+}
+
+export function getSelectedExportableJobs(
+  session: BulkSession,
+  jobIds?: Iterable<string>,
+): ImageJob[] {
+  const requestedJobIds = getRequestedJobIds(jobIds);
+  const exportableJobs = getExportableJobs(session);
+  if (!requestedJobIds) return exportableJobs;
+  return exportableJobs.filter((job) => requestedJobIds.has(job.id));
+}
+
+export function canExportBulkSession(
+  session: BulkSession,
+  jobIds?: Iterable<string>,
+): boolean {
+  return getSelectedExportableJobs(session, jobIds).length > 0;
 }
 
 export function getBulkJobSizeSummary(
@@ -207,9 +233,12 @@ export function getBulkOutputFileName(job: ImageJob): string {
   return extension ? `${safeBaseName}.${extension}` : safeBaseName;
 }
 
-export function getBulkExportEntries(session: BulkSession): BulkExportEntry[] {
+export function getBulkExportEntries(
+  session: BulkSession,
+  jobIds?: Iterable<string>,
+): BulkExportEntry[] {
   const knownNames = new Set<string>();
-  return getExportableJobs(session).map((job) => {
+  return getSelectedExportableJobs(session, jobIds).map((job) => {
     const output = job.output!;
     return {
       job,
@@ -218,4 +247,34 @@ export function getBulkExportEntries(session: BulkSession): BulkExportEntry[] {
       size: output.size,
     };
   });
+}
+
+export function createBulkExportPlan(
+  session: BulkSession,
+  jobIds?: Iterable<string>,
+): BulkExportPlan {
+  const entries = getBulkExportEntries(session, jobIds);
+  const totalOriginalSize = entries.reduce(
+    (total, entry) => total + entry.job.originalSize,
+    0,
+  );
+  const totalOutputSize = entries.reduce(
+    (total, entry) => total + entry.size,
+    0,
+  );
+
+  return {
+    archiveName: getBulkExportName(session),
+    entries,
+    summary: {
+      ready: entries.length,
+      exported: 0,
+      failed: 0,
+      pending: 0,
+      skipped: 0,
+      totalOriginalSize,
+      totalOutputSize,
+      percentChange: getPercentChange(totalOriginalSize, totalOutputSize),
+    },
+  };
 }

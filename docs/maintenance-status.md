@@ -14,7 +14,7 @@ Project homepage metadata: `https://sqush.app`.
 
 Old fork: `tavlean/SquooshPlus`, archived and kept as historical reference.
 
-Working tree at last update: Svelte MCP documentation has been reviewed and a Svelte migration context document is being added. Run `git status --short --branch` for the exact state.
+Working tree at last update: selected bulk export plan helpers have been added and are being verified. Run `git status --short --branch` for the exact state.
 
 Latest recent committed work at last update:
 
@@ -131,6 +131,8 @@ Latest verification run:
 - `npm run check`: passed after adding an `exported` count to bulk export summaries and keeping exported jobs out of pending counts.
 - GitHub Actions passed on Ubuntu, Windows, and macOS for `207589f` (`Track exported bulk summary counts`).
 - `npm run check`: passed after adding Svelte migration context documentation.
+- `npm run test:helpers`: passed after adding selected bulk export plan helpers.
+- `npm run check`: passed after adding selected bulk export plan helpers.
 - `npm run build && npm run smoke:build`: passed.
 - `npm run test:helpers`: passed.
 - `npm run check`: passed after CI matrix diagnostics.
