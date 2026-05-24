@@ -49,6 +49,11 @@ export interface BatchProgress {
   exported: number;
 }
 
+export interface OverrideSummary {
+  overridden: number;
+  total: number;
+}
+
 export function createBulkSession(
   id: string,
   globalSettings: BulkImageSettings,
@@ -213,6 +218,17 @@ export function markJobsExported(
 export function getSelectedJob(session: BulkSession): ImageJob | undefined {
   if (!session.selectedJobId) return;
   return session.jobs.find((job) => job.id === session.selectedJobId);
+}
+
+export function getOverriddenJobs(session: BulkSession): ImageJob[] {
+  return session.jobs.filter((job) => hasSettingsOverrides(job.overrides));
+}
+
+export function getOverrideSummary(session: BulkSession): OverrideSummary {
+  return {
+    overridden: getOverriddenJobs(session).length,
+    total: session.jobs.length,
+  };
 }
 
 export function getBatchProgress(session: BulkSession): {
