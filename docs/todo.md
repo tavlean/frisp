@@ -103,6 +103,7 @@ This list is ordered by priority. Do the high-priority items before building new
     - Bulk export summary tests now cover already-exported jobs separately from pending jobs.
     - Bulk export plan tests now cover selected job subsets, missing IDs, duplicate-safe names, and selected export totals.
     - Result-cache tests now cover cache hits, mismatched image data, mismatched encoder options, and mismatched processor options.
+    - Single-image side reset tests now cover clearing both side outputs and revoking both side download URLs when a new source image is loaded.
     - MIME sniffing tests now cover PNG, JPEG, WebP, TIFF, AVIF, JPEG XL, unknown data, a TIFF false-positive guard, and a non-AVIF `ftyp` guard.
     - `npm run test:unit` runs the current pure-helper test suite.
     - `clean-modify`

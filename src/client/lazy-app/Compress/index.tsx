@@ -37,6 +37,7 @@ import {
   writeSavedSideSettings,
 } from './saved-settings';
 import { processorStateEquivalent } from './processor-state';
+import { resetSidesForNewSourceData } from './side-state';
 import type { LocalStorageKey } from '../storage';
 
 export type OutputType = EncoderType | 'identity';
@@ -111,26 +112,6 @@ function initialSide(index: 0 | 1): Side {
     ...savedSettings,
     loading: false,
   };
-}
-
-function stateForNewSourceData(state: State): State {
-  let newState = { ...state };
-
-  for (const i of [0, 1]) {
-    // Ditch previous encodings
-    const downloadUrl = state.sides[i].downloadUrl;
-    if (downloadUrl) URL.revokeObjectURL(downloadUrl);
-
-    newState = cleanMerge(state, `sides.${i}`, {
-      preprocessed: undefined,
-      file: undefined,
-      downloadUrl: undefined,
-      data: undefined,
-      encodedSettings: undefined,
-    });
-  }
-
-  return newState;
 }
 
 const loadingIndicator = '⏳ ';
@@ -596,7 +577,7 @@ export default class Compress extends Component<Props, State> {
               return newSide;
             }) as [Side, Side],
           };
-          newState = stateForNewSourceData(newState);
+          newState = resetSidesForNewSourceData(newState);
           return newState;
         });
       } catch (err) {

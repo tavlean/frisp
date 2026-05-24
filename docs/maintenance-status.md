@@ -14,7 +14,7 @@ Project homepage metadata: `https://sqush.app`.
 
 Old fork: `tavlean/SquooshPlus`, archived and kept as historical reference.
 
-Working tree at last update: selected bulk export summaries now cover the full selected scope, including ready, exported, failed, and pending jobs. Run `git status --short --branch` for the exact state.
+Working tree at last update: single-image side reset logic has been extracted and covered so both editor sides clear stale output data when a new source image loads. Run `git status --short --branch` for the exact state.
 
 Latest recent committed work at last update:
 
@@ -135,6 +135,10 @@ Latest verification run:
 - `npm run check`: passed after adding selected bulk export plan helpers.
 - GitHub Actions passed on Ubuntu, Windows, and macOS for `e68caee` (`Plan selected bulk exports`).
 - `npm run check`: passed after tightening selected bulk export summary semantics.
+- GitHub Actions passed on Ubuntu, Windows, and macOS for `54a12b5` (`Summarize selected bulk exports`).
+- `npm run test:helpers`: passed after extracting and covering single-image side reset logic.
+- `npm run typecheck`: passed after extracting and covering single-image side reset logic.
+- `npm run check`: passed after extracting and covering single-image side reset logic.
 - `npm run build && npm run smoke:build`: passed.
 - `npm run test:helpers`: passed.
 - `npm run check`: passed after CI matrix diagnostics.
@@ -166,6 +170,7 @@ Latest verification run:
 - Latest observed GitHub Actions state after bulk runner no-op and reserved export name cleanup: `b7d0f3b` passed on Ubuntu, Windows, and macOS.
 - Latest observed GitHub Actions state after bulk exported-count summaries: `207589f` passed on Ubuntu, Windows, and macOS.
 - Latest observed GitHub Actions state after selected bulk export plans: `e68caee` passed on Ubuntu, Windows, and macOS.
+- Latest observed GitHub Actions state after selected bulk export summaries: `54a12b5` passed on Ubuntu, Windows, and macOS.
 - `npm run serve` wrapper: launched successfully on port 55194.
 - Browser production-preview smoke: passed after shared image pipeline extraction; app shell, Sqush logo, and drop target rendered.
 - Playwright CLI production-build smoke: passed after the Sqush rename, with `Sqush` title, file input present, Sqush logo alt text present, and zero console messages.
