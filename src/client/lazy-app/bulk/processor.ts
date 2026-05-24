@@ -30,12 +30,37 @@ export interface BulkProcessJobOptions {
   createDownloadUrl?: (file: File) => string;
 }
 
+export interface BulkProcessPlan {
+  effectiveSettings: BulkImageSettings;
+  encoderState: NonNullable<BulkImageSettings['encoderState']>;
+  settingsHash: string;
+  sourceFileName: string;
+}
+
 const defaultPipeline: BulkProcessorPipeline = {
   decodeImage,
   preprocessImage,
   processImage,
   compressImage,
 };
+
+export function createBulkProcessPlan(
+  job: ImageJob,
+  globalSettings: BulkImageSettings,
+): BulkProcessPlan {
+  const effectiveSettings = getEffectiveSettings(globalSettings, job.overrides);
+
+  if (!effectiveSettings.encoderState) {
+    throw Error('Bulk job requires an encoder');
+  }
+
+  return {
+    effectiveSettings,
+    encoderState: effectiveSettings.encoderState,
+    settingsHash: settingsHash(effectiveSettings),
+    sourceFileName: job.sourceFile.name,
+  };
+}
 
 export async function processBulkImageJob({
   job,
@@ -46,11 +71,7 @@ export async function processBulkImageJob({
   pipeline = defaultPipeline,
   createDownloadUrl = (file) => URL.createObjectURL(file),
 }: BulkProcessJobOptions): Promise<ImageOutput> {
-  const effectiveSettings = getEffectiveSettings(globalSettings, job.overrides);
-
-  if (!effectiveSettings.encoderState) {
-    throw Error('Bulk job requires an encoder');
-  }
+  const plan = createBulkProcessPlan(job, globalSettings);
 
   const decoded = await pipeline.decodeImage(
     signal,
@@ -71,14 +92,14 @@ export async function processBulkImageJob({
   const processed = await pipeline.processImage(
     signal,
     source,
-    effectiveSettings.processorState,
+    plan.effectiveSettings.processorState,
     workerBridge,
   );
   const file = await pipeline.compressImage(
     signal,
     processed,
-    effectiveSettings.encoderState,
-    job.sourceFile.name,
+    plan.encoderState,
+    plan.sourceFileName,
     workerBridge,
   );
 
@@ -87,6 +108,6 @@ export async function processBulkImageJob({
     size: file.size,
     downloadUrl: createDownloadUrl(file),
     percentChange: getPercentChange(job.originalSize, file.size),
-    settingsHash: settingsHash(effectiveSettings),
+    settingsHash: plan.settingsHash,
   };
 }

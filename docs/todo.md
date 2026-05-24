@@ -108,6 +108,7 @@ This list is ordered by priority. Do the high-priority items before building new
     - Bulk import tests now cover creating a bulk session from accepted import jobs while ignoring rejected files.
     - Bulk runner tests now cover no-op runs when no jobs are runnable or concurrency is zero.
     - Bulk runner tests now cover draining the full queue across multiple concurrency-limited batches.
+    - Bulk processor tests now cover pure process-plan creation before decode starts.
     - Bulk queue tests now cover derived queue state for normalized concurrency, active counts, open slots, queued counts, and runnable job ids.
     - Bulk requeue tests now cover active jobs being reset and active counters being decremented.
     - Bulk cancellation tests now cover resetting only active jobs while preserving failed, skipped, and completed jobs.

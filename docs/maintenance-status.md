@@ -16,7 +16,7 @@ Historical archived fork, not the current project: `tavlean/SquooshPlus`.
 
 Project identity note: see [Project identity](project-identity.md). The current app/repo/package name is Sqush. The only known remaining old-name item is the local workspace folder, currently `/Users/tav/Development/Tavlean/SquooshPlus`; rename it to `/Users/tav/Development/Tavlean/Sqush` after closing this active Codex workspace/session and reopen Codex from the new path.
 
-Working tree at last update: progress dashboard reflects browser smoke coverage for saved-settings import and expanded single-image pure helpers. Bulk helpers include a framework-neutral barrel export, import-to-session helper, selected-job detail selector, queue-state selector, export-plan completion helper, strip item selectors, session summary selectors, and metadata-only snapshot restore from parsed or serialized snapshots for future UI/Svelte consumption. Single-image editor work planning, source resize rules, orientation resize adjustment, side-copy URL behavior, default/saved side-state updates, and document-title/loading selectors are partly extracted into pure helpers. Browser smoke now covers real saved-settings import. Project identity is documented so the old local folder/archive name is not confused with current Sqush branding. Run `git status --short --branch` for the exact state.
+Working tree at last update: progress dashboard reflects browser smoke coverage for saved-settings import and expanded single-image pure helpers. Bulk helpers include a framework-neutral barrel export, import-to-session helper, process-plan helper, selected-job detail selector, queue-state selector, export-plan completion helper, strip item selectors, session summary selectors, and metadata-only snapshot restore from parsed or serialized snapshots for future UI/Svelte consumption. Single-image editor work planning, source resize rules, orientation resize adjustment, side-copy URL behavior, default/saved side-state updates, and document-title/loading selectors are partly extracted into pure helpers. Browser smoke now covers real saved-settings import. Project identity is documented so the old local folder/archive name is not confused with current Sqush branding. Run `git status --short --branch` for the exact state.
 
 Latest recent committed work at last update:
 
@@ -208,12 +208,14 @@ Latest verification run:
 - `npm run check`: passed after adding the bulk queue-state selector.
 - `npm run check`: passed after adding the bulk import-to-session helper and clarifying remaining local folder naming.
 - `npm run check`: passed after adding the bulk export-plan completion helper.
+- `npm run check`: passed after extracting bulk process-plan creation.
 - `npm audit --audit-level=low`: passed, 0 vulnerabilities.
 - Latest observed GitHub Actions state: pushed commits through `63adddf` passed on Ubuntu, Windows, and macOS.
 - Latest observed GitHub Actions state after the WebP smoke documentation push: `995c9b2` passed on Ubuntu, Windows, and macOS.
 - Latest observed GitHub Actions state after the bulk queue/retry cleanup: `48746ca` passed on Ubuntu, Windows, and macOS after rerunning a transient macOS DNS failure during `npm audit`.
 - Latest observed GitHub Actions state after the bulk queue-state selector: `cf3eb92` passed on Ubuntu, Windows, and macOS.
 - Latest observed GitHub Actions state after the import-to-session helper and local folder naming clarification: `d3d377b` passed on Ubuntu, Windows, and macOS.
+- Latest observed GitHub Actions state after the export-plan completion helper: `52b3556` passed on Ubuntu, Windows, and macOS.
 - Latest observed GitHub Actions state after bulk summary/override/add-jobs cleanup: `e4e3c1d` passed on Ubuntu, Windows, and macOS.
 - Latest observed GitHub Actions state after shared bulk percent-change cleanup: `6345b2d` passed on Ubuntu, Windows, and macOS.
 - Latest observed GitHub Actions state after bulk override summary cleanup: `1fdf5eb` passed on Ubuntu, Windows, and macOS.
