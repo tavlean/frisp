@@ -140,6 +140,7 @@ This list is ordered by priority. Do the high-priority items before building new
     - Result-cache tests now cover cache hits, mismatched image data, mismatched encoder options, and mismatched processor options.
     - Single-image work-plan tests now cover no-op decisions, first decode/preprocess work, original-to-encoded transitions, and encoder-only updates.
     - Single-image source-state tests now cover default raster and vector resize settings for newly decoded source images.
+    - Single-image source-state tests now cover applying default resize settings to both comparison sides without mutating the old side state.
     - Single-image source-state tests now cover orientation-change detection and resize width/height swapping after rotation.
     - Single-image document-title tests now cover idle, loading, and loaded file title text.
     - Single-image document-title tests now cover loading-state detection, file info derivation, and update gating.

@@ -53,7 +53,7 @@ import {
 } from './side-state';
 import {
   didOrientationChange,
-  getDefaultResizeState,
+  getDefaultResizeSides,
   getOrientationAdjustedSides,
 } from './source-state';
 import {
@@ -419,18 +419,13 @@ export default class Compress extends Component<Props, State> {
         // Set default resize values
         this.setState((currentState) => {
           if (mainSignal.aborted) return {};
-          const sides = currentState.sides.map((side) => {
-            const resizeState = getDefaultResizeState(
+          return {
+            sides: getDefaultResizeSides(
+              currentState.sides,
               decoded,
               Boolean(vectorImage),
-            );
-            return cleanMerge(
-              side,
-              'latestSettings.processorState.resize',
-              resizeState,
-            );
-          }) as [Side, Side];
-          return { sides };
+            ),
+          };
         });
       } catch (err) {
         if (err instanceof Error && err.name === 'AbortError') return;

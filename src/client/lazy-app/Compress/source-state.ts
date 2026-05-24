@@ -34,6 +34,17 @@ export function getDefaultResizeState(
   };
 }
 
+export function getDefaultResizeSides<Side extends ResizeSettingsSide>(
+  sides: [Side, Side],
+  source: SourceDimensions,
+  hasVectorSource: boolean,
+): [Side, Side] {
+  const resizeState = getDefaultResizeState(source, hasVectorSource);
+  return sides.map((side) =>
+    cleanMerge(side, 'latestSettings.processorState.resize', resizeState),
+  ) as [Side, Side];
+}
+
 export function getOrientationAdjustedResizeState(
   resizeState: SourceDimensions,
 ): Partial<ProcessorState['resize']> {
