@@ -124,7 +124,7 @@ This list is ordered by priority. Do the high-priority items before building new
     - Bulk snapshot tests now cover restoring metadata-only snapshots as regeneration-ready sessions without stale blob URLs or false exported counts.
     - Bulk snapshot tests now cover restoring directly from a serialized snapshot string.
     - Bulk strip item tests now cover selected state, output size state, percent change, status grouping, and per-image override paths.
-    - Bulk session summary tests now cover progress, selected-job context, action state, override totals, output totals, and export readiness from one pure selector.
+    - Bulk session summary tests now cover progress, selected-job context, action state, queue state, override totals, output totals, and export readiness from one pure selector.
     - Bulk selected-job detail tests now cover effective settings, output state, override paths, and missing selections.
     - Result-cache tests now cover cache hits, mismatched image data, mismatched encoder options, and mismatched processor options.
     - Single-image work-plan tests now cover no-op decisions, first decode/preprocess work, original-to-encoded transitions, and encoder-only updates.

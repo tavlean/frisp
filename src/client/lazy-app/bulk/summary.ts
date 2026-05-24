@@ -15,6 +15,11 @@ import {
   type OverrideSummary,
   type SelectedJobContext,
 } from './session';
+import {
+  defaultBulkConcurrency,
+  getBulkQueueState,
+  type BulkQueueState,
+} from './queue';
 
 export interface BulkSessionSummary {
   totalJobs: number;
@@ -24,10 +29,12 @@ export interface BulkSessionSummary {
   overrides: OverrideSummary;
   output: BulkOutputSummary;
   export: BulkExportSummary;
+  queue: BulkQueueState;
 }
 
 export function getBulkSessionSummary(
   session: BulkSession,
+  concurrency = defaultBulkConcurrency,
 ): BulkSessionSummary {
   return {
     totalJobs: session.jobs.length,
@@ -37,5 +44,6 @@ export function getBulkSessionSummary(
     overrides: getOverrideSummary(session),
     output: getBulkOutputSummary(session),
     export: getBulkExportSummary(session),
+    queue: getBulkQueueState(session, concurrency),
   };
 }
