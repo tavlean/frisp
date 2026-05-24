@@ -8,6 +8,7 @@ This list is ordered by priority. Do the high-priority items before building new
 
    - `.nvmrc` says `20.16.0`.
    - `package.json` declares Node `>=20.16.0 <21` and npm `>=10`.
+   - `@types/node` is aligned to Node 20 instead of the inherited Node 16 type baseline.
    - The baseline now builds on Node 20 without the previous TypeScript spawn deprecation warning.
    - Keep the required Node/npm versions documented in `README.md`.
 

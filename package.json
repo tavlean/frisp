@@ -36,7 +36,7 @@
     "@surma/rollup-plugin-off-main-thread": "^2.2.3",
     "@types/dedent": "^0.7.2",
     "@types/mime-types": "^2.1.4",
-    "@types/node": "^16.18.126",
+    "@types/node": "^20.19.41",
     "@web/rollup-plugin-import-meta-assets": "^1.0.8",
     "comlink": "^4.4.2",
     "cssnano": "^6.1.2",

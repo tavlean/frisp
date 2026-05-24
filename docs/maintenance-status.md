@@ -14,7 +14,7 @@ Project homepage metadata: `https://sqush.app`.
 
 Old fork: `tavlean/SquooshPlus`, archived and kept as historical reference.
 
-Working tree at last update: browser smoke now verifies saved WebP side settings and is locally verified. Run `git status --short --branch` for the exact state.
+Working tree at last update: Node runtime type definitions aligned to the supported Node 20 baseline and locally verified. Run `git status --short --branch` for the exact state.
 
 Latest recent committed work at last update:
 
@@ -113,6 +113,7 @@ Latest verification run:
 - `npm run smoke:browser`: passed after saved-settings storage refactor.
 - `npm run smoke:browser`: passed after adding real-editor saved side settings verification.
 - `npm run check`: passed after adding real-editor saved side settings verification.
+- `npm run check`: passed after updating `@types/node` from Node 16 types to Node 20 types.
 - `npm run build && npm run smoke:build`: passed.
 - `npm run test:helpers`: passed.
 - `npm run check`: passed after CI matrix diagnostics.
@@ -134,6 +135,7 @@ Latest verification run:
 - Latest observed GitHub Actions state after dependency drift documentation: `b98f4c0` passed on Ubuntu, Windows, and macOS.
 - Latest observed GitHub Actions state after saved-settings storage refactor: `68d03b4` passed on Ubuntu, Windows, and macOS.
 - Latest observed GitHub Actions state after latest handoff update: `ae72c6c` passed on Ubuntu, Windows, and macOS.
+- Latest observed GitHub Actions state after saved-settings browser smoke: `bc78e14` passed on Ubuntu, Windows, and macOS.
 - `npm run serve` wrapper: launched successfully on port 55194.
 - Browser production-preview smoke: passed after shared image pipeline extraction; app shell, Sqush logo, and drop target rendered.
 - Playwright CLI production-build smoke: passed after the Sqush rename, with `Sqush` title, file input present, Sqush logo alt text present, and zero console messages.
@@ -164,6 +166,7 @@ Quick investigation note:
 - Added `npm test` as an alias for the full baseline check.
 - Added `npm run test:unit` as an alias for pure-helper tests.
 - Added Node and npm engine metadata matching `.nvmrc`.
+- Updated Node type definitions to match the supported Node 20 runtime baseline.
 - Added `npm run format` and `npm run format:check`.
 - Added `npm run smoke:build` to verify generated build output.
 - Expanded `npm run smoke:build` to check generated Sqush metadata and absence of analytics code.
