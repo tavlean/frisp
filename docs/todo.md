@@ -123,6 +123,7 @@ This list is ordered by priority. Do the high-priority items before building new
     - Range thumb-label precision and display formatting now live in tested helper logic instead of custom-element DOM code.
     - Output preview update decisions for pinch-zoom resets, transform compensation, and canvas redraws now come from tested helper logic.
     - Output touch-retarget focus cleanup now uses a tested helper instead of inline component branching.
+    - Svelte migration context now reflects the latest range display, output update-plan, and output retarget focus helper boundaries.
     - Initial app file-drop custom element handler typing now uses `void` instead of `any`.
     - Single-image active job completion bookkeeping now goes through pure helpers instead of direct Preact component field mutation.
     - Single-image work-start scheduling now goes through a pure helper instead of inline Preact component logic.
