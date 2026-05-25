@@ -1,0 +1,4 @@
+.svelte-kit
+.playwright-cli
+build
+node_modules
