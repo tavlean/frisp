@@ -22,6 +22,7 @@ Working tree at last update: progress dashboard reflects the Node 24 build basel
 
 Latest recent committed work at last update:
 
+- `db9fdb1` Extract options workflow
 - `82c65eb` Extract output workflow
 - `72efb0a` Extract result loading workflow
 - `fcbc5e8` Extract editor update workflow
@@ -166,6 +167,8 @@ Latest recent committed work at last update:
 
 Latest verification run:
 
+- `npm run check`: passed after refreshing README local-first verification guidance and dashboard/docs.
+- `npm run dashboard`: confirmed the dashboard is already running at `http://localhost:4177`; local dashboard HTML shows README verification docs, five top cards, and only the Documentation `+1` top-card delta.
 - `gh run list --repo tavlean/sqush --branch main --limit 5`: latest pushed CI run `26377593784` completed successfully for `82c65eb`.
 - `npm run test:helpers`: passed after extracting options async load/listener workflow.
 - `npm run check`: passed after extracting options async load/listener workflow and updating dashboard/docs.
