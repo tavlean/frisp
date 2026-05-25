@@ -132,11 +132,12 @@ settings resolution, and settings hashing, then encodes through the existing
 WebP worker module in a SvelteKit-built worker. Runtime browser verification
 produced a real `RIFF`/`WEBP` output and export metadata.
 
-Do not treat this as proof that the full current image pipeline is drop-in.
-`src/client/lazy-app/image-pipeline.ts` and `bulk/processor.ts` still pull the
-full generated encoder map, production worker bridge, Preact option entries, and
-Rollup-only virtual import schemes. The next task should turn the successful
-primitive imports into a reusable migration seam instead of broadening the
+Do not treat this as proof that the full current app shell is drop-in.
+`src/client/lazy-app/image-pipeline.ts` now has a proven WebP compression import
+path through an encode-only generated metadata map, but `bulk/processor.ts` and
+the wider app surface still cross production worker, UI option, and Rollup-only
+virtual import boundaries. The next task should keep turning the successful
+primitive imports into reusable migration seams instead of broadening the
 prototype into production UI.
 
 ### 2. Reusable migration seams
@@ -154,6 +155,14 @@ If the pipeline probe needs tiny shared helpers, extract them from Preact code
 only when the change is behavior-preserving and covered by checks. Prefer
 framework-neutral helper modules over Svelte-specific or Preact-specific glue.
 Do not broaden into production UI work.
+
+The next seam is now partially proven for encoding: generated
+`feature-meta/encoders` combines shared encoder metadata with runtime-only
+encoder modules, while the existing generated `feature-meta` index keeps the
+Preact option entries. `src/client/lazy-app/image-pipeline.ts` imports that
+encode-only map, and the SvelteKit prototype imports the production
+`compressImage` helper for its WebP probe without importing Preact option
+components or the production Rollup `omt:` worker entry.
 
 ### 3. Prototype offline proof
 
@@ -229,14 +238,16 @@ Vite module workers, real WebP WASM encoding, service-worker registration,
 offline cache coverage for the app shell and WebP probe assets, and runtime
 `locateFile` control over which WebP WASM URLs are cached.
 
-This is not yet production-migration-ready. A direct full image-pipeline import
-is still blocked by production Rollup virtual imports (`omt:`, broader `url:`,
-`entry-data:`, `service-worker:`), Preact option components in generated
-feature metadata, and Emscripten codec wrappers that embed worker-local WASM
-asset URLs. The rotate seam proves the likely `url:` replacement shape for a
-small WASM preprocessor: split the production Rollup adapter from a reusable
-runtime that accepts a generated Vite `?url` asset. Those are concrete migration
-tasks, not evidence that SvelteKit static output is the wrong target.
+This is not yet production-migration-ready. The WebP compression part of the
+production image pipeline is now importable from SvelteKit through an
+encode-only generated metadata map, but a broader direct app import is still
+blocked by remaining production Rollup virtual imports (`omt:`, broader `url:`,
+`entry-data:`, `service-worker:`), UI option entries outside that encoding seam,
+and Emscripten codec wrappers that embed worker-local WASM asset URLs. The
+rotate seam proves the likely `url:` replacement shape for a small WASM
+preprocessor: split the production Rollup adapter from a reusable runtime that
+accepts a generated Vite `?url` asset. Those are concrete migration tasks, not
+evidence that SvelteKit static output is the wrong target.
 
 Safest next engineering track:
 
@@ -326,9 +337,9 @@ Worker-bridge seam progress:
   `src/features/processors/resize/client/runtime.ts` now expose the WebP encode
   and resize runtime helpers without importing Preact option controls.
 - `src/client/lazy-app/image-pipeline-shared.ts` provides a framework-neutral
-  pipeline surface for decode, preprocess, process, and injected encoding. The
-  SvelteKit probe now imports those helpers and uses
-  `compressImageWithEncoder` with the WebP runtime plus the SvelteKit worker
+  pipeline surface for decode, preprocess, and process. The SvelteKit probe now
+  imports those helpers and calls production `compressImage` for WebP through
+  the generated encode-only metadata/runtime map plus the SvelteKit worker
   bridge.
 - The SvelteKit prototype sync step now emits
   `.svelte-kit/sqush-generated/codec-assets/webp.ts` as the canonical WebP
@@ -404,9 +415,10 @@ Full worker-surface blocker inventory:
   initialization, while the SvelteKit generated worker passes resize/HQX WASM
   URLs from a generated Vite `?url` asset manifest.
 - Importing the production generated `feature-meta/index.ts` from SvelteKit
-  still pulls Preact `.tsx` encoder option entries. The prototype must keep using
-  the shared metadata split, or the production generator must emit a
-  SvelteKit-safe runtime encoder map separate from UI controls.
+  still pulls Preact `.tsx` encoder option entries. The production generator now
+  emits `feature-meta/encoders.ts` as the SvelteKit-safe encode runtime map, and
+  future seams should follow that pattern for any non-UI runtime surface that
+  still depends on UI option entries.
 
 Recommended next implementation step: use the generated worker-surface manifest
 as the admission list for the next narrow method. The lowest-risk candidate is

@@ -1,18 +1,11 @@
 import { EncodeOptions } from '../shared/meta';
-import type WorkerBridge from 'client/lazy-app/worker-bridge';
 import { h, Component } from 'preact';
 import { preventDefault, shallowEqual } from 'client/lazy-app/util';
 import * as style from 'client/lazy-app/Compress/Options/style.css';
 import Range from 'client/lazy-app/Compress/Options/Range';
 import Checkbox from 'client/lazy-app/Compress/Options/Checkbox';
 import Expander from 'client/lazy-app/Compress/Options/Expander';
-
-export const encode = (
-  signal: AbortSignal,
-  workerBridge: WorkerBridge,
-  imageData: ImageData,
-  options: EncodeOptions,
-) => workerBridge.jxlEncode(signal, imageData, options);
+export { encode } from './runtime';
 
 interface Props {
   options: EncodeOptions;

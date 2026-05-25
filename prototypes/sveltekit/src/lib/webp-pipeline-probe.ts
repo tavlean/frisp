@@ -7,7 +7,6 @@ import {
   type BulkImageSettings,
 } from '../../../../src/client/lazy-app/bulk/settings';
 import {
-  compressImageWithEncoder,
   decodeSourceImage,
   type DecodeWorkerBridge,
   preprocessImage,
@@ -15,8 +14,7 @@ import {
   processImage,
   type ProcessWorkerBridge,
 } from '../../../../src/client/lazy-app/image-pipeline-shared';
-import { encode as encodeWebP } from '../../../../src/features/encoders/webP/client/runtime';
-import * as webpMeta from 'features/encoders/webP/shared/meta';
+import { compressImage } from '../../../../src/client/lazy-app/image-pipeline';
 import * as mozjpegMeta from 'features/encoders/mozJPEG/shared/meta';
 import * as oxipngMeta from 'features/encoders/oxiPNG/shared/meta';
 import {
@@ -24,7 +22,6 @@ import {
   defaultProcessorState,
   encoderMap,
 } from 'client/lazy-app/feature-meta';
-import type { EncodeOptions } from 'features/encoders/webP/shared/meta';
 import SvelteKitWorkerBridge from './sveltekit-worker-bridge';
 
 export interface WebpPipelineProbeResult {
@@ -168,13 +165,12 @@ export async function runWebpPipelineProbe(
   let quantized: ImageData;
   let workerResized: ImageData;
   try {
-    outputFile = await compressImageWithEncoder(
+    outputFile = await compressImage(
       signal,
       processed,
-      encoderState.options as EncodeOptions,
+      encoderState,
       sourceFile.name,
-      workerBridge,
-      { meta: webpMeta, encode: encodeWebP },
+      workerBridge as unknown as Parameters<typeof compressImage>[4],
     );
     qoiOutput = await workerBridge.qoiEncode(signal, processed, {});
     qoiDecoded = await workerBridge.qoiDecode(
@@ -253,7 +249,7 @@ export async function runWebpPipelineProbe(
       'source decoded through existing image-pipeline decodeSourceImage helper',
       `preprocess ran through existing image-pipeline preprocessImage helper with rotate=${pipelinePreprocessorState.rotate.rotate}`,
       'resize processed through existing image-pipeline processImage helper',
-      'encoded through image-pipeline compressImageWithEncoder using the shared WebP runtime and generated SvelteKit features-worker bridge',
+      'encoded through the production image-pipeline compressImage helper using the generated encode-only runtime metadata map and SvelteKit features-worker bridge',
       `qoiEncode promoted through the same generated worker surface (${
         qoiOutput.byteLength
       } bytes, ${ascii.decode(qoiOutputBytes.slice(0, 4))})`,

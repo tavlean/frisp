@@ -1,5 +1,4 @@
 import { EncodeOptions, MozJpegColorSpace } from '../shared/meta';
-import type WorkerBridge from 'client/lazy-app/worker-bridge';
 import { h, Component } from 'preact';
 import {
   inputFieldChecked,
@@ -13,15 +12,7 @@ import Checkbox from 'client/lazy-app/Compress/Options/Checkbox';
 import Expander from 'client/lazy-app/Compress/Options/Expander';
 import Select from 'client/lazy-app/Compress/Options/Select';
 import Revealer from 'client/lazy-app/Compress/Options/Revealer';
-
-export function encode(
-  signal: AbortSignal,
-  workerBridge: WorkerBridge,
-  imageData: ImageData,
-  options: EncodeOptions,
-) {
-  return workerBridge.mozjpegEncode(signal, imageData, options);
-}
+export { encode } from './runtime';
 
 interface Props {
   options: EncodeOptions;

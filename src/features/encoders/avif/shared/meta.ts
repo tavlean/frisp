@@ -10,9 +10,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { EncodeOptions, AVIFTune } from 'codecs/avif/enc/avif_enc';
+import type {
+  AVIFTune as AVIFTuneType,
+  EncodeOptions,
+} from 'codecs/avif/enc/avif_enc';
 
-export { EncodeOptions, AVIFTune };
+export type { EncodeOptions };
+export type AVIFTune = AVIFTuneType;
+
+export const AVIFTune = {
+  auto: 0 as AVIFTune,
+  psnr: 1 as AVIFTune,
+  ssim: 2 as AVIFTune,
+} as const;
 
 export const label = 'AVIF';
 export const mimeType = 'image/avif';

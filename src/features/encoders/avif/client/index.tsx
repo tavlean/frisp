@@ -1,5 +1,4 @@
 import { EncodeOptions, AVIFTune, defaultOptions } from '../shared/meta';
-import type WorkerBridge from 'client/lazy-app/worker-bridge';
 import { h, Component } from 'preact';
 import { preventDefault, shallowEqual } from 'client/lazy-app/util';
 import * as style from 'client/lazy-app/Compress/Options/style.css';
@@ -9,13 +8,7 @@ import Select from 'client/lazy-app/Compress/Options/Select';
 import Range from 'client/lazy-app/Compress/Options/Range';
 import linkState from 'linkstate';
 import Revealer from 'client/lazy-app/Compress/Options/Revealer';
-
-export const encode = (
-  signal: AbortSignal,
-  workerBridge: WorkerBridge,
-  imageData: ImageData,
-  options: EncodeOptions,
-) => workerBridge.avifEncode(signal, imageData, options);
+export { encode } from './runtime';
 
 interface Props {
   options: EncodeOptions;

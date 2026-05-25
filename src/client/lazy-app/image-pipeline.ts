@@ -8,13 +8,12 @@ import {
 import type { ImageMimeTypes } from './image-decode';
 import { abortable, assertSignal, isAbortError } from './abort';
 import { parseSvgViewBoxSize } from './util/svg';
-import {
+import type {
   PreprocessorState,
   ProcessorState,
   EncoderState,
-  encoderMap,
-} from './feature-meta';
-import type WorkerBridge from './worker-bridge';
+} from './feature-meta/shared';
+import { encoderMap } from './feature-meta/encoders';
 import { resize } from 'features/processors/resize/client/runtime';
 import { getOutputFileName } from './output-filename';
 import { drawableToImageData } from './util/canvas';
@@ -30,6 +29,62 @@ export interface DecodedSourceImage {
   file: File;
   decoded: ImageData;
   vectorImage?: HTMLImageElement;
+}
+
+type ComlinkReturn<T> = Promise<T> | Promise<Promise<T>>;
+
+export interface ImagePipelineWorkerBridge {
+  avifDecode(signal: AbortSignal, blob: Blob): ComlinkReturn<ImageData>;
+  webpDecode(signal: AbortSignal, blob: Blob): ComlinkReturn<ImageData>;
+  jxlDecode(signal: AbortSignal, blob: Blob): ComlinkReturn<ImageData>;
+  wp2Decode(signal: AbortSignal, blob: Blob): ComlinkReturn<ImageData>;
+  qoiDecode(signal: AbortSignal, blob: Blob): ComlinkReturn<ImageData>;
+  rotate(
+    signal: AbortSignal,
+    data: ImageData,
+    options: PreprocessorState['rotate'],
+  ): ComlinkReturn<ImageData>;
+  resize: Parameters<typeof resize>[3]['resize'];
+  quantize(
+    signal: AbortSignal,
+    data: ImageData,
+    options: ProcessorState['quantize'],
+  ): ComlinkReturn<ImageData>;
+  avifEncode(
+    signal: AbortSignal,
+    imageData: ImageData,
+    options: Extract<EncoderState, { type: 'avif' }>['options'],
+  ): ComlinkReturn<ArrayBuffer>;
+  jxlEncode(
+    signal: AbortSignal,
+    imageData: ImageData,
+    options: Extract<EncoderState, { type: 'jxl' }>['options'],
+  ): ComlinkReturn<ArrayBuffer>;
+  mozjpegEncode(
+    signal: AbortSignal,
+    imageData: ImageData,
+    options: Extract<EncoderState, { type: 'mozJPEG' }>['options'],
+  ): ComlinkReturn<ArrayBuffer>;
+  oxipngEncode(
+    signal: AbortSignal,
+    imageData: ImageData,
+    options: Extract<EncoderState, { type: 'oxiPNG' }>['options'],
+  ): ComlinkReturn<ArrayBuffer>;
+  qoiEncode(
+    signal: AbortSignal,
+    imageData: ImageData,
+    options: Extract<EncoderState, { type: 'qoi' }>['options'],
+  ): ComlinkReturn<ArrayBuffer>;
+  webpEncode(
+    signal: AbortSignal,
+    imageData: ImageData,
+    options: Extract<EncoderState, { type: 'webP' }>['options'],
+  ): ComlinkReturn<ArrayBuffer>;
+  wp2Encode(
+    signal: AbortSignal,
+    imageData: ImageData,
+    options: Extract<EncoderState, { type: 'wp2' }>['options'],
+  ): ComlinkReturn<ArrayBuffer>;
 }
 
 export interface ImagePipelineEncoder<WorkerBridgeType, Options> {
@@ -48,7 +103,7 @@ export interface ImagePipelineEncoder<WorkerBridgeType, Options> {
 export async function decodeImage(
   signal: AbortSignal,
   blob: Blob,
-  workerBridge: WorkerBridge,
+  workerBridge: ImagePipelineWorkerBridge,
 ): Promise<ImageData> {
   assertSignal(signal);
   const mimeType = await abortable(signal, sniffMimeType(blob));
@@ -94,7 +149,7 @@ export async function decodeImage(
 export async function decodeSourceImage(
   signal: AbortSignal,
   file: File,
-  workerBridge: WorkerBridge,
+  workerBridge: ImagePipelineWorkerBridge,
 ): Promise<DecodedSourceImage> {
   assertSignal(signal);
 
@@ -120,7 +175,7 @@ export async function preprocessImage(
   signal: AbortSignal,
   data: ImageData,
   preprocessorState: PreprocessorState,
-  workerBridge: WorkerBridge,
+  workerBridge: ImagePipelineWorkerBridge,
 ): Promise<ImageData> {
   assertSignal(signal);
   let processedData = data;
@@ -140,7 +195,7 @@ export async function processImage(
   signal: AbortSignal,
   source: SourceImage,
   processorState: ProcessorState,
-  workerBridge: WorkerBridge,
+  workerBridge: ImagePipelineWorkerBridge,
 ): Promise<ImageData> {
   assertSignal(signal);
   let result = source.preprocessed;
@@ -163,7 +218,7 @@ export async function compressImage(
   image: ImageData,
   encodeData: EncoderState,
   sourceFilename: string,
-  workerBridge: WorkerBridge,
+  workerBridge: ImagePipelineWorkerBridge,
 ): Promise<File> {
   assertSignal(signal);
 

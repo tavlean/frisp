@@ -7,6 +7,8 @@ const config = {
     alias: {
       'client/lazy-app/feature-meta/shared':
         './.svelte-kit/sqush-generated/feature-meta/shared.ts',
+      'client/lazy-app/feature-meta/encoders':
+        './.svelte-kit/sqush-generated/feature-meta/encoders.ts',
       'client/lazy-app/feature-meta':
         './.svelte-kit/sqush-generated/feature-meta/index.ts',
       'sqush-generated': './.svelte-kit/sqush-generated',
