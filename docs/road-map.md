@@ -56,6 +56,10 @@ Do this before large feature work.
 
 ## Phase 2: design the bulk-processing core
 
+Status: mostly complete. See
+[Phase 1 readiness audit](phase-1-readiness-audit.md) for the current handoff
+from cleanup into larger product/platform tracks.
+
 Build the feature as framework-neutral TypeScript first. The UI can stay in Preact initially.
 
 1. Define the bulk job model.

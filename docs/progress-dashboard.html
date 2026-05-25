@@ -540,7 +540,7 @@
               </svg>
               Current work
             </span>
-            <strong>initial app startup workflow</strong>
+            <strong>Phase 1 readiness audit</strong>
           </div>
           <div class="meta-row">
             <span class="meta-label">
@@ -614,11 +614,11 @@
               </svg>
             </span>
             <div>
-              <strong>92%</strong>
+              <strong>93%</strong><span class="delta">+1</span>
               <span>Documentation and handoff</span>
             </div>
           </div>
-          <div class="bar"><span style="width: 92%"></span></div>
+          <div class="bar"><span style="width: 93%"></span></div>
         </div>
         <div class="metric">
           <div class="metric-body">
@@ -798,12 +798,12 @@
                     </span>
                     Documentation and handoff
                   </span>
-                  <span>92%</span>
+                  <span>93%</span>
                 </div>
-                <div class="bar"><span style="width: 92%"></span></div>
+                <div class="bar"><span style="width: 93%"></span></div>
                 <p class="progress-note">
-                  Roadmap, maintenance status, migration context, todo list, and
-                  this dashboard are in place.
+                  Roadmap, maintenance status, migration context, Phase 1
+                  readiness audit, todo list, and this dashboard are in place.
                 </p>
               </summary>
               <div class="detail-grid">
@@ -827,12 +827,19 @@
                       verification gates, dashboard workflow, and bulk/Svelte
                       boundaries.
                     </li>
+                    <li>
+                      Phase 1 readiness audit now separates remaining product
+                      and platform tracks from low-value cleanup.
+                    </li>
                   </ul>
                 </div>
                 <div class="detail-box">
                   <h3>Left</h3>
                   <ul>
-                    <li>Keep dashboard updated after meaningful chunks.</li>
+                    <li>
+                      Keep dashboard updated after larger product/platform
+                      checkpoints.
+                    </li>
                     <li>Refresh docs after codec scope decisions.</li>
                     <li>Keep handoff notes short and current.</li>
                   </ul>
@@ -1389,36 +1396,43 @@
             <div class="list">
               <div class="item">
                 <strong>
-                  Start fresh Sqush-attached chat
+                  Choose next large track
                   <span class="status active">next</span>
                 </strong>
                 <p>
-                  Use the real `/Users/tav/Development/Tavlean/Sqush` project
-                  entry so the app sandbox and project folder agree.
+                  Use the Phase 1 readiness audit to choose between bulk UI
+                  design, a Svelte/SvelteKit prototype, build modernization, or
+                  codec visibility work.
                 </p>
               </div>
               <div class="item">
                 <strong>
-                  Reduce Preact coupling
+                  Svelte/build prototype
                   <span class="status wait">planned</span>
                 </strong>
-                <p>Keep extracting pure state and work-planning behavior.</p>
+                <p>
+                  Prove imported helpers, workers, WASM assets, service-worker
+                  behavior, and static output before replacing Rollup/Preact.
+                </p>
+              </div>
+              <div class="item">
+                <strong>
+                  Bulk UI design
+                  <span class="status wait">planned</span>
+                </strong>
+                <p>
+                  Discuss workflow and layout before production implementation;
+                  the backend helpers are ready enough for design iteration.
+                </p>
               </div>
               <div class="item">
                 <strong>
                   Codec focus decision
                   <span class="status wait">planned</span>
                 </strong>
-                <p>Focus future product work on WebP, AVIF, and JPEG XL.</p>
-              </div>
-              <div class="item">
-                <strong>
-                  Session path cleanup
-                  <span class="status wait">handoff</span>
-                </strong>
                 <p>
-                  This chat still belongs to the old SquooshPlus project entry.
-                  A fresh Sqush-attached chat is the clean long-term setup.
+                  Decide visible formats first; hide non-target formats before
+                  deleting codec code.
                 </p>
               </div>
             </div>

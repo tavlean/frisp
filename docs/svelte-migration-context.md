@@ -148,4 +148,5 @@ When Svelte components are added, use Svelte's recommended testing path: Vitest 
 - Choose SvelteKit static output or Svelte plus Vite after a prototype measures build complexity.
 - Decide whether the first Svelte prototype lives beside the current app or on a separate branch. This can happen before a full migration if the prototype imports existing framework-neutral helpers and does not start production UI implementation.
 - Decide final codec surface before deleting codec code.
+- Use [Phase 1 readiness audit](phase-1-readiness-audit.md) as the current rationale for starting a small technical prototype instead of continuing tiny Preact cleanup.
 - Current browser support targets were reviewed on 2026-05-24. Re-check before production migration, but do not lower the modern evergreen baseline or remove WebAssembly, worker, service-worker, Canvas/ImageData, File/Blob, object URL, or dynamic import assumptions without measured evidence.

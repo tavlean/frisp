@@ -327,3 +327,17 @@ Allowed before that discussion:
 - tests for bulk helper behavior;
 - documentation and architecture notes;
 - maintenance, CI, dependency, and build cleanup.
+
+## Phase 1 readiness pivot
+
+The remaining work should no longer be treated as a stream of small helper
+extractions. See [Phase 1 readiness audit](phase-1-readiness-audit.md).
+
+Recommended larger tracks:
+
+1. Bulk UI design/prototype discussion.
+2. Small Svelte/SvelteKit technical prototype that imports existing helpers.
+3. Build modernization spike that proves workers, WASM, service worker, and
+   static output before replacing Rollup.
+4. Codec visibility decision before hiding or deleting non-target formats.
+5. Cross-browser release QA for the documented support baseline.
