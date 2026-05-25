@@ -1,79 +1,53 @@
 # Agent guide
 
-This repo is not being cleaned up for its own sake. The work should move Sqush toward a lean, maintainable image optimizer whose core single-image optimization remains dependable, offline, and serverless. Bulk image optimization is the first major product milestone, and eventual Svelte/SvelteKit migration is a long-term maintainability goal.
+Sqush is a local-first image optimizer. Its core promise is reliable single-image
+optimization in the browser: no uploads, no server processing, and dependable
+offline behavior after load. Any cleanup, prototype, migration, or feature work
+must protect import, decode, process, encode, preview, export, and service-worker
+behavior.
 
-The heart of the app is still image optimization that works reliably. Users return to Squoosh/Sqush because it can be trusted: no server dependency, no internet requirement after load, and predictable local processing. Bulk workflows, UI changes, cleanup, and migration work must protect that reliability first.
+## Current stage
 
-## Mission
+Phase 1 cleanup is ready to stop being the main activity. Bulk backend helpers
+are framework-neutral enough for design/prototype work, and the next engineering
+spike is a small SvelteKit 2 / Svelte 5 static-output prototype under
+`prototypes/sveltekit/`.
 
-Make the project:
+The prototype should answer whether SvelteKit can carry Sqush's existing
+local/offline optimizer architecture: shared helpers, generated feature metadata,
+workers, WASM assets, static output, and service-worker caching. Keep it
+disposable and separated from the production Preact app until those questions are
+answered.
 
-- preserve reliable local image optimization as the core product value;
-- easier to understand;
-- safer from dependency and build-chain risk;
-- simpler to maintain;
-- better tested where behavior matters;
-- less coupled to old Preact UI internals;
-- ready for a future Svelte/SvelteKit migration when the logic boundaries are clean.
+## Boundaries
 
-## Current product priority
-
-Phase one is bulk image optimization.
-
-That does not mean bulk is more important than the optimizer core. Bulk is a multiplier on the existing value: it should reuse and strengthen the same reliable decode, process, encode, preview, and export pipeline that already makes the single-image app useful.
-
-Allowed before UI design is finalized:
-
-- framework-neutral bulk models and helpers;
-- pure tests for import, settings, queue, export, processing, and cleanup behavior;
-- documentation and architecture notes;
-- build, CI, dependency, and security cleanup;
-- extraction of pure logic from UI components.
-
-Do not implement production bulk UI or redesign visible UI without maintainer discussion.
-
-## Big-picture progress signals
-
-Track progress by area, not by commit count:
-
-- Stabilization, CI, and security
-- Documentation and handoff clarity
-- Bulk backend foundation
-- Repo simplification
-- Svelte/SvelteKit migration readiness
-
-Use [Progress dashboard](docs/progress-dashboard.md) as the current reference.
+- Do not implement production bulk UI without maintainer/design discussion.
+- Do not replace the current app shell as part of the prototype.
+- Do not introduce server-side image processing or upload paths.
+- Do not delete or move codecs, generated metadata, workers, or WASM assets
+  unless the build and runtime consequences are proven.
+- Keep WebP as the first production codec focus, AVIF second, JPEG XL advanced,
+  and WebP 2 experimental only.
 
 ## Engineering rules
 
-- Prefer small, behavior-preserving changes.
-- Keep the current app working.
-- Treat regressions in single-image optimization, offline behavior, or export reliability as release blockers.
-- Run focused tests for small pure-helper changes.
-- Run `npm run check` for build/tooling/editor changes.
-- Do not push local commits unless CI validation is needed or the maintainer asks.
-- Update [Maintenance status](docs/maintenance-status.md) before context may be lost.
-- Keep docs honest: remove stale “pending” items after committing them.
+- Prefer behavior-preserving changes that reduce risk or clarify ownership.
+- Reuse existing framework-neutral helpers before creating new logic.
+- Keep browser objects such as `File`, `Blob`, `ImageData`, workers, WASM
+  modules, and object URLs out of broad reactive state unless measured.
+- Run focused tests for pure helper changes.
+- Run `npm run check` for production app build/tooling/runtime changes.
+- In `prototypes/sveltekit`, run its local `check`, `build`, and audit scripts
+  for meaningful prototype changes.
+- Use Svelte MCP/docs when creating, editing, or analyzing Svelte code.
+- Commit meaningful checkpoints. Push when CI feedback is useful or the
+  maintainer asks.
 
-## Simplification strategy
+## Reference docs
 
-Prefer this order:
-
-1. Extract pure logic from UI components.
-2. Add tests around extracted behavior.
-3. Reduce dependency/build risk.
-4. Hide or gate product complexity only after product decisions are clear.
-5. Delete old code only after build assumptions and user flows are tested.
-
-Do not start a Svelte migration by rewriting screens first. Start by importing tested framework-neutral modules into a small prototype after the current app has better smoke coverage.
-
-## Codec strategy
-
-Product focus is:
-
-- WebP 1 first;
-- AVIF second;
-- JPEG XL as advanced/experimental until support is confirmed;
-- WebP 2 experimental only, not a normal production output.
-
-Do not delete codec code yet. Hiding formats from the UI is lower risk than removing codec folders, generated metadata, workers, and WASM assets.
+- [SvelteKit prototype handoff](docs/sveltekit-prototype-handoff.md)
+- [Phase 1 readiness audit](docs/phase-1-readiness-audit.md)
+- [Svelte migration context](docs/svelte-migration-context.md)
+- [Bulk image architecture](docs/bulk-image-architecture.md)
+- [Progress dashboard](docs/progress-dashboard.md)
+- [Maintenance status](docs/maintenance-status.md)

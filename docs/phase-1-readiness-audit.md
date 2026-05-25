@@ -59,10 +59,10 @@ Decisions needed:
 - first visible formats, most likely WebP first, then AVIF, with JPEG XL as
   advanced.
 
-### 2. Svelte/SvelteKit prototype
+### 2. SvelteKit prototype
 
-This can start before a full migration. It should be a small proof, not a
-production rewrite.
+This is now underway on `code/sveltekit-prototype`. It should remain a small
+proof, not a production rewrite.
 
 Prototype scope:
 
@@ -115,11 +115,11 @@ download, saved settings, production reload, and offline app-shell behavior.
 
 ## Recommendation
 
-Close Phase 1 after the readiness docs/dashboard are updated and the current
-local commits are pushed once for CI. Then move to one of these larger tracks:
+Phase 1 is ready to close as the main cleanup track. Move to one of these larger
+tracks:
 
 1. Start the bulk UI design/prototype discussion.
-2. Start a small SvelteKit technical prototype.
+2. Continue the small SvelteKit technical prototype.
 3. Start a build modernization spike.
 4. Decide codec visibility and product scope.
 

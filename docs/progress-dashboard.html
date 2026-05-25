@@ -1123,10 +1123,9 @@
                 </div>
                 <div class="bar"><span style="width: 99%"></span></div>
                 <p class="progress-note">
-                  Migration has not started. Current work is preparing reusable
-                  logic, reducing legacy Preact assumptions, and documenting the
-                  future path while leaving room for a small Svelte prototype
-                  when it lowers risk.
+                  Production migration has not started. Current work is proving
+                  a small SvelteKit prototype can reuse Sqush's local/offline
+                  optimizer architecture without replacing the current app shell.
                 </p>
               </summary>
               <div class="detail-grid">
@@ -1396,23 +1395,13 @@
             <div class="list">
               <div class="item">
                 <strong>
-                  Choose next large track
+                  Continue SvelteKit spike
                   <span class="status active">next</span>
                 </strong>
                 <p>
-                  Use the Phase 1 readiness audit to choose between bulk UI
-                  design, a Svelte/SvelteKit prototype, build modernization, or
-                  codec visibility work.
-                </p>
-              </div>
-              <div class="item">
-                <strong>
-                  Svelte/build prototype
-                  <span class="status wait">planned</span>
-                </strong>
-                <p>
-                  Prove imported helpers, workers, WASM assets, service-worker
-                  behavior, and static output before replacing Rollup/Preact.
+                  Use the prototype branch to prove helper imports, generated
+                  metadata, workers, WASM assets, static output, and offline
+                  caching before production migration.
                 </p>
               </div>
               <div class="item">
@@ -1423,6 +1412,16 @@
                 <p>
                   Discuss workflow and layout before production implementation;
                   the backend helpers are ready enough for design iteration.
+                </p>
+              </div>
+              <div class="item">
+                <strong>
+                  Codec visibility
+                  <span class="status wait">planned</span>
+                </strong>
+                <p>
+                  Decide which non-target formats are hidden before deleting any
+                  codec code or generated metadata paths.
                 </p>
               </div>
               <div class="item">

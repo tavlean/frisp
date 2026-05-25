@@ -18,15 +18,10 @@ This is not a production UI migration and not the bulk UI implementation.
 
 ## Recommended branch/worktree
 
-Use a separate worktree and branch:
-
-```sh
-git worktree add ../Sqush-sveltekit-prototype -b code/sveltekit-prototype main
-```
-
-Keep `main` stable. The prototype branch may add temporary dependencies,
-configuration, and scaffolding that would be too noisy for the production app
-until proven.
+Use Codex Desktop's **New Worktree** option from the existing
+`code/sveltekit-prototype` branch. Keep `main` stable. The prototype branch may
+add temporary dependencies, configuration, and scaffolding that would be too
+noisy for the production app until proven.
 
 ## Prototype scope
 
@@ -114,8 +109,8 @@ Read these before working:
 
 ## Current recommendation
 
-The SvelteKit prototype is now the highest-leverage engineering spike. It should
-answer the build/platform question before production migration work begins.
+The SvelteKit prototype is now the active engineering spike. It should answer
+the build/platform question before production migration work begins.
 
 If it succeeds, merge back lessons and small reusable config/docs first. Do not
 merge a full UI rewrite by default.

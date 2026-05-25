@@ -1,8 +1,10 @@
 # Svelte migration context
 
-This document records the Svelte and SvelteKit migration guidance for Sqush. It is based on a Svelte MCP documentation pass on 2026-05-24.
+This document records the SvelteKit migration guidance for Sqush. It is based on
+Svelte MCP documentation passes on 2026-05-24 and 2026-05-25.
 
-Use this as alignment before doing work that affects a future Svelte migration, even if the current task is still in the Preact app.
+Use this as alignment before doing work that affects the SvelteKit prototype or a
+future production migration.
 
 ## Main principle
 
@@ -31,7 +33,7 @@ For Sqush, any SvelteKit setup must stay browser-first and static. Image process
 1. Keep the current Preact app stable until the Svelte version proves the same optimizer behavior.
 2. Continue extracting framework-neutral TypeScript helpers from Preact components.
 3. Keep bulk session, settings merge, export naming, MIME sniffing, saved settings, and processing orchestration independent of any UI framework.
-4. Build a small Svelte prototype around imported pure modules before replacing production UI.
+4. Build a small SvelteKit prototype around imported pure modules before replacing production UI.
 5. Port one vertical slice at a time: import, selected image state, options, encode result, export.
 6. Run browser smoke tests before switching production routing or service-worker behavior.
 
@@ -99,13 +101,18 @@ Do not remove these early:
 - existing smoke tests;
 - codec files that are still referenced by generated metadata or cache lists.
 
-Initial app share-target, editor-route, editor-open, file-entry, and render-mode state lives in `src/client/initial-app/App/state.ts`. Initial app lazy Compress loading and share-target bridge orchestration lives in `src/client/initial-app/App/workflow.ts`. Single-image viewport state, editor work planning, work-start scheduling, editor update scheduling options, image update scheduling, active job bookkeeping, active job completion bookkeeping, work abort planning, side job run selection, runnable side job records, side job execution planning, side encode decisions, side result/cache assembly, and current/latest job-state derivation are now partly extracted into `src/client/lazy-app/Compress/work-plan.ts`, work-start abort/controller cycling lives in `src/client/lazy-app/Compress/work-start-runner.ts`, source decode/preprocess step runners live in `src/client/lazy-app/Compress/source-job-runner.ts`, source decode/preprocess workflow orchestration with injected image-pipeline functions and tested abort/error handling lives in `src/client/lazy-app/Compress/source-workflow.ts`, side image workflow orchestration with injected image-pipeline/state/cache functions lives in `src/client/lazy-app/Compress/side-workflow.ts`, image update debounce/runtime scheduling with injected timers lives in `src/client/lazy-app/Compress/update-queue.ts`, editor update workflow for source-file replacement, document-title refreshes, and update scheduling lives in `src/client/lazy-app/Compress/editor-update-workflow.ts`, editor unmount cleanup for timers, abort controllers, worker bridges, and output URLs lives in `src/client/lazy-app/Compress/editor-cleanup.ts`, side-job execution and runnable side-job loop orchestration live in `src/client/lazy-app/Compress/side-job-runner.ts`, initial editor state composition lives in `src/client/lazy-app/Compress/editor-state.ts`, viewport state lives in `src/client/lazy-app/Compress/viewport-state.ts`, image update scheduling lives in `src/client/lazy-app/Compress/update-scheduler.ts`, display label/contain decisions, output/result render selectors, and composed render state live in `src/client/lazy-app/Compress/display-state.ts`, desktop/mobile comparison panel ordering lives in `src/client/lazy-app/Compress/layout-state.ts`, output drawable selection, update-plan decisions, and pinch-zoom update decisions live in `src/client/lazy-app/Compress/Output/draw-state.ts`, output mount/update side-effect workflow lives in `src/client/lazy-app/Compress/Output/workflow.ts`, output control state, initial control state, zoom/rotation decisions, event-retarget decisions, and retarget focus cleanup decisions live in `src/client/lazy-app/Compress/Output/control-state.ts`, output preview orientation and canvas sizing state lives in `src/client/lazy-app/Compress/Output/preview-state.ts`, result size/original/percent display state lives in `src/client/lazy-app/Compress/Results/size-state.ts`, result initial loading state, loading lifecycle effects, and visibility state live in `src/client/lazy-app/Compress/Results/loading-state.ts`, result loading timer workflow lives in `src/client/lazy-app/Compress/Results/loading-workflow.ts`, result side/download link state lives in `src/client/lazy-app/Compress/Results/download-state.ts`, processor-state comparisons, enabled toggles, and option merges live in `src/client/lazy-app/Compress/processor-state.ts`, resize preset calculations live in `src/features/processors/resize/client/preset-state.ts`, default source resize side updates, decode success resize updates, orientation resize side updates, source decode/preprocess loading lifecycle patches, and preprocessor-change state live in `src/client/lazy-app/Compress/source-state.ts`, side-copy URL behavior, side-copy state patches, and feedback action data live in `src/client/lazy-app/Compress/side-copy.ts`, copy-to-other-side UI workflow lives in `src/client/lazy-app/Compress/side-copy-workflow.ts`, default/saved initial side-state setup, side settings mutations, side settings state patches, side copy/import restoration state patches, side job state patches, and side loading/result updates live in `src/client/lazy-app/Compress/side-state.ts`, saved settings storage/key/label/payload/read/write action behavior and save/import feedback actions live in `src/client/lazy-app/Compress/saved-settings.ts`, saved-settings save/import UI workflows live in `src/client/lazy-app/Compress/saved-settings-workflow.ts`, processing error message formatting lives in `src/client/lazy-app/Compress/processing-errors.ts`, option panel render decisions live in `src/client/lazy-app/Compress/Options/render-state.ts`, options async load/listener workflow lives in `src/client/lazy-app/Compress/Options/workflow.ts`, options initial/load state lives in `src/client/lazy-app/Compress/Options/state.ts`, encoder dropdown value/label/options live in `src/client/lazy-app/Compress/Options/encoder-select-state.ts`, processor control parsing, enable transitions, option merges, and resize input state live in `src/client/lazy-app/Compress/Options/processor-controls-state.ts`, expander state transitions live in `src/client/lazy-app/Compress/Options/Expander/state.ts`, range input state plus range display formatting lives in `src/client/lazy-app/Compress/Options/Range/state.ts`, saved-settings availability and availability event updates live in `src/client/lazy-app/Compress/Options/saved-settings-state.ts`, editor update effects live in `src/client/lazy-app/Compress/editor-lifecycle.ts`, supported encoder filtering lives in `src/client/lazy-app/Compress/Options/encoder-support.ts`, SVG-aware source decode behavior lives in `src/client/lazy-app/image-pipeline.ts`, and document-title formatting lives in `src/client/lazy-app/Compress/document-title.ts`. Stateless option controls are function components instead of empty-state Preact classes. The maintained source tree no longer uses the deprecated `componentWillReceiveProps` lifecycle, reducing old Preact-specific assumptions before any Svelte rewrite. Preserve those pure boundaries when changing decode/preprocess/process/encode scheduling so the current optimizer remains testable before any Svelte rewrite.
+The detailed extraction inventory is intentionally not repeated here anymore.
+Use [Maintenance status](maintenance-status.md) and the commit history when you
+need the full record of Phase 1 helper extraction. For migration work, preserve
+the pure boundaries around import, decode, preprocess, process, encode,
+scheduling, saved settings, export naming, object URL cleanup, and bulk session
+logic so the current optimizer remains testable before any production rewrite.
 
 ## Bulk feature alignment
 
-The bulk backend helpers being created now should be easy for Svelte to consume later:
+The bulk backend helpers should stay easy for SvelteKit to consume later:
 
-- prefer the helper barrel at `src/client/lazy-app/bulk/index.ts` when a Svelte prototype needs bulk session, queue, export, snapshot, settings, selected-detail, strip, and summary helpers together;
+- prefer the helper barrel at `src/client/lazy-app/bulk/index.ts` when a SvelteKit prototype needs bulk session, queue, export, snapshot, settings, selected-detail, strip, and summary helpers together;
 - sessions should be plain data;
 - selectors should be pure functions;
 - reducers/actions should not import Preact;
@@ -123,7 +130,7 @@ Before production migration:
 1. Current Preact app passes `npm run check`.
 2. Browser smoke covers real import, WebP output, export link creation, and saved settings.
 3. Pure helper tests cover bulk session transitions and export calculations.
-4. A Svelte prototype proves the same helper modules work without Preact.
+4. A SvelteKit prototype proves the same helper modules work without Preact.
 5. Service-worker/offline behavior is verified in the new build.
 6. A real image can be imported, optimized, previewed, and exported in the Svelte build.
 
@@ -148,7 +155,7 @@ When Svelte components are added, use Svelte's recommended testing path: Vitest 
 ## Open decisions
 
 - Keep SvelteKit static output as the prototype target and measure build complexity there first.
-- Decide whether the first Svelte prototype lives beside the current app or on a separate branch. This can happen before a full migration if the prototype imports existing framework-neutral helpers and does not start production UI implementation.
+- Continue the first prototype under `prototypes/sveltekit/` on the `code/sveltekit-prototype` branch; do not turn it into a production migration by default.
 - Decide final codec surface before deleting codec code.
 - Use [Phase 1 readiness audit](phase-1-readiness-audit.md) as the current rationale for starting a small technical prototype instead of continuing tiny Preact cleanup.
 - Current browser support targets were reviewed on 2026-05-24. Re-check before production migration, but do not lower the modern evergreen baseline or remove WebAssembly, worker, service-worker, Canvas/ImageData, File/Blob, object URL, or dynamic import assumptions without measured evidence.

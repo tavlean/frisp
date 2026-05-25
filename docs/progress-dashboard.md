@@ -4,7 +4,7 @@ This dashboard keeps the larger mission visible while small cleanup commits happ
 
 ## Mission
 
-Make Sqush a lean, maintainable, secure image optimization tool that is comfortable to extend. The core product value is reliable local image optimization: the app should keep working offline, without server processing, and without surprising users who depend on the single-image workflow. The first new product target is bulk image optimization. The longer-term maintainer target is a codebase that can be migrated to Svelte or SvelteKit without dragging old UI assumptions into the new app.
+Make Sqush a lean, maintainable, secure image optimization tool that is comfortable to extend. The core product value is reliable local image optimization: the app should keep working offline, without server processing, and without surprising users who depend on the single-image workflow. The first new product target is bulk image optimization. The longer-term maintainer target is a codebase that can move to SvelteKit without dragging old UI assumptions into the new app.
 
 ## Current progress
 
@@ -44,7 +44,7 @@ Bad progress:
 
 1. Stop treating small Preact helper extraction as the main work.
 2. Use [Phase 1 readiness audit](phase-1-readiness-audit.md) as the handoff for the next larger track.
-3. Decide whether the next engineering move is a small Svelte/SvelteKit technical prototype or a build modernization spike.
+3. Continue the small SvelteKit technical prototype on `code/sveltekit-prototype`.
 4. Start bulk UI design discussion before production UI implementation.
 5. Decide codec visibility before hiding or removing formats.
 
@@ -58,4 +58,4 @@ Do not start a production Svelte/SvelteKit migration until these are true:
 - format/codec visibility strategy is decided;
 - build output and service-worker behavior are understood well enough to reproduce in a new toolchain.
 
-When those conditions are met, start with a small Svelte prototype around imported pure modules instead of rewriting the whole app at once. The gate is guidance, not a hard prohibition: if Svelte work clearly reduces risk without starting production UI migration, use the Svelte MCP docs and keep the prototype small. Keep [Svelte migration context](svelte-migration-context.md) open while doing any Svelte-adjacent work.
+When those conditions are met, start with a small SvelteKit prototype around imported pure modules instead of rewriting the whole app at once. The gate is guidance, not a hard prohibition: if SvelteKit work clearly reduces risk without starting production UI migration, use the Svelte MCP docs and keep the prototype small. Keep [Svelte migration context](svelte-migration-context.md) open while doing any Svelte-adjacent work.
