@@ -41,6 +41,8 @@ export interface WebpPipelineProbeResult {
   settingsHash: string;
   riffHeader: string;
   webpSignature: string;
+  qoiOutputBytes: number;
+  qoiSignature: string;
   stages: string[];
 }
 
@@ -131,18 +133,24 @@ export async function runWebpPipelineProbe(
     effectiveSettings.processorState,
     pipelineWorkerBridge,
   );
-  const outputFile = await compressImageWithEncoder(
-    signal,
-    processed,
-    encoderState.options as EncodeOptions,
-    sourceFile.name,
-    workerBridge,
-    { meta: webpMeta, encode: encodeWebP },
-  ).finally(() => {
+  let outputFile: File;
+  let qoiOutput: ArrayBuffer;
+  try {
+    outputFile = await compressImageWithEncoder(
+      signal,
+      processed,
+      encoderState.options as EncodeOptions,
+      sourceFile.name,
+      workerBridge,
+      { meta: webpMeta, encode: encodeWebP },
+    );
+    qoiOutput = await workerBridge.qoiEncode(signal, processed, {});
+  } finally {
     workerBridge.dispose();
-  });
+  }
   const outputBuffer = await outputFile.arrayBuffer();
   const outputBytes = new Uint8Array(outputBuffer);
+  const qoiOutputBytes = new Uint8Array(qoiOutput);
   const ascii = new TextDecoder('ascii');
 
   return {
@@ -162,6 +170,8 @@ export async function runWebpPipelineProbe(
     settingsHash: settingsHash(effectiveSettings),
     riffHeader: ascii.decode(outputBytes.slice(0, 4)),
     webpSignature: ascii.decode(outputBytes.slice(8, 12)),
+    qoiOutputBytes: qoiOutput.byteLength,
+    qoiSignature: ascii.decode(qoiOutputBytes.slice(0, 4)),
     stages: [
       'source generated locally with existing canvasEncode helper',
       'source type sniffed with existing sniffMimeType helper',
@@ -169,6 +179,9 @@ export async function runWebpPipelineProbe(
       `preprocess ran through existing image-pipeline preprocessImage helper with rotate=${pipelinePreprocessorState.rotate.rotate}`,
       'resize processed through existing image-pipeline processImage helper',
       'encoded through image-pipeline compressImageWithEncoder using the shared WebP runtime and generated SvelteKit features-worker bridge',
+      `qoiEncode promoted through the same generated worker surface (${
+        qoiOutput.byteLength
+      } bytes, ${ascii.decode(qoiOutputBytes.slice(0, 4))})`,
       'export metadata built with existing filename, percent-change, and settings-hash helpers',
     ],
   };

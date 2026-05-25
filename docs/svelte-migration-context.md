@@ -178,6 +178,9 @@ When Svelte components are added, use Svelte's recommended testing path: Vitest 
   prototype emits a ready method-name list for the shared worker bridge and a
   blocked-method inventory for codecs or worker methods that still need asset
   URL, thread-support alias, or type work before joining the Vite worker entry.
+- `qoiEncode` is the first non-WebP encoder promoted through that admission
+  list. It uses a generated QOI WASM asset manifest plus a type-only shared
+  metadata export, while the full production worker surface remains filtered.
 - Decide final codec surface before deleting codec code.
 - Use [Phase 1 readiness audit](phase-1-readiness-audit.md) as the current rationale for starting a small technical prototype instead of continuing tiny Preact cleanup.
 - Current browser support targets were reviewed on 2026-05-24. Re-check before production migration, but do not lower the modern evergreen baseline or remove WebAssembly, worker, service-worker, Canvas/ImageData, File/Blob, object URL, or dynamic import assumptions without measured evidence.

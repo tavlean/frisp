@@ -10,9 +10,15 @@ import {
   rotateCodecAssetUrls,
   rotateWasmUrl,
 } from 'sqush-generated/codec-assets/rotate';
+import {
+  qoiCodecAssetUrls,
+  qoiEncoderWasmUrl,
+} from 'sqush-generated/codec-assets/qoi';
 
 export {
   codecAssetProbeWorkerUrl,
+  qoiCodecAssetUrls,
+  qoiEncoderWasmUrl,
   rotateCodecAssetUrls,
   rotateWasmUrl,
   svelteKitFeaturesWorkerUrl,
@@ -27,5 +33,6 @@ export const codecAssetUrls = [
   webpEncodeProbeWorkerUrl,
   svelteKitFeaturesWorkerUrl,
   ...webpCodecAssetUrls,
+  ...qoiCodecAssetUrls,
   ...rotateCodecAssetUrls,
 ];

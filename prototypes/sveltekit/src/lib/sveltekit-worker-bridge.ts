@@ -1,9 +1,14 @@
 import { createWorkerBridgeRuntime } from '../../../../src/client/lazy-app/worker-bridge/runtime';
 import type { EncodeOptions } from 'features/encoders/webP/shared/meta';
+import type { EncodeOptions as QoiEncodeOptions } from 'features/encoders/qoi/shared/meta';
 import type { Options as RotateOptions } from 'features/preprocessors/rotate/shared/meta';
 import { methodNames } from 'sqush-generated/worker-bridge/meta';
-import type { WebpWasmUrls } from 'sqush-generated/features-worker/webp';
+import type {
+  QoiWasmUrls,
+  WebpWasmUrls,
+} from 'sqush-generated/features-worker/webp';
 import {
+  qoiEncoderWasmUrl,
   svelteKitFeaturesWorkerUrl,
   webpEncoderSimdWasmUrl,
   webpEncoderWasmUrl,
@@ -20,6 +25,11 @@ export interface SvelteKitWorkerBridgeApi {
     data: ImageData,
     options: RotateOptions,
   ): Promise<ImageData>;
+  qoiEncode(
+    signal: AbortSignal,
+    imageData: ImageData,
+    options: QoiEncodeOptions,
+  ): Promise<ArrayBuffer>;
   dispose(): void;
 }
 
@@ -29,6 +39,12 @@ interface SvelteKitWorkerBridgeWorkerApi {
     imageData: ImageData,
     options: EncodeOptions,
     wasmUrls: WebpWasmUrls,
+  ): Promise<ArrayBuffer>;
+  qoiEncode(
+    signal: AbortSignal,
+    imageData: ImageData,
+    options: QoiEncodeOptions,
+    wasmUrls: QoiWasmUrls,
   ): Promise<ArrayBuffer>;
   dispose(): void;
 }
@@ -52,6 +68,16 @@ export default class SvelteKitWorkerBridge
     return super.webpEncode(signal, imageData, options, {
       baseline: webpEncoderWasmUrl,
       simd: webpEncoderSimdWasmUrl,
+    });
+  }
+
+  qoiEncode(
+    signal: AbortSignal,
+    imageData: ImageData,
+    options: QoiEncodeOptions,
+  ): Promise<ArrayBuffer> {
+    return super.qoiEncode(signal, imageData, options, {
+      encoder: qoiEncoderWasmUrl,
     });
   }
 }
