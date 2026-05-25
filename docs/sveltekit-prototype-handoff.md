@@ -122,23 +122,21 @@ merge a full UI rewrite by default.
 
 ## Fresh-chat prompt
 
-Use this prompt in a new Codex chat if needed:
+Use this short goal prompt in a new Codex chat. The goal text is intentionally
+compact so it fits Codex Desktop's goal length limit; the detailed context lives
+in the files it tells the new agent to read.
 
 ```text
-Work in /Users/tav/Development/Tavlean/Sqush or the prototype worktree
-/Users/tav/Development/Tavlean/Sqush-sveltekit-prototype.
+Work on Sqush's SvelteKit 2 / Svelte 5 technical prototype until the spike can
+clearly answer whether SvelteKit static output can safely carry Sqush's
+local-first image optimizer architecture.
 
-Goal: create a small SvelteKit 2/Svelte 5 technical prototype for Sqush in a
-separate worktree/branch, without changing production UI or implementing bulk
-UI. The prototype should prove whether existing framework-neutral Sqush helpers
-can be imported into a static/offline-capable SvelteKit app, and identify what
-must happen for generated feature metadata, workers, WASM assets, and
-service-worker caching.
+Use Codex Desktop New Worktree from branch `code/sveltekit-prototype`.
 
 Read first:
 - AGENTS.md
-- docs/phase-1-readiness-audit.md
 - docs/sveltekit-prototype-handoff.md
+- docs/phase-1-readiness-audit.md
 - docs/svelte-migration-context.md
 - docs/bulk-image-architecture.md
 - docs/maintenance-status.md
@@ -146,14 +144,30 @@ Read first:
 - docs/codec-provenance.md
 - docs/codec-source-references.md
 
+Prototype lives in `prototypes/sveltekit/`.
+
 Constraints:
-- Keep the current local/offline single-image optimizer safe.
+- Keep Sqush local/offline/serverless; no upload or server image processing.
+- Keep SvelteKit as the target; do not pivot unless SvelteKit has a documented
+  concrete blocker with a minimal reproduction.
 - Do not implement production bulk UI.
-- Do not start a full migration.
-- Do not delete codecs or major build pieces.
+- Do not start a full production migration.
+- Do not replace the current app shell yet.
+- Do not delete/move codecs or major build pieces.
 - Use Svelte MCP/docs when creating or analyzing Svelte code.
-- Keep the prototype disposable and clearly separated from the current app.
-- Keep SvelteKit as the target. Do not pivot to any non-SvelteKit build path
-  unless SvelteKit produces a concrete blocker that is documented with a
-  minimal reproduction.
+- Keep the prototype disposable and separated under `prototypes/sveltekit`.
+
+Current prototype already proves pure bulk/session helpers can be consumed from
+SvelteKit. Next, prove or document: generated feature metadata strategy, worker
+imports, WASM assets, service-worker/offline caching, and the blockers for full
+image-pipeline import.
+
+Verify meaningful changes with:
+- `npm run check` in `prototypes/sveltekit`
+- `npm run build` in `prototypes/sveltekit`
+- `npm audit --audit-level=low` in `prototypes/sveltekit`
+- Svelte MCP autofixer for changed `.svelte` files
+- browser/render check when runtime or service-worker behavior changes
+
+Commit meaningful checkpoints and push when CI feedback is useful.
 ```
