@@ -4,11 +4,9 @@ import {
   builtinDecode,
   sniffMimeType,
   canDecodeImageType,
-  abortable,
-  assertSignal,
-  isAbortError,
-  ImageMimeTypes,
-} from './util';
+} from './image-decode';
+import type { ImageMimeTypes } from './image-decode';
+import { abortable, assertSignal, isAbortError } from './abort';
 import { parseSvgViewBoxSize } from './util/svg';
 import {
   PreprocessorState,

@@ -1,7 +1,7 @@
 import {
   builtinDecode,
   sniffMimeType,
-} from '../../../../src/client/lazy-app/util';
+} from '../../../../src/client/lazy-app/image-decode';
 import {
   builtinResize,
   canvasEncode,

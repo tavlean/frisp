@@ -1,6 +1,6 @@
 import type { EncoderState, ProcessorState } from '../feature-meta';
 import type { SourceImage } from '../image-pipeline';
-import { isAbortError } from '../util';
+import { isAbortError } from '../abort';
 import { getImageProcessingErrorMessage } from './processing-errors';
 import { runRunnableSideJobs, type SideJobPipeline } from './side-job-runner';
 import type {

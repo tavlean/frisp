@@ -1,5 +1,5 @@
 import type WorkerBridge from '../worker-bridge';
-import { isAbortError } from '../util';
+import { isAbortError } from '../abort';
 import type { BulkSession, ImageJob, ImageOutput } from './session';
 import { completeJob, failJob, getRunnableJobs, startJob } from './queue';
 import { processBulkImageJob } from './processor';

@@ -1,6 +1,6 @@
 import type { PreprocessorState } from '../feature-meta';
 import type { DecodedSourceImage, SourceImage } from '../image-pipeline';
-import { assertSignal } from '../util';
+import { assertSignal } from '../abort';
 
 export interface SourceJobPipeline<WorkerBridgeType> {
   decodeSourceImage: (

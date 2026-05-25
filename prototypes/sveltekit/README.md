@@ -74,6 +74,11 @@ npm audit --audit-level=low
   `getEffectiveSettings`, and `settingsHash`. This proves the useful seam is
   shared source/decode/process/export primitives plus codec-specific workers,
   not the full current Preact app shell.
+- The first reusable seam has been extracted from the broad production `util`
+  module: abort helpers now live in `src/client/lazy-app/abort.ts`, and browser
+  image decode/mime helpers now live in
+  `src/client/lazy-app/image-decode.ts`. `util` keeps compatibility re-exports,
+  while the SvelteKit prototype imports the narrow decode module directly.
 - The WebP encode path needs the prototype to alias `wasm-feature-detect`
   because the imported production source lives outside the prototype package
   root and bare dependency resolution otherwise starts from the repo source
@@ -111,6 +116,9 @@ npm audit --audit-level=low
   generator. The first Svelte-safe split should keep shared metadata separate
   from UI option components so framework-neutral helpers can import types and
   defaults without pulling Preact into a Svelte build.
+- Continue extracting small framework-neutral runtime seams from broad
+  production modules. The initial decode/abort seam shows this can be done
+  behavior-preservingly while keeping existing imports compatible.
 - Replace the production `omt:` worker bridge with Vite worker imports. The
   prototype proves the emitted asset shape, but the real `features-worker`
   Comlink bridge still needs a focused port.

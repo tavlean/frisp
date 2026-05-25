@@ -28,8 +28,9 @@
     "../../src/client/lazy-app/bulk/size.ts",
     "../../src/client/lazy-app/bulk/strip.ts",
     "../../src/client/lazy-app/bulk/summary.ts",
+    "../../src/client/lazy-app/abort.ts",
+    "../../src/client/lazy-app/image-decode.ts",
     "../../src/client/lazy-app/output-filename.ts",
-    "../../src/client/lazy-app/util/canvas.ts",
-    "../../src/client/lazy-app/util/index.ts"
+    "../../src/client/lazy-app/util/canvas.ts"
   ]
 }

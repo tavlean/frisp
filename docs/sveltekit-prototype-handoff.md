@@ -141,6 +141,15 @@ prototype into production UI.
 
 ### 2. Reusable migration seams
 
+Status: started.
+
+The first behavior-preserving shared-source seam is in place:
+`src/client/lazy-app/abort.ts` owns abort helpers, and
+`src/client/lazy-app/image-decode.ts` owns browser decode/mime helpers. The broad
+`util` module keeps re-exports for compatibility, production image-pipeline code
+imports the narrow modules directly, and the SvelteKit prototype no longer needs
+to import browser decode helpers through `util`.
+
 If the pipeline probe needs tiny shared helpers, extract them from Preact code
 only when the change is behavior-preserving and covered by checks. Prefer
 framework-neutral helper modules over Svelte-specific or Preact-specific glue.

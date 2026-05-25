@@ -1,5 +1,5 @@
 import type { DecodedSourceImage, SourceImage } from '../image-pipeline';
-import { isAbortError } from '../util';
+import { isAbortError } from '../abort';
 import { getImageProcessingErrorMessage } from './processing-errors';
 import {
   runSourceDecode,

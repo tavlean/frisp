@@ -2,7 +2,7 @@ import { wrap } from 'comlink';
 import { BridgeMethods, methodNames } from './meta';
 import workerURL from 'omt:../../../features-worker';
 import type { ProcessorWorkerApi } from '../../../features-worker';
-import { abortable } from '../util';
+import { abortable } from '../abort';
 
 /** How long the worker should be idle before terminating. */
 const workerTimeout = 10_000;
