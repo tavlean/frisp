@@ -12,7 +12,9 @@ The Svelte migration should make the app easier to maintain and extend without w
 
 ## Recommended target
 
-The likely target is Svelte 5 with SvelteKit using static output, or a Svelte 5 plus Vite app if SvelteKit routing is not useful.
+The target is Svelte 5 with SvelteKit 2 using static output. Do not broaden the
+prototype to any non-SvelteKit build path unless SvelteKit produces a concrete
+blocker that is documented with a minimal reproduction.
 
 SvelteKit is still a good candidate because it supports:
 
@@ -145,7 +147,7 @@ When Svelte components are added, use Svelte's recommended testing path: Vitest 
 
 ## Open decisions
 
-- Choose SvelteKit static output or Svelte plus Vite after a prototype measures build complexity.
+- Keep SvelteKit static output as the prototype target and measure build complexity there first.
 - Decide whether the first Svelte prototype lives beside the current app or on a separate branch. This can happen before a full migration if the prototype imports existing framework-neutral helpers and does not start production UI implementation.
 - Decide final codec surface before deleting codec code.
 - Use [Phase 1 readiness audit](phase-1-readiness-audit.md) as the current rationale for starting a small technical prototype instead of continuing tiny Preact cleanup.

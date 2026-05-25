@@ -67,7 +67,7 @@ production rewrite.
 Prototype scope:
 
 - use Svelte 5 runes for local UI state;
-- use SvelteKit static output or Svelte plus Vite if routing adds no value;
+- use SvelteKit static output;
 - import existing framework-neutral helpers from the current app;
 - prove that one local image can move through import, settings selection,
   optimized output metadata, and export planning;
@@ -119,11 +119,11 @@ Close Phase 1 after the readiness docs/dashboard are updated and the current
 local commits are pushed once for CI. Then move to one of these larger tracks:
 
 1. Start the bulk UI design/prototype discussion.
-2. Start a small Svelte/SvelteKit technical prototype.
+2. Start a small SvelteKit technical prototype.
 3. Start a build modernization spike.
 4. Decide codec visibility and product scope.
 
-The highest-leverage engineering next step is the Svelte/build prototype,
+The highest-leverage engineering next step is the SvelteKit/build prototype,
 because it answers whether the project can leave the old Rollup/Preact stack
 without weakening the local/offline optimizer. The highest-leverage product next
 step is bulk UI design.

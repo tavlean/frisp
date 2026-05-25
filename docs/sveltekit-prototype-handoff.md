@@ -5,14 +5,14 @@ Last updated: 2026-05-25.
 ## Purpose
 
 Create a small, disposable technical prototype that answers whether Sqush can
-move from the current Rollup/Preact stack toward SvelteKit or Svelte plus Vite
-without weakening the core product promise:
+move from the current Rollup/Preact stack toward SvelteKit without weakening the
+core product promise:
 
 - image optimization stays local;
 - no server upload path is introduced;
 - offline/service-worker behavior remains viable;
 - workers and WASM assets can be built and served reliably;
-- existing framework-neutral helpers can be reused from a Svelte app.
+- existing framework-neutral helpers can be reused from a SvelteKit app.
 
 This is not a production UI migration and not the bulk UI implementation.
 
@@ -40,6 +40,58 @@ The first milestone should prove:
 4. The prototype can include a service-worker path or document what blocks it.
 5. The prototype can explain how current worker/WASM codec assets would be
    handled before any real migration.
+
+Use SvelteKit as the target. Do not broaden the spike to any non-SvelteKit
+build path unless SvelteKit produces a concrete blocker that is documented with
+a minimal reproduction.
+
+Current npm versions checked on 2026-05-25:
+
+- `svelte`: `5.55.9`
+- `@sveltejs/kit`: `2.61.1`
+- `@sveltejs/adapter-static`: `3.0.10`
+- `@sveltejs/vite-plugin-svelte`: `7.1.2`
+- `vite`: `8.0.14`
+- `svelte-check`: `4.4.8`
+
+Svelte MCP docs checked on 2026-05-25:
+
+- `kit/project-types`
+- `kit/adapter-static`
+- `kit/service-workers`
+- `kit/$service-worker`
+- `kit/page-options`
+- `kit/configuration`
+- `kit/$app-environment`
+- `kit/state-management`
+- `kit/building-your-app`
+- `kit/performance`
+- `svelte/what-are-runes`
+- `svelte/$state`
+- `svelte/$derived`
+- `svelte/$effect`
+- `svelte/$props`
+- `svelte/best-practices`
+- `svelte/testing`
+- `svelte/typescript`
+- `svelte/v5-migration-guide`
+
+Important SvelteKit/Svelte 5 guidance for this spike:
+
+- Prefer `@sveltejs/adapter-static` and static output.
+- Use SvelteKit's service-worker support and `$service-worker` manifest for
+  built assets, static files, prerendered paths, and versioned cache names.
+- Use `$app/environment` for browser/dev/build-time checks when needed.
+- Keep browser-only APIs behind browser-only execution paths.
+- Use Svelte 5 runes: `$state` for local mutable UI state, `$derived` for pure
+  computed values, `$effect` only for real side effects, and `$props` for
+  component inputs.
+- Avoid `$effect` for state relationships that can be derived.
+- Keep large binary payloads such as `File`, `Blob`, `ImageData`, workers, WASM
+  modules, and object URLs out of deep reactive state unless there is a measured
+  reason.
+- Use keyed `{#each}` blocks for image jobs and stable job identity.
+- Use `svelte-check` and the Svelte MCP autofixer before finalizing Svelte files.
 
 Avoid:
 
@@ -76,11 +128,12 @@ Use this prompt in a new Codex chat if needed:
 Work in /Users/tav/Development/Tavlean/Sqush or the prototype worktree
 /Users/tav/Development/Tavlean/Sqush-sveltekit-prototype.
 
-Goal: create a small SvelteKit/Svelte 5 technical prototype for Sqush in a
+Goal: create a small SvelteKit 2/Svelte 5 technical prototype for Sqush in a
 separate worktree/branch, without changing production UI or implementing bulk
 UI. The prototype should prove whether existing framework-neutral Sqush helpers
-can be imported into a static/offline-capable SvelteKit or Svelte+Vite app, and
-identify what must happen for workers, WASM assets, and service-worker caching.
+can be imported into a static/offline-capable SvelteKit app, and identify what
+must happen for generated feature metadata, workers, WASM assets, and
+service-worker caching.
 
 Read first:
 - AGENTS.md
@@ -89,6 +142,9 @@ Read first:
 - docs/svelte-migration-context.md
 - docs/bulk-image-architecture.md
 - docs/maintenance-status.md
+- docs/browser-support.md
+- docs/codec-provenance.md
+- docs/codec-source-references.md
 
 Constraints:
 - Keep the current local/offline single-image optimizer safe.
@@ -97,4 +153,7 @@ Constraints:
 - Do not delete codecs or major build pieces.
 - Use Svelte MCP/docs when creating or analyzing Svelte code.
 - Keep the prototype disposable and clearly separated from the current app.
+- Keep SvelteKit as the target. Do not pivot to any non-SvelteKit build path
+  unless SvelteKit produces a concrete blocker that is documented with a
+  minimal reproduction.
 ```
