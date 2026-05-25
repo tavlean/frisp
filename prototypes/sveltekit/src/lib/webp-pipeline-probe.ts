@@ -7,14 +7,12 @@ import {
   type BulkImageSettings,
 } from '../../../../src/client/lazy-app/bulk/settings';
 import {
+  compressImage,
   decodeSourceImage,
-  type DecodeWorkerBridge,
+  type ImagePipelineWorkerBridge,
   preprocessImage,
-  type PreprocessWorkerBridge,
   processImage,
-  type ProcessWorkerBridge,
-} from '../../../../src/client/lazy-app/image-pipeline-shared';
-import { compressImage } from '../../../../src/client/lazy-app/image-pipeline';
+} from '../../../../src/client/lazy-app/image-pipeline';
 import * as mozjpegMeta from 'features/encoders/mozJPEG/shared/meta';
 import * as oxipngMeta from 'features/encoders/oxiPNG/shared/meta';
 import {
@@ -136,9 +134,8 @@ export async function runWebpPipelineProbe(
   }
 
   const workerBridge = new SvelteKitWorkerBridge();
-  const pipelineWorkerBridge = workerBridge as unknown as DecodeWorkerBridge &
-    PreprocessWorkerBridge &
-    ProcessWorkerBridge;
+  const pipelineWorkerBridge =
+    workerBridge as unknown as ImagePipelineWorkerBridge;
   const decodedSource = await decodeSourceImage(
     signal,
     sourceFile,

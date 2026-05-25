@@ -61,16 +61,13 @@ npm audit --audit-level=low
   runtime with a generated WebP-first SvelteKit/Vite module-worker entry,
   proving the first replacement seam for the production Rollup `omt:` worker
   bridge.
-- The WebP pipeline probe now imports the framework-neutral
-  `image-pipeline-shared` helpers for decode, preprocess, process, and injected
-  WebP compression, proving the narrow single-image pipeline can run without
-  importing the production Preact option components or Rollup `omt:` worker
-  entry.
-- The WebP pipeline probe now imports the production `compressImage` helper
-  from `src/client/lazy-app/image-pipeline`. Production encoder clients expose
+- The WebP pipeline probe now imports the production `decodeSourceImage`,
+  `preprocessImage`, `processImage`, and `compressImage` helpers from
+  `src/client/lazy-app/image-pipeline`. Production encoder clients expose
   runtime-only `client/runtime` modules, and generated
   `feature-meta/encoders` combines shared metadata with those runtimes without
-  importing Preact option components.
+  importing Preact option components or the production Rollup `omt:` worker
+  entry.
 - The prototype sync step now emits generated WebP codec asset metadata. The
   service worker and SvelteKit worker bridge both consume that generated WebP
   WASM URL manifest instead of a handwritten local helper.
@@ -221,12 +218,13 @@ minimal SvelteKit single-image editor slice with real user-selected files.
   but a production migration should make codec JS and service-worker manifests
   share one generated asset URL per WASM file or patch the generated codec
   wrappers to externalize WASM URLs.
-- The production `compressImage` import is now proven from SvelteKit for the
-  WebP path via the generated encode-only runtime metadata map. The broader
-  full image-pipeline import is still blocked where it crosses production-only
-  Rollup virtual imports outside this seam: `omt:`, `url:`,
-  `entry-data:`, `service-worker:`, and generated `feature-meta` entries that
-  merge metadata with Preact option components.
+- The production single-image pipeline helper import is now proven from
+  SvelteKit for the WebP path: decode, preprocess, process, and compress all
+  come from `src/client/lazy-app/image-pipeline.ts`. The broader app-shell
+  import is still blocked where it crosses production-only Rollup virtual
+  imports outside this seam: `omt:`, `url:`, `entry-data:`, `service-worker:`,
+  and generated `feature-meta` entries that merge metadata with Preact option
+  components.
 - The first `url:` seam is now proven for rotate: production keeps
   `src/features/preprocessors/rotate/worker/rotate.ts` as the Rollup adapter,
   while shared rotate logic lives in a runtime factory that accepts an injected
@@ -240,12 +238,11 @@ minimal SvelteKit single-image editor slice with real user-selected files.
   keeps the Rollup URL adapter in `sw-bridge/index.ts`, while shared
   registration/update/share-target behavior lives in `sw-bridge/runtime.ts` and
   the prototype provides the SvelteKit service-worker URL explicitly.
-- The current prototype pipeline imports production `compressImage` from
+- The current prototype pipeline imports production single-image helpers from
   `src/client/lazy-app/image-pipeline.ts`, but it intentionally does not import
   `bulk/processor.ts` or the wider app shell. A reusable migration seam should
-  keep splitting source/decode/process helper primitives and injectable codec
-  workers from Preact option UI and Rollup virtual modules before attempting a
-  drop-in import.
+  keep splitting injectable codec workers, UI option controls, and Rollup
+  virtual modules before attempting a drop-in app-shell import.
 - This prototype uses `ssr = false` because the app is browser-local and relies
   on `File`. A production migration should revisit whether selected routes can
   prerender meaningful HTML without touching browser-only APIs.
