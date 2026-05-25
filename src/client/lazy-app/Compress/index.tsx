@@ -31,7 +31,6 @@ import Results from './Results';
 import WorkerBridge from '../worker-bridge';
 import type SnackBarElement from 'shared/custom-els/snack-bar';
 import {
-  DecodedSourceImage,
   SourceImage,
   compressImage,
   decodeSourceImage,
@@ -65,7 +64,7 @@ import {
   getSourcePreprocessStartState,
 } from './source-state';
 import { getImageProcessingErrorMessage } from './processing-errors';
-import { runSourceDecode, runSourcePreprocess } from './source-job-runner';
+import { runSourceImageWorkflow } from './source-workflow';
 import { runRunnableSideJobs } from './side-job-runner';
 import {
   getActiveImageJobsAfterMainCompletion,
@@ -335,84 +334,50 @@ export default class Compress extends Component<Props, State> {
 
     const { mainSignal, sideSignals } = workRuntime;
 
-    let decodedSource: DecodedSourceImage;
-
-    // Handle decoding
-    if (workPlan.needsDecoding) {
-      try {
-        decodedSource = await runSourceDecode({
-          signal: mainSignal,
-          file: mainJobState.file,
-          // Either worker is good enough here.
-          workerBridge: this.workerBridges[0],
-          pipeline: { decodeSourceImage },
-          onDecodeStart: () => {
-            this.setState(getSourceDecodeStartState());
-          },
-          onDecoded: ({ decoded, vectorImage }) => {
-            // Set default resize values
-            this.setState((currentState) => {
-              if (mainSignal.aborted) return {};
-              return getSourceDecodeSuccessState(
-                currentState,
-                decoded,
-                Boolean(vectorImage),
-              );
-            });
-          },
+    const source = await runSourceImageWorkflow({
+      signal: mainSignal,
+      currentSource: currentState.source,
+      mainJobState,
+      workPlan,
+      // Either worker is good enough here.
+      workerBridge: this.workerBridges[0],
+      pipeline: { decodeSourceImage, preprocessImage },
+      isUnmounted: () => this.isUnmounted,
+      showSnack: this.showSnackIfMounted,
+      onDecodeStart: () => {
+        this.setState(getSourceDecodeStartState());
+      },
+      onDecoded: ({ decoded, vectorImage }) => {
+        // Set default resize values
+        this.setState((currentState) => {
+          if (mainSignal.aborted) return {};
+          return getSourceDecodeSuccessState(
+            currentState,
+            decoded,
+            Boolean(vectorImage),
+          );
         });
-      } catch (err) {
-        if (isAbortError(err)) return;
-        if (this.isUnmounted) return;
-        this.showSnackIfMounted(
-          getImageProcessingErrorMessage('source-decoding', err),
-        );
-        throw err;
-      }
-    } else {
-      decodedSource = currentState.source!;
-    }
-
-    let source: SourceImage;
-
-    // Handle preprocessing
-    if (workPlan.needsPreprocessing) {
-      try {
-        source = await runSourcePreprocess({
-          signal: mainSignal,
-          decodedSource,
-          preprocessorState: mainJobState.preprocessorState,
-          // Either worker is good enough here.
-          workerBridge: this.workerBridges[0],
-          pipeline: { preprocessImage },
-          onPreprocessStart: () => {
-            this.setState(getSourcePreprocessStartState());
-          },
-          onPreprocessed: (preprocessedSource) => {
-            // Update state for process completion, including intermediate render
-            this.setState((currentState) => {
-              if (mainSignal.aborted) return {};
-              return setPreprocessedSourceState(
-                currentState,
-                preprocessedSource,
-                mainJobState.preprocessorState,
-                preprocessedSource.preprocessed,
-              );
-            });
-          },
+      },
+      onPreprocessStart: () => {
+        this.setState(getSourcePreprocessStartState());
+      },
+      onPreprocessed: (preprocessedSource) => {
+        // Update state for process completion, including intermediate render
+        this.setState((currentState) => {
+          if (mainSignal.aborted) return {};
+          return setPreprocessedSourceState(
+            currentState,
+            preprocessedSource,
+            mainJobState.preprocessorState,
+            preprocessedSource.preprocessed,
+          );
         });
-      } catch (err) {
-        if (isAbortError(err)) return;
-        if (this.isUnmounted) return;
+      },
+      onPreprocessError: () => {
         this.setState(getSourcePreprocessErrorState());
-        this.showSnackIfMounted(
-          getImageProcessingErrorMessage('preprocessing', err),
-        );
-        throw err;
-      }
-    } else {
-      source = currentState.source!;
-    }
+      },
+    });
+    if (!source) return;
 
     // That's the main part of the job done.
     this.activeMainJob = getActiveImageJobsAfterMainCompletion({
