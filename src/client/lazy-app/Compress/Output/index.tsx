@@ -20,8 +20,9 @@ import type { PreprocessorState } from '../../feature-meta';
 import type { SourceImage } from '../../Compress';
 import { linkRef } from 'shared/prerendered-app/util';
 import { drawDataToCanvas } from 'client/lazy-app/util/canvas';
-import { getOutputDrawableState, getOutputUpdatePlan } from './draw-state';
+import { getOutputDrawableState } from './draw-state';
 import { getOutputPreviewState } from './preview-state';
+import { runOutputMountWorkflow, runOutputUpdateWorkflow } from './workflow';
 import {
   getNextOutputScale,
   getInitialOutputViewControlState,
@@ -70,49 +71,36 @@ export default class Output extends Component<Props, State> {
   retargetedEvents = new WeakSet<Event>();
 
   componentDidMount() {
-    const leftDraw = this.leftDrawable();
-    const rightDraw = this.rightDrawable();
-
-    // Reset the pinch zoom, which may have an position set from the previous view, after pressing
-    // the back button.
-    this.pinchZoomLeft!.setTransform({
-      allowChangeEvent: true,
-      x: 0,
-      y: 0,
-      scale: 1,
+    runOutputMountWorkflow({
+      currentProps: this.props,
+      setPinchZoomTransform: (transform) => {
+        this.pinchZoomLeft!.setTransform(transform);
+      },
+      drawLeft: (drawable) => {
+        if (this.canvasLeft) drawDataToCanvas(this.canvasLeft, drawable);
+      },
+      drawRight: (drawable) => {
+        if (this.canvasRight) drawDataToCanvas(this.canvasRight, drawable);
+      },
     });
-
-    if (this.canvasLeft && leftDraw) {
-      drawDataToCanvas(this.canvasLeft, leftDraw);
-    }
-    if (this.canvasRight && rightDraw) {
-      drawDataToCanvas(this.canvasRight, rightDraw);
-    }
   }
 
   componentDidUpdate(prevProps: Props, prevState: State) {
-    const drawState = getOutputDrawableState(this.props);
     const pinchZoom = this.pinchZoomLeft!;
-    const updatePlan = getOutputUpdatePlan(prevProps, this.props, pinchZoom);
-
-    if (updatePlan.resetPinchZoom) {
-      // New image? Reset the pinch-zoom.
-      pinchZoom.setTransform({
-        allowChangeEvent: true,
-        x: 0,
-        y: 0,
-        scale: 1,
-      });
-    } else if (updatePlan.pinchZoomUpdate) {
-      pinchZoom.setTransform(updatePlan.pinchZoomUpdate);
-    }
-
-    if (updatePlan.redrawLeft && drawState.leftDraw && this.canvasLeft) {
-      drawDataToCanvas(this.canvasLeft, drawState.leftDraw);
-    }
-    if (updatePlan.redrawRight && drawState.rightDraw && this.canvasRight) {
-      drawDataToCanvas(this.canvasRight, drawState.rightDraw);
-    }
+    runOutputUpdateWorkflow({
+      previousProps: prevProps,
+      currentProps: this.props,
+      pinchZoom,
+      setPinchZoomTransform: (transform) => {
+        pinchZoom.setTransform(transform);
+      },
+      drawLeft: (drawable) => {
+        if (this.canvasLeft) drawDataToCanvas(this.canvasLeft, drawable);
+      },
+      drawRight: (drawable) => {
+        if (this.canvasRight) drawDataToCanvas(this.canvasRight, drawable);
+      },
+    });
   }
 
   shouldComponentUpdate(nextProps: Props, nextState: State) {

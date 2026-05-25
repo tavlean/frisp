@@ -95,6 +95,7 @@ This list is ordered by priority. Do the high-priority items before building new
     - Single-image side undo restoration now uses a side-state helper instead of raw immutable path updates in the Preact component.
     - Single-image output control state and event-retarget decisions now live in pure helpers instead of inline Preact output component branches.
     - Single-image output initial zoom/editing/background/aliasing state now lives in a tested helper.
+    - Single-image output mount/update side effects now run through a tested workflow helper with injected canvas and pinch-zoom callbacks.
     - Single-image saved settings key/label lookup and saved payload creation now live with saved-settings parsing/storage helpers instead of the Preact component.
     - Single-image saved-settings read/write action helpers now keep side labels, storage keys, and savable payload construction out of the Preact component.
     - Single-image saved-settings save/import feedback actions now come from pure helpers instead of inline Preact component branches.
