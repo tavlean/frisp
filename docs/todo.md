@@ -86,6 +86,7 @@ This list is ordered by priority. Do the high-priority items before building new
     - Static build file writing now returns a promise from the utility and keeps process-exit handling in the build entry point.
     - Single-image image-work job-state derivation now lives in pure helpers instead of inline Preact component logic.
     - Single-image display settings, result labels, image-contain decisions, and output/result render selectors now live in pure helpers instead of inline Preact render logic.
+    - Single-image display state and panel layout now compose through a tested render-state helper instead of inline Preact render logic.
     - Single-image composed render state now lives in a pure helper instead of being assembled inline by the Preact component.
     - Single-image preprocessing completion now leaves side download URL revocation to the shared side-reset helper instead of revoking twice.
     - Single-image decode success now applies default resize state through a tested source-state helper instead of inline Preact component logic.
@@ -232,6 +233,7 @@ This list is ordered by priority. Do the high-priority items before building new
     - Single-image document-title tests now cover loading-state detection, file info derivation, and update gating.
     - Single-image image update scheduling tests now cover immediate updates plus default and custom deferred delays.
     - Single-image display-state tests now cover the composed output/result render model consumed by the editor.
+    - Single-image compression render-state tests now cover display and panel layout composition.
     - Single-image side-copy tests now cover side index lookup, feedback action data, and blob URL regeneration when copying one side to the other.
     - Single-image processing error tests now cover source decode, preprocessing, and side processing messages.
     - Single-image encoder select tests now cover identity/WebP values, original-image filename labels, and supported encoder option mapping.

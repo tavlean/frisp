@@ -540,7 +540,7 @@
               </svg>
               Current work
             </span>
-            <strong>output render state</strong>
+            <strong>compression render state</strong>
           </div>
           <div class="meta-row">
             <span class="meta-label">
@@ -1004,6 +1004,10 @@
                       compose through a tested render-state helper.
                     </li>
                     <li>
+                      Compression display and panel layout state now compose
+                      through a tested render-state helper.
+                    </li>
+                    <li>
                       Output touch-retarget focus cleanup now uses a tested
                       helper instead of inline component branching.
                     </li>
@@ -1249,6 +1253,10 @@
                     <li>
                       Output render-state composition now keeps drawable,
                       preview, and zoom display data outside JSX.
+                    </li>
+                    <li>
+                      Compression render-state composition now keeps display and
+                      panel layout data outside the Preact component.
                     </li>
                     <li>
                       Desktop and mobile comparison panel ordering is now plain

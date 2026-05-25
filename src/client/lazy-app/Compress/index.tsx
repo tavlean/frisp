@@ -51,11 +51,8 @@ import {
   runCompressionUpdateWorkflow,
   type CompressionUpdateRuntime,
 } from './update-workflow';
-import { getCompressionDisplayState } from './display-state';
-import {
-  getCompressionPanelLayout,
-  type CompressionPanelSlot,
-} from './layout-state';
+import type { CompressionPanelSlot } from './layout-state';
+import { getCompressionRenderState, getEncoderMapLabel } from './render-state';
 
 export type OutputType = EncoderType | 'identity';
 export type { SourceImage } from '../image-pipeline';
@@ -294,13 +291,13 @@ export default class Compress extends Component<Props, State> {
     { onBack }: Props,
     { loading, sides, source, mobileView, preprocessorState }: State,
   ) {
-    const displayState = getCompressionDisplayState(
+    const { displayState, panelLayout } = getCompressionRenderState({
       sides,
       loading,
       mobileView,
-      (encoderState) => encoderMap[encoderState.type].meta.label,
-    );
-    const panelLayout = getCompressionPanelLayout(mobileView);
+      getEncoderLabel: (encoderState) =>
+        getEncoderMapLabel(encoderMap, encoderState),
+    });
 
     const options = sides.map((side, index) => (
       <Options
