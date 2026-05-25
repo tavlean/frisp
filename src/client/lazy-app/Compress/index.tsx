@@ -41,32 +41,16 @@ import {
 import {
   getSideEncoderOptionsChangeState,
   getSideEncoderTypeChangeState,
-  getSideEncodedResultState,
-  getSideLoadingState,
-  getSideProcessedResultState,
   getSideProcessorOptionsChangeState,
   getRestoreSideState,
-  resetSidesForNewSourceData,
-  setPreprocessedSourceState,
   type SideIndex,
 } from './side-state';
+import { getPreprocessorChangeState } from './source-state';
+import { type MainJobState, type SideJobState } from './work-plan';
 import {
-  getSourceDecodeSuccessState,
-  getPreprocessorChangeState,
-  getSourceDecodeStartState,
-  getSourcePreprocessErrorState,
-  getSourcePreprocessStartState,
-} from './source-state';
-import { runSourceImageWorkflow } from './source-workflow';
-import { runSideImageWorkflow } from './side-workflow';
-import {
-  getActiveImageJobsAfterMainCompletion,
-  getActiveImageJobsAfterSideCompletion,
-  getPlannedImageWork,
-  type MainJobState,
-  type SideJobState,
-} from './work-plan';
-import { startImageWork } from './work-start-runner';
+  runCompressionUpdateWorkflow,
+  type CompressionUpdateRuntime,
+} from './update-workflow';
 import { getCompressionDisplayState } from './display-state';
 import {
   getCompressionPanelLayout,
@@ -275,158 +259,34 @@ export default class Compress extends Component<Props, State> {
     undefined,
   ];
 
-  /**
-   * Perform image processing.
-   *
-   * This function is a monster, but I didn't want to break it up, because it
-   * never gets partially called. Instead, it looks at the current state, and
-   * decides which steps can be skipped, and which can be cached.
-   */
   private async updateImage() {
-    const currentState = this.state;
-
-    const { mainJobState, sideJobStates, workPlan, workStarts } =
-      getPlannedImageWork(
-        this.activeMainJob,
-        this.activeSideJobs,
-        this.sourceFile,
-        currentState,
-      );
-
-    const workRuntime = startImageWork(
-      {
+    await runCompressionUpdateWorkflow({
+      sourceFile: this.sourceFile,
+      currentState: this.state,
+      getRuntime: () => ({
         mainJob: this.activeMainJob,
         sideJobs: this.activeSideJobs,
         mainAbortController: this.mainAbortController,
         sideAbortControllers: this.sideAbortControllers,
+      }),
+      setRuntime: (runtime: CompressionUpdateRuntime) => {
+        this.mainAbortController = runtime.mainAbortController;
+        this.sideAbortControllers = runtime.sideAbortControllers;
+        this.activeMainJob = runtime.mainJob;
+        this.activeSideJobs = runtime.sideJobs;
       },
-      workStarts,
-    );
-    this.mainAbortController = workRuntime.mainAbortController;
-    this.sideAbortControllers = workRuntime.sideAbortControllers;
-    this.activeMainJob = workRuntime.mainJob;
-    this.activeSideJobs = workRuntime.sideJobs;
-
-    if (!workPlan.jobNeeded) return;
-
-    const { mainSignal, sideSignals } = workRuntime;
-
-    const source = await runSourceImageWorkflow({
-      signal: mainSignal,
-      currentSource: currentState.source,
-      mainJobState,
-      workPlan,
-      // Either worker is good enough here.
-      workerBridge: this.workerBridges[0],
-      pipeline: { decodeSourceImage, preprocessImage },
-      isUnmounted: () => this.isUnmounted,
-      showSnack: this.showSnackIfMounted,
-      onDecodeStart: () => {
-        this.setState(getSourceDecodeStartState());
-      },
-      onDecoded: ({ decoded, vectorImage }) => {
-        // Set default resize values
-        this.setState((currentState) => {
-          if (mainSignal.aborted) return {};
-          return getSourceDecodeSuccessState(
-            currentState,
-            decoded,
-            Boolean(vectorImage),
-          );
-        });
-      },
-      onPreprocessStart: () => {
-        this.setState(getSourcePreprocessStartState());
-      },
-      onPreprocessed: (preprocessedSource) => {
-        // Update state for process completion, including intermediate render
-        this.setState((currentState) => {
-          if (mainSignal.aborted) return {};
-          return setPreprocessedSourceState(
-            currentState,
-            preprocessedSource,
-            mainJobState.preprocessorState,
-            preprocessedSource.preprocessed,
-          );
-        });
-      },
-      onPreprocessError: () => {
-        this.setState(getSourcePreprocessErrorState());
-      },
-    });
-    if (!source) return;
-
-    // That's the main part of the job done.
-    this.activeMainJob = getActiveImageJobsAfterMainCompletion({
-      mainJob: this.activeMainJob,
-      sideJobs: this.activeSideJobs,
-    }).mainJob;
-
-    runSideImageWorkflow({
-      sideWorksNeeded: workPlan.sideWorksNeeded,
-      sideJobStates,
-      sideSignals,
-      source,
-      sides: currentState.sides,
       encodeCache: this.encodeCache,
-      getWorkerBridge: (sideIndex) => this.workerBridges[sideIndex],
+      workerBridges: this.workerBridges as [WorkerBridge, WorkerBridge],
       pipeline: {
+        decodeSourceImage,
+        preprocessImage,
         processImage,
         compressImage,
         decodeImage,
       },
       isUnmounted: () => this.isUnmounted,
       showSnack: this.showSnackIfMounted,
-      onProcessingStart: (sideIndex, signal) => {
-        this.setState((currentState) => {
-          if (signal.aborted) return {};
-          return getSideLoadingState(
-            currentState,
-            sideIndex as SideIndex,
-            true,
-          );
-        });
-      },
-      onProcessed: (sideIndex, signal, processed, processorState) => {
-        // Update state for process completion, including intermediate render.
-        this.setState((currentState) => {
-          if (signal.aborted) return {};
-          return getSideProcessedResultState(
-            currentState,
-            sideIndex as SideIndex,
-            processed,
-            processorState,
-          );
-        });
-      },
-      onEncodedResult: (sideIndex, signal, sideResult) => {
-        this.setState((currentState) => {
-          if (signal.aborted) return {};
-          return getSideEncodedResultState(
-            currentState,
-            sideIndex as SideIndex,
-            sideResult,
-          );
-        });
-      },
-      onSideComplete: (sideIndex) => {
-        this.activeSideJobs = getActiveImageJobsAfterSideCompletion(
-          {
-            mainJob: this.activeMainJob,
-            sideJobs: this.activeSideJobs,
-          },
-          sideIndex,
-        ).sideJobs;
-      },
-      onProcessingError: (sideIndex) => {
-        this.setState((currentState) => {
-          return getSideLoadingState(
-            currentState,
-            sideIndex as SideIndex,
-            false,
-          );
-        });
-      },
+      applyState: (patch) => this.setState(patch),
     });
   }
 

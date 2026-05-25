@@ -142,6 +142,7 @@ This list is ordered by priority. Do the high-priority items before building new
     - Single-image runnable side-job loop orchestration now runs through a framework-neutral helper with injected state and cache callbacks.
     - Single-image side image workflow orchestration now wraps runnable side jobs, cache updates, worker lookup, and processing error handling in a framework-neutral helper.
     - Single-image editor update workflow now applies new source files, document-title refreshes, and update scheduling through a tested helper.
+    - Single-image update workflow now coordinates planned source and side work through a framework-neutral helper instead of inline Preact component orchestration.
     - Single-image, image-pipeline, and bulk runner abort-error checks now use a shared utility helper instead of open-coded name checks.
     - The main editor no longer uses the deprecated `componentWillReceiveProps` lifecycle for new-file handling.
     - The resize processor options no longer use `componentWillReceiveProps`; preset matching now comes from a tested pure helper.
@@ -258,6 +259,7 @@ This list is ordered by priority. Do the high-priority items before building new
     - Single-image side-state tests now cover loading, processed-result, and encoded-result state patches.
     - Single-image side-state tests now cover preprocessing completion state updates and old side output cleanup.
     - Single-image side-state tests now cover restoring a previous side during undo.
+    - Single-image update workflow tests now cover the no-work path so current state does not wake the image pipeline unnecessarily.
     - Single-image side-state tests now cover encoder and processor settings state patches.
     - Single-image editor-state tests now cover initial default state and saved-settings state composition.
     - Saved-settings tests now cover side storage key and label lookup.
