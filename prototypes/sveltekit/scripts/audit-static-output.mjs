@@ -72,6 +72,11 @@ const qoiDecoderWasmAssets = files
 const mozjpegEncoderWasmAssets = files
   .filter((file) => file.includes('mozjpeg_enc') && file.endsWith('.wasm'))
   .sort();
+const oxipngWasmAssets = files
+  .filter(
+    (file) => file.includes('squoosh_oxipng_bg') && file.endsWith('.wasm'),
+  )
+  .sort();
 const imagequantWasmAssets = files
   .filter((file) => file.includes('imagequant') && file.endsWith('.wasm'))
   .sort();
@@ -107,6 +112,9 @@ const qoiDecoderWasmAsset = files.find(
 const mozjpegEncoderWasmAsset = files.find(
   (file) => file.includes('/mozjpeg_enc.') && file.endsWith('.wasm'),
 );
+const oxipngWasmAsset = files.find(
+  (file) => file.includes('/squoosh_oxipng_bg.') && file.endsWith('.wasm'),
+);
 const imagequantWasmAsset = files.find(
   (file) => file.includes('/imagequant.') && file.endsWith('.wasm'),
 );
@@ -131,6 +139,9 @@ const serviceWorkerImportedFeaturesWorkerAsset = files.find(
   (file) =>
     /^assets\/webp-[A-Za-z0-9_-]+\.js$/.test(file) && file.endsWith('.js'),
 );
+const workerHelperAssets = files
+  .filter((file) => file.includes('workerHelpers') && file.endsWith('.js'))
+  .sort();
 const immutableWorkerAsset = files.find(
   (file) =>
     file.includes('_app/immutable/workers/codec-asset-probe.worker') &&
@@ -166,6 +177,7 @@ assert(rotateWasmAsset, 'Missing emitted rotate WASM asset.');
 assert(qoiEncoderWasmAsset, 'Missing emitted QOI encoder WASM asset.');
 assert(qoiDecoderWasmAsset, 'Missing emitted QOI decoder WASM asset.');
 assert(mozjpegEncoderWasmAsset, 'Missing emitted MozJPEG encoder WASM asset.');
+assert(oxipngWasmAsset, 'Missing emitted OxiPNG WASM asset.');
 assert(imagequantWasmAsset, 'Missing emitted ImageQuant WASM asset.');
 assert(resizeWasmAsset, 'Missing emitted resize WASM asset.');
 assert(hqxWasmAsset, 'Missing emitted HQX WASM asset.');
@@ -197,6 +209,7 @@ assert(
   mozjpegEncoderWasmAssets.length >= 1,
   'Expected emitted MozJPEG encoder WASM asset.',
 );
+assert(oxipngWasmAssets.length >= 1, 'Expected emitted OxiPNG WASM asset.');
 assert(
   imagequantWasmAssets.length >= 1,
   'Expected emitted ImageQuant WASM asset.',
@@ -214,6 +227,10 @@ assert(
 assert(
   serviceWorkerImportedFeaturesWorkerAsset,
   'Missing emitted generated WebP features-worker asset.',
+);
+assert(
+  workerHelperAssets.length >= 1,
+  'Expected emitted OxiPNG parallel worker helper asset to remain visible for threaded-runtime migration analysis.',
 );
 assert(
   immutableWorkerAsset,
@@ -250,6 +267,10 @@ assert(
 assert(
   serviceWorker.includes(mozjpegEncoderWasmAsset),
   `Service-worker build manifest does not include ${mozjpegEncoderWasmAsset}.`,
+);
+assert(
+  serviceWorker.includes(oxipngWasmAsset),
+  `Service-worker build manifest does not include ${oxipngWasmAsset}.`,
 );
 assert(
   serviceWorker.includes(imagequantWasmAsset),
@@ -323,6 +344,7 @@ console.log(
     `QOI encoder WASM asset: ${qoiEncoderWasmAsset}`,
     `QOI decoder WASM asset: ${qoiDecoderWasmAsset}`,
     `MozJPEG encoder WASM asset: ${mozjpegEncoderWasmAsset}`,
+    `OxiPNG WASM asset: ${oxipngWasmAsset}`,
     `ImageQuant WASM asset: ${imagequantWasmAsset}`,
     `Resize WASM asset: ${resizeWasmAsset}`,
     `HQX WASM asset: ${hqxWasmAsset}`,
@@ -339,6 +361,8 @@ console.log(
     ...qoiDecoderWasmAssets.map((asset) => `  - ${asset}`),
     `MozJPEG encoder WASM copies: ${mozjpegEncoderWasmAssets.length}`,
     ...mozjpegEncoderWasmAssets.map((asset) => `  - ${asset}`),
+    `OxiPNG WASM copies: ${oxipngWasmAssets.length}`,
+    ...oxipngWasmAssets.map((asset) => `  - ${asset}`),
     `ImageQuant WASM copies: ${imagequantWasmAssets.length}`,
     ...imagequantWasmAssets.map((asset) => `  - ${asset}`),
     `Resize WASM copies: ${resizeWasmAssets.length}`,
@@ -348,6 +372,8 @@ console.log(
     `Worker asset: ${serviceWorkerImportedWorkerAsset}`,
     `Encode worker asset: ${serviceWorkerImportedEncodeWorkerAsset}`,
     `Generated WebP features-worker asset: ${serviceWorkerImportedFeaturesWorkerAsset}`,
+    `OxiPNG parallel worker helper assets: ${workerHelperAssets.length}`,
+    ...workerHelperAssets.map((asset) => `  - ${asset}`),
     `App worker asset: ${immutableWorkerAsset}`,
     `App encode worker asset: ${immutableEncodeWorkerAsset}`,
     `App generated WebP features-worker asset: ${immutableFeaturesWorkerAsset}`,

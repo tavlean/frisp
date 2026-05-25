@@ -18,6 +18,7 @@ import {
 import { encode as encodeWebP } from '../../../../src/features/encoders/webP/client/runtime';
 import * as webpMeta from 'features/encoders/webP/shared/meta';
 import * as mozjpegMeta from 'features/encoders/mozJPEG/shared/meta';
+import * as oxipngMeta from 'features/encoders/oxiPNG/shared/meta';
 import {
   defaultPreprocessorState,
   defaultProcessorState,
@@ -48,6 +49,8 @@ export interface WebpPipelineProbeResult {
   qoiDecodedHeight: number;
   jpegOutputBytes: number;
   jpegSignature: string;
+  oxipngOutputBytes: number;
+  oxipngSignature: string;
   quantizedWidth: number;
   quantizedHeight: number;
   quantizedUniqueColors: number;
@@ -161,6 +164,7 @@ export async function runWebpPipelineProbe(
   let qoiOutput: ArrayBuffer;
   let qoiDecoded: ImageData;
   let jpegOutput: ArrayBuffer;
+  let oxipngOutput: ArrayBuffer;
   let quantized: ImageData;
   let workerResized: ImageData;
   try {
@@ -181,6 +185,11 @@ export async function runWebpPipelineProbe(
       ...mozjpegMeta.defaultOptions,
       quality: 72,
     });
+    oxipngOutput = await workerBridge.oxipngEncode(
+      signal,
+      processed,
+      oxipngMeta.defaultOptions,
+    );
     quantized = await workerBridge.quantize(signal, processed, {
       zx: 0,
       maxNumColors: 4,
@@ -201,6 +210,7 @@ export async function runWebpPipelineProbe(
   const outputBytes = new Uint8Array(outputBuffer);
   const qoiOutputBytes = new Uint8Array(qoiOutput);
   const jpegOutputBytes = new Uint8Array(jpegOutput);
+  const oxipngOutputBytes = new Uint8Array(oxipngOutput);
   const ascii = new TextDecoder('ascii');
 
   return {
@@ -228,6 +238,10 @@ export async function runWebpPipelineProbe(
     jpegSignature: Array.from(jpegOutputBytes.slice(0, 3), (byte) =>
       byte.toString(16).padStart(2, '0'),
     ).join(' '),
+    oxipngOutputBytes: oxipngOutput.byteLength,
+    oxipngSignature: Array.from(oxipngOutputBytes.slice(0, 4), (byte) =>
+      byte.toString(16).padStart(2, '0'),
+    ).join(' '),
     quantizedWidth: quantized.width,
     quantizedHeight: quantized.height,
     quantizedUniqueColors: countUniqueColors(quantized),
@@ -247,6 +261,11 @@ export async function runWebpPipelineProbe(
       `mozjpegEncode promoted through the same generated worker surface (${
         jpegOutput.byteLength
       } bytes, ${Array.from(jpegOutputBytes.slice(0, 3), (byte) =>
+        byte.toString(16).padStart(2, '0'),
+      ).join(' ')})`,
+      `oxipngEncode promoted through the same generated worker surface (${
+        oxipngOutput.byteLength
+      } bytes, ${Array.from(oxipngOutputBytes.slice(0, 4), (byte) =>
         byte.toString(16).padStart(2, '0'),
       ).join(' ')})`,
       `quantize promoted through the same generated worker surface (${

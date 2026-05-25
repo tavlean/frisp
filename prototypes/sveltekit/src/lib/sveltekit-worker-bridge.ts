@@ -2,6 +2,7 @@ import { createWorkerBridgeRuntime } from '../../../../src/client/lazy-app/worke
 import type { EncodeOptions } from 'features/encoders/webP/shared/meta';
 import type { EncodeOptions as QoiEncodeOptions } from 'features/encoders/qoi/shared/meta';
 import type { EncodeOptions as MozjpegEncodeOptions } from 'features/encoders/mozJPEG/shared/meta';
+import type { EncodeOptions as OxipngEncodeOptions } from 'features/encoders/oxiPNG/shared/meta';
 import type { Options as QuantizeOptions } from 'features/processors/quantize/shared/meta';
 import type { WorkerResizeOptions } from 'features/processors/resize/shared/meta';
 import type { Options as RotateOptions } from 'features/preprocessors/rotate/shared/meta';
@@ -9,6 +10,7 @@ import { methodNames } from 'sqush-generated/worker-bridge/meta';
 import type {
   ImagequantWasmUrls,
   MozjpegWasmUrls,
+  OxipngWasmUrls,
   QoiWasmUrls,
   ResizeWasmUrls,
   WebpWasmUrls,
@@ -17,6 +19,7 @@ import {
   hqxWasmUrl,
   imagequantWasmUrl,
   mozjpegEncoderWasmUrl,
+  oxipngWasmUrl,
   qoiDecoderWasmUrl,
   qoiEncoderWasmUrl,
   resizeWasmUrl,
@@ -46,6 +49,11 @@ export interface SvelteKitWorkerBridgeApi {
     signal: AbortSignal,
     imageData: ImageData,
     options: MozjpegEncodeOptions,
+  ): Promise<ArrayBuffer>;
+  oxipngEncode(
+    signal: AbortSignal,
+    imageData: ImageData,
+    options: OxipngEncodeOptions,
   ): Promise<ArrayBuffer>;
   quantize(
     signal: AbortSignal,
@@ -83,6 +91,12 @@ interface SvelteKitWorkerBridgeWorkerApi {
     imageData: ImageData,
     options: MozjpegEncodeOptions,
     wasmUrls: MozjpegWasmUrls,
+  ): Promise<ArrayBuffer>;
+  oxipngEncode(
+    signal: AbortSignal,
+    imageData: ImageData,
+    options: OxipngEncodeOptions,
+    wasmUrls: OxipngWasmUrls,
   ): Promise<ArrayBuffer>;
   quantize(
     signal: AbortSignal,
@@ -146,6 +160,16 @@ export default class SvelteKitWorkerBridge
   ): Promise<ArrayBuffer> {
     return super.mozjpegEncode(signal, imageData, options, {
       encoder: mozjpegEncoderWasmUrl,
+    });
+  }
+
+  oxipngEncode(
+    signal: AbortSignal,
+    imageData: ImageData,
+    options: OxipngEncodeOptions,
+  ): Promise<ArrayBuffer> {
+    return super.oxipngEncode(signal, imageData, options, {
+      singleThread: oxipngWasmUrl,
     });
   }
 

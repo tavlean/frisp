@@ -32,11 +32,8 @@ export default defineConfig({
       features: fileURLToPath(new URL('../../src/features', import.meta.url)),
       shared: fileURLToPath(new URL('../../src/shared', import.meta.url)),
       sw: fileURLToPath(new URL('../../src/sw', import.meta.url)),
-      'wasm-feature-detect': fileURLToPath(
-        new URL(
-          './node_modules/wasm-feature-detect/dist/esm/index.js',
-          import.meta.url,
-        ),
+      'worker-shared': fileURLToPath(
+        new URL('../../src/worker-shared', import.meta.url),
       ),
     },
   },

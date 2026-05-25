@@ -15,8 +15,7 @@ const config = {
       features: '../../src/features',
       shared: '../../src/shared',
       sw: '../../src/sw',
-      'wasm-feature-detect':
-        './node_modules/wasm-feature-detect/dist/esm/index.js',
+      'worker-shared': '../../src/worker-shared',
     },
     adapter: adapter({
       pages: 'build',

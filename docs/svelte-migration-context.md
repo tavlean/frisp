@@ -191,6 +191,11 @@ When Svelte components are added, use Svelte's recommended testing path: Vitest 
 - Worker resize is now promoted through the same admission list. It uses a
   generated resize/HQX WASM asset manifest and optional injected wasm-bindgen
   URLs, while the default production initialization path remains intact.
+- Single-thread OxiPNG encode is now promoted through the same admission list.
+  It uses a SvelteKit `worker-shared` alias, a generated OxiPNG WASM asset
+  manifest, and optional injected wasm-bindgen URLs. The parallel OxiPNG helper
+  and WASM assets still need a separate threaded-runtime proof before production
+  migration.
 - Decide final codec surface before deleting codec code.
 - Use [Phase 1 readiness audit](phase-1-readiness-audit.md) as the current rationale for starting a small technical prototype instead of continuing tiny Preact cleanup.
 - Current browser support targets were reviewed on 2026-05-24. Re-check before production migration, but do not lower the modern evergreen baseline or remove WebAssembly, worker, service-worker, Canvas/ImageData, File/Blob, object URL, or dynamic import assumptions without measured evidence.

@@ -10,25 +10,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { EncodeOptions } from '../shared/meta';
+import type { EncodeOptions } from '../shared/meta';
 import checkThreadsSupport from 'worker-shared/supports-wasm-threads';
 
-async function initMT() {
+export interface OxiPngWasmUrls {
+  multiThread?: string;
+  singleThread?: string;
+}
+
+export interface OxiPngRuntimeOptions {
+  supportsThreads?: () => Promise<boolean>;
+  wasmUrls?: OxiPngWasmUrls;
+}
+
+async function initMT(wasmUrl?: string) {
   const {
     default: init,
     initThreadPool,
     optimise,
   } = await import('codecs/oxipng/pkg-parallel/squoosh_oxipng');
-  await init();
+  await init(wasmUrl);
   await initThreadPool(navigator.hardwareConcurrency);
   return optimise;
 }
 
-async function initST() {
+async function initST(wasmUrl?: string) {
   const { default: init, optimise } = await import(
     'codecs/oxipng/pkg/squoosh_oxipng'
   );
-  await init();
+  await init(wasmUrl);
   return optimise;
 }
 
@@ -37,19 +47,27 @@ let wasmReady: ReturnType<typeof initMT | typeof initST>;
 export default async function encode(
   data: ImageData,
   options: EncodeOptions,
+  runtimeOptions: OxiPngRuntimeOptions = {},
 ): Promise<ArrayBuffer> {
   if (!wasmReady) {
-    wasmReady = checkThreadsSupport().then((hasThreads: boolean) =>
-      hasThreads ? initMT() : initST(),
+    const { supportsThreads = checkThreadsSupport, wasmUrls } = runtimeOptions;
+    wasmReady = supportsThreads().then((hasThreads: boolean) =>
+      hasThreads
+        ? initMT(wasmUrls?.multiThread)
+        : initST(wasmUrls?.singleThread),
     );
   }
 
   const optimise = await wasmReady;
-  return optimise(
+  const result = optimise(
     data.data,
     data.width,
     data.height,
     options.level,
     options.interlace,
-  ).buffer;
+  );
+  const bytes = new Uint8Array(result.length);
+  bytes.set(result);
+
+  return bytes.buffer;
 }
