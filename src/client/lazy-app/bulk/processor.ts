@@ -5,9 +5,9 @@ import {
   processImage,
   SourceImage,
 } from '../image-pipeline';
+import type { ImagePipelineWorkerBridge } from '../image-pipeline';
 import { defaultPreprocessorState } from '../feature-meta/shared';
 import type { PreprocessorState } from '../feature-meta/shared';
-import type WorkerBridge from '../worker-bridge';
 import { getEffectiveSettings, settingsHash } from './settings';
 import type { BulkImageSettings } from './settings';
 import type { ImageJob, ImageOutput } from './session';
@@ -23,7 +23,7 @@ export interface BulkProcessorPipeline {
 export interface BulkProcessJobOptions {
   job: ImageJob;
   globalSettings: BulkImageSettings;
-  workerBridge: WorkerBridge;
+  workerBridge: ImagePipelineWorkerBridge;
   signal: AbortSignal;
   preprocessorState?: PreprocessorState;
   pipeline?: BulkProcessorPipeline;

@@ -1,11 +1,13 @@
 import { sniffMimeType } from '../../../../src/client/lazy-app/image-decode';
 import { canvasEncode } from '../../../../src/client/lazy-app/util/canvas';
 import { getPercentChange } from '../../../../src/client/lazy-app/bulk/size';
+import { processBulkImageJob } from '../../../../src/client/lazy-app/bulk/processor';
 import {
   getEffectiveSettings,
   settingsHash,
   type BulkImageSettings,
 } from '../../../../src/client/lazy-app/bulk/settings';
+import { createImageJob } from '../../../../src/client/lazy-app/bulk/session';
 import {
   compressImage,
   decodeSourceImage,
@@ -51,6 +53,11 @@ export interface WebpPipelineProbeResult {
   quantizedUniqueColors: number;
   workerResizedWidth: number;
   workerResizedHeight: number;
+  bulkOutputFileName: string;
+  bulkOutputMimeType: string;
+  bulkOutputBytes: number;
+  bulkDownloadUrl: string;
+  bulkPercentChange: number;
   stages: string[];
 }
 
@@ -161,6 +168,7 @@ export async function runWebpPipelineProbe(
   let oxipngOutput: ArrayBuffer;
   let quantized: ImageData;
   let workerResized: ImageData;
+  let bulkOutput: Awaited<ReturnType<typeof processBulkImageJob>>;
   try {
     outputFile = await compressImage(
       signal,
@@ -195,6 +203,14 @@ export async function runWebpPipelineProbe(
       method: 'lanczos3',
       premultiply: true,
       linearRGB: true,
+    });
+    bulkOutput = await processBulkImageJob({
+      job: createImageJob('sveltekit-bulk-pipeline-source', sourceFile),
+      globalSettings: pipelineSettings,
+      workerBridge: pipelineWorkerBridge,
+      signal,
+      preprocessorState: pipelinePreprocessorState,
+      createDownloadUrl: (file) => `prototype://${file.name}`,
     });
   } finally {
     workerBridge.dispose();
@@ -240,6 +256,11 @@ export async function runWebpPipelineProbe(
     quantizedUniqueColors: countUniqueColors(quantized),
     workerResizedWidth: workerResized.width,
     workerResizedHeight: workerResized.height,
+    bulkOutputFileName: bulkOutput.file.name,
+    bulkOutputMimeType: bulkOutput.file.type,
+    bulkOutputBytes: bulkOutput.file.size,
+    bulkDownloadUrl: bulkOutput.downloadUrl,
+    bulkPercentChange: Math.round(bulkOutput.percentChange * 10) / 10,
     stages: [
       'source generated locally with existing canvasEncode helper',
       'source type sniffed with existing sniffMimeType helper',
@@ -265,6 +286,7 @@ export async function runWebpPipelineProbe(
         quantized.width
       } x ${quantized.height}, ${countUniqueColors(quantized)} colors)`,
       `worker resize promoted through the same generated worker surface (${workerResized.width} x ${workerResized.height})`,
+      `production processBulkImageJob imported and completed (${bulkOutput.file.name}, ${bulkOutput.file.size} bytes)`,
       'export metadata built with existing filename, percent-change, and settings-hash helpers',
     ],
   };

@@ -68,6 +68,11 @@ npm audit --audit-level=low
   `feature-meta/encoders` combines shared metadata with those runtimes without
   importing Preact option components or the production Rollup `omt:` worker
   entry.
+- The same probe now imports production `processBulkImageJob` from
+  `src/client/lazy-app/bulk/processor` and runs it with the generated SvelteKit
+  worker bridge, proving the bulk processor boundary can use the same
+  framework-neutral image pipeline worker shape without importing the production
+  Rollup worker adapter.
 - The prototype sync step now emits generated WebP codec asset metadata. The
   service worker and SvelteKit worker bridge both consume that generated WebP
   WASM URL manifest instead of a handwritten local helper.
@@ -225,6 +230,10 @@ minimal SvelteKit single-image editor slice with real user-selected files.
   imports outside this seam: `omt:`, `url:`, `entry-data:`, `service-worker:`,
   and generated `feature-meta` entries that merge metadata with Preact option
   components.
+- The production bulk processor import is now proven from SvelteKit for the
+  same WebP path. `processBulkImageJob` accepts the structural
+  `ImagePipelineWorkerBridge` type, so it no longer needs the production Rollup
+  worker adapter type at its import boundary.
 - The first `url:` seam is now proven for rotate: production keeps
   `src/features/preprocessors/rotate/worker/rotate.ts` as the Rollup adapter,
   while shared rotate logic lives in a runtime factory that accepts an injected
@@ -239,10 +248,11 @@ minimal SvelteKit single-image editor slice with real user-selected files.
   registration/update/share-target behavior lives in `sw-bridge/runtime.ts` and
   the prototype provides the SvelteKit service-worker URL explicitly.
 - The current prototype pipeline imports production single-image helpers from
-  `src/client/lazy-app/image-pipeline.ts`, but it intentionally does not import
-  `bulk/processor.ts` or the wider app shell. A reusable migration seam should
-  keep splitting injectable codec workers, UI option controls, and Rollup
-  virtual modules before attempting a drop-in app-shell import.
+  `src/client/lazy-app/image-pipeline.ts` and the production bulk job processor
+  from `src/client/lazy-app/bulk/processor.ts`, but it intentionally does not
+  import the wider app shell. A reusable migration seam should keep splitting
+  injectable codec workers, UI option controls, and Rollup virtual modules
+  before attempting a drop-in app-shell import.
 - This prototype uses `ssr = false` because the app is browser-local and relies
   on `File`. A production migration should revisit whether selected routes can
   prerender meaningful HTML without touching browser-only APIs.

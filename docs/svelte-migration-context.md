@@ -203,6 +203,10 @@ When Svelte components are added, use Svelte's recommended testing path: Vitest 
   prototype imports production `decodeSourceImage`, `preprocessImage`,
   `processImage`, and `compressImage` for its WebP path through this encode-only
   map and a generated SvelteKit worker bridge.
+- The production bulk processor now accepts the same structural
+  `ImagePipelineWorkerBridge` type, so the SvelteKit prototype can import and
+  run `processBulkImageJob` for the WebP path without importing the production
+  Rollup worker adapter.
 - Decide final codec surface before deleting codec code.
 - Use [Phase 1 readiness audit](phase-1-readiness-audit.md) as the current rationale for starting a small technical prototype instead of continuing tiny Preact cleanup.
 - Current browser support targets were reviewed on 2026-05-24. Re-check before production migration, but do not lower the modern evergreen baseline or remove WebAssembly, worker, service-worker, Canvas/ImageData, File/Blob, object URL, or dynamic import assumptions without measured evidence.

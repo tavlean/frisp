@@ -135,11 +135,12 @@ produced a real `RIFF`/`WEBP` output and export metadata.
 Do not treat this as proof that the full current app shell is drop-in.
 `src/client/lazy-app/image-pipeline.ts` now has a proven WebP prototype path for
 decode, preprocess, process, and compression through the generated SvelteKit
-worker bridge and encode-only metadata map, but `bulk/processor.ts` and the
-wider app surface still cross production worker, UI option, and Rollup-only
-virtual import boundaries. The next task should keep turning those remaining
-boundaries into reusable migration seams instead of broadening the prototype
-into production UI.
+worker bridge and encode-only metadata map. `bulk/processor.ts` now has a
+proven WebP prototype path through production `processBulkImageJob` using the
+same structural worker-bridge type. The wider app surface still crosses
+production worker, UI option, and Rollup-only virtual import boundaries. The
+next task should keep turning those remaining boundaries into reusable migration
+seams instead of broadening the prototype into production UI.
 
 ### 2. Reusable migration seams
 
@@ -165,6 +166,10 @@ encode-only map and no longer imports the production Rollup `omt:` worker entry
 for its worker type. The SvelteKit prototype imports the production
 `decodeSourceImage`, `preprocessImage`, `processImage`, and `compressImage`
 helpers for its WebP probe without importing Preact option components.
+`src/client/lazy-app/bulk/processor.ts` now uses that same structural
+`ImagePipelineWorkerBridge` type, so the SvelteKit prototype can import and run
+production `processBulkImageJob` without importing the production Rollup worker
+adapter.
 
 ### 3. Prototype offline proof
 
@@ -242,14 +247,15 @@ offline cache coverage for the app shell and WebP probe assets, and runtime
 
 This is not yet production-migration-ready. The WebP single-image helper path in
 the production image pipeline is now importable from SvelteKit, including
-decode, preprocess, process, and compression, but a broader direct app import is
-still blocked by remaining production Rollup virtual imports (`omt:`, broader
-`url:`, `entry-data:`, `service-worker:`), UI option entries outside that seam,
-and Emscripten codec wrappers that embed worker-local WASM asset URLs. The
-rotate seam proves the likely `url:` replacement shape for a small WASM
-preprocessor: split the production Rollup adapter from a reusable runtime that
-accepts a generated Vite `?url` asset. Those are concrete migration tasks, not
-evidence that SvelteKit static output is the wrong target.
+decode, preprocess, process, and compression. The WebP bulk job processor path
+is also importable through production `processBulkImageJob`. A broader direct
+app import is still blocked by remaining production Rollup virtual imports
+(`omt:`, broader `url:`, `entry-data:`, `service-worker:`), UI option entries
+outside that seam, and Emscripten codec wrappers that embed worker-local WASM
+asset URLs. The rotate seam proves the likely `url:` replacement shape for a
+small WASM preprocessor: split the production Rollup adapter from a reusable
+runtime that accepts a generated Vite `?url` asset. Those are concrete migration
+tasks, not evidence that SvelteKit static output is the wrong target.
 
 Safest next engineering track:
 
@@ -342,6 +348,10 @@ Worker-bridge seam progress:
   single-image helper surface for decode, preprocess, process, and WebP
   compression. The SvelteKit probe calls those production helpers through the
   generated encode-only metadata/runtime map plus the SvelteKit worker bridge.
+- `src/client/lazy-app/bulk/processor.ts` now takes the structural
+  `ImagePipelineWorkerBridge` type instead of the production Rollup worker
+  adapter type. The SvelteKit probe imports production `processBulkImageJob` and
+  completes a WebP bulk job with an injected download URL creator.
 - The SvelteKit prototype sync step now emits
   `.svelte-kit/sqush-generated/codec-assets/webp.ts` as the canonical WebP
   encoder WASM URL manifest. The service-worker asset list and
