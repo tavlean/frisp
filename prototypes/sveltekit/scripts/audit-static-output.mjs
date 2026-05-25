@@ -33,6 +33,22 @@ const serviceWorker = await readFile(
   'utf8',
 );
 
+const appEntryAsset = files.find(
+  (file) => file.includes('_app/immutable/entry/app.') && file.endsWith('.js'),
+);
+const startEntryAsset = files.find(
+  (file) =>
+    file.includes('_app/immutable/entry/start.') && file.endsWith('.js'),
+);
+const routeNodeAssets = files.filter(
+  (file) => file.includes('_app/immutable/nodes/') && file.endsWith('.js'),
+);
+const pageCssAsset = files.find(
+  (file) =>
+    file.includes('_app/immutable/assets/') &&
+    file.endsWith('.css') &&
+    !file.includes('/webp_'),
+);
 const wasmAsset = files.find(
   (file) =>
     file.includes('/webp_enc.') &&
@@ -76,6 +92,13 @@ assert(
   files.includes('service-worker.js'),
   'Missing SvelteKit service-worker output.',
 );
+assert(appEntryAsset, 'Missing emitted SvelteKit app entry asset.');
+assert(startEntryAsset, 'Missing emitted SvelteKit start entry asset.');
+assert(
+  routeNodeAssets.length > 0,
+  'Missing emitted SvelteKit route node assets.',
+);
+assert(pageCssAsset, 'Missing emitted SvelteKit page CSS asset.');
 assert(wasmAsset, 'Missing emitted WebP WASM asset from the worker probe.');
 assert(simdWasmAsset, 'Missing emitted SIMD WebP WASM asset.');
 assert(
@@ -123,6 +146,32 @@ assert(
   `Service-worker build manifest does not include ${serviceWorkerImportedPipelineWorkerAsset}.`,
 );
 assert(
+  serviceWorker.includes(appEntryAsset),
+  `Service-worker build manifest does not include ${appEntryAsset}.`,
+);
+assert(
+  serviceWorker.includes(startEntryAsset),
+  `Service-worker build manifest does not include ${startEntryAsset}.`,
+);
+for (const routeNodeAsset of routeNodeAssets) {
+  assert(
+    serviceWorker.includes(routeNodeAsset),
+    `Service-worker build manifest does not include ${routeNodeAsset}.`,
+  );
+}
+assert(
+  serviceWorker.includes(pageCssAsset),
+  `Service-worker build manifest does not include ${pageCssAsset}.`,
+);
+assert(
+  /\.addAll\(/.test(serviceWorker),
+  'Service worker does not pre-cache its build manifest.',
+);
+assert(
+  serviceWorker.includes('caches.match'),
+  'Service worker does not read from Cache Storage for GET requests.',
+);
+assert(
   /\.put\(/.test(serviceWorker),
   'Service worker does not runtime-cache fetched GET assets.',
 );
@@ -130,6 +179,10 @@ assert(
 console.log(
   [
     'Static output audit passed.',
+    `App entry asset: ${appEntryAsset}`,
+    `Start entry asset: ${startEntryAsset}`,
+    `Route node assets: ${routeNodeAssets.length}`,
+    `Page CSS asset: ${pageCssAsset}`,
     `WASM asset: ${wasmAsset}`,
     `SIMD WASM asset: ${simdWasmAsset}`,
     `Worker asset: ${serviceWorkerImportedWorkerAsset}`,

@@ -8,7 +8,7 @@ import { codecAssetUrls } from '$lib/codec-assets';
 
 const worker = self as unknown as ServiceWorkerGlobalScope;
 const cacheName = `sqush-sveltekit-prototype-${version}`;
-const assets = [...build, ...files, ...codecAssetUrls];
+const assets = Array.from(new Set([...build, ...files, ...codecAssetUrls]));
 
 async function fetchAndCache(request: Request): Promise<Response> {
   const response = await fetch(request);

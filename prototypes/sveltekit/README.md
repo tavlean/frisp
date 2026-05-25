@@ -34,7 +34,8 @@ npm audit --audit-level=low
   WebP worker encoder.
 - Builds with `@sveltejs/adapter-static`.
 - Includes a prototype service worker using SvelteKit's `$service-worker`
-  asset manifest.
+  asset manifest, explicit codec asset references, and a de-duped install cache
+  list.
 - `npm run audit:static-output` verifies that static output includes the
   fallback page, service worker, module worker, WebP WASM asset, and
   service-worker cache coverage for the worker/WASM assets.
@@ -49,6 +50,10 @@ npm audit --audit-level=low
 - Local preview rendered in Chrome through Playwright with the WebP pipeline
   probe reporting a generated 155-byte PNG source, 4x4 decode, 3x3 processed
   image, 96-byte WebP output, `RIFF`/`WEBP` header, and export metadata.
+- Runtime service-worker verification in Chrome showed the page controlled by
+  the prototype service worker after reload, with Cache Storage covering app
+  entry/start/route assets, the WebP pipeline worker, baseline WebP WASM, and
+  SIMD WebP WASM.
 
 ## Findings
 
@@ -86,11 +91,13 @@ npm audit --audit-level=low
 - SvelteKit's `$service-worker` build manifest does not automatically include
   the nested worker/WASM assets. The viable path is to expose codec asset URLs
   from a shared module and add them to the service-worker cache list
-  explicitly. Importing a worker URL from the service-worker build emits a
-  second worker file, so the prototype also runtime-caches non-manifest GETs to
-  cover the app worker after first load. A production migration should prefer a
-  generated manifest that gives both the app and service worker the same worker
-  asset URL.
+  explicitly. The combined build and codec manifests must be de-duped before
+  `cache.addAll`; otherwise duplicate WebP WASM URLs make the service-worker
+  install become redundant. Importing a worker URL from the service-worker build
+  emits a second worker file, so the prototype also runtime-caches non-manifest
+  GETs to cover the app worker after first load. A production migration should
+  prefer a generated manifest that gives both the app and service worker the
+  same worker asset URL.
 - Importing WebP WASM assets explicitly for service-worker coverage while also
   importing the existing Emscripten modules currently emits duplicate baseline
   and SIMD WASM files. This is acceptable for the disposable proof, but a

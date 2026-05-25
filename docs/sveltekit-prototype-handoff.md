@@ -157,6 +157,20 @@ Do not broaden into production UI work.
 
 ### 3. Prototype offline proof
 
+Status: proven for the prototype shell and WebP probe assets.
+
+The prototype registers its emitted `service-worker.js` in production builds.
+The static audit now confirms cache-manifest coverage for app entry/start/route
+assets, page CSS, service-worker-imported codec workers, baseline WebP WASM, and
+SIMD WebP WASM. Runtime Chrome verification confirmed the page becomes
+service-worker controlled after reload and Cache Storage contains the app shell,
+pipeline worker, baseline WebP WASM, and SIMD WebP WASM.
+
+One important finding: SvelteKit's build manifest and the explicit codec asset
+manifest can both contain the same WebP WASM URLs. Passing duplicates to
+`cache.addAll` makes the service-worker install fail and the worker become
+redundant, so the prototype de-dupes the install list with `Set`.
+
 Extend `audit:static-output` and browser checks to confirm app shell, worker
 assets, baseline WebP WASM, SIMD WebP WASM, and generated codec asset
 references are cache-covered. If the available browser surface cannot expose

@@ -37,6 +37,19 @@
   const exportSummary = $derived(model.summary.export);
 
   $effect(() => {
+    if (import.meta.env.DEV || !('serviceWorker' in navigator)) return;
+
+    navigator.serviceWorker
+      .register('/service-worker.js')
+      .catch((error: unknown) => {
+        console.error(
+          'SvelteKit prototype service-worker registration failed',
+          error,
+        );
+      });
+  });
+
+  $effect(() => {
     let cancelled = false;
 
     runCodecAssetProbe()
