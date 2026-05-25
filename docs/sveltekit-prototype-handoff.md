@@ -265,18 +265,30 @@ WebP encoder path.
 
 Worker-bridge seam progress:
 
-- `src/client/lazy-app/worker-bridge/bridge.ts` now owns the reusable Comlink
-  bridge runtime and accepts a `createWorker` function.
+- `src/client/lazy-app/worker-bridge/runtime.ts` now owns the reusable Comlink
+  bridge runtime and accepts explicit method names plus a `createWorker`
+  function.
+- `src/client/lazy-app/worker-bridge/bridge.ts` adapts that runtime to the
+  production generated `methodNames` list.
 - `src/client/lazy-app/worker-bridge/index.ts` is now the Rollup adapter that
   imports the current `omt:` worker URL and passes `() => new Worker(workerURL)`
   into the shared bridge factory.
 - Root `npm run check` and `npm run smoke:browser` passed after the split,
   including real WebP output, resize processing, saved-settings import, and
   offline app-shell reload.
+- The SvelteKit prototype now has a WebP-only Vite adapter at
+  `prototypes/sveltekit/src/lib/sveltekit-worker-bridge.ts`. It uses
+  `createWorkerBridgeRuntime(['webpEncode'], createWorker)` with a module
+  worker URL, and the WebP pipeline probe now encodes through that shared bridge
+  runtime instead of a bespoke `postMessage` wrapper.
+- Runtime Chrome verification confirmed the controlled SvelteKit page still
+  renders the bridge-factory WebP pipeline probe with `RIFF`/`WEBP`, caches the
+  app shell and top-level baseline/SIMD WebP WASM assets, and does not add
+  worker-local WASM URLs to Cache Storage.
 
-Next worker seam: add a Vite/SvelteKit-facing adapter in the prototype that uses
-the shared bridge factory with a module worker URL, then re-attempt a narrow
-pipeline import through that adapter before touching the production app shell.
+Next worker seam: re-attempt a narrow real pipeline import through the
+SvelteKit-facing adapter and document the next concrete blocker, likely
+remaining full encoder-map or asset URL coupling.
 
 ### Verification expectations
 

@@ -20,15 +20,8 @@ import {
   encoderMap,
 } from 'client/lazy-app/feature-meta';
 import type { EncodeOptions } from 'features/encoders/webP/shared/meta';
-import {
-  webpEncoderSimdWasmUrl,
-  webpEncoderWasmUrl,
-  webpPipelineProbeWorkerUrl,
-} from './codec-assets';
-import type {
-  WebpPipelineEncodeRequest,
-  WebpPipelineEncodeResult,
-} from './webp-pipeline-probe.worker';
+import { webpEncoderSimdWasmUrl, webpEncoderWasmUrl } from './codec-assets';
+import SvelteKitWorkerBridge from './sveltekit-worker-bridge';
 
 export interface WebpPipelineProbeResult {
   sourceFileName: string;
@@ -98,38 +91,20 @@ async function createSourceFile(): Promise<File> {
 }
 
 function encodeWebpInWorker(
+  signal: AbortSignal,
   imageData: ImageData,
   options: EncodeOptions,
 ): Promise<ArrayBuffer> {
-  return new Promise((resolve, reject) => {
-    const worker = new Worker(webpPipelineProbeWorkerUrl, { type: 'module' });
+  const workerBridge = new SvelteKitWorkerBridge();
 
-    worker.onmessage = (
-      event: MessageEvent<WebpPipelineEncodeResult | { error: string }>,
-    ) => {
-      worker.terminate();
-      if ('error' in event.data) {
-        reject(new Error(event.data.error));
-        return;
-      }
-      resolve(event.data.output);
-    };
-
-    worker.onerror = (event) => {
-      worker.terminate();
-      reject(new Error(event.message || 'WebP pipeline worker failed.'));
-    };
-
-    const request: WebpPipelineEncodeRequest = {
-      imageData,
-      options,
-      wasmUrls: {
-        baseline: webpEncoderWasmUrl,
-        simd: webpEncoderSimdWasmUrl,
-      },
-    };
-    worker.postMessage(request);
-  });
+  return workerBridge
+    .webpEncode(signal, imageData, options, {
+      baseline: webpEncoderWasmUrl,
+      simd: webpEncoderSimdWasmUrl,
+    })
+    .finally(() => {
+      workerBridge.dispose();
+    });
 }
 
 export async function runWebpPipelineProbe(
@@ -163,6 +138,7 @@ export async function runWebpPipelineProbe(
   }
 
   const outputBuffer = await encodeWebpInWorker(
+    signal,
     processed,
     encoderState.options as EncodeOptions,
   );
@@ -197,7 +173,7 @@ export async function runWebpPipelineProbe(
       'source decoded with existing builtinDecode helper',
       `preprocess inspected default rotate=${defaultPreprocessorState.rotate.rotate}; no worker rotation needed`,
       'resize processed with existing builtinResize helper',
-      'encoded through existing WebP worker encode module in a SvelteKit worker',
+      'encoded through existing WebP worker encode module via the shared worker-bridge factory and a SvelteKit module worker',
       'export metadata built with existing filename, percent-change, and settings-hash helpers',
     ],
   };

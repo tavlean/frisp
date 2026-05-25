@@ -15,6 +15,7 @@
     "@sveltejs/adapter-static": "3.0.10",
     "@sveltejs/kit": "2.61.1",
     "@sveltejs/vite-plugin-svelte": "7.1.2",
+    "comlink": "^4.4.2",
     "svelte": "5.55.9",
     "svelte-check": "4.3.4",
     "typescript": "6.0.3",

@@ -54,6 +54,9 @@ npm audit --audit-level=low
   the prototype service worker after reload, with Cache Storage covering app
   entry/start/route assets, the WebP pipeline worker, baseline WebP WASM, and
   SIMD WebP WASM.
+- The WebP pipeline probe now runs through Sqush's shared Comlink worker-bridge
+  runtime with a SvelteKit/Vite module-worker adapter, proving the first
+  replacement seam for the production Rollup `omt:` worker bridge.
 
 ## Readiness verdict
 
@@ -165,8 +168,9 @@ minimal SvelteKit single-image editor slice with real user-selected files.
   production modules. The initial decode/abort seam shows this can be done
   behavior-preservingly while keeping existing imports compatible.
 - Replace the production `omt:` worker bridge with Vite worker imports. The
-  prototype proves the emitted asset shape, but the real `features-worker`
-  Comlink bridge still needs a focused port.
+  prototype now proves the shared bridge runtime can be reused with a WebP-only
+  SvelteKit module-worker adapter, but the full generated `features-worker`
+  surface still needs a focused Vite-facing generated entry.
 - Replace production `url:` codec references with Vite `?url` imports or
   `new URL(..., import.meta.url)` in codec-facing modules.
 - Replace `entry-data:` service-worker cache generation with `$service-worker`
