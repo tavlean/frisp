@@ -81,6 +81,20 @@ const qoiEncoderWasmAssets = files
 const qoiDecoderWasmAssets = files
   .filter((file) => file.includes('qoi_dec') && file.endsWith('.wasm'))
   .sort();
+const jxlEncoderWasmAssets = files
+  .filter((file) => file.includes('jxl_enc') && file.endsWith('.wasm'))
+  .sort();
+const jxlDecoderWasmAssets = files
+  .filter((file) => file.includes('jxl_dec') && file.endsWith('.wasm'))
+  .sort();
+const jxlThreadedWorkerAssets = files
+  .filter(
+    (file) =>
+      file.includes('jxl_enc_mt') &&
+      file.includes('.worker') &&
+      file.endsWith('.js'),
+  )
+  .sort();
 const mozjpegEncoderWasmAssets = files
   .filter((file) => file.includes('mozjpeg_enc') && file.endsWith('.wasm'))
   .sort();
@@ -129,6 +143,12 @@ const qoiEncoderWasmAsset = files.find(
 );
 const qoiDecoderWasmAsset = files.find(
   (file) => file.includes('/qoi_dec.') && file.endsWith('.wasm'),
+);
+const jxlEncoderWasmAsset = files.find(
+  (file) => file.includes('/jxl_enc.') && file.endsWith('.wasm'),
+);
+const jxlDecoderWasmAsset = files.find(
+  (file) => file.includes('/jxl_dec.') && file.endsWith('.wasm'),
 );
 const mozjpegEncoderWasmAsset = files.find(
   (file) => file.includes('/mozjpeg_enc.') && file.endsWith('.wasm'),
@@ -200,6 +220,8 @@ assert(avifEncoderWasmAsset, 'Missing emitted AVIF encoder WASM asset.');
 assert(rotateWasmAsset, 'Missing emitted rotate WASM asset.');
 assert(qoiEncoderWasmAsset, 'Missing emitted QOI encoder WASM asset.');
 assert(qoiDecoderWasmAsset, 'Missing emitted QOI decoder WASM asset.');
+assert(jxlEncoderWasmAsset, 'Missing emitted JPEG XL encoder WASM asset.');
+assert(jxlDecoderWasmAsset, 'Missing emitted JPEG XL decoder WASM asset.');
 assert(mozjpegEncoderWasmAsset, 'Missing emitted MozJPEG encoder WASM asset.');
 assert(oxipngWasmAsset, 'Missing emitted OxiPNG WASM asset.');
 assert(imagequantWasmAsset, 'Missing emitted ImageQuant WASM asset.');
@@ -244,6 +266,18 @@ assert(
 assert(
   qoiDecoderWasmAssets.length >= 1,
   'Expected emitted QOI decoder WASM asset.',
+);
+assert(
+  jxlEncoderWasmAssets.length >= 1,
+  'Expected emitted JPEG XL encoder WASM asset.',
+);
+assert(
+  jxlDecoderWasmAssets.length >= 1,
+  'Expected emitted JPEG XL decoder WASM asset.',
+);
+assert(
+  jxlThreadedWorkerAssets.length >= 1,
+  'Expected emitted JPEG XL threaded worker helper asset to remain visible for threaded-runtime migration analysis.',
 );
 assert(
   mozjpegEncoderWasmAssets.length >= 1,
@@ -315,6 +349,14 @@ assert(
 assert(
   serviceWorker.includes(qoiDecoderWasmAsset),
   `Service-worker build manifest does not include ${qoiDecoderWasmAsset}.`,
+);
+assert(
+  serviceWorker.includes(jxlEncoderWasmAsset),
+  `Service-worker build manifest does not include ${jxlEncoderWasmAsset}.`,
+);
+assert(
+  serviceWorker.includes(jxlDecoderWasmAsset),
+  `Service-worker build manifest does not include ${jxlDecoderWasmAsset}.`,
 );
 assert(
   serviceWorker.includes(mozjpegEncoderWasmAsset),
@@ -398,6 +440,8 @@ console.log(
     `Rotate WASM asset: ${rotateWasmAsset}`,
     `QOI encoder WASM asset: ${qoiEncoderWasmAsset}`,
     `QOI decoder WASM asset: ${qoiDecoderWasmAsset}`,
+    `JPEG XL encoder WASM asset: ${jxlEncoderWasmAsset}`,
+    `JPEG XL decoder WASM asset: ${jxlDecoderWasmAsset}`,
     `MozJPEG encoder WASM asset: ${mozjpegEncoderWasmAsset}`,
     `OxiPNG WASM asset: ${oxipngWasmAsset}`,
     `ImageQuant WASM asset: ${imagequantWasmAsset}`,
@@ -422,6 +466,12 @@ console.log(
     ...qoiEncoderWasmAssets.map((asset) => `  - ${asset}`),
     `QOI decoder WASM copies: ${qoiDecoderWasmAssets.length}`,
     ...qoiDecoderWasmAssets.map((asset) => `  - ${asset}`),
+    `JPEG XL encoder WASM copies: ${jxlEncoderWasmAssets.length}`,
+    ...jxlEncoderWasmAssets.map((asset) => `  - ${asset}`),
+    `JPEG XL decoder WASM copies: ${jxlDecoderWasmAssets.length}`,
+    ...jxlDecoderWasmAssets.map((asset) => `  - ${asset}`),
+    `JPEG XL threaded worker helper assets: ${jxlThreadedWorkerAssets.length}`,
+    ...jxlThreadedWorkerAssets.map((asset) => `  - ${asset}`),
     `MozJPEG encoder WASM copies: ${mozjpegEncoderWasmAssets.length}`,
     ...mozjpegEncoderWasmAssets.map((asset) => `  - ${asset}`),
     `OxiPNG WASM copies: ${oxipngWasmAssets.length}`,

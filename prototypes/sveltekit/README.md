@@ -54,8 +54,10 @@ npm audit --audit-level=low
   round trip from the promoted `avifEncode` worker method, a 3x3 AVIF fixture
   decode from the promoted `avifDecode` worker method, a 3x3 WebP decode round
   trip from the promoted `webpDecode` worker method, a 3x3 QOI decode round
-  trip from the promoted `qoiDecode` worker method, MozJPEG `ff d8 ff` output
-  from the promoted `mozjpegEncode` worker method, and export metadata.
+  trip from the promoted `qoiDecode` worker method, JPEG XL `ff 0a` output plus
+  a 3x3 decode round trip from the promoted `jxlEncode`/`jxlDecode` worker
+  methods, MozJPEG `ff d8 ff` output from the promoted `mozjpegEncode` worker
+  method, and export metadata.
 - Runtime service-worker verification in Chrome showed the page controlled by
   the prototype service worker after reload, with Cache Storage covering app
   entry/start/route assets, the generated WebP features-worker, baseline WebP
@@ -124,6 +126,16 @@ npm audit --audit-level=low
   manifests, passes them through the SvelteKit worker bridge, verifies a `qoif`
   output plus 3x3 QOI decode round trip from the existing QOI worker modules,
   and confirms service-worker cache coverage for both QOI WASM assets.
+- `jxlEncode` and `jxlDecode` have been promoted through the same generated
+  worker surface for a forced single-thread runtime path. The production JPEG XL
+  encoder now accepts an injectable thread-support probe while preserving the
+  default threaded-capable path, the prototype generates JPEG XL encoder and
+  decoder WASM URL manifests, verifies JPEG XL `ff 0a` output plus a decode
+  round trip, and confirms service-worker cache coverage for both JPEG XL WASM
+  assets. Vite still emits the JPEG XL threaded worker helpers and MT/SIMD WASM
+  assets because the production module keeps dynamic threaded imports in its
+  graph; production migration still needs a separate threaded-runtime proof or
+  a build split.
 - `mozjpegEncode` has been promoted through the same generated worker surface.
   The prototype now generates a MozJPEG encoder WASM URL manifest, passes it
   through the SvelteKit worker bridge, verifies JPEG `ff d8 ff` output from the
@@ -154,11 +166,12 @@ architecture, but the production app is not ready for a direct migration yet.
 
 The prototype has proven the platform path that matters most: a static SvelteKit
 app can consume shared Sqush helpers, generate Svelte-safe WebP/MozJPEG
-metadata, run existing WebP/AVIF/QOI/MozJPEG WASM encoding, AVIF/WebP/QOI WASM
-decoding, single-thread OxiPNG WASM encoding, ImageQuant quantization, worker
-resize, and rotate preprocessing in Vite-built module workers, register an
-offline service worker, cache the app shell and codec probe assets, and keep
-runtime WASM lookup pointed at generated asset URLs.
+metadata, run existing WebP/AVIF/QOI/JPEG XL/MozJPEG WASM encoding,
+AVIF/WebP/QOI/JPEG XL WASM decoding, single-thread OxiPNG WASM encoding,
+ImageQuant quantization, worker resize, and rotate preprocessing in Vite-built
+module workers, register an offline service worker, cache the app shell and
+codec probe assets, and keep runtime WASM lookup pointed at generated asset
+URLs.
 
 The remaining blockers are migration seams, not a SvelteKit blocker:
 
@@ -296,11 +309,11 @@ minimal SvelteKit single-image editor slice with real user-selected files.
   surface still needs incremental broadening.
 - Generate the Vite-facing worker entry incrementally from an explicit ready
   surface. The current generated manifest enables `webpEncode`, single-thread
-  `avifEncode`, `rotate`, QOI encode/decode, `mozjpegEncode`, `quantize`,
-  worker `resize`, and single-thread `oxipngEncode`; full production parity is
-  blocked by threaded WASM runtime headers/nested-worker behavior, remaining
-  `url:` WASM imports, stricter worker `ArrayBufferLike` types, and remaining
-  codec asset URLs.
+  `avifEncode`, `rotate`, QOI encode/decode, single-thread `jxlEncode` plus
+  `jxlDecode`, `mozjpegEncode`, `quantize`, worker `resize`, and single-thread
+  `oxipngEncode`; full production parity is blocked by threaded WASM runtime
+  headers/nested-worker behavior, remaining `url:` WASM imports, stricter
+  worker `ArrayBufferLike` types, and remaining codec asset URLs.
 - Replace production `url:` codec references with reusable runtimes plus
   generated Vite `?url` asset manifests, following the rotate preprocessor seam
   before broadening to the remaining codec surfaces.

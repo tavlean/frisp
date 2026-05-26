@@ -2,6 +2,7 @@ import { createWorkerBridgeRuntime } from '../../../../src/client/lazy-app/worke
 import type { EncodeOptions as AvifEncodeOptions } from 'features/encoders/avif/shared/meta';
 import type { EncodeOptions } from 'features/encoders/webP/shared/meta';
 import type { EncodeOptions as QoiEncodeOptions } from 'features/encoders/qoi/shared/meta';
+import type { EncodeOptions as JxlEncodeOptions } from 'features/encoders/jxl/shared/meta';
 import type { EncodeOptions as MozjpegEncodeOptions } from 'features/encoders/mozJPEG/shared/meta';
 import type { EncodeOptions as OxipngEncodeOptions } from 'features/encoders/oxiPNG/shared/meta';
 import type { Options as QuantizeOptions } from 'features/processors/quantize/shared/meta';
@@ -11,6 +12,7 @@ import { methodNames } from 'sqush-generated/worker-bridge/meta';
 import type {
   AvifWasmUrls,
   ImagequantWasmUrls,
+  JxlWasmUrls,
   MozjpegWasmUrls,
   OxipngWasmUrls,
   QoiWasmUrls,
@@ -22,6 +24,8 @@ import {
   avifEncoderWasmUrl,
   hqxWasmUrl,
   imagequantWasmUrl,
+  jxlDecoderWasmUrl,
+  jxlEncoderWasmUrl,
   mozjpegEncoderWasmUrl,
   oxipngWasmUrl,
   qoiDecoderWasmUrl,
@@ -57,6 +61,12 @@ export interface SvelteKitWorkerBridgeApi {
     options: QoiEncodeOptions,
   ): Promise<ArrayBuffer>;
   qoiDecode(signal: AbortSignal, blob: Blob): Promise<ImageData>;
+  jxlEncode(
+    signal: AbortSignal,
+    imageData: ImageData,
+    options: JxlEncodeOptions,
+  ): Promise<ArrayBuffer>;
+  jxlDecode(signal: AbortSignal, blob: Blob): Promise<ImageData>;
   mozjpegEncode(
     signal: AbortSignal,
     imageData: ImageData,
@@ -113,6 +123,17 @@ interface SvelteKitWorkerBridgeWorkerApi {
     signal: AbortSignal,
     blob: Blob,
     wasmUrls: QoiWasmUrls,
+  ): Promise<ImageData>;
+  jxlEncode(
+    signal: AbortSignal,
+    imageData: ImageData,
+    options: JxlEncodeOptions,
+    wasmUrls: JxlWasmUrls,
+  ): Promise<ArrayBuffer>;
+  jxlDecode(
+    signal: AbortSignal,
+    blob: Blob,
+    wasmUrls: JxlWasmUrls,
   ): Promise<ImageData>;
   mozjpegEncode(
     signal: AbortSignal,
@@ -205,6 +226,24 @@ export default class SvelteKitWorkerBridge
     return super.qoiDecode(signal, blob, {
       decoder: qoiDecoderWasmUrl,
       encoder: qoiEncoderWasmUrl,
+    });
+  }
+
+  jxlEncode(
+    signal: AbortSignal,
+    imageData: ImageData,
+    options: JxlEncodeOptions,
+  ): Promise<ArrayBuffer> {
+    return super.jxlEncode(signal, imageData, options, {
+      decoder: jxlDecoderWasmUrl,
+      encoder: jxlEncoderWasmUrl,
+    });
+  }
+
+  jxlDecode(signal: AbortSignal, blob: Blob): Promise<ImageData> {
+    return super.jxlDecode(signal, blob, {
+      decoder: jxlDecoderWasmUrl,
+      encoder: jxlEncoderWasmUrl,
     });
   }
 

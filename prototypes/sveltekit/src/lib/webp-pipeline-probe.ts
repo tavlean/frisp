@@ -17,6 +17,7 @@ import {
   processImage,
 } from '../../../../src/client/lazy-app/image-pipeline';
 import * as avifMeta from 'features/encoders/avif/shared/meta';
+import * as jxlMeta from 'features/encoders/jxl/shared/meta';
 import * as mozjpegMeta from 'features/encoders/mozJPEG/shared/meta';
 import * as oxipngMeta from 'features/encoders/oxiPNG/shared/meta';
 import {
@@ -54,6 +55,10 @@ export interface WebpPipelineProbeResult {
   qoiSignature: string;
   qoiDecodedWidth: number;
   qoiDecodedHeight: number;
+  jxlOutputBytes: number;
+  jxlSignature: string;
+  jxlDecodedWidth: number;
+  jxlDecodedHeight: number;
   jpegOutputBytes: number;
   jpegSignature: string;
   oxipngOutputBytes: number;
@@ -178,6 +183,8 @@ export async function runWebpPipelineProbe(
   let avifDecoded: ImageData;
   let qoiOutput: ArrayBuffer;
   let qoiDecoded: ImageData;
+  let jxlOutput: ArrayBuffer;
+  let jxlDecoded: ImageData;
   let jpegOutput: ArrayBuffer;
   let oxipngOutput: ArrayBuffer;
   let quantized: ImageData;
@@ -209,6 +216,15 @@ export async function runWebpPipelineProbe(
     qoiDecoded = await workerBridge.qoiDecode(
       signal,
       new Blob([qoiOutput], { type: 'image/qoi' }),
+    );
+    jxlOutput = await workerBridge.jxlEncode(signal, processed, {
+      ...jxlMeta.defaultOptions,
+      quality: 45,
+      effort: 3,
+    });
+    jxlDecoded = await workerBridge.jxlDecode(
+      signal,
+      new Blob([jxlOutput], { type: 'image/jxl' }),
     );
     jpegOutput = await workerBridge.mozjpegEncode(signal, processed, {
       ...mozjpegMeta.defaultOptions,
@@ -247,6 +263,7 @@ export async function runWebpPipelineProbe(
   const outputBytes = new Uint8Array(outputBuffer);
   const avifOutputBytes = new Uint8Array(avifOutput);
   const qoiOutputBytes = new Uint8Array(qoiOutput);
+  const jxlOutputBytes = new Uint8Array(jxlOutput);
   const jpegOutputBytes = new Uint8Array(jpegOutput);
   const oxipngOutputBytes = new Uint8Array(oxipngOutput);
   const ascii = new TextDecoder('ascii');
@@ -280,6 +297,12 @@ export async function runWebpPipelineProbe(
     qoiSignature: ascii.decode(qoiOutputBytes.slice(0, 4)),
     qoiDecodedWidth: qoiDecoded.width,
     qoiDecodedHeight: qoiDecoded.height,
+    jxlOutputBytes: jxlOutput.byteLength,
+    jxlSignature: Array.from(jxlOutputBytes.slice(0, 4), (byte) =>
+      byte.toString(16).padStart(2, '0'),
+    ).join(' '),
+    jxlDecodedWidth: jxlDecoded.width,
+    jxlDecodedHeight: jxlDecoded.height,
     jpegOutputBytes: jpegOutput.byteLength,
     jpegSignature: Array.from(jpegOutputBytes.slice(0, 3), (byte) =>
       byte.toString(16).padStart(2, '0'),
@@ -315,6 +338,12 @@ export async function runWebpPipelineProbe(
         qoiOutput.byteLength
       } bytes, ${ascii.decode(qoiOutputBytes.slice(0, 4))})`,
       `qoiDecode promoted through the same generated worker surface (${qoiDecoded.width} x ${qoiDecoded.height})`,
+      `jxlEncode promoted through a forced single-thread generated worker surface (${
+        jxlOutput.byteLength
+      } bytes, ${Array.from(jxlOutputBytes.slice(0, 4), (byte) =>
+        byte.toString(16).padStart(2, '0'),
+      ).join(' ')})`,
+      `jxlDecode promoted through the same generated worker surface (${jxlDecoded.width} x ${jxlDecoded.height})`,
       `mozjpegEncode promoted through the same generated worker surface (${
         jpegOutput.byteLength
       } bytes, ${Array.from(jpegOutputBytes.slice(0, 3), (byte) =>

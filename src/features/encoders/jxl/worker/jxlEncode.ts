@@ -19,8 +19,14 @@ import checkThreadsSupport from 'worker-shared/supports-wasm-threads';
 
 let emscriptenModule: Promise<JXLModule>;
 
-async function init() {
-  if (await checkThreadsSupport()) {
+export interface JxlEncodeRuntimeOptions {
+  supportsThreads?: typeof checkThreadsSupport;
+}
+
+async function init({
+  supportsThreads = checkThreadsSupport,
+}: JxlEncodeRuntimeOptions = {}) {
+  if (await supportsThreads()) {
     if (await simd()) {
       const jxlEncoder = await import('codecs/jxl/enc/jxl_enc_mt_simd');
       return initEmscriptenModule(jxlEncoder.default);
@@ -35,13 +41,16 @@ async function init() {
 export default async function encode(
   data: ImageData,
   options: EncodeOptions,
+  runtimeOptions?: JxlEncodeRuntimeOptions,
 ): Promise<ArrayBuffer> {
-  if (!emscriptenModule) emscriptenModule = init();
+  if (!emscriptenModule) emscriptenModule = init(runtimeOptions);
 
   const module = await emscriptenModule;
   const result = module.encode(data.data, data.width, data.height, options);
 
   if (!result) throw new Error('Encoding error.');
 
-  return result.buffer;
+  const output = new Uint8Array(result.byteLength);
+  output.set(result);
+  return output.buffer as ArrayBuffer;
 }

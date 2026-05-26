@@ -194,6 +194,13 @@ When Svelte components are added, use Svelte's recommended testing path: Vitest 
   admission list. They use a generated QOI WASM asset manifest plus a type-only
   shared metadata export, while the full production worker surface remains
   filtered.
+- JPEG XL encode/decode are promoted through that admission list for a forced
+  single-thread runtime path. The production JPEG XL worker accepts an
+  injectable thread-support probe, the prototype uses generated JPEG XL encoder
+  and decoder WASM URLs, and runtime proof produces JPEG XL `ff 0a` output that
+  decodes back through `jxlDecode`. This does not prove JPEG XL threaded runtime
+  parity; Vite still emits the threaded helpers and MT/SIMD WASM assets from
+  the dynamic import graph.
 - MozJPEG encode is now promoted through the same admission list. It uses a
   generated MozJPEG WASM asset manifest plus local shared metadata constants
   instead of a runtime import from declaration-only codec types.

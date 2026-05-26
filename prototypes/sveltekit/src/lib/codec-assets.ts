@@ -22,6 +22,11 @@ import {
   qoiEncoderWasmUrl,
 } from 'sqush-generated/codec-assets/qoi';
 import {
+  jxlCodecAssetUrls,
+  jxlDecoderWasmUrl,
+  jxlEncoderWasmUrl,
+} from 'sqush-generated/codec-assets/jxl';
+import {
   mozjpegCodecAssetUrls,
   mozjpegEncoderWasmUrl,
 } from 'sqush-generated/codec-assets/mozjpeg';
@@ -47,6 +52,9 @@ export {
   hqxWasmUrl,
   imagequantCodecAssetUrls,
   imagequantWasmUrl,
+  jxlCodecAssetUrls,
+  jxlDecoderWasmUrl,
+  jxlEncoderWasmUrl,
   mozjpegCodecAssetUrls,
   mozjpegEncoderWasmUrl,
   oxipngCodecAssetUrls,
@@ -73,6 +81,7 @@ export const codecAssetUrls = [
   ...avifCodecAssetUrls,
   ...webpCodecAssetUrls,
   ...qoiCodecAssetUrls,
+  ...jxlCodecAssetUrls,
   ...mozjpegCodecAssetUrls,
   ...oxipngCodecAssetUrls,
   ...imagequantCodecAssetUrls,

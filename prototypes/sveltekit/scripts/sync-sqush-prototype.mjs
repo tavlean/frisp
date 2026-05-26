@@ -43,6 +43,7 @@ const codecAssetOutputDir = join(
 const avifCodecAssetOutputPath = join(codecAssetOutputDir, 'avif.ts');
 const webpCodecAssetOutputPath = join(codecAssetOutputDir, 'webp.ts');
 const qoiCodecAssetOutputPath = join(codecAssetOutputDir, 'qoi.ts');
+const jxlCodecAssetOutputPath = join(codecAssetOutputDir, 'jxl.ts');
 const mozjpegCodecAssetOutputPath = join(codecAssetOutputDir, 'mozjpeg.ts');
 const oxipngCodecAssetOutputPath = join(codecAssetOutputDir, 'oxipng.ts');
 const imagequantCodecAssetOutputPath = join(
@@ -94,6 +95,12 @@ const svelteKitReadyWorkerMethods = [
       'QOI decode runs with generated Vite worker and generated QOI WASM URL injection.',
   },
   {
+    name: 'jxlDecode',
+    source: 'features/decoders/jxl/worker/jxlDecode',
+    reason:
+      'JPEG XL decode runs with generated Vite worker and generated JXL decoder WASM URL injection.',
+  },
+  {
     name: 'webpDecode',
     source: 'features/decoders/webP/worker/webpDecode',
     reason:
@@ -104,6 +111,12 @@ const svelteKitReadyWorkerMethods = [
     source: 'features/encoders/qoi/worker/qoiEncode',
     reason:
       'QOI encode runs with generated Vite worker and generated QOI WASM URL injection.',
+  },
+  {
+    name: 'jxlEncode',
+    source: 'features/encoders/jxl/worker/jxlEncode',
+    reason:
+      'JPEG XL single-thread encode runs with generated Vite worker and generated JXL encoder WASM URL injection.',
   },
   {
     name: 'mozjpegEncode',
@@ -132,17 +145,8 @@ const svelteKitReadyWorkerMethods = [
 ];
 const blockedWorkerMethods = [
   {
-    name: 'jxlDecode',
-    blocker: 'Full decoder surface is not part of the WebP-first prototype.',
-  },
-  {
     name: 'wp2Decode',
     blocker: 'Full decoder surface is not part of the WebP-first prototype.',
-  },
-  {
-    name: 'jxlEncode',
-    blocker:
-      'Needs worker-shared/supports-wasm-threads alias and JPEG XL asset URL strategy.',
   },
   {
     name: 'wp2Encode',
@@ -320,8 +324,11 @@ function generateWebpWorkerEntry() {
     "import type { EncodeOptions } from 'features/encoders/webP/shared/meta';",
     "import decodeWebp from 'features/decoders/webP/worker/webpDecode';",
     "import decodeQoi from 'features/decoders/qoi/worker/qoiDecode';",
+    "import decodeJxl from 'features/decoders/jxl/worker/jxlDecode';",
     "import encodeQoi from 'features/encoders/qoi/worker/qoiEncode';",
     "import type { EncodeOptions as QoiEncodeOptions } from 'features/encoders/qoi/shared/meta';",
+    "import encodeJxl from 'features/encoders/jxl/worker/jxlEncode';",
+    "import type { EncodeOptions as JxlEncodeOptions } from 'features/encoders/jxl/shared/meta';",
     "import encodeMozjpeg from 'features/encoders/mozJPEG/worker/mozjpegEncode';",
     "import type { EncodeOptions as MozjpegEncodeOptions } from 'features/encoders/mozJPEG/shared/meta';",
     "import encodeOxipng from 'features/encoders/oxiPNG/worker/oxipngEncode';",
@@ -350,6 +357,11 @@ function generateWebpWorkerEntry() {
     '  encoder: string;',
     '}',
     '',
+    'export interface JxlWasmUrls {',
+    '  decoder: string;',
+    '  encoder: string;',
+    '}',
+    '',
     'export interface MozjpegWasmUrls {',
     '  encoder: string;',
     '}',
@@ -370,12 +382,14 @@ function generateWebpWorkerEntry() {
     'function locateCodecWasm({',
     '  avif,',
     '  imagequant,',
+    '  jxl,',
     '  mozjpeg,',
     '  qoi,',
     '  webp,',
     '}: {',
     '  avif?: AvifWasmUrls;',
     '  imagequant?: ImagequantWasmUrls;',
+    '  jxl?: JxlWasmUrls;',
     '  mozjpeg?: MozjpegWasmUrls;',
     '  qoi?: QoiWasmUrls;',
     '  webp?: WebpWasmUrls;',
@@ -388,6 +402,8 @@ function generateWebpWorkerEntry() {
     "    if (path === 'webp_enc_simd.wasm') return webp?.simd ?? path;",
     "    if (path === 'qoi_enc.wasm') return qoi?.encoder ?? path;",
     "    if (path === 'qoi_dec.wasm') return qoi?.decoder ?? path;",
+    "    if (path === 'jxl_enc.wasm') return jxl?.encoder ?? path;",
+    "    if (path === 'jxl_dec.wasm') return jxl?.decoder ?? path;",
     "    if (path === 'mozjpeg_enc.wasm') return mozjpeg?.encoder ?? path;",
     "    if (path === 'imagequant.wasm') return imagequant?.processor ?? path;",
     '    return path;',
@@ -434,6 +450,20 @@ function generateWebpWorkerEntry() {
     '  ): Promise<ArrayBuffer> {',
     '    locateCodecWasm({ qoi: wasmUrls });',
     '    return encodeQoi(imageData, options);',
+    '  },',
+    '  jxlDecode(blob: Blob, wasmUrls: JxlWasmUrls): Promise<ImageData> {',
+    '    locateCodecWasm({ jxl: wasmUrls });',
+    '    return decodeJxl(blob);',
+    '  },',
+    '  jxlEncode(',
+    '    imageData: ImageData,',
+    '    options: JxlEncodeOptions,',
+    '    wasmUrls: JxlWasmUrls,',
+    '  ): Promise<ArrayBuffer> {',
+    '    locateCodecWasm({ jxl: wasmUrls });',
+    '    return encodeJxl(imageData, options, {',
+    '      supportsThreads: async () => false,',
+    '    });',
     '  },',
     '  mozjpegEncode(',
     '    imageData: ImageData,',
@@ -598,6 +628,24 @@ function generateQoiCodecAssets() {
   ].join('\n');
 }
 
+function generateJxlCodecAssets() {
+  return [
+    '// This file is autogenerated by prototypes/sveltekit/scripts/sync-sqush-prototype.mjs',
+    '// It is the prototype canonical asset manifest for JPEG XL codec WASM URLs.',
+    '',
+    "import jxlDecoderWasmUrl from 'codecs/jxl/dec/jxl_dec.wasm?url';",
+    "import jxlEncoderWasmUrl from 'codecs/jxl/enc/jxl_enc.wasm?url';",
+    '',
+    'export { jxlDecoderWasmUrl, jxlEncoderWasmUrl };',
+    '',
+    'export const jxlCodecAssetUrls = [',
+    '  jxlDecoderWasmUrl,',
+    '  jxlEncoderWasmUrl,',
+    '] as const;',
+    '',
+  ].join('\n');
+}
+
 function generateMozjpegCodecAssets() {
   return [
     '// This file is autogenerated by prototypes/sveltekit/scripts/sync-sqush-prototype.mjs',
@@ -664,6 +712,7 @@ function generateServiceWorkerCachePlan() {
     "import svelteKitFeaturesWorkerUrl from '../features-worker/webp.ts?worker&url';",
     "import { webpCodecAssetUrls } from '../codec-assets/webp';",
     "import { qoiCodecAssetUrls } from '../codec-assets/qoi';",
+    "import { jxlCodecAssetUrls } from '../codec-assets/jxl';",
     "import { mozjpegCodecAssetUrls } from '../codec-assets/mozjpeg';",
     "import { avifCodecAssetUrls } from '../codec-assets/avif';",
     "import { oxipngCodecAssetUrls } from '../codec-assets/oxipng';",
@@ -677,6 +726,7 @@ function generateServiceWorkerCachePlan() {
     '      ...webpCodecAssetUrls,',
     '      ...avifCodecAssetUrls,',
     '      ...qoiCodecAssetUrls,',
+    '      ...jxlCodecAssetUrls,',
     '      ...mozjpegCodecAssetUrls,',
     '      ...oxipngCodecAssetUrls,',
     '      ...imagequantCodecAssetUrls,',
@@ -741,6 +791,7 @@ await Promise.all([
   writeFile(avifCodecAssetOutputPath, generateAvifCodecAssets()),
   writeFile(webpCodecAssetOutputPath, generateWebpCodecAssets()),
   writeFile(qoiCodecAssetOutputPath, generateQoiCodecAssets()),
+  writeFile(jxlCodecAssetOutputPath, generateJxlCodecAssets()),
   writeFile(mozjpegCodecAssetOutputPath, generateMozjpegCodecAssets()),
   writeFile(oxipngCodecAssetOutputPath, generateOxipngCodecAssets()),
   writeFile(imagequantCodecAssetOutputPath, generateImagequantCodecAssets()),

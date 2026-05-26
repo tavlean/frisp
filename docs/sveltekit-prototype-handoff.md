@@ -388,6 +388,16 @@ Worker-bridge seam progress:
   decoder WASM URLs through the SvelteKit worker bridge, verifies a `qoif`
   output plus 3x3 QOI decode round trip in the runtime pipeline probe, and
   audits service-worker cache coverage for both QOI WASM assets.
+- `jxlEncode` and `jxlDecode` have moved from blocked to ready for a forced
+  single-thread runtime path in the generated worker-surface manifest. The
+  production JPEG XL encoder now accepts an injectable thread-support probe
+  while preserving the default threaded-capable path, the prototype generates
+  JPEG XL encoder and decoder WASM URL manifests, verifies JPEG XL `ff 0a`
+  output plus a decode round trip in the runtime pipeline probe, and audits
+  service-worker cache coverage for both JPEG XL WASM assets. Vite still emits
+  the JPEG XL threaded worker helpers and MT/SIMD WASM assets because the
+  production module keeps dynamic threaded imports in its graph, so threaded
+  production parity remains a separate migration proof.
 - `mozjpegEncode` has moved from blocked to ready in the generated
   worker-surface manifest. The prototype now generates
   `.svelte-kit/sqush-generated/codec-assets/mozjpeg.ts`, passes the MozJPEG
@@ -435,12 +445,14 @@ Full worker-surface blocker inventory:
   single-thread OxiPNG encode, quantize, and worker resize now have narrow
   generated SvelteKit paths, but the broader production worker surface remains
   intentionally filtered.
-- AVIF, JXL, and WP2 threaded workers still need focused threaded-codec passes.
+- AVIF, JPEG XL, and WP2 threaded workers still need focused threaded-codec
+  passes.
   `worker-shared/supports-wasm-threads` now has a SvelteKit alias shape, but the
   actual threaded WASM runtime still needs COOP/COEP, nested-worker, worker
   helper asset, and service-worker cache proof before those threaded paths can
   be considered production-ready. AVIF now has a proven forced single-thread
-  encode path, but that does not prove the threaded runtime.
+  encode path, and JPEG XL now has a proven forced single-thread encode/decode
+  path, but those do not prove the threaded runtime.
 - Rotate now has a proven split: production keeps the Rollup `url:` adapter,
   while the SvelteKit generated worker imports the shared rotate runtime with a
   generated Vite `?url` asset manifest.
