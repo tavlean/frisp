@@ -326,6 +326,9 @@ Migration-seams progress on `code/sveltekit-migration-seams`:
   through a reusable helper with focused tests. The shared cache planner now
   also exposes an active non-WebP-2 codec-cache helper for migration work while
   keeping the full current production cache path intact.
+- `src/sw/active-to-cache.ts` mirrors the production Rollup `entry-data:`
+  boundary against `features-worker/active` and the active cache planner, without
+  importing WebP 2 codec records. It is not wired to the current service worker.
 - The SvelteKit prototype generator now emits
   `.svelte-kit/sqush-generated/service-worker/cache-plan.ts`, which mirrors the
   same `{ main, deps }` shape with Vite worker URLs and generated WebP WASM URL
@@ -526,9 +529,9 @@ Full worker-surface blocker inventory:
 - WebP 2 is intentionally out of scope for continued prototype work. Keep it
   filtered from the SvelteKit worker surface and avoid spending engineering time
   on its asset/threading seams unless the product direction changes. The active
-  service-worker cache planner excludes WebP 2, but production `to-cache.ts`
-  still preserves the current full cache behavior until product removal is a
-  separate decision.
+  service-worker cache planner and `active-to-cache.ts` boundary exclude WebP 2,
+  but production `to-cache.ts` still preserves the current full cache behavior
+  until product removal is a separate decision.
 - Rotate now has a proven split: production keeps the Rollup `url:` adapter,
   while the SvelteKit generated worker imports the shared rotate runtime with a
   generated Vite `?url` asset manifest.
