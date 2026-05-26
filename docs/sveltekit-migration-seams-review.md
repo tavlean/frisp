@@ -110,6 +110,99 @@ the candidate set to merge or cherry-pick into `main` after verification:
 - `.prettierignore`: ignores disposable SvelteKit build output so root checks
   do not require destructive cleanup prompts.
 
+## Suggested merge slices
+
+Use these slices to review or cherry-pick the branch without treating the whole
+prototype delta as one merge unit. Each slice should pass root `npm run check`
+on its own after conflict resolution. Run production browser smoke for slices
+that touch runtime, worker, codec, or service-worker behavior.
+
+1. Generated metadata seams
+
+   - `lib/feature-plugin.js`
+   - `.gitignore`
+   - `.prettierignore`
+   - `src/client/lazy-app/feature-meta/encoders.ts`
+   - generated processor/preprocessor entrypoint names and smoke guards in
+     `lib/smoke-build.js`
+
+   This slice is the lowest-risk foundation. It separates framework-neutral
+   feature metadata from Preact option entries and keeps generated SvelteKit
+   support outputs ignored.
+
+2. Shared image-pipeline helpers
+
+   - `src/client/lazy-app/abort.ts`
+   - `src/client/lazy-app/image-decode.ts`
+   - `src/client/lazy-app/image-pipeline-shared.ts`
+   - `src/client/lazy-app/image-pipeline.ts`
+   - import rewiring under `src/client/lazy-app/Compress/**`,
+     `src/client/lazy-app/bulk/**`, and `src/client/lazy-app/util/index.ts`
+   - focused helper/smoke coverage in `lib/test-helpers.js` and
+     `lib/smoke-build.js`
+
+   This slice keeps the current Preact shell but makes decode/preprocess/process
+   and WebP compression helpers importable without UI ownership.
+
+3. Worker bridge and active worker boundaries
+
+   - `src/client/lazy-app/worker-bridge/runtime.ts`
+   - `src/client/lazy-app/worker-bridge/bridge.ts`
+   - `src/client/lazy-app/worker-bridge/active-bridge.ts`
+   - `src/client/lazy-app/worker-bridge/index.ts`
+   - `src/client/lazy-app/worker-bridge/active-index.ts`
+   - active worker metadata generation in `lib/feature-plugin.js`
+   - worker runtime seams under `src/features/**/worker/runtime.ts`
+   - corresponding production worker entry rewires
+
+   This slice keeps Rollup `omt:` at the production boundary while exposing a
+   Vite/SvelteKit-compatible bridge shape for later adapters.
+
+4. Service-worker cache boundaries
+
+   - `src/client/lazy-app/sw-bridge/runtime.ts`
+   - `src/client/lazy-app/sw-bridge/index.ts`
+   - `src/sw/cache-plan.ts`
+   - `src/sw/processor-support.ts`
+   - `src/sw/to-cache.ts`
+   - `src/sw/active-to-cache.ts`
+   - service-worker and cache-plan guards in `lib/smoke-build.js`
+
+   This slice keeps current production service-worker behavior while separating
+   cache planning from Rollup `entry-data:` and `service-worker:` assumptions.
+
+5. Codec client/runtime splits
+
+   - `src/features/**/client/runtime.ts`
+   - corresponding `src/features/**/client/index.*` re-exports
+   - `src/features/**/shared/meta.ts` importability updates
+
+   This slice is useful after the metadata and pipeline slices because it keeps
+   option UI components separate from runtime encoder/processor clients.
+
+Do not include `prototypes/sveltekit/**` in any source-safe merge slice unless
+the explicit decision is to carry prototype evidence on `main`. Do not stage
+`prototypes/sveltekit/.svelte-kit/` or `prototypes/sveltekit/build/` under any
+circumstance.
+
+## Review commands
+
+- `git diff --name-status origin/main...HEAD`: confirm the branch still has the
+  expected source/docs/prototype split.
+- `git diff origin/main...HEAD -- src/client/lazy-app src/features src/sw lib`:
+  review production-source seams without prototype files.
+- `git diff origin/main...HEAD -- prototypes/sveltekit`: review disposable
+  SvelteKit evidence separately.
+- `npm run check`: verify any source-safe slice at the repo root.
+- `npm run smoke:browser`: run after runtime, worker, WASM, image-pipeline, or
+  service-worker slices.
+- From `prototypes/sveltekit`: run `npm run check`, `npm run build`,
+  `npm run audit:static-output`, and `npm audit --audit-level=low` only when
+  changing prototype files.
+- `gh run list --branch code/sveltekit-migration-seams --limit 10`: check
+  whether remote CI exists for this branch. As of this update, GitHub has not
+  reported runs for the branch.
+
 ## Prototype-only evidence
 
 Keep this set out of `main` by default. It proves SvelteKit behavior but is not
