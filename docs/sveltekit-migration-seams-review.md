@@ -54,7 +54,9 @@ the candidate set to merge or cherry-pick into `main` after verification:
   `service-worker:` adapter.
 - `src/sw/cache-plan.ts` and `src/sw/to-cache.ts`: framework-neutral
   service-worker cache planning over `{ main, deps }` records, with Rollup
-  virtual imports kept at the production boundary.
+  virtual imports kept at the production boundary. The active cache-planning
+  helper excludes WebP 2 while the current production cache path remains full
+  for existing behavior.
 - `src/features/**/client/runtime.ts`: runtime-only encoder/processor clients
   split from Preact option controls for browser encoders, WebP, AVIF, JPEG XL,
   QOI, MozJPEG, OxiPNG, and resize.
@@ -141,6 +143,10 @@ Do not merge these as solved just because the single-thread prototype passes:
   SvelteKit adapter is still not wired, and the active worker still needs
   threaded asset/runtime proof before it can replace the prototype's
   intentionally narrowed worker entry.
+- Full production service-worker codec cache import from SvelteKit: the shared
+  cache planner can now compute an active non-WebP-2 cache list, but
+  `src/sw/to-cache.ts` still imports Rollup `entry-data:` records for the full
+  current production codec set.
 - Processor/preprocessor metadata and UI option entry splits beyond the proven
   encode-runtime map.
 - Minimal SvelteKit single-image editor slice with real user-selected files.

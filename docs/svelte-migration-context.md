@@ -172,7 +172,9 @@ When Svelte components are added, use Svelte's recommended testing path: Vitest 
   service-worker cache planning: keep Rollup virtual imports at the production
   boundary, move cache selection into a helper that accepts plain
   `{ main, deps }` records, and let the SvelteKit prototype generator provide
-  those records from Vite worker and asset URL imports.
+  those records from Vite worker and asset URL imports. The shared cache planner
+  also has an active non-WebP-2 codec-cache helper for migration work while the
+  current production cache path remains full.
 - The first production `service-worker:` replacement shape is now proven for
   registration: keep the Rollup URL adapter at the production boundary, move
   registration/update/share-target behavior into a helper that accepts an
