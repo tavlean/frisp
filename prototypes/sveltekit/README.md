@@ -91,7 +91,10 @@ npm audit --audit-level=low
   worker bridge, and the service-worker cache plan consume URLs derived from
   that manifest instead of maintaining separate loose URL lists. The generated
   service-worker path imports a precache-only manifest so runtime-only assets do
-  not get inlined into the service-worker bundle.
+  not get inlined into the service-worker bundle. The worker bridge derives its
+  codec-specific WASM URL maps from `svelteKitCodecAssetRecords` by logical key,
+  which is the production-safe pattern for keeping app code, workers, and cache
+  planning aligned on canonical runtime URLs.
 - The prototype sync step now emits generated rotate WASM asset metadata. The
   generated SvelteKit features worker imports the shared rotate runtime with a
   canonical Vite `?url` WASM asset passed through the worker bridge, proving

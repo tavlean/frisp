@@ -1,4 +1,5 @@
 import { createWorkerBridgeRuntime } from '../../../../src/client/lazy-app/worker-bridge/runtime';
+import { getCodecAssetUrl } from 'shared/codec-assets';
 import type { EncodeOptions as AvifEncodeOptions } from 'features/encoders/avif/shared/meta';
 import type { EncodeOptions } from 'features/encoders/webP/shared/meta';
 import type { EncodeOptions as QoiEncodeOptions } from 'features/encoders/qoi/shared/meta';
@@ -21,22 +22,8 @@ import type {
   WebpWasmUrls,
 } from 'sqush-generated/features-worker/webp';
 import {
-  avifDecoderWasmUrl,
-  avifEncoderWasmUrl,
-  hqxWasmUrl,
-  imagequantWasmUrl,
-  jxlDecoderWasmUrl,
-  jxlEncoderWasmUrl,
-  mozjpegEncoderWasmUrl,
-  oxipngWasmUrl,
-  qoiDecoderWasmUrl,
-  qoiEncoderWasmUrl,
-  resizeWasmUrl,
-  rotateWasmUrl,
   svelteKitFeaturesWorkerUrl,
-  webpDecoderWasmUrl,
-  webpEncoderSimdWasmUrl,
-  webpEncoderWasmUrl,
+  svelteKitCodecAssetRecords,
 } from './codec-assets';
 
 export interface SvelteKitWorkerBridgeApi {
@@ -175,15 +162,57 @@ const SvelteKitWorkerBridgeBase = createWorkerBridgeRuntime(
   () => new Worker(svelteKitFeaturesWorkerUrl, { type: 'module' }),
 ) as new () => SvelteKitWorkerBridgeWorkerApi;
 
+const codecAssetUrl = (logicalKey: string): string =>
+  getCodecAssetUrl(svelteKitCodecAssetRecords, logicalKey);
+
+const avifWasmUrls = {
+  decoder: codecAssetUrl('avif:decoder:default'),
+  encoder: codecAssetUrl('avif:encoder:single-thread'),
+} satisfies AvifWasmUrls;
+
+const webpWasmUrls = {
+  baseline: codecAssetUrl('webp:encoder:baseline'),
+  decoder: codecAssetUrl('webp:decoder:default'),
+  simd: codecAssetUrl('webp:encoder:simd'),
+} satisfies WebpWasmUrls;
+
+const qoiWasmUrls = {
+  decoder: codecAssetUrl('qoi:decoder:default'),
+  encoder: codecAssetUrl('qoi:encoder:default'),
+} satisfies QoiWasmUrls;
+
+const jxlWasmUrls = {
+  decoder: codecAssetUrl('jxl:decoder:default'),
+  encoder: codecAssetUrl('jxl:encoder:single-thread'),
+} satisfies JxlWasmUrls;
+
+const mozjpegWasmUrls = {
+  encoder: codecAssetUrl('mozjpeg:encoder:default'),
+} satisfies MozjpegWasmUrls;
+
+const oxipngWasmUrls = {
+  singleThread: codecAssetUrl('oxipng:encoder:single-thread'),
+} satisfies OxipngWasmUrls;
+
+const imagequantWasmUrls = {
+  processor: codecAssetUrl('imagequant:processor:default'),
+} satisfies ImagequantWasmUrls;
+
+const resizeWasmUrls = {
+  hqx: codecAssetUrl('hqx:processor:hqx'),
+  resize: codecAssetUrl('resize:processor:default'),
+} satisfies ResizeWasmUrls;
+
+const rotateWasmUrls = {
+  preprocessor: codecAssetUrl('rotate:preprocessor:default'),
+} satisfies RotateWasmUrls;
+
 export default class SvelteKitWorkerBridge
   extends SvelteKitWorkerBridgeBase
   implements SvelteKitWorkerBridgeApi
 {
   avifDecode(signal: AbortSignal, blob: Blob): Promise<ImageData> {
-    return super.avifDecode(signal, blob, {
-      decoder: avifDecoderWasmUrl,
-      encoder: avifEncoderWasmUrl,
-    });
+    return super.avifDecode(signal, blob, avifWasmUrls);
   }
 
   avifEncode(
@@ -191,10 +220,7 @@ export default class SvelteKitWorkerBridge
     imageData: ImageData,
     options: AvifEncodeOptions,
   ): Promise<ArrayBuffer> {
-    return super.avifEncode(signal, imageData, options, {
-      decoder: avifDecoderWasmUrl,
-      encoder: avifEncoderWasmUrl,
-    });
+    return super.avifEncode(signal, imageData, options, avifWasmUrls);
   }
 
   webpEncode(
@@ -202,19 +228,11 @@ export default class SvelteKitWorkerBridge
     imageData: ImageData,
     options: EncodeOptions,
   ): Promise<ArrayBuffer> {
-    return super.webpEncode(signal, imageData, options, {
-      baseline: webpEncoderWasmUrl,
-      decoder: webpDecoderWasmUrl,
-      simd: webpEncoderSimdWasmUrl,
-    });
+    return super.webpEncode(signal, imageData, options, webpWasmUrls);
   }
 
   webpDecode(signal: AbortSignal, blob: Blob): Promise<ImageData> {
-    return super.webpDecode(signal, blob, {
-      baseline: webpEncoderWasmUrl,
-      decoder: webpDecoderWasmUrl,
-      simd: webpEncoderSimdWasmUrl,
-    });
+    return super.webpDecode(signal, blob, webpWasmUrls);
   }
 
   qoiEncode(
@@ -222,17 +240,11 @@ export default class SvelteKitWorkerBridge
     imageData: ImageData,
     options: QoiEncodeOptions,
   ): Promise<ArrayBuffer> {
-    return super.qoiEncode(signal, imageData, options, {
-      decoder: qoiDecoderWasmUrl,
-      encoder: qoiEncoderWasmUrl,
-    });
+    return super.qoiEncode(signal, imageData, options, qoiWasmUrls);
   }
 
   qoiDecode(signal: AbortSignal, blob: Blob): Promise<ImageData> {
-    return super.qoiDecode(signal, blob, {
-      decoder: qoiDecoderWasmUrl,
-      encoder: qoiEncoderWasmUrl,
-    });
+    return super.qoiDecode(signal, blob, qoiWasmUrls);
   }
 
   jxlEncode(
@@ -240,17 +252,11 @@ export default class SvelteKitWorkerBridge
     imageData: ImageData,
     options: JxlEncodeOptions,
   ): Promise<ArrayBuffer> {
-    return super.jxlEncode(signal, imageData, options, {
-      decoder: jxlDecoderWasmUrl,
-      encoder: jxlEncoderWasmUrl,
-    });
+    return super.jxlEncode(signal, imageData, options, jxlWasmUrls);
   }
 
   jxlDecode(signal: AbortSignal, blob: Blob): Promise<ImageData> {
-    return super.jxlDecode(signal, blob, {
-      decoder: jxlDecoderWasmUrl,
-      encoder: jxlEncoderWasmUrl,
-    });
+    return super.jxlDecode(signal, blob, jxlWasmUrls);
   }
 
   mozjpegEncode(
@@ -258,9 +264,7 @@ export default class SvelteKitWorkerBridge
     imageData: ImageData,
     options: MozjpegEncodeOptions,
   ): Promise<ArrayBuffer> {
-    return super.mozjpegEncode(signal, imageData, options, {
-      encoder: mozjpegEncoderWasmUrl,
-    });
+    return super.mozjpegEncode(signal, imageData, options, mozjpegWasmUrls);
   }
 
   oxipngEncode(
@@ -268,9 +272,7 @@ export default class SvelteKitWorkerBridge
     imageData: ImageData,
     options: OxipngEncodeOptions,
   ): Promise<ArrayBuffer> {
-    return super.oxipngEncode(signal, imageData, options, {
-      singleThread: oxipngWasmUrl,
-    });
+    return super.oxipngEncode(signal, imageData, options, oxipngWasmUrls);
   }
 
   quantize(
@@ -278,9 +280,7 @@ export default class SvelteKitWorkerBridge
     imageData: ImageData,
     options: QuantizeOptions,
   ): Promise<ImageData> {
-    return super.quantize(signal, imageData, options, {
-      processor: imagequantWasmUrl,
-    });
+    return super.quantize(signal, imageData, options, imagequantWasmUrls);
   }
 
   resize(
@@ -288,10 +288,7 @@ export default class SvelteKitWorkerBridge
     imageData: ImageData,
     options: WorkerResizeOptions,
   ): Promise<ImageData> {
-    return super.resize(signal, imageData, options, {
-      hqx: hqxWasmUrl,
-      resize: resizeWasmUrl,
-    });
+    return super.resize(signal, imageData, options, resizeWasmUrls);
   }
 
   rotate(
@@ -299,8 +296,6 @@ export default class SvelteKitWorkerBridge
     data: ImageData,
     options: RotateOptions,
   ): Promise<ImageData> {
-    return super.rotate(signal, data, options, {
-      preprocessor: rotateWasmUrl,
-    });
+    return super.rotate(signal, data, options, rotateWasmUrls);
   }
 }

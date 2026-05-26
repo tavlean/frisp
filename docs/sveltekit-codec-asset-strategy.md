@@ -6,6 +6,31 @@ This document records the canonical worker/WASM asset URL strategy implied by
 the SvelteKit prototype. It is a migration plan, not permission to move,
 delete, or rebuild codec artifacts.
 
+## Production decision
+
+Use generated logical codec asset records as the canonical production source of
+runtime URLs, and use a build-time wrapper transform for wrappers that still
+contain bundler-visible fallback `new URL("*.wasm", import.meta.url)`
+references.
+
+Do not patch committed codec wrappers in place for the SvelteKit migration, and
+do not rebuild codecs just to change wrapper URL discovery. A rebuild can be a
+future provenance task, but it is too broad for the migration asset seam. The
+safe production path is:
+
+1. generate one typed `CodecAssetRecord` per logical committed asset;
+2. derive app, worker, and service-worker URLs from those records;
+3. route Emscripten runtime loading through injected URL maps or `locateFile`;
+4. copy transformed wrapper modules into generated build output when a wrapper
+   has fallback URL references that would otherwise create duplicate physical
+   WASM outputs;
+5. leave the committed codec artifacts untouched.
+
+The current Rollup/Preact app can keep its virtual import boundaries until a
+SvelteKit slice needs the generated manifest. The shared source seam should be
+build-tool-neutral: records and lookup helpers live in normal TypeScript, while
+Rollup or Vite-specific URL imports stay at generated or adapter boundaries.
+
 ## Problem
 
 The current Rollup build hides several asset decisions behind virtual imports
@@ -97,6 +122,13 @@ runtime calls, for example `webpWasmUrls`, `avifWasmUrls`, and
 records from the same source of truth, but the service-worker graph should
 import only records whose `cache` status is `precache`.
 
+For production source, prefer deriving those codec-specific objects from the
+record list by logical key rather than maintaining separate loose imports in app
+code. `src/shared/codec-assets.ts` provides build-tool-neutral helpers for
+precache filtering, URL de-duplication, and logical-key lookup. The SvelteKit
+prototype worker bridge now uses this pattern so worker runtime URL maps are
+owned by `svelteKitCodecAssetRecords`, not by a parallel handwritten URL list.
+
 ## Migration rules
 
 1. Generate codec asset URLs from the codec inventory, not from route or
@@ -144,9 +176,10 @@ import.meta.url)` references while preserving runtime `locateFile` behavior.
    prototype-generated patched wrapper copies plus injectable runtimes. Rotate
    is proven by passing the canonical URL through the SvelteKit worker bridge
    instead of importing a second worker URL.
-7. Decide whether production should use an equivalent post-generation transform,
-   a codec rebuild option, or a checked-in wrapper patch before broadening the
-   approach to other Emscripten codecs.
+7. Use an equivalent post-generation transform for production SvelteKit wrapper
+   copies. Checked-in wrapper patches and codec rebuilds are rejected for this
+   migration track because they either mutate inherited artifacts or broaden the
+   work into codec provenance.
 8. Repeat only after root checks, prototype checks, service-worker cache audit,
    and browser runtime verification pass.
 
@@ -174,9 +207,6 @@ The strategy is ready for a minimal SvelteKit single-image slice only when:
 
 ## Open questions
 
-- Should codec wrappers be patched in place, regenerated from source, or wrapped
-  by a small post-generation transform that removes Vite-visible fallback URL
-  references?
 - Should threaded codec assets be generated in the same manifest with
   `threaded-only` cache status, or should they live in a separate manifest until
   the threaded-runtime branch proves headers and nested workers?

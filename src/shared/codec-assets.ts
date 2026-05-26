@@ -58,3 +58,34 @@ export function getPrecacheCodecAssetUrls(
 ): string[] {
   return getCodecAssetUrls(getPrecacheCodecAssetRecords(records));
 }
+
+export function getCodecAssetUrlMap(
+  records: readonly CodecAssetRecord[],
+): Readonly<Record<string, string>> {
+  const urlsByLogicalKey: Record<string, string> = {};
+
+  for (const record of records) {
+    if (urlsByLogicalKey[record.logicalKey] !== undefined) {
+      throw new Error(
+        `Duplicate codec asset logical key: ${record.logicalKey}`,
+      );
+    }
+
+    urlsByLogicalKey[record.logicalKey] = record.url;
+  }
+
+  return urlsByLogicalKey;
+}
+
+export function getCodecAssetUrl(
+  records: readonly CodecAssetRecord[],
+  logicalKey: string,
+): string {
+  const record = records.find((item) => item.logicalKey === logicalKey);
+
+  if (!record) {
+    throw new Error(`Missing codec asset logical key: ${logicalKey}`);
+  }
+
+  return record.url;
+}
