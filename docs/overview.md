@@ -62,6 +62,8 @@ The file `lib/feature-plugin.js` scans `src/features/` during the build and gene
 - `src/client/lazy-app/feature-meta/index.ts`
 - `src/client/lazy-app/feature-meta/shared.ts`
 - `src/client/lazy-app/feature-meta/encoders.ts`
+- `src/client/lazy-app/feature-meta/processors.ts`
+- `src/client/lazy-app/feature-meta/preprocessors.ts`
 - `src/client/lazy-app/worker-bridge/active-meta.ts`
 - `src/client/lazy-app/worker-bridge/meta.ts`
 - `src/client/lazy-app/worker-bridge/surface.ts`

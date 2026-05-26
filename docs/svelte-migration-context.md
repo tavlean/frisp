@@ -240,6 +240,9 @@ When Svelte components are added, use Svelte's recommended testing path: Vitest 
   prototype imports production `decodeSourceImage`, `preprocessImage`,
   `processImage`, and `compressImage` for its WebP path through this encode-only
   map and a generated SvelteKit worker bridge.
+- Generated `feature-meta/processors` and `feature-meta/preprocessors` now expose
+  framework-neutral processor/preprocessor metadata maps and defaults without
+  Preact option components. Generated UI option entries remain a later concern.
 - Production `image-pipeline.ts` now delegates decode, preprocess, process, SVG
   handling, and generic encoder wrapping to `image-pipeline-shared.ts`, then
   keeps only the production encoder-map dispatch. This reduces drift between the

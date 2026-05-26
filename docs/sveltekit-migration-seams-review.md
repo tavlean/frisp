@@ -29,6 +29,10 @@ the candidate set to merge or cherry-pick into `main` after verification:
   worker methods from blocked/deprioritized methods.
 - `src/client/lazy-app/feature-meta/encoders.ts`: generated encode runtime map
   that keeps production compression helpers away from Preact option components.
+- `src/client/lazy-app/feature-meta/processors.ts` and
+  `src/client/lazy-app/feature-meta/preprocessors.ts`: generated
+  framework-neutral processor/preprocessor metadata entrypoints that re-export
+  shared metadata maps and defaults without importing Preact option components.
 - `src/client/lazy-app/abort.ts` and
   `src/client/lazy-app/image-decode.ts`: narrow browser/runtime helper modules
   split from the broad `util` surface while keeping compatibility re-exports.
@@ -101,7 +105,8 @@ the candidate set to merge or cherry-pick into `main` after verification:
 - `lib/test-helpers.js` and `lib/smoke-build.js`: focused coverage for the new
   cache-plan, bridge, helper seams, generated worker files, and WebP 2 exclusion
   from the active worker-method surface, generated active bridge metadata, and
-  generated active worker entry.
+  generated active worker entry. Smoke coverage also guards that generated
+  processor/preprocessor metadata entrypoints remain UI-free.
 - `.prettierignore`: ignores disposable SvelteKit build output so root checks
   do not require destructive cleanup prompts.
 
@@ -151,8 +156,8 @@ Do not merge these as solved just because the single-thread prototype passes:
   over `features-worker/active` without WebP 2 imports. A SvelteKit
   service-worker boundary still needs generated Vite asset records before this
   can replace the prototype's cache manifest.
-- Processor/preprocessor metadata and UI option entry splits beyond the proven
-  encode-runtime map.
+- Processor/preprocessor UI option entry splits beyond the generated
+  framework-neutral metadata entrypoints.
 - Minimal SvelteKit single-image editor slice with real user-selected files.
   Start this only after the above build/runtime risks are either proven or
   explicitly scoped.

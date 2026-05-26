@@ -178,6 +178,10 @@ helpers for its WebP probe without importing Preact option components.
 `ImagePipelineWorkerBridge` type, so the SvelteKit prototype can import and run
 production `processBulkImageJob` without importing the production Rollup worker
 adapter.
+Generated `feature-meta/processors` and `feature-meta/preprocessors` now expose
+framework-neutral processor/preprocessor metadata maps and defaults without
+importing Preact option components. Generated UI option entries for processors
+and preprocessors remain a later split if SvelteKit needs generated controls.
 
 ### 3. Prototype offline proof
 
@@ -579,7 +583,7 @@ kinds of work:
 - Not ready for `main`: threaded AVIF/JPEG XL/OxiPNG runtime parity, production
   canonical codec worker/WASM asset URL generation, full production
   `features-worker` filtering/import, processor/preprocessor UI option entry
-  splits, and any SvelteKit production editor UI.
+  splits beyond metadata, and any SvelteKit production editor UI.
 
 Merge or cherry-pick production-safe seam candidates into `main` only after root
 `npm run check` passes, production smoke coverage remains green where relevant,
