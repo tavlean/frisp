@@ -40,6 +40,8 @@ export interface WebpPipelineProbeResult {
   settingsHash: string;
   riffHeader: string;
   webpSignature: string;
+  webpDecodedWidth: number;
+  webpDecodedHeight: number;
   qoiOutputBytes: number;
   qoiSignature: string;
   qoiDecodedWidth: number;
@@ -162,6 +164,7 @@ export async function runWebpPipelineProbe(
     pipelineWorkerBridge,
   );
   let outputFile: File;
+  let webpDecoded: ImageData;
   let qoiOutput: ArrayBuffer;
   let qoiDecoded: ImageData;
   let jpegOutput: ArrayBuffer;
@@ -177,6 +180,7 @@ export async function runWebpPipelineProbe(
       sourceFile.name,
       workerBridge as unknown as Parameters<typeof compressImage>[4],
     );
+    webpDecoded = await workerBridge.webpDecode(signal, outputFile);
     qoiOutput = await workerBridge.qoiEncode(signal, processed, {});
     qoiDecoded = await workerBridge.qoiDecode(
       signal,
@@ -239,6 +243,8 @@ export async function runWebpPipelineProbe(
     settingsHash: settingsHash(effectiveSettings),
     riffHeader: ascii.decode(outputBytes.slice(0, 4)),
     webpSignature: ascii.decode(outputBytes.slice(8, 12)),
+    webpDecodedWidth: webpDecoded.width,
+    webpDecodedHeight: webpDecoded.height,
     qoiOutputBytes: qoiOutput.byteLength,
     qoiSignature: ascii.decode(qoiOutputBytes.slice(0, 4)),
     qoiDecodedWidth: qoiDecoded.width,
@@ -268,6 +274,7 @@ export async function runWebpPipelineProbe(
       `preprocess ran through existing image-pipeline preprocessImage helper with rotate=${pipelinePreprocessorState.rotate.rotate}`,
       'resize processed through existing image-pipeline processImage helper',
       'encoded through the production image-pipeline compressImage helper using the generated encode-only runtime metadata map and SvelteKit features-worker bridge',
+      `webpDecode promoted through the same generated worker surface (${webpDecoded.width} x ${webpDecoded.height})`,
       `qoiEncode promoted through the same generated worker surface (${
         qoiOutput.byteLength
       } bytes, ${ascii.decode(qoiOutputBytes.slice(0, 4))})`,

@@ -3,6 +3,7 @@ import webpEncodeProbeWorkerUrl from './webp-encode-probe.worker.ts?worker&url';
 import svelteKitFeaturesWorkerUrl from 'sqush-generated/features-worker/webp.ts?worker&url';
 import {
   webpCodecAssetUrls,
+  webpDecoderWasmUrl,
   webpEncoderSimdWasmUrl,
   webpEncoderWasmUrl,
 } from 'sqush-generated/codec-assets/webp';
@@ -51,6 +52,7 @@ export {
   rotateWasmUrl,
   svelteKitFeaturesWorkerUrl,
   webpCodecAssetUrls,
+  webpDecoderWasmUrl,
   webpEncodeProbeWorkerUrl,
   webpEncoderSimdWasmUrl,
   webpEncoderWasmUrl,

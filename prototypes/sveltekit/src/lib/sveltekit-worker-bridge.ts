@@ -24,6 +24,7 @@ import {
   qoiEncoderWasmUrl,
   resizeWasmUrl,
   svelteKitFeaturesWorkerUrl,
+  webpDecoderWasmUrl,
   webpEncoderSimdWasmUrl,
   webpEncoderWasmUrl,
 } from './codec-assets';
@@ -34,6 +35,7 @@ export interface SvelteKitWorkerBridgeApi {
     imageData: ImageData,
     options: EncodeOptions,
   ): Promise<ArrayBuffer>;
+  webpDecode(signal: AbortSignal, blob: Blob): Promise<ImageData>;
   rotate(
     signal: AbortSignal,
     data: ImageData,
@@ -75,6 +77,11 @@ interface SvelteKitWorkerBridgeWorkerApi {
     options: EncodeOptions,
     wasmUrls: WebpWasmUrls,
   ): Promise<ArrayBuffer>;
+  webpDecode(
+    signal: AbortSignal,
+    blob: Blob,
+    wasmUrls: WebpWasmUrls,
+  ): Promise<ImageData>;
   qoiEncode(
     signal: AbortSignal,
     imageData: ImageData,
@@ -131,6 +138,15 @@ export default class SvelteKitWorkerBridge
   ): Promise<ArrayBuffer> {
     return super.webpEncode(signal, imageData, options, {
       baseline: webpEncoderWasmUrl,
+      decoder: webpDecoderWasmUrl,
+      simd: webpEncoderSimdWasmUrl,
+    });
+  }
+
+  webpDecode(signal: AbortSignal, blob: Blob): Promise<ImageData> {
+    return super.webpDecode(signal, blob, {
+      baseline: webpEncoderWasmUrl,
+      decoder: webpDecoderWasmUrl,
       simd: webpEncoderSimdWasmUrl,
     });
   }

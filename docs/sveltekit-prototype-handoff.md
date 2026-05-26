@@ -362,6 +362,11 @@ Worker-bridge seam progress:
   bridge metadata imports its ready method-name list, and the same file records
   blocked worker methods with their current codec asset, thread-support, or type
   blockers.
+- `webpDecode` has moved from blocked to ready in the generated worker-surface
+  manifest. The prototype now generates the WebP decoder WASM URL alongside the
+  WebP encoder WASM URLs, passes it through the SvelteKit worker bridge,
+  verifies a 3x3 WebP decode round trip in the runtime pipeline probe, and
+  audits service-worker cache coverage for the decoder WASM asset.
 - `qoiEncode` and `qoiDecode` have moved from blocked to ready in that generated
   worker-surface manifest. The prototype now generates
   `.svelte-kit/sqush-generated/codec-assets/qoi.ts`, passes the QOI encoder and
@@ -411,9 +416,10 @@ Full worker-surface blocker inventory:
 - Importing the production `features-worker` surface directly from SvelteKit
   still pulls every codec worker, not just WebP. That reintroduces AVIF, WP2,
   JXL, and AVIF/JXL/WP2 decoder type/build issues before the prototype needs
-  those codecs. QOI encode/decode, MozJPEG encode, single-thread OxiPNG encode,
-  quantize, and worker resize now have narrow generated SvelteKit paths, but the
-  broader production worker surface remains intentionally filtered.
+  those codecs. WebP decode, QOI encode/decode, MozJPEG encode, single-thread
+  OxiPNG encode, quantize, and worker resize now have narrow generated
+  SvelteKit paths, but the broader production worker surface remains
+  intentionally filtered.
 - AVIF, JXL, and WP2 workers still need focused threaded-codec passes.
   `worker-shared/supports-wasm-threads` now has a SvelteKit alias shape, but the
   actual threaded WASM runtime still needs COOP/COEP, nested-worker, worker
