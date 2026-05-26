@@ -479,12 +479,13 @@ prototype evidence.
 Full worker-surface blocker inventory:
 
 - Importing the production `features-worker` surface directly from SvelteKit
-  still pulls every codec worker, not just WebP. That can reintroduce codec
-  build and type issues before the prototype needs those codecs. AVIF decode,
-  AVIF encode, WebP decode, QOI encode/decode, JPEG XL encode/decode, MozJPEG
-  encode, single-thread OxiPNG encode, quantize, and worker resize now have
-  narrow generated SvelteKit paths, but the broader production worker surface
-  remains intentionally filtered.
+  still pulls every codec worker, including WebP 2. That can reintroduce
+  product-deprioritized codec work before the migration needs it. AVIF decode,
+  AVIF encode, WebP decode/encode, QOI encode/decode, JPEG XL encode/decode,
+  MozJPEG encode, single-thread OxiPNG encode, quantize, worker resize, and
+  rotate now have narrow generated SvelteKit paths; the broader production
+  worker surface remains intentionally filtered until the generator can express
+  the active product codec set.
 - AVIF, JPEG XL, and production-threaded OxiPNG workers still need focused
   threaded-codec passes.
   `worker-shared/supports-wasm-threads` now has a SvelteKit alias shape, but the
@@ -516,10 +517,12 @@ Full worker-surface blocker inventory:
   still depends on UI option entries.
 
 Recommended next implementation step: stop broadening the single-thread
-worker-method list for its own sake. The useful next checkpoint is to package
-the migration-seams branch into a source-only review set, then start a focused
-threaded-runtime or canonical-asset branch before attempting a minimal
-SvelteKit editor slice.
+worker-method list. The active non-WebP-2 worker methods now have generated
+SvelteKit paths and one canonical physical WASM asset each in static output. The
+useful next checkpoint is to package the migration-seams branch into a
+source-only review set, then start a focused threaded-runtime branch or a
+production codec-asset generator branch before attempting a minimal SvelteKit
+editor slice.
 
 ### Merge plan
 
@@ -535,10 +538,10 @@ kinds of work:
   `prototypes/sveltekit/`, generated SvelteKit manifests, diagnostic route UI,
   prototype package dependencies, static-output audit scripts, and browser proof
   scaffolding.
-- Not ready for `main`: threaded AVIF/JPEG XL/OxiPNG runtime parity,
-  canonical de-duplicated codec worker/WASM asset URLs, full production
-  `features-worker` import, processor/preprocessor UI option entry splits, and
-  any SvelteKit production editor UI.
+- Not ready for `main`: threaded AVIF/JPEG XL/OxiPNG runtime parity, production
+  canonical codec worker/WASM asset URL generation, full production
+  `features-worker` filtering/import, processor/preprocessor UI option entry
+  splits, and any SvelteKit production editor UI.
 
 Merge or cherry-pick production-safe seam candidates into `main` only after root
 `npm run check` passes, production smoke coverage remains green where relevant,

@@ -116,8 +116,10 @@ Do not merge these as solved just because the single-thread prototype passes:
   still needs COOP/COEP, nested-worker, helper-asset, and service-worker cache
   proof.
 - Canonical codec worker/WASM asset URL strategy: the prototype controls
-  runtime URLs but still documents physical duplication from Emscripten
-  `new URL(..., import.meta.url)` references. Use
+  runtime URLs and now removes physical duplication for the active single-thread
+  static-output paths with generated patched wrapper copies. Production still
+  needs a source/build strategy for equivalent wrapper patching or regeneration.
+  Use
   [SvelteKit codec asset strategy](sveltekit-codec-asset-strategy.md) as the
   implementation plan for this follow-up.
 - Full production `features-worker` import from SvelteKit: still intentionally

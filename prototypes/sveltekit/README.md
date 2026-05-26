@@ -324,9 +324,11 @@ minimal SvelteKit single-image editor slice with real user-selected files.
   prototype also proves WebP encode, resize, and an injected single-image
   pipeline surface can be split from Preact option controls.
 - Replace the production `omt:` worker bridge with Vite worker imports. The
-  prototype now proves the shared bridge runtime can be reused with a WebP-only
-  SvelteKit module-worker adapter, but the full generated `features-worker`
-  surface still needs incremental broadening.
+  prototype now proves the shared bridge runtime can be reused with a generated
+  SvelteKit module-worker adapter that covers every active non-WebP-2 worker
+  method. A direct production `features-worker` import still needs generator
+  filtering so deprioritized codecs and production-only worker assumptions do
+  not enter the SvelteKit graph.
 - Generate the Vite-facing worker entry incrementally from an explicit ready
   surface. The current generated manifest enables `webpEncode`, single-thread
   `avifEncode`, `rotate`, QOI encode/decode, single-thread `jxlEncode` plus
@@ -346,13 +348,13 @@ minimal SvelteKit single-image editor slice with real user-selected files.
   lazy/feature-detected workers and WASM assets, following the prototype
   `sqush-generated/service-worker/cache-plan.ts` proof.
 - Resolve codec WASM duplication before production migration. The prototype now
-  proves the WebP and QOI encoder/decoder shapes, MozJPEG encoder shape,
-  ImageQuant processor shape, and resize/HQX processor shape with generated
-  patched wrapper copies and injectable runtimes, while runtime loading still
-  flows through generated manifest URLs and `locateFile` or explicit
-  wasm-bindgen init URLs. Production still needs a decision between an
-  equivalent post-generation transform, a codec rebuild option, or a checked-in
-  wrapper patch before this is broadened.
+  proves WebP, AVIF, JPEG XL, and QOI encoder/decoder shapes, MozJPEG and
+  OxiPNG encoder shapes, ImageQuant processor shape, and resize/HQX processor
+  shape with generated patched wrapper copies and injectable runtimes, while
+  runtime loading still flows through generated manifest URLs and `locateFile`
+  or explicit wasm-bindgen init URLs. Production still needs a decision between
+  an equivalent post-generation transform, a codec rebuild option, or a
+  checked-in wrapper patch before this becomes production build behavior.
 - Keep the logical codec asset manifest as the next asset-seam shape. The
   manifest should stay the single owner of codec WASM URLs, while app code,
   worker bridge calls, and service-worker cache plans derive their URL lists
