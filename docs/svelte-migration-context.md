@@ -184,9 +184,10 @@ When Svelte components are added, use Svelte's recommended testing path: Vitest 
   URL, thread-support alias, or type work before joining the Vite worker entry.
 - Production generation now mirrors the same decision boundary at the source
   level with `src/client/lazy-app/worker-bridge/surface.ts`: active worker
-  methods are listed separately from blocked WebP 2 methods, while the current
-  Preact/Rollup `features-worker/index.ts` remains unchanged until a focused
-  SvelteKit-safe filtering seam is built.
+  methods are listed separately from blocked WebP 2 methods. It also emits
+  ignored `src/features-worker/active.ts` as a Comlink entry for the active
+  non-WebP-2 method set, while the current Preact/Rollup
+  `features-worker/index.ts` remains unchanged for existing app behavior.
 - AVIF decode is promoted through that admission list. It uses a generated AVIF
   decoder WASM asset manifest and local fixture decode proof, while the broader
   production worker surface remains filtered.

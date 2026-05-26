@@ -64,6 +64,7 @@ The file `lib/feature-plugin.js` scans `src/features/` during the build and gene
 - `src/client/lazy-app/feature-meta/encoders.ts`
 - `src/client/lazy-app/worker-bridge/meta.ts`
 - `src/client/lazy-app/worker-bridge/surface.ts`
+- `src/features-worker/active.ts`
 - `src/features-worker/index.ts`
 
 These generated files are recreated by the build and ignored by Git unless a
