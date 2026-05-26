@@ -110,7 +110,8 @@ the candidate set to merge or cherry-pick into `main` after verification:
   compression workflow helpers: now have SvelteKit prototype evidence for the
   WebP path. The prototype runs `runCompressionUpdateWorkflow` with injected
   state patching, `ResultCache`, generated SvelteKit worker bridges, and the
-  production pipeline helper set, without importing the Preact component shell.
+  production `imagePipeline` helper bundle, without importing the Preact
+  component shell.
 - `lib/test-helpers.js` and `lib/smoke-build.js`: focused coverage for the new
   cache-plan, bridge, helper seams, generated worker files, and WebP 2 exclusion
   from the active worker-method surface, generated active bridge metadata, and
@@ -153,7 +154,7 @@ that touch runtime, worker, codec, or service-worker behavior.
 This slice keeps the current Preact shell but makes decode/preprocess/process
 and WebP compression helpers importable without UI ownership. The prototype
 also proves the extracted compression update workflow can consume this
-injected pipeline shape for the WebP side.
+injected `imagePipeline` shape for the WebP side.
 
 3. Worker bridge and active worker boundaries
 

@@ -254,7 +254,7 @@ When Svelte components are added, use Svelte's recommended testing path: Vitest 
 - The production compression update workflow now has SvelteKit prototype
   evidence. `runCompressionUpdateWorkflow` can run the WebP side outside the
   Preact component shell when given injected state patching, cache, worker
-  bridges, and the existing production pipeline helper set. This narrows the
+  bridges, and the production `imagePipeline` helper bundle. This narrows the
   future single-image slice risk to UI/control integration, full codec/threaded
   runtime parity, and static asset/service-worker strategy rather than the core
   update orchestration itself.

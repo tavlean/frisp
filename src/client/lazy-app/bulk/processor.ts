@@ -1,10 +1,4 @@
-import {
-  compressImage,
-  decodeSourceImage,
-  preprocessImage,
-  processImage,
-  SourceImage,
-} from '../image-pipeline';
+import { imagePipeline, SourceImage } from '../image-pipeline';
 import type { ImagePipelineWorkerBridge } from '../image-pipeline';
 import { defaultPreprocessorState } from '../feature-meta/shared';
 import type { PreprocessorState } from '../feature-meta/shared';
@@ -14,10 +8,10 @@ import type { ImageJob, ImageOutput } from './session';
 import { getPercentChange } from './size';
 
 export interface BulkProcessorPipeline {
-  decodeSourceImage: typeof decodeSourceImage;
-  preprocessImage: typeof preprocessImage;
-  processImage: typeof processImage;
-  compressImage: typeof compressImage;
+  decodeSourceImage: typeof imagePipeline.decodeSourceImage;
+  preprocessImage: typeof imagePipeline.preprocessImage;
+  processImage: typeof imagePipeline.processImage;
+  compressImage: typeof imagePipeline.compressImage;
 }
 
 export interface BulkProcessJobOptions {
@@ -37,12 +31,7 @@ export interface BulkProcessPlan {
   sourceFileName: string;
 }
 
-const defaultPipeline: BulkProcessorPipeline = {
-  decodeSourceImage,
-  preprocessImage,
-  processImage,
-  compressImage,
-};
+const defaultPipeline: BulkProcessorPipeline = imagePipeline;
 
 export function createBulkProcessPlan(
   job: ImageJob,

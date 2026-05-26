@@ -304,7 +304,7 @@ minimal SvelteKit single-image editor slice with real user-selected files.
 - The production compression update workflow import is now proven from
   SvelteKit for the same WebP path. The prototype supplies local state patching,
   `ResultCache`, two generated SvelteKit worker bridges, and the existing
-  production pipeline helper set; `runCompressionUpdateWorkflow` then decodes,
+  production `imagePipeline` helper bundle; `runCompressionUpdateWorkflow` then decodes,
   preprocesses, processes, encodes, decodes the output, and writes the side
   result without importing the Preact component shell.
 - The first `url:` seam is now proven for rotate: production keeps

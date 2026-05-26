@@ -16,9 +16,8 @@ import {
 import { createImageJob } from '../../../../src/client/lazy-app/bulk/session';
 import tinyAvifUrl from 'sw/tiny.avif?url';
 import {
-  compressImage,
-  decodeImage,
   decodeSourceImage,
+  imagePipeline,
   type ImagePipelineWorkerBridge,
   preprocessImage,
   processImage,
@@ -210,13 +209,7 @@ async function runProductionUpdateWorkflowProbe(
         },
         encodeCache: new ResultCache(),
         workerBridges,
-        pipeline: {
-          decodeSourceImage,
-          preprocessImage,
-          processImage,
-          compressImage,
-          decodeImage,
-        },
+        pipeline: imagePipeline,
         isUnmounted: () => false,
         showSnack: (message) => {
           reject(new Error(message));
@@ -291,12 +284,14 @@ export async function runWebpPipelineProbe(
   let bulkOutput: Awaited<ReturnType<typeof processBulkImageJob>>;
   let updateWorkflowOutput: File;
   try {
-    outputFile = await compressImage(
+    outputFile = await imagePipeline.compressImage(
       signal,
       processed,
       encoderState,
       sourceFile.name,
-      workerBridge as unknown as Parameters<typeof compressImage>[4],
+      workerBridge as unknown as Parameters<
+        typeof imagePipeline.compressImage
+      >[4],
     );
     webpDecoded = await workerBridge.webpDecode(signal, outputFile);
     avifOutput = await workerBridge.avifEncode(signal, processed, {

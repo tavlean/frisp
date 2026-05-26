@@ -399,7 +399,7 @@ Worker-bridge seam progress:
 - `src/client/lazy-app/Compress/update-workflow.ts` is now imported by the
   SvelteKit probe and completes the WebP side of the production compression
   update workflow with injected state patching, `ResultCache`, generated
-  SvelteKit worker bridges, and the existing production pipeline helper set.
+  SvelteKit worker bridges, and the production `imagePipeline` helper bundle.
   This proves the workflow orchestration seam is usable outside the Preact
   component shell.
 - The SvelteKit prototype sync step now emits

@@ -25,14 +25,7 @@ import Results from './Results';
 import WorkerBridge from '../worker-bridge';
 import type SnackBarElement from 'shared/custom-els/snack-bar';
 import { cleanupEditorRuntime } from './editor-cleanup';
-import {
-  SourceImage,
-  compressImage,
-  decodeSourceImage,
-  decodeImage,
-  preprocessImage,
-  processImage,
-} from '../image-pipeline';
+import { SourceImage, imagePipeline } from '../image-pipeline';
 import { SideSettings, readInitialSavedSideSettings } from './saved-settings';
 import {
   runImportSideSettings,
@@ -274,13 +267,7 @@ export default class Compress extends Component<Props, State> {
       },
       encodeCache: this.encodeCache,
       workerBridges: this.workerBridges as [WorkerBridge, WorkerBridge],
-      pipeline: {
-        decodeSourceImage,
-        preprocessImage,
-        processImage,
-        compressImage,
-        decodeImage,
-      },
+      pipeline: imagePipeline,
       isUnmounted: () => this.isUnmounted,
       showSnack: this.showSnackIfMounted,
       applyState: (patch) => this.setState(patch),

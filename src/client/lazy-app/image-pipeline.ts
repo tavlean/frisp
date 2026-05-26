@@ -2,6 +2,10 @@ import type { EncoderState } from './feature-meta/shared';
 import { encoderMap } from './feature-meta/encoders';
 import {
   compressImageWithEncoder,
+  decodeImage,
+  decodeSourceImage,
+  preprocessImage,
+  processImage,
   type DecodeWorkerBridge,
   type PreprocessWorkerBridge,
   type ProcessWorkerBridge,
@@ -170,3 +174,11 @@ export function compressImage(
   const unsupportedEncoder: never = encodeData;
   throw new Error(`Unsupported encoder: ${JSON.stringify(unsupportedEncoder)}`);
 }
+
+export const imagePipeline = {
+  decodeSourceImage,
+  preprocessImage,
+  processImage,
+  compressImage,
+  decodeImage,
+};
