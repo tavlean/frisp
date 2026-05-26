@@ -303,16 +303,16 @@ assert(
   `Expected exactly one QOI decoder WASM asset after the generated wrapper patch, found ${qoiDecoderWasmAssets.length}.`,
 );
 assert(
-  jxlEncoderWasmAssets.length >= 1,
-  'Expected emitted JPEG XL encoder WASM asset.',
+  jxlEncoderWasmAssets.length === 1,
+  `Expected exactly one JPEG XL encoder WASM asset after the generated wrapper patch, found ${jxlEncoderWasmAssets.length}.`,
 );
 assert(
-  jxlDecoderWasmAssets.length >= 1,
-  'Expected emitted JPEG XL decoder WASM asset.',
+  jxlDecoderWasmAssets.length === 1,
+  `Expected exactly one JPEG XL decoder WASM asset after the generated wrapper patch, found ${jxlDecoderWasmAssets.length}.`,
 );
 assert(
-  jxlThreadedWorkerAssets.length >= 1,
-  'Expected emitted JPEG XL threaded worker helper asset to remain visible for threaded-runtime migration analysis.',
+  jxlThreadedWorkerAssets.length === 0,
+  `Expected no JPEG XL threaded worker helper assets when the prototype injects the single-thread runtime, found ${jxlThreadedWorkerAssets.length}.`,
 );
 assert(
   mozjpegEncoderWasmAssets.length === 1,

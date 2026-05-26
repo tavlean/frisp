@@ -50,14 +50,15 @@ the candidate set to merge or cherry-pick into `main` after verification:
 - `src/features/**/client/runtime.ts`: runtime-only encoder/processor clients
   split from Preact option controls for browser encoders, WebP, AVIF, JPEG XL,
   QOI, MozJPEG, OxiPNG, and resize.
-- `src/features/encoders/jxl/worker/jxlEncode.ts`: injectable thread-support
-  probe that preserves the default threaded-capable production path while
-  letting the prototype force the single-thread runtime path.
 - `src/features/decoders/webP/worker/webpDecode.ts`,
   `src/features/decoders/avif/worker/avifDecode.ts`,
   `src/features/decoders/avif/worker/runtime.ts`,
   `src/features/encoders/avif/worker/avifEncode.ts`,
   `src/features/encoders/avif/worker/runtime.ts`,
+  `src/features/decoders/jxl/worker/jxlDecode.ts`,
+  `src/features/decoders/jxl/worker/runtime.ts`,
+  `src/features/encoders/jxl/worker/jxlEncode.ts`,
+  `src/features/encoders/jxl/worker/runtime.ts`,
   `src/features/decoders/webP/worker/runtime.ts`,
   `src/features/encoders/webP/worker/webpEncode.ts`,
   `src/features/encoders/webP/worker/runtime.ts`,

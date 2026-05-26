@@ -10,47 +10,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import type { JXLModule } from 'codecs/jxl/enc/jxl_enc';
-import type { EncodeOptions } from '../shared/meta';
-
-import { initEmscriptenModule } from 'features/worker-utils';
 import { simd } from 'wasm-feature-detect';
 import checkThreadsSupport from 'worker-shared/supports-wasm-threads';
+import { createJxlEncoderRuntime } from './runtime';
 
-let emscriptenModule: Promise<JXLModule>;
+export type { JxlEncodeRuntimeOptions } from './runtime';
 
-export interface JxlEncodeRuntimeOptions {
-  supportsThreads?: typeof checkThreadsSupport;
-}
-
-async function init({
-  supportsThreads = checkThreadsSupport,
-}: JxlEncodeRuntimeOptions = {}) {
-  if (await supportsThreads()) {
-    if (await simd()) {
-      const jxlEncoder = await import('codecs/jxl/enc/jxl_enc_mt_simd');
-      return initEmscriptenModule(jxlEncoder.default);
-    }
+export default createJxlEncoderRuntime({
+  supportsThreads: checkThreadsSupport,
+  supportsSimd: simd,
+  async loadMultiThread() {
     const jxlEncoder = await import('codecs/jxl/enc/jxl_enc_mt');
-    return initEmscriptenModule(jxlEncoder.default);
-  }
-  const jxlEncoder = await import('codecs/jxl/enc/jxl_enc');
-  return initEmscriptenModule(jxlEncoder.default);
-}
-
-export default async function encode(
-  data: ImageData,
-  options: EncodeOptions,
-  runtimeOptions?: JxlEncodeRuntimeOptions,
-): Promise<ArrayBuffer> {
-  if (!emscriptenModule) emscriptenModule = init(runtimeOptions);
-
-  const module = await emscriptenModule;
-  const result = module.encode(data.data, data.width, data.height, options);
-
-  if (!result) throw new Error('Encoding error.');
-
-  const output = new Uint8Array(result.byteLength);
-  output.set(result);
-  return output.buffer as ArrayBuffer;
-}
+    return jxlEncoder.default;
+  },
+  async loadMultiThreadSimd() {
+    const jxlEncoder = await import('codecs/jxl/enc/jxl_enc_mt_simd');
+    return jxlEncoder.default;
+  },
+  async loadSingleThread() {
+    const jxlEncoder = await import('codecs/jxl/enc/jxl_enc');
+    return jxlEncoder.default;
+  },
+});

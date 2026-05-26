@@ -47,10 +47,10 @@ The prototype already proves the useful shape:
 
 The prototype also deliberately audits duplicate assets. `audit:static-output`
 now expects WebP encoder/decoder, QOI encoder/decoder, MozJPEG encoder,
-AVIF decoder/single-thread encoder, OxiPNG single-thread encoder, ImageQuant
-processor, resize/HQX processor, and rotate preprocessor WASM to be emitted once
-from the canonical generated URL records after the generated wrapper patches and
-worker-bridge URL injection.
+AVIF decoder/single-thread encoder, JPEG XL decoder/single-thread encoder,
+OxiPNG single-thread encoder, ImageQuant processor, resize/HQX processor, and
+rotate preprocessor WASM to be emitted once from the canonical generated URL
+records after the generated wrapper patches and worker-bridge URL injection.
 
 ## Canonical manifest shape
 
@@ -126,12 +126,12 @@ Implementation order:
    generation option that removes worker-local `new URL("*.wasm",
 import.meta.url)` references while preserving runtime `locateFile` behavior.
    Proven for the WebP encoder/decoder, AVIF decoder/single-thread encoder,
-   QOI encoder/decoder, MozJPEG encoder, ImageQuant processor, resize/HQX
-   wasm-bindgen wrappers, and the OxiPNG single-thread wasm-bindgen wrapper on
-   `code/sveltekit-migration-seams` with prototype-generated patched wrapper
-   copies plus injectable runtimes. Rotate is proven by passing the canonical
-   URL through the SvelteKit worker bridge instead of importing a second worker
-   URL.
+   JPEG XL decoder/single-thread encoder, QOI encoder/decoder, MozJPEG encoder,
+   ImageQuant processor, resize/HQX wasm-bindgen wrappers, and the OxiPNG
+   single-thread wasm-bindgen wrapper on `code/sveltekit-migration-seams` with
+   prototype-generated patched wrapper copies plus injectable runtimes. Rotate
+   is proven by passing the canonical URL through the SvelteKit worker bridge
+   instead of importing a second worker URL.
 6. Decide whether production should use an equivalent post-generation transform,
    a codec rebuild option, or a checked-in wrapper patch before broadening the
    approach to other Emscripten codecs.
@@ -146,15 +146,17 @@ The strategy is ready for a minimal SvelteKit single-image slice only when:
   logical asset records;
 - `npm run audit:static-output` can distinguish intentional threaded/helper
   assets from accidental duplicate WASM emissions;
-- WebP runtime encoding still produces a valid `RIFF`/`WEBP` output, QOI
-  runtime encoding still produces a valid `qoif` output, MozJPEG runtime
-  encoding still produces a valid JPEG header, ImageQuant runtime processing
-  still returns image data, resize runtime processing still returns resized
-  image data, and rotate preprocessing still returns rotated image data through
-  the generated URLs;
-- service-worker Cache Storage contains the intended canonical WebP, QOI,
-  MozJPEG, ImageQuant, resize, HQX, and rotate assets after a controlled-page
-  reload;
+- WebP runtime encoding still produces a valid `RIFF`/`WEBP` output, AVIF
+  runtime encoding still produces an `ftyp` output and decode round trip, JPEG
+  XL runtime encoding still produces an `ff 0a` output and decode round trip,
+  QOI runtime encoding still produces a valid `qoif` output, MozJPEG runtime
+  encoding still produces a valid JPEG header, OxiPNG runtime encoding still
+  produces a valid PNG header, ImageQuant runtime processing still returns image
+  data, resize runtime processing still returns resized image data, and rotate
+  preprocessing still returns rotated image data through the generated URLs;
+- service-worker Cache Storage contains the intended canonical WebP, AVIF,
+  JPEG XL, QOI, MozJPEG, OxiPNG, ImageQuant, resize, HQX, and rotate assets
+  after a controlled-page reload;
 - root `npm run check` and prototype `npm run check`, `npm run build`,
   `npm run audit:static-output`, and `npm audit --audit-level=low` pass.
 

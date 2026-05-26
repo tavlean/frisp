@@ -140,14 +140,16 @@ npm audit --audit-level=low
   WASM asset and one canonical QOI decoder WASM asset.
 - `jxlEncode` and `jxlDecode` have been promoted through the same generated
   worker surface for a forced single-thread runtime path. The production JPEG XL
-  encoder now accepts an injectable thread-support probe while preserving the
-  default threaded-capable path, the prototype generates JPEG XL encoder and
+  encoder now keeps its lazy threaded-capable adapter while exposing an
+  injectable runtime factory, the prototype generates JPEG XL encoder and
   decoder WASM URL manifests, verifies JPEG XL `ff 0a` output plus a decode
   round trip, and confirms service-worker cache coverage for both JPEG XL WASM
-  assets. Vite still emits the JPEG XL threaded worker helpers and MT/SIMD WASM
-  assets because the production module keeps dynamic threaded imports in its
-  graph; production migration still needs a separate threaded-runtime proof or
-  a build split.
+  assets. The prototype imports generated patched JPEG XL encoder/decoder
+  wrapper copies through shared JPEG XL runtime seams, so static output emits
+  one canonical JPEG XL encoder WASM asset, one canonical JPEG XL decoder WASM
+  asset, and no JPEG XL threaded worker-helper assets. Production migration
+  still needs a separate threaded-runtime proof or a build split for the
+  threaded JPEG XL path.
 - `mozjpegEncode` has been promoted through the same generated worker surface.
   The prototype now generates a MozJPEG encoder WASM URL manifest, passes it
   through the SvelteKit worker bridge, verifies JPEG `ff d8 ff` output from the

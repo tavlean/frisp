@@ -414,14 +414,16 @@ Worker-bridge seam progress:
   one canonical QOI encoder WASM asset and one canonical QOI decoder WASM asset.
 - `jxlEncode` and `jxlDecode` have moved from blocked to ready for a forced
   single-thread runtime path in the generated worker-surface manifest. The
-  production JPEG XL encoder now accepts an injectable thread-support probe
-  while preserving the default threaded-capable path, the prototype generates
-  JPEG XL encoder and decoder WASM URL manifests, verifies JPEG XL `ff 0a`
-  output plus a decode round trip in the runtime pipeline probe, and audits
-  service-worker cache coverage for both JPEG XL WASM assets. Vite still emits
-  the JPEG XL threaded worker helpers and MT/SIMD WASM assets because the
-  production module keeps dynamic threaded imports in its graph, so threaded
-  production parity remains a separate migration proof.
+  production JPEG XL encoder now keeps its lazy threaded-capable adapter while
+  exposing an injectable runtime factory, the prototype generates JPEG XL
+  encoder and decoder WASM URL manifests, verifies JPEG XL `ff 0a` output plus a
+  decode round trip in the runtime pipeline probe, and audits service-worker
+  cache coverage for both JPEG XL WASM assets. The prototype imports generated
+  patched JPEG XL encoder/decoder wrapper copies through shared JPEG XL runtime
+  seams, so static output emits exactly one canonical JPEG XL encoder WASM
+  asset, one canonical JPEG XL decoder WASM asset, and no JPEG XL threaded
+  worker-helper assets. Threaded production parity remains a separate migration
+  proof.
 - `mozjpegEncode` has moved from blocked to ready in the generated
   worker-surface manifest. The prototype now generates
   `.svelte-kit/sqush-generated/codec-assets/mozjpeg.ts`, passes the MozJPEG
@@ -488,10 +490,9 @@ Full worker-surface blocker inventory:
   `worker-shared/supports-wasm-threads` now has a SvelteKit alias shape, but the
   actual threaded WASM runtime still needs COOP/COEP, nested-worker, worker
   helper asset, and service-worker cache proof before those threaded paths can
-  be considered production-ready. AVIF now has a proven forced single-thread
-  encode path, JPEG XL now has a proven forced single-thread encode/decode path,
-  and OxiPNG now has a proven injected single-thread encode path, but those do
-  not prove the threaded runtime.
+  be considered production-ready. AVIF and JPEG XL now have proven forced
+  single-thread encode/decode asset seams, and OxiPNG now has a proven injected
+  single-thread encode path, but those do not prove the threaded runtime.
 - WebP 2 is intentionally out of scope for continued prototype work. Keep it
   filtered from the SvelteKit worker surface and avoid spending engineering time
   on its asset/threading seams unless the product direction changes.
