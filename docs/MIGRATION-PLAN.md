@@ -49,11 +49,12 @@ single-image slice proved it (engine called from Svelte, encoded WebP/AVIF/JXL).
 
 ## 2. Current state (verified 2026-05-31)
 
-- **Branches (clean):** `main` (Preact+Rollup, untouched production),
-  `code/sveltekit-codec-assets` (CANONICAL backend branch — contains the old
-  prototype + migration-seams in full), `code/sveltekit-single-image-slice`
-  (this branch: the runnable single-image compressor + docs). The redundant
-  `migration-seams` and `prototype` branches were deleted.
+- **Branches (two — clean):** `main` (Preact+Rollup, untouched production) and
+  **`svelte`** (the migration trunk — engine seams + codec-asset strategy +
+  runnable single-image compressor + all docs; worktree at `../Sqush-svelte`).
+  The old `code/sveltekit-{codec-assets,migration-seams,prototype,single-image-slice}`
+  branches were all collapsed into `svelte` and deleted (each verified fully
+  contained first — nothing lost).
 - **Repo hygiene done:** `upstream` (GoogleChromeLabs) remote removed (~113
   stale branches gone; all commits preserved in `main`'s ancestry). `SquooshPlus`
   symlink and the orphaned codex worktree removed.
@@ -139,9 +140,9 @@ Grounded in the official docs (fetched 2026-05-31). Apply these everywhere:
 
 ## 5. The plan — phases (plumbing-first)
 
-Work on a dedicated branch off `code/sveltekit-codec-assets` (suggested name:
-`code/sveltekit-plumbing`, then `code/sveltekit-editor`, then
-`code/sveltekit-bulk`). Keep `main` (Preact) working at all times. Each phase
+Work on the `svelte` trunk, or cut a short per-phase branch off it
+(`svelte-plumbing`, then `svelte-editor`, then `svelte-bulk`) and merge back.
+Keep `main` (Preact) working at all times. Each phase
 ends green: `npm run check` + `npm run build` in `prototypes/sveltekit`, plus a
 browser check for anything touching runtime/worker/codec/SW behavior.
 

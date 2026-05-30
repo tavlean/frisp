@@ -16,21 +16,25 @@ from Preact, and proven to run under SvelteKit. The original Squoosh app (Preact
   **UI** — deliberately left for the UI track. The first piece of that UI now
   exists: a runnable single-image compressor on the SvelteKit prototype.
 
-## Branch stack (one canonical branch, not three rivals)
+## Branches (two — clean)
 
 ```
-main                              stable Preact + Rollup app (production, untouched)
-  └─ code/sveltekit-codec-assets  CANONICAL backend branch (codec-asset URL strategy + all seams + prototype)
-       └─ code/sveltekit-single-image-slice   runnable single-image UI + docs (this branch)
+main      stable Preact + Rollup app (production, untouched)
+svelte    migration trunk — engine seams + codec-asset strategy + runnable
+          single-image UI + all docs. This is where migration work continues.
 ```
 
-- `code/sveltekit-codec-assets` is the canonical backend branch; the slice
-  branch builds on it.
-- The redundant `code/sveltekit-migration-seams` and `code/sveltekit-prototype`
-  branches were **retired** (deleted from origin + local) after verifying they
-  were fully contained in codec-assets — nothing lost.
+- **`svelte`** is the single migration trunk (it absorbed the old
+  `codec-assets`, `migration-seams`, `prototype`, and `single-image-slice`
+  branches — all verified fully contained before deletion, nothing lost). Its
+  worktree is at `../Sqush-svelte`.
+- Optional per-phase branches cut from `svelte`: `svelte-plumbing` →
+  `svelte-editor` → `svelte-bulk` (see [MIGRATION-PLAN.md](MIGRATION-PLAN.md)).
 - The `upstream` (GoogleChromeLabs) remote and its ~113 stale tracking branches
   were removed; all commits remain in `main`'s ancestry.
+- Older docs below may still name the retired `code/sveltekit-*` branches in
+  their point-in-time narratives — that history is intact, but the live branch
+  names are just `main` and `svelte`.
 
 ## Done
 
