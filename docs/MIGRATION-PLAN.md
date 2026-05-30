@@ -2,12 +2,13 @@
 
 Last updated: 2026-05-31. Author: Claude (UI/architecture colleague pass).
 
-> **Read this first if you're a fresh session.** This is the working plan for
-> moving Sqush from the inherited Preact + Rollup app to an all-in Svelte 5 +
-> SvelteKit + Vite app, **without changing what the user sees** until parity is
-> reached. It is self-contained: it carries the context you need so you don't
-> have to re-derive it. Pair it with [STATUS.md](STATUS.md) (current state) and
-> [HANDOFF-2026-05-30.md](HANDOFF-2026-05-30.md).
+> **Read [STATUS.md](STATUS.md) first** for the live current state, then this
+> plan. This is the working plan for moving Sqush from the inherited Preact +
+> Rollup app to an all-in Svelte 5 + SvelteKit + Vite app, **without changing
+> what the user sees** until parity is reached. **Phases 1–5 are done**; the
+> current focus is the §"Phase 5 polish backlog" before Phase 6.
+> ([HANDOFF-2026-05-30.md](HANDOFF-2026-05-30.md) is an older point-in-time
+> record, superseded by STATUS.)
 
 ---
 
@@ -47,32 +48,40 @@ single-image slice proved it (engine called from Svelte, encoded WebP/AVIF/JXL).
 
 ---
 
-## 2. Current state (verified 2026-05-31)
+## 2. Current state (2026-05-31)
 
+> For the live, authoritative current state read [STATUS.md](STATUS.md). This
+> section is the plan's own snapshot.
+
+- **Phases 1–5 are DONE** (see each phase below). `prototypes/sveltekit/` is now
+  a full **single-image editor at Squoosh parity**, not just a slice. Current
+  focus is the **Phase 5 polish backlog** (§ below) before Phase 6.
 - **Branches (two — clean):** `main` (Preact+Rollup, untouched production) and
-  **`svelte`** (the migration trunk — engine seams + codec-asset strategy +
-  runnable single-image compressor + all docs; worktree at `../Sqush-svelte`).
-  The old `code/sveltekit-{codec-assets,migration-seams,prototype,single-image-slice}`
-  branches were all collapsed into `svelte` and deleted (each verified fully
-  contained first — nothing lost).
-- **Repo hygiene done:** `upstream` (GoogleChromeLabs) remote removed (~113
-  stale branches gone; all commits preserved in `main`'s ancestry). `SquooshPlus`
-  symlink and the orphaned codex worktree removed.
-- **The SvelteKit app lives in `prototypes/sveltekit/`** (Svelte 5.55, SvelteKit
-  2.61, Vite 8, adapter-static). It currently has:
-  - `src/routes/+page.svelte` — runnable single-image compressor (drop → WebP/
-    AVIF/JXL → preview, %, download). Browser-verified.
-  - `src/routes/diagnostics/+page.svelte` — the original probe page.
-  - `src/lib/compress.ts` — adapter: File + settings → engine helpers → bridge.
-  - `src/lib/sveltekit-worker-bridge.ts` — the SvelteKit codec worker bridge
-    (decode/encode for webp/avif/jxl/qoi/mozjpeg/oxipng + resize/quantize/rotate).
-  - `scripts/sync-sqush-prototype.mjs` — generates `.svelte-kit/sqush-generated/*`
-    codec-asset URL records + feature-meta + patched Emscripten wrappers.
-  - `scripts/audit-static-output.mjs` — verifies one physical WASM per logical
-    asset (no accidental duplicates).
-- **Verified working:** single-image encode for WebP/AVIF/JXL in-browser via
-  Vite dev + workers; quality slider re-encodes live; offline SW registers;
-  `npm run check`/`build` pass.
+  **`svelte`** (the migration trunk carrying Phases 1–5; worktree at
+  `../Sqush-svelte`). Per-phase branches (`svelte-plumbing`, `svelte-editor`)
+  were fast-forward-merged into `svelte` and deleted. Next would be
+  `svelte-bulk` for Phase 6.
+- **The SvelteKit app** (Svelte 5.55, SvelteKit 2.61, Vite 8, adapter-static)
+  lives in `prototypes/sveltekit/`. Editor file map + how-to-run are in
+  [STATUS.md](STATUS.md). Headlines:
+  - `src/routes/+page.svelte` — full-bleed dark editor (intro/drop → two-up
+    before/after with zoom/pan → encoder + option panels → resize/quantize/rotate
+    → download). Saved settings persist.
+  - `src/lib/editor/options/*` — option primitives + all six per-encoder panels +
+    resize/quantize panels.
+  - `src/lib/editor/output/*` — `Output.svelte` (two-up) + ported `pinch-zoom` /
+    `two-up` custom elements.
+  - `src/lib/compress.ts` — drives `imagePipeline.compressImage` (shared with
+    bulk); returns before/after ImageData.
+  - `src/service-worker.ts` (+ helpers) — offline; `scripts/sync-sqush-prototype.mjs`
+    - `scripts/audit-static-output.mjs`.
+- **Repo hygiene (done earlier):** `upstream` (GoogleChromeLabs) remote + ~113
+  stale branches removed (commits preserved in `main`'s ancestry); `SquooshPlus`
+  symlink + orphaned codex worktree removed.
+- **Verified (2026-05-31):** all six codecs encode through the unified path;
+  every panel re-encodes live; two-up + zoom/pan + slider; rotate/resize/quantize;
+  saved settings round-trip; offline SW on production preview. `npm run check`
+  0/0, `build` + `audit:static-output` green.
 
 ---
 
@@ -336,6 +345,38 @@ with the current Preact app. This is the big UI phase.
 - Keep the current Squoosh look (colors, layout). Gradual restyle comes later.
 - **Acceptance:** a user cannot tell the Svelte single-image editor from the
   Preact one, feature-for-feature; all active codecs selectable and working.
+
+### Phase 5 polish backlog ← CURRENT FOCUS (2026-05-31)
+
+The editor is functionally complete; the user wants to **stabilize and smooth
+rough edges before starting Phase 6**. Known items (none are blockers; verify
+each in the browser, fix, keep `npm run check` green):
+
+- **Two-up fit-centering hides image edges behind the rails.** The `.output`
+  two-up abs-fills the whole `.compress` stage, so on load a wide image fits to
+  the _full_ width and its left/right ~320px sit behind the option rails. The
+  fit in `Output.svelte` should inset by the rail widths (and the 48px header) so
+  the image fits/centers within the _visible_ viewport. (The page knows the rail
+  width: 320px, 260px under the 800px breakpoint.)
+- **Narrow-screen / mobile layout breaks.** The two rails are
+  `position:absolute` at 320px (260px <800px); below ~700px they cover the
+  viewport with no centre gap. Needs a responsive fallback — e.g. stack the rails
+  below the viewport, or a mobile panel mode (Squoosh uses a `multi-panel`
+  bottom-sheet on mobile; see `src/client/lazy-app/Compress/custom-els/MultiPanel`).
+- **Toolbar icons are placeholder glyphs** (`⟳ ⊞ ◓`, and `− +` for zoom) instead
+  of Squoosh's SVG icons (`RotateIcon`, `ToggleAliasing*Icon`, `ToggleBackground*Icon`,
+  `AddIcon`/`RemoveIcon` in `src/client/lazy-app/icons`). Swap for the real icons
+  (active/inactive variants for aliasing + background).
+- **Minor control polish:** the editable zoom-% field sizing/focus behaviour; the
+  rotate button has no hover/active affordance; the resize "Preset" select only
+  shows "Custom" when the size doesn't match a preset (verify the matching logic
+  feels right); confirm the `<select>` arrow/large styling matches Squoosh.
+- **General QA pass:** odd aspect ratios, very large images (fit + pan), SVG
+  input, re-encode debounce feel, switching encoders mid-encode (abort), download
+  filename per format, keyboard split (1/2/3) discoverability.
+
+Not in scope for polish (deferred): threaded codecs; the intro/marketing screen
+redesign; codec pruning.
 
 ### Phase 6 — Bulk UI (the headline feature)
 
