@@ -48,6 +48,22 @@ main                              stable Preact + Rollup app (production, untouc
 - Canonical codec-asset URL strategy documented
   ([sveltekit-codec-asset-strategy.md](sveltekit-codec-asset-strategy.md)).
 
+## Browser-verified (2026-05-30)
+
+The single-image compressor was driven end-to-end in a real browser (Vite dev +
+the SvelteKit codec workers) on a 216 KB PNG. All three focus formats produced
+valid output, with the quality slider re-encoding live:
+
+| Format   | Output  | Saved |
+| -------- | ------- | ----- |
+| WebP     | 61.4 KB | ~72%  |
+| AVIF     | 20.5 KB | ~90%  |
+| JPEG XL  | 45.9 KB | ~79%  |
+| WebP q30 | 31.0 KB | ~86%  |
+
+No console errors (one dev-only service-worker registration notice, expected).
+`svelte-check` passes 0/0; the Svelte autofixer reports no issues.
+
 ## In progress / just added (this pass, on the slice branch)
 
 - **Runnable single-image compressor UI** (Svelte 5): drop/pick a real file →
