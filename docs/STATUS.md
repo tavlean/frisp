@@ -54,15 +54,17 @@ The single-image compressor was driven end-to-end in a real browser (Vite dev +
 the SvelteKit codec workers) on a 2.66 MB JPEG photo. All three focus formats
 produced valid, downloadable output, with the quality slider re-encoding live:
 
-| Format            | Output   | Saved |
-| ----------------- | -------- | ----- |
-| WebP (q75)        | 303.7 KB | −89%  |
-| AVIF (q50)        | 162.5 KB | −94%  |
-| JPEG XL (q75)     | 274.6 KB | −90%  |
-| WebP (q25 slider) | 146.0 KB | −95%  |
+| Format            | Output   | Saved  |
+| ----------------- | -------- | ------ |
+| WebP (q75)        | 688.0 KB | −74.8% |
+| AVIF (q50)        | 1.09 MB  | −59%   |
+| JPEG XL (q75)     | 695.0 KB | −74.5% |
+| WebP (q25 slider) | 245.2 KB | −91%   |
 
-Zero console errors. `svelte-check` passes 0/0; the Svelte autofixer reports no
-issues.
+Output previews render and download is enabled. Zero console errors.
+`svelte-check` passes 0/0; the Svelte autofixer reports no issues.
+(AVIF at the default speed/quality is larger here because the codec defaults are
+conservative — tuning per-format defaults is a follow-up.)
 
 ## In progress / just added (this pass, on the slice branch)
 
