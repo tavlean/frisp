@@ -51,18 +51,18 @@ main                              stable Preact + Rollup app (production, untouc
 ## Browser-verified (2026-05-30)
 
 The single-image compressor was driven end-to-end in a real browser (Vite dev +
-the SvelteKit codec workers) on a 216 KB PNG. All three focus formats produced
-valid output, with the quality slider re-encoding live:
+the SvelteKit codec workers) on a 2.66 MB JPEG photo. All three focus formats
+produced valid, downloadable output, with the quality slider re-encoding live:
 
-| Format   | Output  | Saved |
-| -------- | ------- | ----- |
-| WebP     | 61.4 KB | ~72%  |
-| AVIF     | 20.5 KB | ~90%  |
-| JPEG XL  | 45.9 KB | ~79%  |
-| WebP q30 | 31.0 KB | ~86%  |
+| Format            | Output   | Saved |
+| ----------------- | -------- | ----- |
+| WebP (q75)        | 303.7 KB | −89%  |
+| AVIF (q50)        | 162.5 KB | −94%  |
+| JPEG XL (q75)     | 274.6 KB | −90%  |
+| WebP (q25 slider) | 146.0 KB | −95%  |
 
-No console errors (one dev-only service-worker registration notice, expected).
-`svelte-check` passes 0/0; the Svelte autofixer reports no issues.
+Zero console errors. `svelte-check` passes 0/0; the Svelte autofixer reports no
+issues.
 
 ## In progress / just added (this pass, on the slice branch)
 
