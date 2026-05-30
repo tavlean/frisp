@@ -14,7 +14,8 @@
     disabled?: boolean;
     /** Forces decimal places in the bubble; otherwise derived from `step`. */
     labelPrecision?: string;
-    oninput?: () => void;
+    /** Fires with the committed numeric value (for derived/inverted fields). */
+    oninput?: (value: number) => void;
     children?: Snippet;
   }
 
@@ -52,7 +53,7 @@
     const next = Number(raw);
     if (Number.isNaN(next)) return;
     value = next;
-    oninput?.();
+    oninput?.(next);
   }
 
   function onPointerDown() {

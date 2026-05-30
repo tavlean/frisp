@@ -49,10 +49,19 @@ export const OUTPUT_FORMATS: {
 
 export interface CompressRequest {
   format: OutputFormat;
-  /** 0-100 quality. Applied to encoders that expose a 0-100 `quality` option. */
-  quality: number;
+  /** The encoder's full option object (e.g. webP EncodeOptions). */
+  options: unknown;
   /** Optional resize. When omitted the image keeps its size. */
   resize?: { width: number; height: number };
+}
+
+/** A fresh, mutable copy of an encoder's default options (for the UI to bind). */
+export function getDefaultOptions(
+  format: OutputFormat,
+): Record<string, unknown> {
+  return structuredClone(
+    encoderMap[format].meta.defaultOptions as Record<string, unknown>,
+  );
 }
 
 export interface CompressOutcome {
@@ -79,25 +88,12 @@ function buildProcessorState(request: CompressRequest) {
 }
 
 /**
- * Build the encoder state from each encoder's default options, applying the
- * requested quality only to encoders whose `quality` is on a 0-100 scale (the
- * WASM codecs). Encoders without quality, or with a 0-1 quality (browser JPEG),
- * keep their defaults — per-encoder option mapping arrives with the editor.
+ * Pair the requested format with its option object. The options come from the UI
+ * (each per-encoder panel binds the encoder's own option type), so the
+ * discriminated-union cast is the prototype adapter's single typing seam.
  */
 function buildEncoderState(request: CompressRequest): EncoderState {
-  const defaults = encoderMap[request.format].meta.defaultOptions as Record<
-    string,
-    unknown
-  >;
-  const quality = defaults.quality;
-  const options =
-    typeof quality === 'number' && quality > 1
-      ? { ...defaults, quality: request.quality }
-      : { ...defaults };
-
-  // The options object is the encoder's own option type by construction; the
-  // discriminated-union cast is the prototype adapter's single typing seam.
-  return { type: request.format, options } as EncoderState;
+  return { type: request.format, options: request.options } as EncoderState;
 }
 
 /**

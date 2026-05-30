@@ -23,12 +23,63 @@
   --dark-text: #142630;
 
   --options-radius: 7px;
+  --horizontal-padding: 15px;
 
   /* Output-side (blue) theme, matching Squoosh's options-2. */
   --main-theme-color: var(--blue);
   --hot-theme-color: var(--deep-blue);
   --header-text-color: var(--dark-text);
   --scroller-radius: var(--options-radius) var(--options-radius) 0 0;
+}
+
+/*
+ * Option-panel layout classes, ported from
+ * src/client/lazy-app/Compress/Options/style.css. Shared by every per-encoder
+ * panel; scoped under .sqush-editor so they don't leak to other prototype pages.
+ */
+.sqush-editor .options-section {
+  background: var(--off-black);
+  color: #fff;
+}
+
+.sqush-editor .option-toggle {
+  cursor: pointer;
+  display: grid;
+  align-items: center;
+  grid-template-columns: 1fr auto;
+  gap: 0.7em;
+  padding: 10px var(--horizontal-padding);
+}
+
+.sqush-editor .option-one-cell {
+  display: grid;
+  grid-template-columns: 1fr;
+  padding: 10px var(--horizontal-padding);
+}
+
+.sqush-editor .option-text-first {
+  display: grid;
+  align-items: center;
+  grid-template-columns: 87px 1fr;
+  gap: 0.7em;
+  padding: 10px var(--horizontal-padding);
+}
+
+.sqush-editor .option-reveal {
+  cursor: pointer;
+  display: grid;
+  align-items: center;
+  grid-template-columns: auto 1fr;
+  gap: 1em;
+  padding: 10px var(--horizontal-padding);
+  border-top: 1px solid #fff4;
+  transition-property: background-color;
+  transition-duration: 250ms;
+}
+
+.sqush-editor .option-reveal:focus-within,
+.sqush-editor .option-reveal:hover {
+  background-color: #fff2;
 }
 
 @media (dynamic-range: high) {

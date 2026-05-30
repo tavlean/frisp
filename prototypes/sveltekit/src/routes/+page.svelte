@@ -1,16 +1,25 @@
 <script lang="ts">
   import {
     compressFile,
+    getDefaultOptions,
     OUTPUT_FORMATS,
     type CompressOutcome,
     type OutputFormat,
   } from '$lib/compress';
   import { registerPrototypeServiceWorker } from '$lib/service-worker-registration';
+  import WebpOptions from '$lib/editor/options/WebpOptions.svelte';
+  import Range from '$lib/editor/options/Range.svelte';
+  import type { EncodeOptions as WebpEncodeOptions } from 'features/encoders/webP/shared/meta';
+  import '$lib/editor/theme.css';
 
   let file = $state<File | null>(null);
   let dragging = $state(false);
   let format = $state<OutputFormat>('webP');
-  let quality = $state(75);
+  // One option object per format, seeded from each encoder's defaults. Panels
+  // mutate these proxies in place; the encode effect reads them via a snapshot.
+  let optionsByFormat = $state<Record<string, Record<string, unknown>>>(
+    Object.fromEntries(OUTPUT_FORMATS.map((f) => [f.id, getDefaultOptions(f.id)])),
+  );
   let resizeOn = $state(false);
   let resizeWidth = $state(1600);
   let resizeHeight = $state(1600);
@@ -46,9 +55,11 @@
   // the quality slider does not spawn an encode per pixel.
   $effect(() => {
     const current = file;
+    // $state.snapshot deeply reads the option object, so editing any nested
+    // option (quality, lossless, advanced…) re-triggers this effect.
     const request = {
       format,
-      quality,
+      options: $state.snapshot(optionsByFormat[format]),
       resize: resizeOn
         ? { width: resizeWidth, height: resizeHeight }
         : undefined,
@@ -199,14 +210,33 @@
         </div>
 
         <div class="field">
-          <label class="label" for="quality">Quality — {quality}</label>
-          <input
-            id="quality"
-            type="range"
-            min="1"
-            max="100"
-            bind:value={quality}
-          />
+          <span class="label">Options</span>
+          <div class="sqush-editor option-panel">
+            {#if format === 'webP'}
+              <WebpOptions
+                options={optionsByFormat[format] as unknown as WebpEncodeOptions}
+              />
+            {:else}
+              <div class="options-section">
+                {#if typeof optionsByFormat[format].quality === 'number'}
+                  <div class="option-one-cell">
+                    <Range
+                      min={0}
+                      max={100}
+                      step={0.1}
+                      value={Number(optionsByFormat[format].quality)}
+                      oninput={(v) => (optionsByFormat[format].quality = v)}
+                      >Quality:</Range
+                    >
+                  </div>
+                {:else}
+                  <p class="no-opts">
+                    No adjustable options for {format} yet.
+                  </p>
+                {/if}
+              </div>
+            {/if}
+          </div>
         </div>
 
         <div class="field">
@@ -388,8 +418,15 @@
     background: #ecfdf5;
     font-weight: 600;
   }
-  input[type='range'] {
-    width: 100%;
+  .option-panel {
+    border-radius: 8px;
+    overflow: hidden;
+    font-size: 1.1rem;
+  }
+  .no-opts {
+    margin: 0;
+    padding: 14px 15px;
+    color: #bcbcbc;
   }
   .checkbox {
     display: flex;
