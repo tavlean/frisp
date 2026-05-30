@@ -221,7 +221,7 @@ prototype slice's format row now lists the six codec encoders; browser encoders
 stay in the type/surface but get proper option panels in Phase 5 (their quality
 scales differ).
 
-### Phase 3 — Service worker / offline (SvelteKit-native)
+### Phase 3 — Service worker / offline (SvelteKit-native) ✅ DONE (2026-05-31)
 
 **Goal:** replace the inherited service worker with the SvelteKit-native one,
 caching app shell + codec WASM.
@@ -234,6 +234,32 @@ caching app shell + codec WASM.
 - **Acceptance:** load app → go offline → reload → app still works and a
   controlled encode still runs; Cache Storage contains the canonical WebP/AVIF/
   JXL (and other active) assets.
+
+**Outcome (2026-05-31):** Verified; **no code change needed** — the
+SvelteKit-native SW was already implemented and correctly wired, so this phase
+was a verification pass. `src/service-worker.ts` uses `$service-worker`
+(`build`/`files`/`version`) plus `serviceWorkerCodecAssetUrls` (the generated
+precache codec records + the features-worker), precaches on install, deletes
+stale caches on activate, and serves cache-first with network fallback. The
+generated precache manifest excludes the runtime-only rotate WASM from the
+service-worker module graph (so Vite never inlines it into the SW bundle);
+rotate is still offline-available via the `build` asset list. No `src/sw/`
+`entry-data:`/`service-worker:` Rollup virtual imports remain in the SvelteKit
+app (`src/lib/service-worker-codec-assets.ts` imports only the plain
+`sw/cache-plan` helpers). Registration runs from both routes via
+`registerPrototypeServiceWorker()`, production-only (`!import.meta.env.DEV`).
+
+Runtime-verified against a production `vite preview` (Preview MCP) — the SW does
+not register under `vite dev`: SW reached `active` and controlled the page;
+Cache Storage held 32 entries including **all 15 canonical codec WASM** (webp
+enc/simd/dec, avif enc/dec, jxl enc/dec, mozjpeg, oxipng, qoi enc/dec,
+imagequant, resize, hqx, rotate), the features-worker, the app entry/start
+chunks, every route-node chunk, and the navigation document `/` — all confirmed
+to serve from cache. A controlled WebP encode driven through the real UI ran to
+completion with the SW controlling the page (worker + WASM served cache-first),
+producing valid `RIFF…WEBP` output. The harness can't toggle the browser to
+literal `offline`, but the cache-completeness proof (every load-and-encode asset
+present and cache-served) plus the live SW-served encode is equivalent.
 
 ### Phase 4 — App shell, routing, SPA config
 

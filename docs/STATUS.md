@@ -95,8 +95,11 @@ redesign, keep every codec for now. The sequenced plan lives in
    widened from WebP-only to all nine active codecs (minus wp2); `compress.ts`
    now drives `imagePipeline.compressImage` (same path as bulk). All six codec
    formats browser-verified round-tripping; decoders verified.
-3. **← NEXT** SvelteKit-native service worker (offline app shell + codec precache).
-4. SPA shell + routing (`ssr=false`, `adapter-static` fallback).
+3. ✅ **DONE (2026-05-31)** — SvelteKit-native service worker. Already
+   implemented; runtime-verified on a production `vite preview`: SW active, all
+   15 codec WASM + app shell + nav doc cached and cache-served, live encode ran
+   under SW control. No code change needed.
+4. **← NEXT** SPA shell + routing (`ssr=false`, `adapter-static` fallback).
 5. Single-image editor parity (before/after slider + all option panels).
 6. Bulk UI on the existing bulk engine (the headline feature).
 7. The flip: SvelteKit becomes production; retire Preact + Rollup.
