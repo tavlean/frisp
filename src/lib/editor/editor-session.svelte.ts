@@ -103,6 +103,11 @@ function buildSide(
 function snapshotProcessorStateForEncode(
   state: ProcessorState,
 ): ProcessorState {
+  // `enabled` is read tracked (toggling resize must re-encode). When resize is
+  // OFF, snapshot its width/height UNtracked: those values don't affect a
+  // disabled-resize output, and `seedResizeDimensions()` writes them once a
+  // result lands — so tracking them here would make the encode `$effect` depend
+  // on width/height and fire a redundant re-encode right after the first one.
   const resizeEnabled = state.resize.enabled;
   return {
     quantize: $state.snapshot(state.quantize),
@@ -112,11 +117,17 @@ function snapshotProcessorStateForEncode(
   };
 }
 
+function buildInitialSides(): [SideState, SideState] {
+  // Read persisted settings once (not per side) and hydrate both sides.
+  const saved = readSaved();
+  return [
+    buildSide(saved.sides?.[0], IDENTITY),
+    buildSide(saved.sides?.[1], 'webP'),
+  ];
+}
+
 export class EditorSession {
-  sides = $state<[SideState, SideState]>([
-    buildSide(readSaved().sides?.[0], IDENTITY),
-    buildSide(readSaved().sides?.[1], 'webP'),
-  ]);
+  sides = $state<[SideState, SideState]>(buildInitialSides());
 
   preprocessorState = $state(structuredClone(defaultPreprocessorState));
   file = $state<File | null>(null);
