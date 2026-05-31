@@ -16,10 +16,35 @@
     rightImage?: ImageData;
     /** Identity of the loaded source; changes force a re-fit even at same dims. */
     fileId?: string | number;
+    /** Per-side "contain" resize: display the (smaller) output letterboxed
+     *  inside the original source footprint so the two-up split stays aligned. */
+    leftContain?: boolean;
+    rightContain?: boolean;
+    /** The preprocessed (original, post-rotate) source dims — the contain box. */
+    containWidth?: number;
+    containHeight?: number;
     onRotate?: () => void;
   }
 
-  let { leftImage, rightImage, fileId, onRotate }: Props = $props();
+  let {
+    leftImage,
+    rightImage,
+    fileId,
+    leftContain = false,
+    rightContain = false,
+    containWidth = 0,
+    containHeight = 0,
+    onRotate,
+  }: Props = $props();
+
+  // When a side is "contain"-resized, pin the canvas's CSS box to the original
+  // source dims and let object-fit letterbox the smaller raster inside it, so
+  // both sides occupy the same footprint. Ported from the original's
+  // getOutputPreviewImageState.
+  const containStyle = (active: boolean) =>
+    active && containWidth && containHeight
+      ? `width:${containWidth}px;height:${containHeight}px;object-fit:contain;`
+      : '';
 
   let twoUp = $state<HTMLElement>();
   let pinchLeft = $state<PinchZoom>();
@@ -141,6 +166,7 @@
           class:pixelated
           width={leftImage?.width}
           height={leftImage?.height}
+          style={containStyle(leftContain)}
           bind:this={canvasLeft}
         ></canvas>
       </pinch-zoom>
@@ -150,6 +176,7 @@
           class:pixelated
           width={rightImage?.width}
           height={rightImage?.height}
+          style={containStyle(rightContain)}
           bind:this={canvasRight}
         ></canvas>
       </pinch-zoom>

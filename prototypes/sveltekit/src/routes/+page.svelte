@@ -135,6 +135,14 @@
   );
   const isVectorSource = $derived(file?.type === 'image/svg+xml');
 
+  // A side using resize → fitMethod "contain" letterboxes its output; tell
+  // Output to display it inside the original footprint (see Output.svelte).
+  const sideContains = (i: 0 | 1) =>
+    sides[i].processorState.resize.enabled &&
+    sides[i].processorState.resize.fitMethod === 'contain';
+  const leftContain = $derived(sideContains(0));
+  const rightContain = $derived(sideContains(1));
+
   // Encoder choices, narrowed to those this browser can actually run (the
   // browser-native encoders are feature-detected; GIF in particular usually
   // isn't supported by canvas.toBlob).
@@ -437,6 +445,10 @@
         leftImage={results[0]?.outputImageData}
         rightImage={results[1]?.outputImageData}
         fileId={loadId}
+        {leftContain}
+        {rightContain}
+        containWidth={naturalWidth}
+        containHeight={naturalHeight}
         onRotate={rotate}
       />
 
