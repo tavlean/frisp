@@ -171,10 +171,9 @@ The current app supports many formats. For this fork, a smaller codec surface pr
 
 ### Recommended product formats
 
-Do not spend product, prototype, or migration effort on WebP 2 unless the codec
-becomes a serious web-platform contender again. It is not part of the active
-roadmap, and SvelteKit prototype work should not treat WebP 2 parity as a
-blocker.
+Keep WebP 2 available as experimental parity while the SvelteKit app is matching
+the inherited editor. Do not make it a primary product promise unless browser and
+runtime testing proves it is useful.
 
 1. WebP 1
 
@@ -196,8 +195,8 @@ blocker.
 
 ### Formats to consider hiding or removing from the main UI
 
-- WebP 2: legacy/deprioritized; likely removable later, but not worth active
-  engineering effort during the SvelteKit prototype or migration-seams tracks
+- WebP 2: experimental parity; keep testable for now, then decide whether to
+  hide or remove it after usage/runtime evidence
 - Browser JPEG
 - Browser PNG
 - Browser GIF

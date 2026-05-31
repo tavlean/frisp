@@ -6,7 +6,8 @@ Last updated: 2026-05-31. Author: Claude (UI/architecture colleague pass).
 > plan. This is the working plan for moving Sqush from the inherited Preact +
 > Rollup app to an all-in Svelte 5 + SvelteKit + Vite app, **without changing
 > what the user sees** until parity is reached. **Phases 1–5 are done**; the
-> current focus is the §"Phase 5 polish backlog" before Phase 6.
+> foundation-hardening checkpoint is complete enough for a short maintainer
+> acceptance pass before Phase 6.
 > ([HANDOFF-2026-05-30.md](HANDOFF-2026-05-30.md) is an older point-in-time
 > record, superseded by STATUS.)
 
@@ -54,8 +55,10 @@ single-image slice proved it (engine called from Svelte, encoded WebP/AVIF/JXL).
 > section is the plan's own snapshot.
 
 - **Phases 1–5 are DONE** (see each phase below). `prototypes/sveltekit/` is now
-  a full **single-image editor at Squoosh parity**, not just a slice. Current
-  focus is the **Phase 5 polish backlog** (§ below) before Phase 6.
+  a full **single-image editor at Squoosh parity**, not just a slice. The
+  foundation-hardening checkpoint before Phase 6 now covers state extraction,
+  WebP 2 parity, mobile layout, service-worker polish, generated-file hygiene,
+  favicon/logo assets, and docs.
 - **Branches (two — clean):** `main` (Preact+Rollup, untouched production) and
   **`svelte`** (the migration trunk carrying Phases 1–5; worktree at
   `../Sqush-svelte`). Per-phase branches (`svelte-plumbing`, `svelte-editor`)
@@ -67,7 +70,10 @@ single-image slice proved it (engine called from Svelte, encoded WebP/AVIF/JXL).
   - `src/routes/+page.svelte` — full-bleed dark editor (intro/drop → two-up
     before/after with zoom/pan → encoder + option panels → resize/quantize/rotate
     → download). Saved settings persist.
-  - `src/lib/editor/options/*` — option primitives + all six per-encoder panels +
+  - `src/lib/editor/editor-session.svelte.ts` — rune-backed editor session for
+    file/side settings, encode orchestration, object URL cleanup, saved settings,
+    dimension seeding, and download names.
+  - `src/lib/editor/options/*` — option primitives + per-encoder panels +
     resize/quantize panels.
   - `src/lib/editor/output/*` — `Output.svelte` (two-up) + ported `pinch-zoom` /
     `two-up` custom elements.
@@ -199,8 +205,8 @@ WebP. Today the generated `encoderMap`/`features-worker` is **WebP-only**;
 AVIF/JXL/etc. only work via direct `bridge.*Encode` calls.
 
 - Widen the generated **active worker surface** (the sync generator + active
-  method set) to include avif, jxl, mozjpeg, oxipng, qoi, and the browser
-  encoders/decoders — everything except blocked wp2.
+  method set) to include avif, jxl, mozjpeg, oxipng, qoi, WebP 2, and the
+  browser encoders/decoders.
 - Once the generated `encoderMap` covers all formats, simplify
   `src/lib/compress.ts` to drive `processBulkImageJob` /
   `imagePipeline.compressImage` for ALL formats (single path shared with bulk),
@@ -209,10 +215,10 @@ AVIF/JXL/etc. only work via direct `bridge.*Encode` calls.
   inputs; single-image path and the bulk engine call the same `compressImage`.
 
 **Outcome (2026-05-31):** Done and browser-verified. The generator's
-`prototypeEncoderNames` went from `['webP']` to all nine active encoders (avif,
-browserGIF, browserJPEG, browserPNG, jxl, mozJPEG, oxiPNG, qoi, webP — wp2 stays
-blocked), so the generated `EncoderState`/`encoderMap` now mirror production
-minus wp2 (no more WebP-only split-brain). `src/lib/compress.ts` dropped its
+`prototypeEncoderNames` went from `['webP']` to all active encoders (avif,
+browserGIF, browserJPEG, browserPNG, jxl, mozJPEG, oxiPNG, qoi, webP, and
+experimental wp2), so the generated `EncoderState`/`encoderMap` now mirror the
+production encoder surface. `src/lib/compress.ts` dropped its
 per-format `switch` + direct `bridge.*Encode` calls and now drives
 `imagePipeline.compressImage` with an `EncoderState` — the exact path
 `bulk/processor.ts` uses, so single-image and bulk share one code path. The
@@ -226,9 +232,8 @@ console errors. Decoders verified by round-tripping WebP/AVIF/JXL/QOI back to
 256×256 ImageData through the bridge. Gates: `sync` deterministic, `check` 0/0,
 `build` clean, `audit:static-output` unchanged (15 logical assets = 1 physical
 WASM each — widening added only main-thread client runtimes, no new WASM). The
-prototype slice's format row now lists the six codec encoders; browser encoders
-stay in the type/surface but get proper option panels in Phase 5 (their quality
-scales differ).
+prototype slice's format row now lists the codec encoders plus feature-detected
+browser encoders.
 
 ### Phase 3 — Service worker / offline (SvelteKit-native) ✅ DONE (2026-05-31)
 
@@ -346,31 +351,31 @@ with the current Preact app. This is the big UI phase.
 - **Acceptance:** a user cannot tell the Svelte single-image editor from the
   Preact one, feature-for-feature; all active codecs selectable and working.
 
-### Phase 5 polish backlog ← CURRENT FOCUS (2026-05-31)
+### Foundation hardening checkpoint (2026-05-31)
 
-The editor is functionally complete; the user wants to **stabilize and smooth
-rough edges before starting Phase 6**. Known items (none are blockers; verify
-each in the browser, fix, keep `npm run check` green):
+The editor is functionally complete; the user wants to **stabilize and simplify
+the foundation before starting Phase 6**. Verify each in the browser and keep
+`npm run check`, `npm run build`, and `npm run audit:static-output` green:
 
-- **Two-up fit-centering hides image edges behind the rails.** The `.output`
-  two-up abs-fills the whole `.compress` stage, so on load a wide image fits to
-  the _full_ width and its left/right ~320px sit behind the option rails. The
-  fit in `Output.svelte` should inset by the rail widths (and the 48px header) so
-  the image fits/centers within the _visible_ viewport. (The page knows the rail
-  width: 320px, 260px under the 800px breakpoint.)
-- **Narrow-screen / mobile layout breaks.** The two rails are
-  `position:absolute` at 320px (260px <800px); below ~700px they cover the
-  viewport with no centre gap. Needs a responsive fallback — e.g. stack the rails
-  below the viewport, or a mobile panel mode (Squoosh uses a `multi-panel`
-  bottom-sheet on mobile; see `src/client/lazy-app/Compress/custom-els/MultiPanel`).
-- **Toolbar icons are placeholder glyphs** (`⟳ ⊞ ◓`, and `− +` for zoom) instead
-  of Squoosh's SVG icons (`RotateIcon`, `ToggleAliasing*Icon`, `ToggleBackground*Icon`,
-  `AddIcon`/`RemoveIcon` in `src/client/lazy-app/icons`). Swap for the real icons
-  (active/inactive variants for aliasing + background).
+- **Responsive editor QA.** The SvelteKit editor now reserves a lower mobile
+  options area and switches `<two-up>` to a vertical split on narrow screens. A
+  production-preview pass at 390×844 confirmed vertical split and no horizontal
+  overflow; keep large-image/tablet spot checks in the maintainer acceptance pass.
+- **Two-up fit-centering.** `Output.svelte` reads fit-inset CSS variables so
+  desktop images fit within the visible space between the option rails and uses
+  contain-mode display dimensions for resize previews. Verify odd aspect ratios
+  and very large images before launch.
+- **WebP 2 parity.** WebP 2 is restored as experimental parity through the
+  generated SvelteKit surface with single-thread encode/decode WASM assets and a
+  Svelte option panel. Chromium preview QA verified online and offline `.wp2`
+  encode; keep it experimental until maintainer/product testing says otherwise.
+- **Service-worker polish.** The production preview service worker precaches
+  SvelteKit build assets, static files, prerendered routes, and generated codec
+  assets; claims clients after activation; and the static audit guards WebP 2
+  WASM, prerendered `/diagnostics`, cache reads/writes, and client claiming.
 - **Minor control polish:** the editable zoom-% field sizing/focus behaviour; the
-  rotate button has no hover/active affordance; the resize "Preset" select only
-  shows "Custom" when the size doesn't match a preset (verify the matching logic
-  feels right); confirm the `<select>` arrow/large styling matches Squoosh.
+  rotate button hover/active affordance; the resize "Preset" matching logic; the
+  `<select>` arrow/large styling.
 - **General QA pass:** odd aspect ratios, very large images (fit + pan), SVG
   input, re-encode debounce feel, switching encoders mid-encode (abort), download
   filename per format, keyboard split (1/2/3) discoverability.
@@ -442,8 +447,9 @@ first; treat threaded as a perf enhancement on its own branch.
 - **Preview-MCP verify ritual:** reload first; inject a real existing image;
   check `fetch r.ok`. (A reused dev server keeps prior state; the file input is
   absent once an image is loaded.)
-- **wp2 (WebP 2) stays blocked** across the active surface unless product
-  direction changes.
+- **WebP 2 is experimental.** It is included for parity, but only the
+  single-thread SvelteKit path is proven in this migration. Treat threaded WebP
+  2, product prominence, or removal as separate decisions after QA.
 
 ## 8. Open decisions for the user (not blockers)
 

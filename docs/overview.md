@@ -43,7 +43,7 @@ Run `npm run build` before `npm run typecheck` on a fresh checkout so generated 
 2. `src/client/initial-app/index.tsx` starts the browser app.
 3. `src/client/initial-app/App/index.tsx` waits for a file drop, file picker selection, or PWA share target.
 4. The editor component `src/client/lazy-app/Compress/index.tsx` loads the image.
-5. The image is decoded using browser APIs when possible, or worker-based decoders for formats such as AVIF, WebP, JPEG XL, and QOI. WebP 2 remains legacy/deprioritized unless product direction changes.
+5. The image is decoded using browser APIs when possible, or worker-based decoders for formats such as AVIF, WebP, WebP 2, JPEG XL, and QOI.
 6. Preprocessors run once for the source image. Today this mainly means rotation.
 7. Each comparison side can apply processors independently. Today this includes resize and quantize.
 8. Each side can encode to a chosen output format.

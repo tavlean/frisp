@@ -30,10 +30,9 @@ start from `code/sveltekit-migration-seams` and read
 `docs/sveltekit-migration-seams-exit-audit.md`.
 
 Codec roadmap note: focus WebP first, AVIF second, and JPEG XL as the advanced
-codec. WebP 2 is deprioritized across product, SvelteKit prototype, and
-migration-seams work; avoid spending engineering effort on it, and do not treat
-WebP 2 parity as a prototype or migration blocker, unless it becomes a serious
-product target again. Any future WebP 2 removal should be a separate cleanup
+codec. WebP 2 is now kept as experimental parity in the SvelteKit editor so the
+migration does not silently drop an inherited format. Any future WebP 2
+promotion, hiding, or removal should be a separate evidence-based cleanup
 decision after the focused codec surface is stable.
 
 Working tree at last update: `code/sveltekit-migration-seams` packages the

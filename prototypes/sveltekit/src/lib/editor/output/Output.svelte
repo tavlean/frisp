@@ -52,12 +52,28 @@
   let canvasLeft = $state<HTMLCanvasElement>();
   let canvasRight = $state<HTMLCanvasElement>();
 
+  let viewportWidth = $state(1024);
+  let viewportHeight = $state(768);
   let scale = $state(1);
   let editingScale = $state(false);
   let pixelated = $state(false);
   let altBackground = $state(false);
 
+  const orientation = $derived(viewportWidth <= 760 ? 'vertical' : 'horizontal');
   const scalePercent = $derived(Math.round(scale * 100));
+  const fitTarget = $derived.by(() => {
+    const image = leftImage ?? rightImage;
+    if (!image) return null;
+    const containActive = leftImage ? leftContain : rightContain;
+    return {
+      width:
+        containActive && containWidth && containHeight ? containWidth : image.width,
+      height:
+        containActive && containWidth && containHeight
+          ? containHeight
+          : image.height,
+    };
+  });
 
   const scaleToOpts = {
     originX: '50%',
@@ -78,22 +94,33 @@
   // but not on every re-encode (which keeps the same dimensions).
   let fittedKey = '';
   $effect(() => {
-    const s = leftImage ?? rightImage;
+    const s = fitTarget;
     const pz = pinchLeft;
     const tu = twoUp;
     if (!s || !pz || !tu) return;
-    const key = `${fileId}:${s.width}x${s.height}`;
+    const key = `${fileId}:${s.width}x${s.height}:${orientation}:${viewportWidth}x${viewportHeight}`;
     if (key === fittedKey) return;
     const raf = requestAnimationFrame(() => {
       const bounds = tu.getBoundingClientRect();
       if (!bounds.width || !bounds.height) return;
+      const styles = getComputedStyle(tu);
+      const insetLeft =
+        Number.parseFloat(styles.getPropertyValue('--fit-inset-left')) || 0;
+      const insetRight =
+        Number.parseFloat(styles.getPropertyValue('--fit-inset-right')) || 0;
+      const insetTop =
+        Number.parseFloat(styles.getPropertyValue('--fit-inset-top')) || 0;
+      const insetBottom =
+        Number.parseFloat(styles.getPropertyValue('--fit-inset-bottom')) || 0;
+      const visibleWidth = Math.max(1, bounds.width - insetLeft - insetRight);
+      const visibleHeight = Math.max(1, bounds.height - insetTop - insetBottom);
       fittedKey = key;
-      const fit = Math.min(bounds.width / s.width, bounds.height / s.height);
+      const fit = Math.min(visibleWidth / s.width, visibleHeight / s.height);
       const fitScale = fit < 1 ? fit : 1;
       pz.setTransform({
         scale: fitScale,
-        x: (bounds.width - s.width * fitScale) / 2,
-        y: (bounds.height - s.height * fitScale) / 2,
+        x: insetLeft + (visibleWidth - s.width * fitScale) / 2,
+        y: insetTop + (visibleHeight - s.height * fitScale) / 2,
         allowChangeEvent: true,
       });
     });
@@ -158,30 +185,32 @@
   }
 </script>
 
+<svelte:window bind:innerWidth={viewportWidth} bind:innerHeight={viewportHeight} />
+
 <div class="output" class:alt-background={altBackground}>
-  <two-up class="two-up" legacy-clip-compat bind:this={twoUp}>
-      <pinch-zoom class="pinch-zoom" bind:this={pinchLeft} onchange={onLeftChange}>
-        <canvas
-          class="pinch-target"
-          class:pixelated
-          width={leftImage?.width}
-          height={leftImage?.height}
-          style={containStyle(leftContain)}
-          bind:this={canvasLeft}
-        ></canvas>
-      </pinch-zoom>
-      <pinch-zoom class="pinch-zoom" bind:this={pinchRight}>
-        <canvas
-          class="pinch-target"
-          class:pixelated
-          width={rightImage?.width}
-          height={rightImage?.height}
-          style={containStyle(rightContain)}
-          bind:this={canvasRight}
-        ></canvas>
-      </pinch-zoom>
-    </two-up>
-  </div>
+  <two-up class="two-up" legacy-clip-compat {orientation} bind:this={twoUp}>
+    <pinch-zoom class="pinch-zoom" bind:this={pinchLeft} onchange={onLeftChange}>
+      <canvas
+        class="pinch-target"
+        class:pixelated
+        width={leftImage?.width}
+        height={leftImage?.height}
+        style={containStyle(leftContain)}
+        bind:this={canvasLeft}
+      ></canvas>
+    </pinch-zoom>
+    <pinch-zoom class="pinch-zoom" bind:this={pinchRight}>
+      <canvas
+        class="pinch-target"
+        class:pixelated
+        width={rightImage?.width}
+        height={rightImage?.height}
+        style={containStyle(rightContain)}
+        bind:this={canvasRight}
+      ></canvas>
+    </pinch-zoom>
+  </two-up>
+</div>
 
   <div class="controls">
     <div class="button-group">

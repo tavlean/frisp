@@ -13,7 +13,8 @@ export type CodecAssetCodec =
   | 'qoi'
   | 'resize'
   | 'rotate'
-  | 'webp';
+  | 'webp'
+  | 'wp2';
 
 export type CodecAssetRole =
   | 'decoder'

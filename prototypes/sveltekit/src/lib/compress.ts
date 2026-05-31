@@ -2,9 +2,9 @@
 //
 // Drives the SAME framework-neutral pipeline the bulk feature uses: decode ->
 // preprocess -> resize -> `imagePipeline.compressImage`. compressImage dispatches
-// on the encoder type through the generated encoder runtime map, which now covers
-// every active codec (all except blocked wp2), so the single-image path and the
-// bulk engine share one code path. Heavy work runs in the SvelteKit codec worker
+// on the encoder type through the generated encoder runtime map, so the
+// single-image path and the bulk engine share one code path. Heavy work runs in
+// the SvelteKit codec worker
 // via SvelteKitWorkerBridge; browser encoders (GIF/JPEG/PNG) encode on the main
 // thread through the same map. No per-format switch.
 
@@ -26,7 +26,7 @@ import {
 } from 'client/lazy-app/feature-meta';
 import SvelteKitWorkerBridge from './sveltekit-worker-bridge';
 
-/** Any active encoder the generated surface supports (all codecs except wp2). */
+/** Any encoder the generated SvelteKit surface supports. */
 export type OutputFormat = EncoderType;
 
 /**
@@ -39,10 +39,8 @@ export type SideFormat = OutputFormat | 'identity';
 export const IDENTITY: 'identity' = 'identity';
 
 /**
- * Formats surfaced in the slice's button row. The codec encoders the project
- * focuses on, plus the other single-thread WASM codecs. Browser encoders stay in
- * the type/generated surface but get their own option panels in the editor phase
- * (their quality scales differ), so they are intentionally not listed here yet.
+ * Formats surfaced in the editor. Browser-native encoders are feature-detected
+ * at runtime because canvas.toBlob support varies by browser.
  */
 export const OUTPUT_FORMATS: {
   id: OutputFormat;
@@ -50,6 +48,11 @@ export const OUTPUT_FORMATS: {
   ext: string;
 }[] = [
   { id: 'webP', label: 'WebP', ext: encoderMap.webP.meta.extension },
+  {
+    id: 'wp2',
+    label: encoderMap.wp2.meta.label,
+    ext: encoderMap.wp2.meta.extension,
+  },
   { id: 'avif', label: 'AVIF', ext: encoderMap.avif.meta.extension },
   // Use the engine's own label so it stays in sync (e.g. "JPEG XL (beta)").
   {

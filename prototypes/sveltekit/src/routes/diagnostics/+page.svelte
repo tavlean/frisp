@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { resolve } from '$app/paths';
   import { runCodecAssetProbe } from '$lib/codec-asset-probe';
   import { createPrototypeModel } from '$lib/prototype-data';
   import type { CodecAssetProbeResult } from '$lib/codec-asset-probe';
@@ -123,7 +124,7 @@
     <p>
       This page checks whether existing local-first Sqush helpers can be
       consumed from SvelteKit. The user-facing compressor lives at
-      <a href="/">the home page</a>.
+      <a href={resolve('/')}>the home page</a>.
     </p>
   </header>
 

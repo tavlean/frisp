@@ -89,10 +89,11 @@ Recommended sequence:
 
 ### 4. Codec product scope and provenance
 
-The product direction is WebP, AVIF, and JPEG XL. WebP 2 is deprioritized: do
-not spend prototype, migration, or roadmap effort on it unless it becomes a
-serious contender again. The inherited app still has a larger visible and built
-codec surface.
+The product direction remains WebP first, AVIF second, and JPEG XL advanced.
+WebP 2 is kept in the SvelteKit prototype as experimental parity until direct
+maintainer testing proves it should be removed. Do not promote WebP 2 as a
+primary product promise or spend threaded-runtime effort on it without a fresh
+decision. The inherited app still has a larger visible and built codec surface.
 
 Recommended sequence:
 

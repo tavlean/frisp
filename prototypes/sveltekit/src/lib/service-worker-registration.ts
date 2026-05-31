@@ -1,4 +1,5 @@
 import { registerServiceWorkerUrl } from '../../../../src/client/lazy-app/sw-bridge/runtime';
+import { base } from '$app/paths';
 
 /**
  * In production, register the SvelteKit-native service worker. In dev, do the
@@ -22,7 +23,7 @@ export async function registerPrototypeServiceWorker(): Promise<
     return undefined;
   }
 
-  return registerServiceWorkerUrl('/service-worker.js', {
+  return registerServiceWorkerUrl(`${base}/service-worker.js`, {
     isProduction: true,
   });
 }

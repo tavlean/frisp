@@ -294,9 +294,10 @@ Migration-seams progress on `code/sveltekit-migration-seams`:
 - The production `feature-plugin` also emits
   `src/client/lazy-app/worker-bridge/surface.ts` as an ignored generated
   worker-surface inventory. It lists active worker methods separately from
-  blocked methods such as WebP 2. It now also emits ignored
-  `src/features-worker/active.ts`, a Comlink worker entry for the active
-  non-WebP-2 method set, plus
+  methods that still need explicit codec asset, thread-support, or type proof.
+  It now also emits ignored
+  `src/features-worker/active.ts`, a Comlink worker entry for the active method
+  set, plus
   `src/client/lazy-app/worker-bridge/active-meta.ts` for the matching active
   bridge method names/types. The existing production `features-worker/index.ts`
   stays the full Rollup/Preact worker entry for current app behavior.
@@ -310,10 +311,10 @@ Migration-seams progress on `code/sveltekit-migration-seams`:
   `feature-meta` index is `Options/encoder-support.ts`, which intentionally
   needs runtime encoder client entries such as `featureTest`.
 - The SvelteKit prototype generator now mirrors that path shape by emitting
-  WebP-only `feature-meta/shared.ts` and `feature-meta/index.ts` files under
-  `.svelte-kit/sqush-generated/`. This keeps the prototype on the narrow WebP
-  metadata proof instead of falling through to the full production shared
-  metadata module and reintroducing the older broad-codec blockers.
+  `feature-meta/shared.ts` and `feature-meta/index.ts` files under
+  `.svelte-kit/sqush-generated/`. The current SvelteKit branch includes the
+  inherited single-image codec surface, with WebP 2 kept as experimental parity
+  rather than a primary product promise.
 - The production rotate preprocessor worker now has a reusable runtime factory
   that accepts a WASM URL, while the production `rotate.ts` remains the Rollup
   `url:` adapter. The SvelteKit prototype generator emits a Vite `?url` rotate
@@ -328,14 +329,14 @@ Migration-seams progress on `code/sveltekit-migration-seams`:
   Production `src/sw/to-cache.ts` still imports Rollup virtual modules at the
   boundary, but initial-cache and feature-detected codec-cache selection now run
   through a reusable helper with focused tests. The shared cache planner now
-  also exposes an active non-WebP-2 codec-cache helper for migration work while
-  keeping the full current production cache path intact.
+  also exposes active codec-cache helpers for migration work while keeping the
+  full current production cache path intact.
 - `src/sw/processor-support.ts` now owns the shared service-worker support probe
   for threads, SIMD, WebP, and AVIF detection, so the full and active cache
   boundaries do not drift.
 - `src/sw/active-to-cache.ts` mirrors the production Rollup `entry-data:`
-  boundary against `features-worker/active` and the active cache planner, without
-  importing WebP 2 codec records. It is not wired to the current service worker.
+  boundary against `features-worker/active` and the active cache planner. It is
+  not wired to the current service worker.
 - The SvelteKit prototype generator now emits
   `.svelte-kit/sqush-generated/service-worker/cache-plan.ts`, which mirrors the
   same `{ main, deps }` shape with Vite worker URLs and generated WebP WASM URL
@@ -508,11 +509,11 @@ Worker-bridge seam progress:
   wrapper copy so static output emits exactly one canonical OxiPNG WASM asset
   and no parallel OxiPNG worker-helper assets.
 
-Next worker seam: do not spend more migration-seams effort on WebP 2 unless a
-fresh product decision makes it a serious target again. WebP 2 is intentionally
-deprioritized and likely removable later, so the next valuable work is the
-threaded-runtime strategy for already-relevant codecs, the canonical codec asset
-URL strategy, and the merge plan for production-safe seams versus disposable
+Next worker seam: WebP 2 is now included in the SvelteKit prototype only as
+experimental parity. Do not spend threaded-runtime or product-positioning effort
+on it without maintainer evidence that it is useful. The next valuable work
+remains the threaded-runtime strategy for already-relevant codecs, the canonical
+codec asset URL strategy, and the merge plan for production-safe seams versus
 prototype evidence.
 
 Full worker-surface blocker inventory:
@@ -520,9 +521,10 @@ Full worker-surface blocker inventory:
 - Importing the production `features-worker` surface directly from SvelteKit
   still pulls every codec worker. The generator now emits
   `src/features-worker/active.ts` and
-  `src/client/lazy-app/worker-bridge/active-meta.ts` for the active non-WebP-2
-  method set, and `worker-bridge/active-bridge.ts` can build a bridge over that
-  generated active method list. `worker-bridge/active-index.ts` also proves the
+  `src/client/lazy-app/worker-bridge/active-meta.ts` for the active method set;
+  WebP 2 is wired in the SvelteKit prototype separately as experimental parity.
+  `worker-bridge/active-bridge.ts` can build a bridge over that generated active
+  method list. `worker-bridge/active-index.ts` also proves the
   matching Rollup adapter shape for the active entry. That entry pair is not yet
   wired to a SvelteKit worker adapter and still includes active methods whose
   threaded production runtime needs separate proof. AVIF decode, AVIF encode,
@@ -539,13 +541,12 @@ Full worker-surface blocker inventory:
   be considered production-ready. AVIF and JPEG XL now have proven forced
   single-thread encode/decode asset seams, and OxiPNG now has a proven injected
   single-thread encode path, but those do not prove the threaded runtime.
-- WebP 2 is intentionally out of scope for continued prototype work. Keep it
-  filtered from the SvelteKit worker surface, do not treat WebP 2 parity as a
-  migration blocker, and avoid spending engineering time on its asset/threading
-  seams unless the product direction changes. The active service-worker cache
-  planner and `active-to-cache.ts` boundary exclude WebP 2, but production
-  `to-cache.ts` still preserves the current full cache behavior until product
-  removal is a separate cleanup decision.
+- WebP 2 is included for experimental parity in the current SvelteKit branch.
+  Keep it behind normal codec UI rather than treating it as a primary migration
+  blocker, and avoid spending threaded-runtime or product-positioning effort on
+  it unless maintainer testing proves it is worth keeping. Production
+  `to-cache.ts` still preserves current full cache behavior until any product
+  removal becomes a separate cleanup decision.
 - Codec asset records now use the shared `src/shared/codec-assets.ts`
   `CodecAssetRecord` contract and precache URL helpers. The prototype generator
   still owns the SvelteKit `?url` imports, but app, worker, and service-worker
@@ -571,12 +572,12 @@ Full worker-surface blocker inventory:
   still depends on UI option entries.
 
 Recommended next implementation step: stop broadening the single-thread
-worker-method list. The active non-WebP-2 worker methods now have generated
-SvelteKit paths and one canonical physical WASM asset each in static output. The
-useful next checkpoint is to package the migration-seams branch into a
-source-only review set, then start a focused threaded-runtime branch or a
-production codec-asset generator branch before attempting a minimal SvelteKit
-editor slice.
+worker-method list. The active worker methods now have generated SvelteKit paths
+and one canonical physical WASM asset each in static output, with WebP 2 kept as
+experimental parity rather than a new product promise. The useful next
+checkpoint is to package the migration-seams branch into a source-only review
+set, then start a focused threaded-runtime branch or a production codec-asset
+generator branch before attempting a minimal SvelteKit editor slice.
 
 ### Merge plan
 
@@ -633,7 +634,8 @@ Use that next branch for one focused target, not a broad migration:
   build a minimal SvelteKit single-image slice with real user-selected files and
   compare import, decode, process, encode, preview, export, and offline behavior
   against the current Preact app. Start with WebP, add AVIF next, keep JPEG XL
-  advanced, and leave WebP 2 out of scope.
+  advanced, and keep WebP 2 only as experimental parity until testing says
+  otherwise.
 
 ### Verification expectations
 

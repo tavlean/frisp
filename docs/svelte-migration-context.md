@@ -156,10 +156,10 @@ When Svelte components are added, use Svelte's recommended testing path: Vitest 
 
 - Keep SvelteKit static output as the prototype target and measure build complexity there first.
 - Continue the first prototype under `prototypes/sveltekit/` on the `code/sveltekit-prototype` branch; do not turn it into a production migration by default.
-- Treat WebP 2 as deprioritized across the SvelteKit prototype, migration-seams
-  work, and product roadmap. Do not spend effort on WebP 2 worker, WASM, or
-  metadata seams unless the product direction changes and it becomes a serious
-  target again.
+- Keep WebP 2 in the SvelteKit prototype as experimental parity until direct
+  maintainer testing proves it should be removed. Do not promote it as a primary
+  product codec or spend threaded-runtime/product-positioning effort on it
+  without a fresh decision.
 - Continue migration seam work on `code/sveltekit-migration-seams`. The first
   seam is a generated `client/lazy-app/feature-meta/shared` module that keeps
   framework-neutral codec/processor/preprocessor metadata separate from the
@@ -173,9 +173,9 @@ When Svelte components are added, use Svelte's recommended testing path: Vitest 
   boundary, move cache selection into a helper that accepts plain
   `{ main, deps }` records, and let the SvelteKit prototype generator provide
   those records from Vite worker and asset URL imports. The shared cache planner
-  also has an active non-WebP-2 codec-cache helper and `active-to-cache.ts`
-  boundary for migration work while the current production cache path remains
-  full. `processor-support.ts` keeps thread, SIMD, WebP, and AVIF support
+  also has active codec-cache helpers and an `active-to-cache.ts` boundary for
+  migration work while the current production cache path remains full.
+  `processor-support.ts` keeps thread, SIMD, WebP, and AVIF support
   detection shared between the full and active cache boundaries.
 - The first production `service-worker:` replacement shape is now proven for
   registration: keep the Rollup URL adapter at the production boundary, move
@@ -188,9 +188,9 @@ When Svelte components are added, use Svelte's recommended testing path: Vitest 
   URL, thread-support alias, or type work before joining the Vite worker entry.
 - Production generation now mirrors the same decision boundary at the source
   level with `src/client/lazy-app/worker-bridge/surface.ts`: active worker
-  methods are listed separately from blocked WebP 2 methods. It also emits
-  ignored `src/features-worker/active.ts` as a Comlink entry for the active
-  non-WebP-2 method set and
+  methods are listed separately from methods that still need asset, thread, or
+  type proof. It also emits ignored `src/features-worker/active.ts` as a
+  Comlink entry for the active method set and
   `src/client/lazy-app/worker-bridge/active-meta.ts` for the matching active
   bridge method names/types. `worker-bridge/active-bridge.ts` can construct a
   bridge over that active list, and `worker-bridge/active-index.ts` proves the
@@ -279,7 +279,8 @@ When Svelte components are added, use Svelte's recommended testing path: Vitest 
 - Do not start `code/sveltekit-single-image-slice` as a full app migration. Its
   target is one real user-selected file path that proves import, decode,
   process, encode, preview, export, and offline behavior. Start with WebP, add
-  AVIF next, keep JPEG XL advanced, and leave WebP 2 out of scope.
+  AVIF next, keep JPEG XL advanced, and keep WebP 2 only as experimental parity
+  until maintainer testing says otherwise.
 - Decide final codec surface before deleting codec code.
 - Use [Phase 1 readiness audit](phase-1-readiness-audit.md) as the current rationale for starting a small technical prototype instead of continuing tiny Preact cleanup.
 - Current browser support targets were reviewed on 2026-05-24. Re-check before production migration, but do not lower the modern evergreen baseline or remove WebAssembly, worker, service-worker, Canvas/ImageData, File/Blob, object URL, or dynamic import assumptions without measured evidence.

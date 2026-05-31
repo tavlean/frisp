@@ -1,184 +1,502 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Sqush — Project Status</title>
-<style>
-  :root{
-    --bg:#0f1115; --panel:#171a21; --panel2:#1e222b; --line:#2a2f3a;
-    --ink:#e7eaf0; --muted:#9aa3b2; --faint:#6b7280;
-    --done:#3fb950; --now:#d29922; --next:#58a6ff; --block:#f85149; --idea:#a371f7;
-    --chip:#222834;
-  }
-  *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);color:var(--ink);
-    font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
-  a{color:var(--next);text-decoration:none}
-  .wrap{max-width:1100px;margin:0 auto;padding:32px 24px 80px}
-  header h1{margin:0 0 4px;font-size:26px;letter-spacing:-.01em}
-  header p{margin:0;color:var(--muted)}
-  .meta{margin-top:10px;color:var(--faint);font-size:13px}
-  h2{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);
-    margin:36px 0 12px;font-weight:600}
-  .grid{display:grid;gap:14px}
-  .cols-4{grid-template-columns:repeat(4,1fr)}
-  .cols-2{grid-template-columns:repeat(2,1fr)}
-  @media(max-width:880px){.cols-4{grid-template-columns:1fr 1fr}.cols-2{grid-template-columns:1fr}}
-  @media(max-width:560px){.cols-4{grid-template-columns:1fr}}
-  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px}
-  .card h3{margin:0 0 10px;font-size:14px;display:flex;align-items:center;gap:8px}
-  .card ul{margin:0;padding-left:0;list-style:none}
-  .card li{padding:5px 0;color:var(--muted);font-size:13.5px;border-top:1px solid var(--line)}
-  .card li:first-child{border-top:none}
-  .dot{width:9px;height:9px;border-radius:50%;display:inline-block;flex:0 0 auto}
-  .d-done{background:var(--done)} .d-now{background:var(--now)}
-  .d-next{background:var(--next)} .d-block{background:var(--block)} .d-idea{background:var(--idea)}
-  .tag{font-size:11px;padding:1px 7px;border-radius:20px;background:var(--chip);color:var(--muted);
-    border:1px solid var(--line);white-space:nowrap}
-  .legend{display:flex;gap:18px;flex-wrap:wrap;color:var(--muted);font-size:13px;margin-top:6px}
-  .legend span{display:inline-flex;align-items:center;gap:7px}
-  /* branch map */
-  .branches{display:flex;flex-direction:column;gap:0}
-  .brow{display:grid;grid-template-columns:200px 1fr;gap:14px;align-items:start;
-    padding:14px 0;border-top:1px solid var(--line)}
-  .brow:first-child{border-top:none}
-  .bname{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px;color:var(--ink)}
-  .bname .sub{display:block;color:var(--faint);font-size:11px;margin-top:3px;font-family:inherit}
-  .bbody{color:var(--muted);font-size:13.5px}
-  .pill{font-size:11px;padding:2px 8px;border-radius:6px;border:1px solid var(--line);
-    background:var(--chip);color:var(--muted);margin-left:6px}
-  /* roadmap */
-  .phase{display:grid;grid-template-columns:30px 1fr auto;gap:12px;align-items:center;
-    padding:11px 0;border-top:1px solid var(--line)}
-  .phase:first-child{border-top:none}
-  .phase .n{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;
-    font-size:12px;font-weight:700;background:var(--panel2);color:var(--muted);border:1px solid var(--line)}
-  .phase .t b{color:var(--ink);font-weight:600}
-  .phase .t span{color:var(--faint);font-size:12.5px}
-  .st{font-size:11.5px;padding:3px 10px;border-radius:20px;font-weight:600}
-  .st.done{background:rgba(63,185,80,.12);color:var(--done)}
-  .st.now{background:rgba(210,153,34,.14);color:var(--now)}
-  .st.next{background:rgba(88,166,255,.12);color:var(--next)}
-  .st.hold{background:rgba(139,148,158,.14);color:var(--muted)}
-  .note{background:var(--panel2);border:1px solid var(--line);border-radius:10px;
-    padding:14px 16px;color:var(--muted);font-size:13.5px}
-  .note b{color:var(--ink)}
-  code{font-family:ui-monospace,Menlo,monospace;font-size:12.5px;background:var(--chip);
-    padding:1px 5px;border-radius:5px;color:#cdd6e4}
-  .kpi{display:flex;gap:10px;flex-wrap:wrap;margin-top:4px}
-  .kpi .k{background:var(--panel);border:1px solid var(--line);border-radius:10px;
-    padding:10px 14px;min-width:120px}
-  .kpi .k b{display:block;font-size:22px;color:var(--ink)}
-  .kpi .k span{font-size:12px;color:var(--faint)}
-</style>
-</head>
-<body>
-<div class="wrap">
-  <header>
-    <h1>Sqush — Project Status</h1>
-    <p>A modern, focused fork of Squoosh: local-first image optimization (WebP · AVIF · JPEG XL) with bulk editing as the headline feature.</p>
-    <div class="meta">Snapshot: 2026-05-30 · Hand-written, not auto-generated · Replaces the old <code>progress-dashboard.html</code></div>
-  </header>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Sqush — Project Status</title>
+    <style>
+      :root {
+        --bg: #0f1115;
+        --panel: #171a21;
+        --panel2: #1e222b;
+        --line: #2a2f3a;
+        --ink: #e7eaf0;
+        --muted: #9aa3b2;
+        --faint: #6b7280;
+        --done: #3fb950;
+        --now: #d29922;
+        --next: #58a6ff;
+        --block: #f85149;
+        --idea: #a371f7;
+        --chip: #222834;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font: 15px/1.5 -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+          Helvetica, Arial, sans-serif;
+      }
+      a {
+        color: var(--next);
+        text-decoration: none;
+      }
+      .wrap {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 32px 24px 80px;
+      }
+      header h1 {
+        margin: 0 0 4px;
+        font-size: 26px;
+        letter-spacing: -0.01em;
+      }
+      header p {
+        margin: 0;
+        color: var(--muted);
+      }
+      .meta {
+        margin-top: 10px;
+        color: var(--faint);
+        font-size: 13px;
+      }
+      h2 {
+        font-size: 13px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--muted);
+        margin: 36px 0 12px;
+        font-weight: 600;
+      }
+      .grid {
+        display: grid;
+        gap: 14px;
+      }
+      .cols-4 {
+        grid-template-columns: repeat(4, 1fr);
+      }
+      .cols-2 {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      @media (max-width: 880px) {
+        .cols-4 {
+          grid-template-columns: 1fr 1fr;
+        }
+        .cols-2 {
+          grid-template-columns: 1fr;
+        }
+      }
+      @media (max-width: 560px) {
+        .cols-4 {
+          grid-template-columns: 1fr;
+        }
+      }
+      .card {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 16px;
+      }
+      .card h3 {
+        margin: 0 0 10px;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .card ul {
+        margin: 0;
+        padding-left: 0;
+        list-style: none;
+      }
+      .card li {
+        padding: 5px 0;
+        color: var(--muted);
+        font-size: 13.5px;
+        border-top: 1px solid var(--line);
+      }
+      .card li:first-child {
+        border-top: none;
+      }
+      .dot {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        display: inline-block;
+        flex: 0 0 auto;
+      }
+      .d-done {
+        background: var(--done);
+      }
+      .d-now {
+        background: var(--now);
+      }
+      .d-next {
+        background: var(--next);
+      }
+      .d-block {
+        background: var(--block);
+      }
+      .d-idea {
+        background: var(--idea);
+      }
+      .tag {
+        font-size: 11px;
+        padding: 1px 7px;
+        border-radius: 20px;
+        background: var(--chip);
+        color: var(--muted);
+        border: 1px solid var(--line);
+        white-space: nowrap;
+      }
+      .legend {
+        display: flex;
+        gap: 18px;
+        flex-wrap: wrap;
+        color: var(--muted);
+        font-size: 13px;
+        margin-top: 6px;
+      }
+      .legend span {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+      }
+      /* branch map */
+      .branches {
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+      }
+      .brow {
+        display: grid;
+        grid-template-columns: 200px 1fr;
+        gap: 14px;
+        align-items: start;
+        padding: 14px 0;
+        border-top: 1px solid var(--line);
+      }
+      .brow:first-child {
+        border-top: none;
+      }
+      .bname {
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 13px;
+        color: var(--ink);
+      }
+      .bname .sub {
+        display: block;
+        color: var(--faint);
+        font-size: 11px;
+        margin-top: 3px;
+        font-family: inherit;
+      }
+      .bbody {
+        color: var(--muted);
+        font-size: 13.5px;
+      }
+      .pill {
+        font-size: 11px;
+        padding: 2px 8px;
+        border-radius: 6px;
+        border: 1px solid var(--line);
+        background: var(--chip);
+        color: var(--muted);
+        margin-left: 6px;
+      }
+      /* roadmap */
+      .phase {
+        display: grid;
+        grid-template-columns: 30px 1fr auto;
+        gap: 12px;
+        align-items: center;
+        padding: 11px 0;
+        border-top: 1px solid var(--line);
+      }
+      .phase:first-child {
+        border-top: none;
+      }
+      .phase .n {
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        font-size: 12px;
+        font-weight: 700;
+        background: var(--panel2);
+        color: var(--muted);
+        border: 1px solid var(--line);
+      }
+      .phase .t b {
+        color: var(--ink);
+        font-weight: 600;
+      }
+      .phase .t span {
+        color: var(--faint);
+        font-size: 12.5px;
+      }
+      .st {
+        font-size: 11.5px;
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-weight: 600;
+      }
+      .st.done {
+        background: rgba(63, 185, 80, 0.12);
+        color: var(--done);
+      }
+      .st.now {
+        background: rgba(210, 153, 34, 0.14);
+        color: var(--now);
+      }
+      .st.next {
+        background: rgba(88, 166, 255, 0.12);
+        color: var(--next);
+      }
+      .st.hold {
+        background: rgba(139, 148, 158, 0.14);
+        color: var(--muted);
+      }
+      .note {
+        background: var(--panel2);
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 14px 16px;
+        color: var(--muted);
+        font-size: 13.5px;
+      }
+      .note b {
+        color: var(--ink);
+      }
+      code {
+        font-family: ui-monospace, Menlo, monospace;
+        font-size: 12.5px;
+        background: var(--chip);
+        padding: 1px 5px;
+        border-radius: 5px;
+        color: #cdd6e4;
+      }
+      .kpi {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 4px;
+      }
+      .kpi .k {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 10px 14px;
+        min-width: 120px;
+      }
+      .kpi .k b {
+        display: block;
+        font-size: 22px;
+        color: var(--ink);
+      }
+      .kpi .k span {
+        font-size: 12px;
+        color: var(--faint);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <h1>Sqush — Project Status</h1>
+        <p>
+          A modern, focused fork of Squoosh: local-first image optimization
+          (WebP · AVIF · JPEG XL) with bulk editing as the headline feature.
+        </p>
+        <div class="meta">
+          Snapshot: 2026-05-30 · Hand-written, not auto-generated · Replaces the
+          old <code>progress-dashboard.html</code>
+        </div>
+      </header>
 
-  <div class="kpi">
-    <div class="k"><b>~371</b><span>fork commits (3 days)</span></div>
-    <div class="k"><b>67</b><span>framework-neutral TS modules</span></div>
-    <div class="k"><b>16</b><span>bulk-engine modules (no UI yet)</span></div>
-    <div class="k"><b>105</b><span>codec .wasm present</span></div>
-    <div class="k"><b>1</b><span>canonical branch + main</span></div>
-  </div>
+      <div class="kpi">
+        <div class="k"><b>~371</b><span>fork commits (3 days)</span></div>
+        <div class="k"><b>67</b><span>framework-neutral TS modules</span></div>
+        <div class="k">
+          <b>16</b><span>bulk-engine modules (no UI yet)</span>
+        </div>
+        <div class="k"><b>105</b><span>codec .wasm present</span></div>
+        <div class="k"><b>1</b><span>canonical branch + main</span></div>
+      </div>
 
-  <h2>Where things stand</h2>
-  <div class="grid cols-4">
-    <div class="card">
-      <h3><span class="dot d-done"></span>Done</h3>
-      <ul>
-        <li>Phase-1 stabilize: Node 24, CI, deps audit</li>
-        <li>Logic decoupled from Preact (67 TS modules)</li>
-        <li>Bulk engine built (framework-neutral)</li>
-        <li>Codec focus encoded: wp2 blocked</li>
-        <li>SvelteKit seams proven &amp; reviewed</li>
-        <li>Prototype: WebP/AVIF/JXL encode in a worker</li>
-        <li>Codec-asset URL strategy documented</li>
-      </ul>
-    </div>
-    <div class="card">
-      <h3><span class="dot d-now"></span>In progress</h3>
-      <ul>
-        <li>This pass: branch consolidation + doc cleanup</li>
-        <li>This pass: clearer status &amp; dashboard</li>
-        <li>Next build: runnable single-image Svelte UI</li>
-      </ul>
-    </div>
-    <div class="card">
-      <h3><span class="dot d-next"></span>Next</h3>
-      <ul>
-        <li>Single-image slice: real file → encode → download</li>
-        <li>Then: bulk UI on the Svelte trunk</li>
-        <li>Decide build tool (keep Rollup vs go Vite)</li>
-        <li>Hide non-focus codecs from UI</li>
-      </ul>
-    </div>
-    <div class="card">
-      <h3><span class="dot d-block"></span>Open risks</h3>
-      <ul>
-        <li>Threaded AVIF/JXL/OxiPNG (COOP/COEP) unproven</li>
-        <li>Build-tool decision not made</li>
-        <li>UI not started (intentional — yours/mine)</li>
-        <li>Codec deletion deferred (build coupling)</li>
-      </ul>
-    </div>
-  </div>
+      <h2>Where things stand</h2>
+      <div class="grid cols-4">
+        <div class="card">
+          <h3><span class="dot d-done"></span>Done</h3>
+          <ul>
+            <li>Phase-1 stabilize: Node 24, CI, deps audit</li>
+            <li>Logic decoupled from Preact (67 TS modules)</li>
+            <li>Bulk engine built (framework-neutral)</li>
+            <li>Codec focus encoded: WebP2 experimental</li>
+            <li>SvelteKit seams proven &amp; reviewed</li>
+            <li>Prototype: WebP/AVIF/JXL encode in a worker</li>
+            <li>Codec-asset URL strategy documented</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3><span class="dot d-now"></span>In progress</h3>
+          <ul>
+            <li>This pass: branch consolidation + doc cleanup</li>
+            <li>This pass: clearer status &amp; dashboard</li>
+            <li>Next build: runnable single-image Svelte UI</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3><span class="dot d-next"></span>Next</h3>
+          <ul>
+            <li>Single-image slice: real file → encode → download</li>
+            <li>Then: bulk UI on the Svelte trunk</li>
+            <li>Decide build tool (keep Rollup vs go Vite)</li>
+            <li>Hide non-focus codecs from UI</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3><span class="dot d-block"></span>Open risks</h3>
+          <ul>
+            <li>Threaded AVIF/JXL/OxiPNG (COOP/COEP) unproven</li>
+            <li>Build-tool decision not made</li>
+            <li>UI not started (intentional — yours/mine)</li>
+            <li>Codec deletion deferred (build coupling)</li>
+          </ul>
+        </div>
+      </div>
 
-  <h2>Branch map — a clean linear stack, not 3 rival efforts</h2>
-  <div class="card branches">
-    <div class="brow">
-      <div class="bname">main<span class="sub">stable trunk</span></div>
-      <div class="bbody">The original Squoosh app (Preact + Rollup), still the working product. Untouched by the migration. <span class="pill">production</span></div>
-    </div>
-    <div class="brow">
-      <div class="bname">code/sveltekit-prototype<span class="sub">⊂ codec-assets</span></div>
-      <div class="bbody">Disposable proof: a real SvelteKit (Svelte 5) app that loads the WASM codecs and encodes WebP in a worker. Evidence, not product. <span class="pill">contained in codec-assets</span></div>
-    </div>
-    <div class="brow">
-      <div class="bname">code/sveltekit-migration-seams<span class="sub">⊂ codec-assets</span></div>
-      <div class="bbody">The framework-neutral “seam” refactors that make Squoosh’s pipeline importable from Vite/SvelteKit. <span class="pill">redundant — subset of codec-assets</span></div>
-    </div>
-    <div class="brow">
-      <div class="bname">code/sveltekit-codec-assets<span class="sub">canonical</span></div>
-      <div class="bbody"><b>The one branch that matters.</b> Contains everything above + the codec-asset URL strategy. This is the base for new work. <span class="pill">build here next</span></div>
-    </div>
-    <div class="brow">
-      <div class="bname">code/sveltekit-single-image-slice<span class="sub">new (this pass)</span></div>
-      <div class="bbody">Branched from codec-assets to build the runnable single-image UI. <span class="pill">in progress</span></div>
-    </div>
-  </div>
+      <h2>Branch map — a clean linear stack, not 3 rival efforts</h2>
+      <div class="card branches">
+        <div class="brow">
+          <div class="bname">main<span class="sub">stable trunk</span></div>
+          <div class="bbody">
+            The original Squoosh app (Preact + Rollup), still the working
+            product. Untouched by the migration.
+            <span class="pill">production</span>
+          </div>
+        </div>
+        <div class="brow">
+          <div class="bname">
+            code/sveltekit-prototype<span class="sub">⊂ codec-assets</span>
+          </div>
+          <div class="bbody">
+            Disposable proof: a real SvelteKit (Svelte 5) app that loads the
+            WASM codecs and encodes WebP in a worker. Evidence, not product.
+            <span class="pill">contained in codec-assets</span>
+          </div>
+        </div>
+        <div class="brow">
+          <div class="bname">
+            code/sveltekit-migration-seams<span class="sub"
+              >⊂ codec-assets</span
+            >
+          </div>
+          <div class="bbody">
+            The framework-neutral “seam” refactors that make Squoosh’s pipeline
+            importable from Vite/SvelteKit.
+            <span class="pill">redundant — subset of codec-assets</span>
+          </div>
+        </div>
+        <div class="brow">
+          <div class="bname">
+            code/sveltekit-codec-assets<span class="sub">canonical</span>
+          </div>
+          <div class="bbody">
+            <b>The one branch that matters.</b> Contains everything above + the
+            codec-asset URL strategy. This is the base for new work.
+            <span class="pill">build here next</span>
+          </div>
+        </div>
+        <div class="brow">
+          <div class="bname">
+            code/sveltekit-single-image-slice<span class="sub"
+              >new (this pass)</span
+            >
+          </div>
+          <div class="bbody">
+            Branched from codec-assets to build the runnable single-image UI.
+            <span class="pill">in progress</span>
+          </div>
+        </div>
+      </div>
 
-  <h2>Roadmap (condensed)</h2>
-  <div class="card">
-    <div class="phase"><div class="n">1</div><div class="t"><b>Stabilize the baseline</b> <span>Node/CI, deps, QA checklist</span></div><div class="st done">Done</div></div>
-    <div class="phase"><div class="n">2</div><div class="t"><b>Bulk-processing core</b> <span>framework-neutral job/queue/session model</span></div><div class="st done">Done</div></div>
-    <div class="phase"><div class="n">3</div><div class="t"><b>Minimum useful bulk feature</b> <span>multi-import, strip, batch, export — needs UI</span></div><div class="st next">Next</div></div>
-    <div class="phase"><div class="n">4</div><div class="t"><b>Per-image review &amp; overrides</b> <span>select → compare → override</span></div><div class="st hold">Later</div></div>
-    <div class="phase"><div class="n">5</div><div class="t"><b>Focused codec strategy</b> <span>hide non-target formats, then prune</span></div><div class="st hold">Later</div></div>
-    <div class="phase"><div class="n">6</div><div class="t"><b>Better exports</b> <span>ZIP, naming templates, presets</span></div><div class="st hold">Later</div></div>
-    <div class="phase"><div class="n">7</div><div class="t"><b>Svelte migration decision</b> <span>promote SvelteKit to the trunk</span></div><div class="st now">Underway (prototype proven)</div></div>
-  </div>
+      <h2>Roadmap (condensed)</h2>
+      <div class="card">
+        <div class="phase">
+          <div class="n">1</div>
+          <div class="t">
+            <b>Stabilize the baseline</b>
+            <span>Node/CI, deps, QA checklist</span>
+          </div>
+          <div class="st done">Done</div>
+        </div>
+        <div class="phase">
+          <div class="n">2</div>
+          <div class="t">
+            <b>Bulk-processing core</b>
+            <span>framework-neutral job/queue/session model</span>
+          </div>
+          <div class="st done">Done</div>
+        </div>
+        <div class="phase">
+          <div class="n">3</div>
+          <div class="t">
+            <b>Minimum useful bulk feature</b>
+            <span>multi-import, strip, batch, export — needs UI</span>
+          </div>
+          <div class="st next">Next</div>
+        </div>
+        <div class="phase">
+          <div class="n">4</div>
+          <div class="t">
+            <b>Per-image review &amp; overrides</b>
+            <span>select → compare → override</span>
+          </div>
+          <div class="st hold">Later</div>
+        </div>
+        <div class="phase">
+          <div class="n">5</div>
+          <div class="t">
+            <b>Focused codec strategy</b>
+            <span>hide non-target formats, then prune</span>
+          </div>
+          <div class="st hold">Later</div>
+        </div>
+        <div class="phase">
+          <div class="n">6</div>
+          <div class="t">
+            <b>Better exports</b> <span>ZIP, naming templates, presets</span>
+          </div>
+          <div class="st hold">Later</div>
+        </div>
+        <div class="phase">
+          <div class="n">7</div>
+          <div class="t">
+            <b>Svelte migration decision</b>
+            <span>promote SvelteKit to the trunk</span>
+          </div>
+          <div class="st now">Underway (prototype proven)</div>
+        </div>
+      </div>
 
-  <h2>Division of labor</h2>
-  <div class="grid cols-2">
-    <div class="note"><b>The backend AI</b> owns the framework-neutral engine: codecs, worker bridges, bulk logic, build seams, service worker. This layer is in good shape and well-documented. It deliberately stopped before the UI.</div>
-    <div class="note"><b>The UI (this track)</b> turns that engine into a usable app — starting with a runnable single-image compressor that keeps the current Squoosh look, then evolving the design gradually and adding the bulk interface without a disruptive redesign.</div>
-  </div>
+      <h2>Division of labor</h2>
+      <div class="grid cols-2">
+        <div class="note">
+          <b>The backend AI</b> owns the framework-neutral engine: codecs,
+          worker bridges, bulk logic, build seams, service worker. This layer is
+          in good shape and well-documented. It deliberately stopped before the
+          UI.
+        </div>
+        <div class="note">
+          <b>The UI (this track)</b> turns that engine into a usable app —
+          starting with a runnable single-image compressor that keeps the
+          current Squoosh look, then evolving the design gradually and adding
+          the bulk interface without a disruptive redesign.
+        </div>
+      </div>
 
-  <div class="legend">
-    <span><span class="dot d-done"></span>Done</span>
-    <span><span class="dot d-now"></span>In progress</span>
-    <span><span class="dot d-next"></span>Next</span>
-    <span><span class="dot d-block"></span>Risk / blocked</span>
-    <span><span class="dot d-idea"></span>Idea</span>
-  </div>
-</div>
-</body>
+      <div class="legend">
+        <span><span class="dot d-done"></span>Done</span>
+        <span><span class="dot d-now"></span>In progress</span>
+        <span><span class="dot d-next"></span>Next</span>
+        <span><span class="dot d-block"></span>Risk / blocked</span>
+        <span><span class="dot d-idea"></span>Idea</span>
+      </div>
+    </div>
+  </body>
 </html>

@@ -73,23 +73,23 @@ The build recipes record these upstream source references. Treat them as the reb
 
 ## App codec inventory
 
-| Area                | Feature path                        | Codec assets                                                    | Current status                                                                               |
-| ------------------- | ----------------------------------- | --------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
-| AVIF decoder        | `src/features/decoders/avif`        | `codecs/avif/dec/avif_dec.*`                                    | Used by app                                                                                  |
-| AVIF encoder        | `src/features/encoders/avif`        | `codecs/avif/enc/avif_enc.*`, `avif_enc_mt.*`                   | Used by app; threaded path exists                                                            |
-| WebP decoder        | `src/features/decoders/webp`        | `codecs/webp/dec/webp_dec.*`                                    | Used by app                                                                                  |
-| WebP encoder        | `src/features/encoders/webP`        | `codecs/webp/enc/webp_enc.*`, `webp_enc_simd.*`                 | Used by app; SIMD path exists                                                                |
-| JPEG XL decoder     | `src/features/decoders/jxl`         | `codecs/jxl/dec/jxl_dec.*`                                      | Used by app; strategy still undecided                                                        |
-| JPEG XL encoder     | `src/features/encoders/jxl`         | `codecs/jxl/enc/jxl_enc.*`, `jxl_enc_mt.*`, `jxl_enc_mt_simd.*` | Used by app; strategy still undecided                                                        |
-| WP2 legacy decoder  | `src/features/decoders/wp2`         | `codecs/wp2/dec/wp2_dec.*`                                      | Legacy/deprioritized; avoid new prototype or roadmap effort unless product direction changes |
-| WP2 legacy encoder  | `src/features/encoders/wp2`         | `codecs/wp2/enc/wp2_enc.*`, `wp2_enc_mt.*`, `wp2_enc_mt_simd.*` | Legacy/deprioritized; avoid new prototype or roadmap effort unless product direction changes |
-| QOI decoder         | `src/features/decoders/qoi`         | `codecs/qoi/dec/qoi_dec.*`                                      | Used by app today; likely removable later if the codec surface is narrowed                   |
-| QOI encoder         | `src/features/encoders/qoi`         | `codecs/qoi/enc/qoi_enc.*`                                      | Used by app today; likely removable later if the codec surface is narrowed                   |
-| MozJPEG encoder     | `src/features/encoders/mozJPEG`     | `codecs/mozjpeg/enc/mozjpeg_enc.*`                              | Used by app today; not in the proposed focused codec list                                    |
-| OxiPNG encoder      | `src/features/encoders/oxiPNG`      | `codecs/oxipng/pkg*`                                            | Used by app today; not in the proposed focused codec list                                    |
-| Quantize processor  | `src/features/processors/quantize`  | `codecs/imagequant/imagequant.*`                                | Used by app today; keep until processing strategy is decided                                 |
-| Resize processor    | `src/features/processors/resize`    | `codecs/resize/pkg`, `codecs/hqx/pkg`                           | Used by app today                                                                            |
-| Rotate preprocessor | `src/features/preprocessors/rotate` | `codecs/rotate/rotate.wasm`                                     | Used by app today                                                                            |
+| Area                | Feature path                        | Codec assets                                                    | Current status                                                             |
+| ------------------- | ----------------------------------- | --------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| AVIF decoder        | `src/features/decoders/avif`        | `codecs/avif/dec/avif_dec.*`                                    | Used by app                                                                |
+| AVIF encoder        | `src/features/encoders/avif`        | `codecs/avif/enc/avif_enc.*`, `avif_enc_mt.*`                   | Used by app; threaded path exists                                          |
+| WebP decoder        | `src/features/decoders/webp`        | `codecs/webp/dec/webp_dec.*`                                    | Used by app                                                                |
+| WebP encoder        | `src/features/encoders/webP`        | `codecs/webp/enc/webp_enc.*`, `webp_enc_simd.*`                 | Used by app; SIMD path exists                                              |
+| JPEG XL decoder     | `src/features/decoders/jxl`         | `codecs/jxl/dec/jxl_dec.*`                                      | Used by app; strategy still undecided                                      |
+| JPEG XL encoder     | `src/features/encoders/jxl`         | `codecs/jxl/enc/jxl_enc.*`, `jxl_enc_mt.*`, `jxl_enc_mt_simd.*` | Used by app; strategy still undecided                                      |
+| WP2 decoder         | `src/features/decoders/wp2`         | `codecs/wp2/dec/wp2_dec.*`                                      | Experimental parity; SvelteKit uses the single-thread asset path           |
+| WP2 encoder         | `src/features/encoders/wp2`         | `codecs/wp2/enc/wp2_enc.*`, `wp2_enc_mt.*`, `wp2_enc_mt_simd.*` | Experimental parity; threaded assets remain unproven in SvelteKit          |
+| QOI decoder         | `src/features/decoders/qoi`         | `codecs/qoi/dec/qoi_dec.*`                                      | Used by app today; likely removable later if the codec surface is narrowed |
+| QOI encoder         | `src/features/encoders/qoi`         | `codecs/qoi/enc/qoi_enc.*`                                      | Used by app today; likely removable later if the codec surface is narrowed |
+| MozJPEG encoder     | `src/features/encoders/mozJPEG`     | `codecs/mozjpeg/enc/mozjpeg_enc.*`                              | Used by app today; not in the proposed focused codec list                  |
+| OxiPNG encoder      | `src/features/encoders/oxiPNG`      | `codecs/oxipng/pkg*`                                            | Used by app today; not in the proposed focused codec list                  |
+| Quantize processor  | `src/features/processors/quantize`  | `codecs/imagequant/imagequant.*`                                | Used by app today; keep until processing strategy is decided               |
+| Resize processor    | `src/features/processors/resize`    | `codecs/resize/pkg`, `codecs/hqx/pkg`                           | Used by app today                                                          |
+| Rotate preprocessor | `src/features/preprocessors/rotate` | `codecs/rotate/rotate.wasm`                                     | Used by app today                                                          |
 
 ## Codec assets not directly wired as current features
 
@@ -107,10 +107,10 @@ The focused codec list being considered is:
 - AVIF
 - JPEG XL
 
-WebP 2 is intentionally excluded from this product direction. Keep the inherited
-WP2 provenance notes for historical accuracy, but do not spend roadmap,
-SvelteKit prototype, or migration-seams effort on WP2 unless it becomes a
-serious product target again.
+WebP 2 is included as experimental parity in the SvelteKit editor. Keep the
+inherited WP2 provenance notes for historical accuracy, and treat any future
+promotion, hiding, threaded-runtime work, or removal as an evidence-based product
+decision.
 
 To reduce risk, first hide unwanted codecs from product UI after design discussion. Delete codec code only after:
 

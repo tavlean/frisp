@@ -19,3 +19,9 @@ declare module '$app/state' {
     readonly state: App.PageState;
   };
 }
+
+declare module '$app/paths' {
+  export const base: string;
+  export const assets: string;
+  export function resolve(path: string): string;
+}

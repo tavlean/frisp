@@ -16,8 +16,9 @@ for the roadmap-level status and next-branch decision.
 - Current target: keep SvelteKit static output as viable, but do not start a
   production Svelte UI migration.
 - Current codec priority: WebP first, AVIF second, JPEG XL advanced. WebP 2 is
-  deprioritized and should not receive migration or roadmap effort unless the
-  product direction changes.
+  experimental parity in the current SvelteKit prototype; do not promote it as a
+  primary product promise or spend threaded-runtime effort on it without a fresh
+  decision.
 
 ## Production-safe seam candidates
 
@@ -28,7 +29,7 @@ the candidate set to merge or cherry-pick into `main` after verification:
   encode-runtime metadata without pulling Preact option entries into every
   helper import. It also emits ignored generated worker-surface,
   active-worker-entry, and active bridge metadata outputs that separate active
-  worker methods from blocked/deprioritized methods.
+  worker methods from methods that still need explicit proof.
 - `src/client/lazy-app/feature-meta/encoders.ts`: generated encode runtime map
   that keeps production compression helpers away from Preact option components.
 - `src/client/lazy-app/feature-meta/processors.ts` and
@@ -63,8 +64,10 @@ the candidate set to merge or cherry-pick into `main` after verification:
   over `{ main, deps }` records, with Rollup virtual imports kept at the
   production boundary. `src/sw/processor-support.ts` owns shared thread, SIMD,
   WebP, and AVIF support detection for both cache boundaries. The active
-  cache-planning helper and active cache boundary exclude WebP 2 while the
-  current production cache path remains full for existing behavior.
+  cache-planning helper and active cache boundary historically excluded WebP 2
+  while the current production cache path remained full for existing behavior.
+  The current SvelteKit prototype now includes WebP 2 generated assets as
+  experimental parity.
 - `src/shared/codec-assets.ts`: build-tool-neutral codec asset record contract
   and helper filters for canonical generated asset manifests. The SvelteKit
   prototype generator consumes this shared seam instead of defining a
@@ -101,8 +104,8 @@ the candidate set to merge or cherry-pick into `main` after verification:
   assets.
 - `src/features/**/shared/meta.ts` updates for AVIF, QOI, MozJPEG, and WebP 2:
   metadata constants no longer require runtime imports from declaration-only
-  codec values. WebP 2 stays legacy/deprioritized; these changes are only to
-  keep shared metadata importable.
+  codec values. WebP 2 remains experimental parity in the SvelteKit prototype;
+  these seams keep shared metadata importable without making it a primary codec.
 - Production helper imports under `src/client/lazy-app/Compress/**`,
   `src/client/lazy-app/bulk/**`, and `src/client/lazy-app/util/index.ts`: import
   rewiring to use the new shared seams while keeping the Preact app behavior.
@@ -115,9 +118,9 @@ the candidate set to merge or cherry-pick into `main` after verification:
   production `imagePipeline` helper bundle, without importing the Preact
   component shell.
 - `lib/test-helpers.js` and `lib/smoke-build.js`: focused coverage for the new
-  cache-plan, bridge, helper seams, generated worker files, and WebP 2 exclusion
-  from the active worker-method surface, generated active bridge metadata, and
-  generated active worker entry. Smoke coverage also guards that generated
+  cache-plan, bridge, helper seams, generated worker files, active
+  worker-method surface, generated active bridge metadata, and generated active
+  worker entry. Smoke coverage also guards that generated
   processor/preprocessor metadata entrypoints remain UI-free.
 - `.prettierignore`: ignores disposable SvelteKit build output so root checks
   do not require destructive cleanup prompts.
@@ -252,19 +255,21 @@ Do not merge these as solved just because the single-thread prototype passes:
   implementation plan for this follow-up.
 - Full production `features-worker` import from SvelteKit: the generator now
   emits `src/features-worker/active.ts` and
-  `src/client/lazy-app/worker-bridge/active-meta.ts`, which exclude blocked
-  WebP 2 methods. `worker-bridge/active-bridge.ts` can construct a bridge over
-  that active method list, and `worker-bridge/active-index.ts` proves the
+  `src/client/lazy-app/worker-bridge/active-meta.ts`. Older active-worker
+  inventories excluded blocked WebP 2 methods; the current SvelteKit prototype
+  wires single-thread WebP 2 separately as experimental parity.
+  `worker-bridge/active-bridge.ts` can construct a bridge over that active
+  method list, and `worker-bridge/active-index.ts` proves the
   equivalent Rollup adapter shape for the generated active worker entry. A
   SvelteKit adapter is still not wired, and the active worker still needs
   threaded asset/runtime proof before it can replace the prototype's
   intentionally narrowed worker entry.
 - Full production service-worker codec cache import from SvelteKit: the shared
-  cache planner can now compute an active non-WebP-2 cache list, and
-  `src/sw/active-to-cache.ts` proves the matching Rollup `entry-data:` boundary
-  over `features-worker/active` without WebP 2 imports. A SvelteKit
-  service-worker boundary still needs generated Vite asset records before this
-  can replace the prototype's cache manifest.
+  cache planner can compute an active cache list, and `src/sw/active-to-cache.ts`
+  proves the matching Rollup `entry-data:` boundary over
+  `features-worker/active`. The current SvelteKit prototype uses generated Vite
+  asset records for WebP 2 experimental parity; production cache policy should
+  still be decided separately before this replaces the prototype manifest.
 - Processor/preprocessor UI option entry splits beyond the generated
   framework-neutral metadata entrypoints.
 - Minimal SvelteKit single-image editor slice with real user-selected files.

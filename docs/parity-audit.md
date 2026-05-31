@@ -61,8 +61,11 @@ Deliberate deviations (my call — re-open if you disagree):
    preserving the user's zoom/pan with the original's pan-compensation math.
    Re-fit is simpler and arguably nicer (re-centres the new framing); the
    compensation is risky for marginal benefit.
-2. **`wp2` (WebP v2, "unstable") stays out** — blocked at the shared-engine
-   level, not just the UI, so it can't be offered without engine support.
+2. **`wp2` (WebP v2, "unstable") is experimental parity** — restored in the
+   SvelteKit surface with generated single-thread encode/decode assets and a
+   Svelte option panel. Chromium production-preview QA now covers online and
+   offline `.wp2` encode; keep it experimental until maintainer/product testing
+   says it is worth promoting.
 
 Deferred to later phases (infra, not feature/bug parity):
 
@@ -103,8 +106,8 @@ alignment · history via SvelteKit shallow routing. (See §B "Resolved".)
 
 ### Deliberate deviations / deferred (see §B)
 
-Pinch-zoom re-fits on dimension change · `wp2` (engine-blocked) · shared decode
-(perf, foundations phase) · share-target (PWA).
+Pinch-zoom re-fits on dimension change · WebP 2 threaded/prominence decisions ·
+shared decode (perf, foundations phase) · share-target (PWA).
 
 ### Deferred / N-A (see §D)
 
@@ -116,6 +119,7 @@ restore-on-unmount (vacuous — the route never unmounts) · share-target (B-7).
 
 ## D. Known-deferred (by user decision)
 
-- **Mobile / responsive layout** and the `<multi-panel>` accordion (<600px).
-  Editor is desktop-only for now; revisit after parity is otherwise reached.
+- **Mobile `<multi-panel>` accordion** from the original remains deferred. The
+  SvelteKit editor now has a responsive lower-panel fallback instead; verify it
+  before deciding whether the original accordion is still needed.
 - Items above explicitly marked deferred/intentional.

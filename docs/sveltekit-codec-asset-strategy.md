@@ -158,8 +158,9 @@ owned by `svelteKitCodecAssetRecords`, not by a parallel handwritten URL list.
    as a fix for physical output duplication.
 7. Keep threaded assets separate from single-thread assets until COOP/COEP,
    nested-worker loading, helper URLs, and service-worker caching are proven.
-8. Keep WebP 2 out of the generated active asset surface unless product
-   direction changes.
+8. Keep WebP 2 in the generated asset surface as experimental parity, but keep
+   threaded WebP 2 and any product-promotion/removal decision separate from the
+   baseline single-thread migration path.
 
 ## Recommended branch work
 

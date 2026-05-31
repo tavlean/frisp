@@ -40,8 +40,9 @@ Product priority:
 - WebP is the safest first-class output. MDN lists WebP as supported in Chrome, Edge, Firefox, Opera, and Safari.
 - AVIF is first-class, but should be tested carefully because encoding can be slower and browser history is shorter. MDN lists AVIF support in Chrome, Edge, Firefox, Opera, and Safari, with version floors including Chrome 85, Edge 121, Firefox 93, and Safari 16.1.
 - JPEG XL should stay advanced or experimental until default browser support and preview behavior are proven. Sqush can keep its bundled WASM codec path for local conversion, but public delivery guidance should still prefer AVIF/WebP fallbacks.
-- WebP 2 is not an active support target. Do not add browser-support,
-  prototype, or migration work for it unless product direction changes.
+- WebP 2 is experimental parity. Keep the bundled WASM path testable while the
+  SvelteKit editor is matching existing behavior, but do not make public
+  delivery guidance depend on it.
 
 MDN also lists BMP as broadly browser-supported and TIFF as Safari-only, which is why extension acceptance and actual decode success must remain separate.
 

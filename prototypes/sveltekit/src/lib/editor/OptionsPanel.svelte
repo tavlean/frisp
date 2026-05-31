@@ -9,6 +9,7 @@
   import Toggle from './options/Toggle.svelte';
   import Range from './options/Range.svelte';
   import WebpOptions from './options/WebpOptions.svelte';
+  import Wp2Options from './options/Wp2Options.svelte';
   import AvifOptions from './options/AvifOptions.svelte';
   import JxlOptions from './options/JxlOptions.svelte';
   import MozjpegOptions from './options/MozjpegOptions.svelte';
@@ -28,6 +29,7 @@
   } from './options/processor-types';
   import type { ProcessorState } from 'client/lazy-app/feature-meta';
   import type { EncodeOptions as WebpEncodeOptions } from 'features/encoders/webP/shared/meta';
+  import type { EncodeOptions as Wp2EncodeOptions } from 'features/encoders/wp2/shared/meta';
   import type { EncodeOptions as AvifEncodeOptions } from 'features/encoders/avif/shared/meta';
   import type { EncodeOptions as JxlEncodeOptions } from 'features/encoders/jxl/shared/meta';
   import type { EncodeOptions as MozjpegEncodeOptions } from 'features/encoders/mozJPEG/shared/meta';
@@ -199,6 +201,8 @@
       {#key options}
         {#if format === 'webP'}
           <WebpOptions options={options as unknown as WebpEncodeOptions} />
+      {:else if format === 'wp2'}
+        <Wp2Options options={options as unknown as Wp2EncodeOptions} />
       {:else if format === 'avif'}
         <AvifOptions options={options as unknown as AvifEncodeOptions} />
       {:else if format === 'jxl'}
@@ -326,5 +330,24 @@
        edge), matching the original. */
     padding: 14px 0 0;
     flex: none;
+  }
+
+  @media (max-width: 760px) {
+    .options-title {
+      padding: 8px 10px;
+      font-size: 1rem;
+    }
+
+    .title-and-buttons {
+      gap: 0.5rem;
+    }
+
+    .title-button svg {
+      --size: 18px;
+    }
+
+    .options-results {
+      padding-top: 8px;
+    }
   }
 </style>

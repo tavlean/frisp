@@ -59,6 +59,9 @@
   const percentMagnitude = $derived(
     percent === null ? '' : String(Math.abs(Math.round(percent))),
   );
+  const downloadAttributes = $derived(
+    disabled ? {} : { href: downloadHref, download: downloadName },
+  );
 </script>
 
 <div
@@ -97,9 +100,9 @@
   <a
     class="download"
     class:download-disable={disabled}
-    href={downloadHref}
-    download={downloadName}
+    {...downloadAttributes}
     title="Download"
+    aria-disabled={disabled}
   >
     <svg class="download-blobs" viewBox="0 0 89.6 86.9">
       <title>Download</title>
@@ -370,6 +373,60 @@
   @keyframes spin {
     to {
       transform: rotate(360deg);
+    }
+  }
+
+  @media (max-width: 760px) {
+    .results {
+      --download-overflow-size: 18px;
+    }
+
+    .bubble-inner {
+      --speech-padding: 1.2rem;
+      gap: 0.35rem;
+    }
+
+    .file-size {
+      font-size: 0.82rem;
+    }
+
+    .type-label {
+      display: inline;
+      color: var(--less-light-gray);
+    }
+
+    .percent-info {
+      --arrow-width: 9px;
+    }
+
+    .percent-output {
+      --padding-arrow-side: 0.35rem;
+      --padding-other-side: 0.55rem;
+      padding-top: 0.45rem;
+      padding-bottom: 0.45rem;
+    }
+
+    .size-direction {
+      font-size: 1rem;
+      top: 1px;
+    }
+
+    .size-value {
+      font-size: 1.55rem;
+    }
+
+    .percent-char {
+      top: 2px;
+      margin-left: 0.1rem;
+      font-size: 0.75rem;
+    }
+
+    .download {
+      --size: 48px;
+    }
+
+    .download-icon svg {
+      --size: 22px;
     }
   }
 </style>

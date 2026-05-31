@@ -54,8 +54,8 @@ Use this as a backlog seed. Keep each issue small enough to review in one focuse
 
 4. Decide codec visibility before deleting codec code.
    - Start by hiding non-focus formats only after UI design discussion.
-   - Treat WebP 2 as deprioritized and out of scope for new prototype,
-     migration, or roadmap work unless product direction changes.
+   - Keep WebP 2 as experimental parity in the SvelteKit prototype until direct
+     maintainer testing proves whether it should stay or be removed.
    - Do not delete codec folders until the focused bulk workflow is working and tested.
 
 ## Later

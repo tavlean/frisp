@@ -135,3 +135,34 @@
     }
   }
 }
+
+@media (max-width: 760px) {
+  .sqush-editor {
+    --horizontal-padding: 10px;
+    --options-radius: 6px;
+  }
+
+  .sqush-editor .options-1 {
+    --scroller-radius: 0 var(--options-radius) 0 0;
+  }
+
+  .sqush-editor .options-2 {
+    --scroller-radius: var(--options-radius) 0 0 0;
+  }
+
+  .sqush-editor .option-toggle,
+  .sqush-editor .option-one-cell,
+  .sqush-editor .option-text-first,
+  .sqush-editor .option-reveal {
+    padding: 8px var(--horizontal-padding);
+  }
+
+  .sqush-editor .option-text-first {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .sqush-editor .section-enabler {
+    padding: 10px var(--horizontal-padding);
+  }
+}

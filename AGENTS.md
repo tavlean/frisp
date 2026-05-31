@@ -8,16 +8,15 @@ behavior.
 
 ## Current stage
 
-Phase 1 cleanup is ready to stop being the main activity. Bulk backend helpers
-are framework-neutral enough for design/prototype work, and the next engineering
-spike is a small SvelteKit 2 / Svelte 5 static-output prototype under
-`prototypes/sveltekit/`.
+The launch path is the `svelte` branch and its worktree at
+`../Sqush-svelte`. Sqush is now all-in on a SvelteKit 2 / Svelte 5 static app
+under `prototypes/sveltekit/`, with the existing Preact/Rollup app on `main`
+kept only as a safety net until the flip.
 
-The prototype should answer whether SvelteKit can carry Sqush's existing
-local/offline optimizer architecture: shared helpers, generated feature metadata,
-workers, WASM assets, static output, and service-worker caching. Keep it
-disposable and separated from the production Preact app until those questions are
-answered.
+The immediate focus is a short **maintainer acceptance pass before new
+features**: spot-check single-image editor parity, worker/WASM/static-output/
+service-worker reliability, responsive layout, large/SVG inputs, downloads, and
+settings. Do not start the bulk UI until this foundation is accepted.
 
 ## Boundaries
 
@@ -26,10 +25,9 @@ answered.
 - Do not introduce server-side image processing or upload paths.
 - Do not delete or move codecs, generated metadata, workers, or WASM assets
   unless the build and runtime consequences are proven.
-- Keep WebP as the first production codec focus, AVIF second, and JPEG XL
-  advanced. WebP 2 is deprioritized and should not receive prototype,
-  migration, or roadmap effort unless it becomes a serious product target
-  again.
+- Keep WebP as the first production codec focus, AVIF second, JPEG XL advanced,
+  and WebP 2 experimental but included for parity until there is evidence to
+  prune it.
 
 ## Engineering rules
 
@@ -47,7 +45,8 @@ answered.
 
 ## Reference docs
 
-- [SvelteKit prototype handoff](docs/sveltekit-prototype-handoff.md)
+- [Current status](docs/STATUS.md)
+- [Migration plan](docs/MIGRATION-PLAN.md)
 - [Phase 1 readiness audit](docs/phase-1-readiness-audit.md)
 - [Svelte migration context](docs/svelte-migration-context.md)
 - [Bulk image architecture](docs/bulk-image-architecture.md)

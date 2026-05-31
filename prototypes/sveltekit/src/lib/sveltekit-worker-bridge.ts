@@ -6,6 +6,7 @@ import type { EncodeOptions as QoiEncodeOptions } from 'features/encoders/qoi/sh
 import type { EncodeOptions as JxlEncodeOptions } from 'features/encoders/jxl/shared/meta';
 import type { EncodeOptions as MozjpegEncodeOptions } from 'features/encoders/mozJPEG/shared/meta';
 import type { EncodeOptions as OxipngEncodeOptions } from 'features/encoders/oxiPNG/shared/meta';
+import type { EncodeOptions as Wp2EncodeOptions } from 'features/encoders/wp2/shared/meta';
 import type { Options as QuantizeOptions } from 'features/processors/quantize/shared/meta';
 import type { WorkerResizeOptions } from 'features/processors/resize/shared/meta';
 import type { Options as RotateOptions } from 'features/preprocessors/rotate/shared/meta';
@@ -20,6 +21,7 @@ import type {
   ResizeWasmUrls,
   RotateWasmUrls,
   WebpWasmUrls,
+  Wp2WasmUrls,
 } from 'sqush-generated/features-worker/webp';
 import {
   svelteKitFeaturesWorkerUrl,
@@ -39,6 +41,12 @@ export interface SvelteKitWorkerBridgeApi {
     options: EncodeOptions,
   ): Promise<ArrayBuffer>;
   webpDecode(signal: AbortSignal, blob: Blob): Promise<ImageData>;
+  wp2Encode(
+    signal: AbortSignal,
+    imageData: ImageData,
+    options: Wp2EncodeOptions,
+  ): Promise<ArrayBuffer>;
+  wp2Decode(signal: AbortSignal, blob: Blob): Promise<ImageData>;
   rotate(
     signal: AbortSignal,
     data: ImageData,
@@ -101,6 +109,17 @@ interface SvelteKitWorkerBridgeWorkerApi {
     signal: AbortSignal,
     blob: Blob,
     wasmUrls: WebpWasmUrls,
+  ): Promise<ImageData>;
+  wp2Encode(
+    signal: AbortSignal,
+    imageData: ImageData,
+    options: Wp2EncodeOptions,
+    wasmUrls: Wp2WasmUrls,
+  ): Promise<ArrayBuffer>;
+  wp2Decode(
+    signal: AbortSignal,
+    blob: Blob,
+    wasmUrls: Wp2WasmUrls,
   ): Promise<ImageData>;
   qoiEncode(
     signal: AbortSignal,
@@ -176,6 +195,11 @@ const webpWasmUrls = {
   simd: codecAssetUrl('webp:encoder:simd'),
 } satisfies WebpWasmUrls;
 
+const wp2WasmUrls = {
+  decoder: codecAssetUrl('wp2:decoder:default'),
+  encoder: codecAssetUrl('wp2:encoder:baseline'),
+} satisfies Wp2WasmUrls;
+
 const qoiWasmUrls = {
   decoder: codecAssetUrl('qoi:decoder:default'),
   encoder: codecAssetUrl('qoi:encoder:default'),
@@ -233,6 +257,18 @@ export default class SvelteKitWorkerBridge
 
   webpDecode(signal: AbortSignal, blob: Blob): Promise<ImageData> {
     return super.webpDecode(signal, blob, webpWasmUrls);
+  }
+
+  wp2Encode(
+    signal: AbortSignal,
+    imageData: ImageData,
+    options: Wp2EncodeOptions,
+  ): Promise<ArrayBuffer> {
+    return super.wp2Encode(signal, imageData, options, wp2WasmUrls);
+  }
+
+  wp2Decode(signal: AbortSignal, blob: Blob): Promise<ImageData> {
+    return super.wp2Decode(signal, blob, wp2WasmUrls);
   }
 
   qoiEncode(
