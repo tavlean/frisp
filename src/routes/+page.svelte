@@ -2,7 +2,7 @@
   import { onMount } from 'svelte';
   import { dev } from '$app/environment';
   import { pushState } from '$app/navigation';
-  import { resolve } from '$app/paths';
+  import { asset, resolve } from '$app/paths';
   import { page } from '$app/state';
   import { registerSqushServiceWorker } from '$lib/service-worker-registration';
   import Output from '$lib/editor/output/Output.svelte';
@@ -63,7 +63,7 @@
       <header class="intro-head">
         <img
           class="intro-logo"
-          src={resolve('/logo.webp')}
+          src={asset('/logo.webp')}
           alt=""
           width="96"
           height="96"

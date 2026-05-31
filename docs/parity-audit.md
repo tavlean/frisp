@@ -99,9 +99,15 @@ feature/bug parity):
    post-launch performance work.
 4. **Share-target (PWA).** Needs an installable PWA + `share_target` manifest +
    a SW POST handler. Defer until the roadmap PWA track.
-5. **`$app/*` type shim.** `src/sveltekit-app.d.ts` shims `$app/navigation` /
-   `$app/state` for `svelte-check` (the prototype's generated tsconfig only maps
-   `$app/types`). Delete once the tsconfig matches a standard SvelteKit setup.
+5. **`$app/*` type shim — DONE 2026-06-01.** `src/sveltekit-app.d.ts` was
+   deleted. Root cause: the root `tsconfig.json` overrode `include`, which
+   dropped the generated `ambient.d.ts` (it carries
+   `/// <reference types="@sveltejs/kit" />`, the source of the real `$app/*`
+   types). Fix: curate `include` to add the generated `ambient.d.ts` /
+   `non-ambient.d.ts` / `$types` (a full inherit isn't possible — it pulls in
+   `vite.config.ts` and crashes `svelte-check` with `forEachResolvedModule is
+not a function`). The real types also caught a latent bug: `resolve('/logo.webp')`
+   on a static asset — fixed to `asset('/logo.webp')` (`resolve()` is for routes).
 
 ---
 

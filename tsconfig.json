@@ -12,27 +12,14 @@
     "strict": true,
     "verbatimModuleSyntax": false
   },
+  "//": "We can't simply inherit the generated .svelte-kit/tsconfig.json `include` (which would pull in vite.config.ts and crash svelte-check with 'forEachResolvedModule is not a function'). So we curate `include` — but crucially we add the generated SvelteKit `ambient.d.ts`/`non-ambient.d.ts`/`$types`, which carry `/// <reference types=\"@sveltejs/kit\" />` and thus the REAL $app/* + $env/* + route types (no hand-written shim needed).",
   "include": [
-    "src/**/*.d.ts",
+    ".svelte-kit/ambient.d.ts",
+    ".svelte-kit/non-ambient.d.ts",
+    ".svelte-kit/types/**/*.d.ts",
+    ".svelte-kit/sqush-generated/**/*.ts",
     "src/**/*.js",
     "src/**/*.ts",
-    "src/**/*.svelte",
-    ".svelte-kit/sqush-generated/**/*.ts",
-    "src/client/lazy-app/bulk/changes.ts",
-    "src/client/lazy-app/bulk/detail.ts",
-    "src/client/lazy-app/bulk/export.ts",
-    "src/client/lazy-app/bulk/import.ts",
-    "src/client/lazy-app/bulk/queue.ts",
-    "src/client/lazy-app/bulk/session.ts",
-    "src/client/lazy-app/bulk/settings.ts",
-    "src/client/lazy-app/bulk/size.ts",
-    "src/client/lazy-app/bulk/strip.ts",
-    "src/client/lazy-app/bulk/summary.ts",
-    "src/client/lazy-app/abort.ts",
-    "src/client/lazy-app/image-decode.ts",
-    "src/client/lazy-app/output-filename.ts",
-    "src/client/lazy-app/util/canvas.ts",
-    "src/shared/codec-assets.ts",
-    "src/sw/cache-plan.ts"
+    "src/**/*.svelte"
   ]
 }
