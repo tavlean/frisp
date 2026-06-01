@@ -8,14 +8,18 @@ service-worker behavior.
 
 ## Current stage
 
-The launch path is the `svelte` branch and its worktree at `../Sqush-svelte`.
-The app has been promoted out of `prototypes/sveltekit/` and now lives at the
-repo root as a SvelteKit 2 / Svelte 5 static app.
+The SvelteKit 2 / Svelte 5 migration is **concluded**. `main` is the production
+app, living at the repo root as a static SPA. The retired Preact/Rollup app is
+preserved on the `preact` branch (tag `preact-final`) for reference only — it is
+no longer a fallback for `main`. There is a single working tree at the repo
+root; the old `../Sqush-svelte` worktree and the `svelte` branch are gone.
 
-The immediate focus is migration closeout: verify the root SvelteKit app,
-service worker, worker/WASM assets, downloads, settings, responsive layout,
-large/SVG inputs, and docs. Bulk UI and other new product work are roadmap
-items, not migration scope.
+The immediate focus is **post-migration cleanup and Svelte hardening**: remove
+dead Preact-era code, make the ported components fully idiomatic Svelte 5, and
+fix the defects/rule-violations found by the post-migration review — all
+behavior-preserving. The prioritized backlog is
+[svelte-hardening-plan.md](docs/svelte-hardening-plan.md). Bulk UI and other new
+product work remain roadmap items, not part of this cleanup.
 
 ## Boundaries
 
@@ -39,13 +43,18 @@ items, not migration scope.
   changes.
 - Use Svelte MCP/docs when creating, editing, or analyzing Svelte code. Run the
   Svelte autofixer after meaningful Svelte edits.
+- Prefer idiomatic Svelte 5 over verbatim Preact ports: `$derived` for computed
+  values (reserve `$effect` for genuine side effects), `bind:`/`$bindable` over
+  controlled-input plumbing, `{@attach}` over `use:` actions, and snippets over
+  duplicated markup. When unsure, write the question into a doc rather than guess.
 - Commit meaningful checkpoints. Push when CI feedback is useful or the
   maintainer asks.
 
 ## Reference docs
 
 - [Current status](docs/STATUS.md)
-- [Migration plan](docs/MIGRATION-PLAN.md)
+- [Cleanup & Svelte hardening plan](docs/svelte-hardening-plan.md)
+- [Migration plan](docs/MIGRATION-PLAN.md) (concluded; historical)
 - [Build and runtime map](docs/build-and-runtime.md)
 - [Product roadmap](docs/road-map.md)
 - [Svelte migration context](docs/svelte-migration-context.md)

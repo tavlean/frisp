@@ -3,10 +3,12 @@
 This document records the SvelteKit migration guidance for Sqush. It is based on
 Svelte MCP documentation passes on 2026-05-24 and 2026-05-25.
 
-Use this as Svelte/SvelteKit guidance, not as the live scope tracker. The live
-scope is in [STATUS.md](STATUS.md) and [MIGRATION-PLAN.md](MIGRATION-PLAN.md):
-the migration is now single-image parity plus cutover, while bulk and other new
-product work are tracked in [road-map.md](road-map.md).
+Use this as Svelte/SvelteKit guidance, not as the live scope tracker. The
+migration is now **concluded** (`main` is the production app); live state is in
+[STATUS.md](STATUS.md), the concluded migration record is in
+[MIGRATION-PLAN.md](MIGRATION-PLAN.md), the active cleanup track is in
+[svelte-hardening-plan.md](svelte-hardening-plan.md), and product work is in
+[road-map.md](road-map.md).
 
 ## Main principle
 

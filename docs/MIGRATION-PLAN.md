@@ -1,6 +1,12 @@
 # Sqush SvelteKit Migration Plan
 
-Last updated: 2026-05-31.
+Last updated: 2026-06-01.
+
+> **Status: CONCLUDED.** All phases are done. `main` is the production
+> SvelteKit 2 / Svelte 5 app; the Preact/Rollup app is archived on the `preact`
+> branch. This document is kept as the historical migration record. Active work
+> is now post-migration cleanup — see
+> [svelte-hardening-plan.md](svelte-hardening-plan.md).
 
 Read [STATUS.md](STATUS.md) first. This document is only the migration track.
 New product features, including bulk UI, live in [road-map.md](road-map.md).
@@ -13,9 +19,10 @@ functionally equivalent while the build/runtime foundation moves to Vite,
 SvelteKit workers, generated codec metadata, and a SvelteKit-native service
 worker.
 
-The SvelteKit app has been promoted to the repo root on the `svelte` branch. The
-`prototypes/sveltekit/` spike is closed. `main` remains the historical
-Preact/Rollup safety net until the Svelte branch is accepted.
+The SvelteKit app has been promoted to the repo root and is now `main`. The
+`prototypes/sveltekit/` spike is closed and the `svelte` branch has been merged
+away. The historical Preact/Rollup app is archived on the `preact` branch (tag
+`preact-final`).
 
 ## Migration Scope
 
@@ -94,10 +101,9 @@ large photos and any edge formats they care about.
 
 ## Remaining Migration Actions
 
-1. Let the maintainer validate the Svelte branch through normal usage.
-2. Fix only parity/build/offline regressions found during acceptance.
-3. Merge/ship the Svelte branch when accepted.
-4. Move post-migration work to [road-map.md](road-map.md).
+None — the migration is closed. Post-migration cleanup is tracked in
+[svelte-hardening-plan.md](svelte-hardening-plan.md); product work is in
+[road-map.md](road-map.md).
 
 ## Notes For Future Agents
 

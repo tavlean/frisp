@@ -8,8 +8,8 @@ Website: [sqush.app](https://sqush.app)
 
 ## Current App
 
-The `svelte` branch is now the launch candidate. The app lives at the repo root
-as a SvelteKit 2 / Svelte 5 static SPA:
+The SvelteKit 2 / Svelte 5 migration is complete. `main` is the production app,
+living at the repo root as a static SPA:
 
 - `src/routes/+page.svelte` is the single-image optimizer.
 - `src/lib/editor/` contains the Svelte editor shell, controls, output view, and
@@ -21,8 +21,10 @@ as a SvelteKit 2 / Svelte 5 static SPA:
   codec/runtime foundation.
 - `src/service-worker.ts` is the SvelteKit-native offline service worker.
 
-The old Preact/Rollup app has been removed from this branch. Use `main` only as
-the historical safety net until the Svelte branch is accepted and merged.
+The original Preact/Rollup app is preserved on the `preact` branch (tag
+`preact-final`) for reference only; it is no longer a fallback for `main`. The
+current track is post-migration cleanup and Svelte hardening — see
+[docs/svelte-hardening-plan.md](docs/svelte-hardening-plan.md).
 
 ## Developing
 
@@ -67,6 +69,7 @@ offline behavior are release blockers.
 
 - [Agent guide](AGENTS.md)
 - [Current status](docs/STATUS.md)
+- [Cleanup & Svelte hardening plan](docs/svelte-hardening-plan.md)
 - [Migration plan](docs/MIGRATION-PLAN.md)
 - [Build and runtime map](docs/build-and-runtime.md)
 - [Project overview](docs/overview.md)

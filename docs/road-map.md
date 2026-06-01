@@ -1,13 +1,13 @@
 # Sqush Product Roadmap
 
-Last updated: 2026-05-31.
+Last updated: 2026-06-01.
 
-This roadmap starts **after** the SvelteKit migration is closed out. It is not a
-migration phase list. Migration work is limited to preserving the existing
-single-image optimizer in SvelteKit/Vite with static output, worker/WASM assets,
-downloads, settings, and offline behavior intact. See
-[STATUS.md](STATUS.md) and [MIGRATION-PLAN.md](MIGRATION-PLAN.md) for that
-track.
+The SvelteKit migration is now **closed** (`main` is the production app). This
+roadmap is the product track that follows it — not a migration phase list. The
+immediate post-migration engineering track is cleanup and Svelte hardening in
+[svelte-hardening-plan.md](svelte-hardening-plan.md); product features below
+come after that foundation pass. See [STATUS.md](STATUS.md) for live state and
+[MIGRATION-PLAN.md](MIGRATION-PLAN.md) for the (concluded) migration record.
 
 Sqush remains local-first: no uploads, no server processing, and dependable
 browser/offline behavior after the app loads. New features must protect the
@@ -29,6 +29,9 @@ single-image optimizer before expanding the surface area.
 These are allowed immediately after migration if they are needed to stabilize
 the launch:
 
+- the post-migration cleanup and Svelte hardening pass
+  ([svelte-hardening-plan.md](svelte-hardening-plan.md)) — dead-code removal,
+  idiomatic Svelte 5, and the confirmed defect fixes;
 - maintainer acceptance notes from real daily use;
 - browser support QA on the chosen release browsers;
 - build/dependency modernization that reduces launch risk;

@@ -7,15 +7,18 @@ browser, the build is static, and offline reload must work after load.
 
 ## Current State
 
-- The launch candidate is the `svelte` branch in `../Sqush-svelte`.
-- The SvelteKit 2 / Svelte 5 app now lives at the repo root, not in
-  `prototypes/sveltekit/`.
-- The old Preact/Rollup app shell, Rollup build helpers, old service-worker
-  adapters, and Preact option UI have been removed from this branch.
-- `main` remains the historical Preact/Rollup safety net until the Svelte branch
-  is accepted and merged.
-- Bulk UI is not part of migration closeout. Bulk and other product additions
-  are tracked in [road-map.md](road-map.md).
+- The SvelteKit 2 / Svelte 5 migration is **concluded**. `main` is the
+  production app at the repo root (not in `prototypes/sveltekit/`).
+- The original Preact/Rollup app is preserved on the `preact` branch (tag
+  `preact-final`) for reference only — it is no longer a fallback for `main`.
+  There is a single working tree at the repo root; the `svelte` branch and the
+  `../Sqush-svelte` worktree are gone.
+- The current track is **post-migration cleanup and Svelte hardening**: remove
+  dead Preact-era code, make ported components fully idiomatic Svelte 5, and fix
+  the defects found by the post-migration review. Prioritized backlog:
+  [svelte-hardening-plan.md](svelte-hardening-plan.md).
+- Bulk UI is not part of this cleanup. Bulk and other product additions are
+  tracked in [road-map.md](road-map.md).
 - Repo hygiene (2026-06-01): the ambient Emscripten type declaration now lives
   at `src/emscripten-types.d.ts`, alongside the other `src/*.d.ts` ambient
   files, instead of sitting loose at the repo root (its `///` reference in
@@ -102,20 +105,27 @@ Current local verification:
   components. Remaining suggestions are DOM/canvas effects that are intentional
   side effects.
 
-Still required before launch acceptance:
-
-- maintainer acceptance with real daily-use images, especially large photos and
-  any edge formats they care about;
-- targeted fixes for regressions found during that acceptance pass;
-- final merge/ship decision for the `svelte` branch.
+A post-migration read-only review (two independent passes) confirmed the
+migration is idiomatic at the surface — no `createEventDispatcher`, `on:`
+directives, `export let`, `$:`, or `writable()` stores. The remaining work is
+hardening, captured in [svelte-hardening-plan.md](svelte-hardening-plan.md).
 
 ## Next Actions
 
-1. Have the maintainer do real-use acceptance on the Svelte branch.
-2. Fix only migration regressions found by that acceptance pass.
-3. Merge/ship the Svelte branch when accepted.
-4. Start roadmap work after migration is closed, beginning with design decisions
-   for bulk optimization.
+Work the cleanup backlog in [svelte-hardening-plan.md](svelte-hardening-plan.md),
+roughly in wave order:
+
+1. Wave 0 — confirmed defects/rule-violations: the two-up "2"-key divider bug,
+   browser host objects in deep `$state`, and the unthrottled `persistSettings`
+   write.
+2. Wave 1 — dead-code purge (the `preact` type shim, `clean-modify.ts`, dead
+   `util/index.ts` helpers, orphaned `.css.d.ts` stubs).
+3. Waves 2–3 — the controlled-component event boundary and the `apply()`
+   mirror-state panels (AVIF/JXL).
+4. Then reactivity cleanups, Output attachments, and structural simplification.
+
+Roadmap/product work (starting with bulk-optimization design) follows the
+cleanup — see [road-map.md](road-map.md).
 
 ## Gotchas
 
