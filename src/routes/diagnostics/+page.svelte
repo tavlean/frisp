@@ -282,18 +282,11 @@
 </main>
 
 <style>
+  /* Body reset + font stack live in the root +layout.svelte; this page only
+     owns its light background. */
   :global(body) {
-    margin: 0;
     background: #f6f4ef;
     color: #171717;
-    font-family:
-      Inter,
-      ui-sans-serif,
-      system-ui,
-      -apple-system,
-      BlinkMacSystemFont,
-      'Segoe UI',
-      sans-serif;
   }
 
   main {

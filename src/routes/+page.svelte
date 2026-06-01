@@ -147,22 +147,15 @@
 </div>
 
 <style>
+  /* Body reset + font stack live in the root +layout.svelte; this page only
+     owns its full-height sizing and dark background. */
   :global(html),
   :global(body) {
-    margin: 0;
     height: 100%;
   }
   :global(body) {
     background: #1a1a1a;
     color: #fff;
-    font-family:
-      Inter,
-      ui-sans-serif,
-      system-ui,
-      -apple-system,
-      BlinkMacSystemFont,
-      'Segoe UI',
-      sans-serif;
   }
 
   /* Intro / landing screen. The whole viewport is the drop target (see the
