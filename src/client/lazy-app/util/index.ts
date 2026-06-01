@@ -27,7 +27,14 @@ export const isSafari =
   !/Chrom(e|ium)\//.test(navigator.userAgent);
 
 /**
- * Creates a promise that resolves when the user types the konami code.
+ * Resolves when the user types the Konami code (↑ ↑ ↓ ↓ ← → ← → B A).
+ *
+ * Intentionally retained from upstream Squoosh, where it unlocked the hidden
+ * "ZX" (ZX Spectrum) palette in the Reduce-palette panel. The engine side is
+ * still present (quantize honours `opts.zx` via `zx_quantize`), but the Svelte
+ * UI does not yet wire up the trigger, so this currently has no caller. Kept
+ * deliberately so we can revisit and put our own spin on the easter-egg — see
+ * docs/svelte-hardening-plan.md ("Deferred / revisit").
  */
 export function konami(): Promise<void> {
   return new Promise((resolve) => {

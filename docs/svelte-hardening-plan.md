@@ -178,10 +178,12 @@ Highest leverage — one change at the primitives ripples through every panel.
 - [ ] Drop the shallow `$derived` aliases over the non-reactive diagnostics model
       ([diagnostics/+page.svelte:39](../src/routes/diagnostics/+page.svelte:39)) and
       the `onInput` wrapper ([+page.svelte:43](../src/routes/+page.svelte:43)).
-- [ ] Guard `customElements.define` with `if (!customElements.get(name))`
-      ([pinch-zoom.ts:342](../src/lib/editor/output/pinch-zoom.ts:342),
-      [two-up.ts:181](../src/lib/editor/output/two-up.ts:181)) to avoid HMR /
-      double-eval `NotSupportedError`. _Source: second AI; verified. Dev-only impact._
+- [x] Guard `customElements.define` with `if (!customElements.get(name))`
+      ([pinch-zoom.ts](../src/lib/editor/output/pinch-zoom.ts),
+      [two-up.ts](../src/lib/editor/output/two-up.ts)) to avoid HMR / double-eval
+      `NotSupportedError`. **Pulled forward and done 2026-06-01** (it was breaking
+      dev HMR for these modules and would have dogged Waves 2–6). _Source: second
+      AI; verified. Dev-only impact._
 
 ## Wave 6 — Structural simplification (readability ROI)
 
@@ -199,6 +201,15 @@ Highest leverage — one change at the primitives ripples through every panel.
 
 ## Deferred — bigger / design-dependent (do after the waves above)
 
+- **Konami → "ZX" palette easter-egg (revisit together).** Upstream Squoosh hid a
+  ZX-Spectrum-style palette behind the Konami code (↑↑↓↓←→←→BA). The **engine is
+  still intact** — `quantize/worker/runtime.ts` honours `opts.zx` via
+  `zx_quantize` — but the Svelte UI omitted the unlock trigger, so `konami()`
+  (`client/lazy-app/util/index.ts`) currently has no caller. **Decision: keep it**
+  (deliberately retained; see the code comment on `konami()`), and later put our
+  own spin on it so it reads as "noticed and evolved," not untouched. Re-wiring
+  would mean: on Konami in the Reduce-palette panel, reveal a control that sets
+  `options.zx = 1`. To discuss before implementing.
 - **Context API for `OptionsPanel`.** Pass `EditorSession` / per-side state via
   `setContext`/`getContext` to collapse the ~15-prop interface
   ([+page.svelte:119](../src/routes/+page.svelte:119)). Matter of taste given the
