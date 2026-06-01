@@ -70,28 +70,33 @@ source and whether it was verified against the code.
 
 ## Wave 1 — Dead-code purge (pure subtraction; verify with `npm run check`)
 
+> **Done 2026-06-01** (commit `25fe0669`). 187 lines removed; gate green;
+> browser-verified (clean reload boots + encodes + settings persist).
+
 All low-risk deletions. The `src/client/lazy-app/*.ts` logic tree is **live** —
 only the items below are dead.
 
-- [ ] Delete `src/shared/missing-preact-types.d.ts` — dead `preact` module shim;
+- [x] Delete `src/shared/missing-preact-types.d.ts` — dead `preact` module shim;
       nothing imports `preact`. It also actively suppresses the type error that
       would catch a stray `import … from 'preact'`. _Source: both; verified._
-- [ ] Delete `src/client/lazy-app/util/clean-modify.ts` — `cleanMerge`/`cleanSet`
+- [x] Delete `src/client/lazy-app/util/clean-modify.ts` — `cleanMerge`/`cleanSet`
       are Preact's immutable copy-on-write helpers; **zero callers** repo-wide and
       conceptually obsolete under `$state` in-place mutation. _Source: Claude;
       verified zero callers._
-- [ ] Remove dead React-onChange helpers from `src/client/lazy-app/util/index.ts`:
+- [x] Remove dead React-onChange helpers from `src/client/lazy-app/util/index.ts`:
       `inputFieldValueAsNumber`, `inputFieldChecked`, `inputFieldCheckedAsNumber`,
-      `inputFieldValue` (plus unused `shallowEqual`, `transitionHeight`). Keep
-      `isSafari` (live). _Source: Claude; verified no callers._
-- [ ] Delete the ~24 orphaned CSS-module `*.css.d.ts` stubs and the empty dirs
-      that hold only them: the dead `src/client/lazy-app/Compress/**` subtree,
-      `src/shared/prerendered-app/**`, `src/shared/custom-els/**`,
-      `src/client/initial-app/**`, `src/static-build/**`, plus the 3 live-CSS
-      siblings whose `.css` is imported only for side effects
-      (`src/lib/editor/theme.css.d.ts`, `output/two-up.css.d.ts`,
-      `output/pinch-zoom.css.d.ts`). _Source: Claude; verified no destructured
-      imports._
+      `inputFieldValue` (plus unused `shallowEqual`, `transitionHeight`). Kept
+      `isSafari` (live). Also-dead but kept (out of scope): `konami` (the
+      deliberate ZX easter-egg) and the trivial `preventDefault`. _Source: Claude;
+      verified no callers._
+- [x] Delete the stale CSS-module `*.css.d.ts` stubs and the dirs that hold only
+      them (`src/client/lazy-app/Compress/**`, `src/shared/prerendered-app/**`,
+      `src/shared/custom-els/**`, `src/client/initial-app/**`,
+      `src/static-build/**`, plus `theme.css.d.ts`, `output/two-up.css.d.ts`,
+      `output/pinch-zoom.css.d.ts`). **Note:** `*.css.d.ts` is gitignored, so
+      these were never committed — removed from the working tree only; a fresh
+      clone never had them. The side-effect `import './x.css'` resolves via
+      `vite/client`'s ambient `*.css` declaration. _Source: Claude; verified._
 
 ## Wave 2 — The dominant Preact-ism: controlled-component event boundary
 
