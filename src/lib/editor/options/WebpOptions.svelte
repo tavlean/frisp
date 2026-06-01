@@ -47,6 +47,10 @@
     options.method = losslessPresets[preset][0];
     options.quality = losslessPresets[preset][1];
   }
+
+  const losslessQuality = $derived(
+    determineLosslessQuality(options.quality, options.method),
+  );
 </script>
 
 <form class="options-section" onsubmit={(e) => e.preventDefault()}>
@@ -61,11 +65,8 @@
 
   {#if options.lossless}
     <div class="option-one-cell">
-      <Range
-        min={0}
-        max={9}
-        value={determineLosslessQuality(options.quality, options.method)}
-        oninput={setLosslessPreset}>Effort:</Range
+      <Range min={0} max={9} value={losslessQuality} oninput={setLosslessPreset}
+        >Effort:</Range
       >
     </div>
     <div class="option-one-cell">

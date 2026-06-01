@@ -59,9 +59,6 @@
   const percentMagnitude = $derived(
     percent === null ? '' : String(Math.abs(Math.round(percent))),
   );
-  const downloadAttributes = $derived(
-    disabled ? {} : { href: downloadHref, download: downloadName },
-  );
 </script>
 
 <div
@@ -102,7 +99,8 @@
   <a
     class="download"
     class:download-disable={disabled}
-    {...downloadAttributes}
+    href={disabled ? undefined : downloadHref}
+    download={disabled ? undefined : downloadName}
     title="Download"
     aria-disabled={disabled}
   >

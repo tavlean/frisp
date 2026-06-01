@@ -40,10 +40,6 @@
     session.pickFiles(list, () => pushState('', { editor: true }));
   }
 
-  function onInput(event: Event) {
-    pickFiles((event.currentTarget as HTMLInputElement).files);
-  }
-
   function back() {
     if (typeof history !== 'undefined') history.back();
     else session.clearFile();
@@ -73,7 +69,12 @@
         <p>Local-first image compression. Nothing leaves your device.</p>
       </header>
       <label class="select-button">
-        <input type="file" accept="image/*" onchange={onInput} />
+        <input
+          type="file"
+          accept="image/*"
+          onchange={(e) =>
+            pickFiles((e.currentTarget as HTMLInputElement).files)}
+        />
         Select an image
       </label>
       <p class="intro-hint">…or drop an image anywhere on the page</p>

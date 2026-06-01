@@ -36,8 +36,10 @@
     model.session.jobs.find((job) => job.id === selectedJobId) ??
       model.session.jobs[0],
   );
-  const progress = $derived(model.summary.progress);
-  const exportSummary = $derived(model.summary.export);
+  // `model` is a plain (non-reactive) const, so these are static reads — no
+  // $derived needed (it would track nothing).
+  const progress = model.summary.progress;
+  const exportSummary = model.summary.export;
 
   onMount(() => {
     const controller = new AbortController();
