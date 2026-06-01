@@ -130,23 +130,18 @@ Highest leverage — one change at the primitives ripples through every panel.
   prefer `$bindable`/`bind:` or explicit setter methods. Pairs with the item
   above. _Source: second AI; verified. Effort: medium._
 
-## Wave 3 — Collapse the mirror-state panels
+## Wave 3 — Promoted to its own project
 
-- [ ] **Remove the `apply()` + mirrored-`$state` pattern in `AvifOptions` and
-      `JxlOptions`.** They snapshot `options` once via `untrack`, keep local mirror
-      state, then `apply()` back on every handler — a literal port of React's
-      `getDerivedStateFromProps` (the JxlOptions comment says so,
-      [JxlOptions.svelte:4](../src/lib/editor/options/JxlOptions.svelte:4)). Since
-      `options` is already a `$state` proxy (the simple panels bind straight to it),
-      bind directly and express the inverted/inferred fields as `$derived`. _Source:
-      both; verified. Effort: medium._
-- [ ] **Model `lossless` as `$derived`, not stored state**
-      ([AvifOptions.svelte:27](../src/lib/editor/options/AvifOptions.svelte:27),
-      [Wp2Options.svelte:19](../src/lib/editor/options/Wp2Options.svelte:19)). It is
-      a predicate over codec fields, not a distinct option. Folds into the item
-      above; once `options` is mutated directly, the `{#key options}` remount in
-      [OptionsPanel.svelte:205](../src/lib/editor/OptionsPanel.svelte:205) can be
-      reconsidered. _Source: both._
+> **Out of cleanup scope.** The AVIF/JXL mirror-state + `apply()` is the most
+> Preact-flavored code left, but it also encodes real UX (e.g. Lossless mode
+> remembers your lossy quality, inter-field rules, inferred toggles), so it can't
+> be flattened to plain `bind:` without regressions. Rather than a minimal
+> collapse, this is being treated as a forward-looking investment: a shared
+> **codec options model** that maps raw codec fields ↔ human controls in one
+> place, makes panels thin and testable, and pre-pays presets / target-size /
+> bulk per-image overrides. Design + plan: [codec-options-model.md](codec-options-model.md).
+> To be started fresh after Waves 4–6. (This also absorbs the old "data-driven
+> codec panels" deferred item.)
 
 ## Wave 4 — Reactivity-model cleanups (retire React-style guards)
 
@@ -224,9 +219,8 @@ Highest leverage — one change at the primitives ripples through every panel.
   ([+page.svelte:119](../src/routes/+page.svelte:119)). Matter of taste given the
   singleton is already reactive; do it _after_ Wave 2 so the boundary is clean
   first.
-- **Data-driven codec panels.** Once Waves 2–3 land, consider generating panels
-  from codec meta + a generic row renderer. The simple panels (Oxipng,
-  BrowserJpeg, Quantize) already show the idiomatic target shape.
+- **Data-driven codec panels.** Folded into the codec options model project —
+  see [codec-options-model.md](codec-options-model.md).
 - **Legacy service-worker / cache surfaces.** A second AI flagged `skip-waiting`,
   `share-ready`, `cache-all` in `src/client/lazy-app/sw-bridge/runtime.ts` and
   old app-chunk modeling in `src/sw/cache-plan.ts` as possible dead surface.
