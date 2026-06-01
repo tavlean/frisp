@@ -178,4 +178,8 @@ export default class TwoUp extends HTMLElement {
   }
 }
 
-customElements.define('two-up', TwoUp);
+// Guard the registration: a bare define() throws NotSupportedError when the
+// module is re-evaluated (e.g. Vite HMR), which breaks hot updates in dev.
+if (!customElements.get('two-up')) {
+  customElements.define('two-up', TwoUp);
+}

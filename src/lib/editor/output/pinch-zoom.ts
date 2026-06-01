@@ -339,4 +339,8 @@ export default class PinchZoom extends HTMLElement {
   }
 }
 
-customElements.define('pinch-zoom', PinchZoom);
+// Guard the registration: a bare define() throws NotSupportedError when the
+// module is re-evaluated (e.g. Vite HMR), which breaks hot updates in dev.
+if (!customElements.get('pinch-zoom')) {
+  customElements.define('pinch-zoom', PinchZoom);
+}
