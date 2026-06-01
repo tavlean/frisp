@@ -191,17 +191,31 @@ Highest leverage — one change at the primitives ripples through every panel.
 
 ## Wave 6 — Structural simplification (readability ROI)
 
+> **Done 2026-06-01** (commits `fc03306b` AdvancedSection, `a04ab2bc`
+> OptionRow/ToggleRow, `50e7e7b3` root `+layout.svelte`). Gate green; browser-
+> verified panel layout, format switch, branch swaps, slide reveals, and the
+> body font/background on both routes.
+
 - [x] Extract a shared "Advanced settings" component
       (`options/AdvancedSection.svelte`, owns `open`, renders a children snippet) —
       replaced the scaffold duplicated across AVIF/WebP/WP2/MozJPEG. **Done**
       (`fc03306b`); browser-verified in all four panels. _Source: Claude._
-- [ ] Extract `OptionRow` / `ToggleRow` snippets to replace the ~87 repeated
+- [x] Extract `OptionRow` / `ToggleRow` components to replace the repeated
       `<div class="option-one-cell">` / `<label class="option-toggle">` wrappers
-      across the nine panels. _Source: Claude._
-- [ ] Add a root `src/routes/+layout.svelte` (or `app.css`) for the shared body
-      font stack + reset, currently duplicated in both route pages
-      ([+page.svelte:156](../src/routes/+page.svelte:156),
-      [diagnostics/+page.svelte:287](../src/routes/diagnostics/+page.svelte:287)).
+      across the panels. **Done** (`a04ab2bc`). Two thin wrappers own the shared
+      grid markup; `ToggleRow` takes the label as a prop + the control as
+      children, both accept an optional `slide` for reveal rows, and `ToggleRow`
+      takes an extra `class` for the gray `section-enabler` variant. Converted
+      WebP/MozJPEG/Wp2/Resize/BrowserJPEG/OxiPNG/Quantize + OptionsPanel; AVIF/JXL
+      left for the codec-options-model project; the format picker's
+      `<section class="option-one-cell options-section">` stays raw. Browser-
+      verified layout, format switch, Lossless branch swap, and the slide reveals.
+      _Source: Claude._
+- [x] Add a root `src/routes/+layout.svelte` for the shared body font stack +
+      reset (was duplicated in both route pages). **Done** (`50e7e7b3`). The
+      layout owns `body { margin: 0; font-family: … }`; each page keeps its own
+      background/color and the editor its full-height sizing. Browser-verified on
+      both routes.
 
 ## Deferred — bigger / design-dependent (do after the waves above)
 
