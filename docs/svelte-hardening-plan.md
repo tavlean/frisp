@@ -35,7 +35,11 @@ source and whether it was verified against the code.
 
 ## Wave 0 — Confirmed defects & rule violations (do first; small, high value)
 
-- [ ] **Fix the two-up divider "2" key bug.** `_relativePosition` is set to
+> **Done 2026-06-01** (commit `c11544dc`). Gate green, autofixer clean,
+> browser-verified (encode + re-encode render, divider centers at 0.5, settings
+> persist, no console errors).
+
+- [x] **Fix the two-up divider "2" key bug.** `_relativePosition` is set to
       `0.25` instead of `0.5` because of a stray `/ 2`
       ([two-up.ts:105](../src/lib/editor/output/two-up.ts:105)). `_setPosition()`
       paints 50% immediately, but `_resetPosition()` (on orientation change /
@@ -44,7 +48,7 @@ source and whether it was verified against the code.
       `/ 2` so it matches the `Digit3` branch shape
       ([two-up.ts:113](../src/lib/editor/output/two-up.ts:113)). _Source: second AI;
       verified. Effort: trivial._
-- [ ] **Get browser host objects out of deep `$state`.**
+- [x] **Get browser host objects out of deep `$state`.**
       `results = $state<[CompressOutcome | null, …]>`
       ([editor-session.svelte.ts:181](../src/lib/editor/editor-session.svelte.ts:181))
       deep-proxies objects that hold `File`, `ImageData`, and a Blob-URL string
@@ -55,12 +59,14 @@ source and whether it was verified against the code.
       use `$state.raw` on `results` (reassign on update), or split a plain-data
       result DTO from a non-reactive store of the host-object refs. _Source: both;
       verified. Effort: medium._
-- [ ] **Debounce `persistSettings()`.** It runs from a bare `$effect` with no
+- [x] **Debounce `persistSettings()`.** It runs from a bare `$effect` with no
       throttle ([editor-session.svelte.ts:321](../src/lib/editor/editor-session.svelte.ts:321),
       [+page.svelte:37](../src/routes/+page.svelte:37)), serializing and writing
       JSON to `localStorage` on every reactive tick — ~60×/sec while dragging a
-      quality slider. Fix: debounce inside the effect (~200 ms) and return
-      `clearTimeout` as cleanup. _Source: Claude; verified. Effort: small._
+      quality slider. Fixed: payload is serialised synchronously (so the `$effect`
+      still tracks its deps) but the `localStorage` write is deferred 200 ms;
+      `dispose()` flushes any pending write so the last edit is never dropped.
+      _Source: Claude; verified. Effort: small._
 
 ## Wave 1 — Dead-code purge (pure subtraction; verify with `npm run check`)
 
