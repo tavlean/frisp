@@ -56,9 +56,6 @@
     maintainAspect = value;
     if (value) options.height = Math.round(options.width / aspect);
   }
-
-  const numVal = (e: Event) =>
-    Number((e.currentTarget as HTMLInputElement).value);
 </script>
 
 <form class="options-section" onsubmit={(e) => e.preventDefault()}>
@@ -97,8 +94,7 @@
       class="text-field"
       type="number"
       min="1"
-      value={options.width}
-      oninput={(e) => setWidth(numVal(e))}
+      bind:value={() => options.width, (v) => setWidth(Number(v))}
     />
   </label>
   <label class="option-text-first">
@@ -107,8 +103,7 @@
       class="text-field"
       type="number"
       min="1"
-      value={options.height}
-      oninput={(e) => setHeight(numVal(e))}
+      bind:value={() => options.height, (v) => setHeight(Number(v))}
     />
   </label>
   {#if isWorker}
