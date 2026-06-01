@@ -100,9 +100,15 @@ only the items below are dead.
 
 ## Wave 2 — The dominant Preact-ism: controlled-component event boundary
 
+> **Done 2026-06-01** (commits `89e710a2` 2a Checkbox/Toggle, `216292e9` 2b
+> Select, `f04e55e2` 2c Range/number inputs). Every `currentTarget as HTML…`
+> cast helper is gone from the panels (verified zero). Gate green throughout;
+> browser-verified WebP/AVIF lossless toggles, MozJPEG enum select, format
+> switch, and resize aspect-ratio.
+
 Highest leverage — one change at the primitives ripples through every panel.
 
-- [ ] **Narrow the form-primitive event contracts.** `Select`, `Checkbox`,
+- [x] **Narrow the form-primitive event contracts.** `Select`, `Checkbox`,
       `Toggle`, and `Range` currently expose `onchange?: (event: Event) => void`
       (raw DOM event up), forcing every caller to re-implement
       `Number((e.currentTarget as HTMLSelectElement).value)` /
@@ -112,14 +118,17 @@ Highest leverage — one change at the primitives ripples through every panel.
       callers `bind:value` / `bind:checked` (`Wp2Options` already proves this with
       `bind:value={options.uv_mode}`). Deletes the `numValue` / `checked()` cast
       helpers from every panel. _Source: both; verified. Effort: medium._
-- [ ] **Make `options` ownership explicit.** Children currently mutate fields of
-      a mutable proxy passed down one-way
-      ([OptionsPanel.svelte:151](../src/lib/editor/OptionsPanel.svelte:151),
-      [ResizeOptions.svelte:41](../src/lib/editor/options/ResizeOptions.svelte:41),
-      [WebpOptions.svelte:47](../src/lib/editor/options/WebpOptions.svelte:47)). It
-      works (mutating a passed `$state` proxy is reactive) but ownership is implicit;
-      prefer `$bindable`/`bind:` or explicit setter methods. Pairs with the item
-      above. _Source: second AI; verified. Effort: medium._
+- [~] **Make `options` ownership explicit.** _Partially done:_ plain fields now
+  flow through `bind:`/`$bindable`, making ownership explicit; the
+  mirror-state panels (AVIF/JXL) still mutate via `apply()` and are addressed
+  in Wave 3. Children currently mutate fields of a mutable proxy passed
+  down one-way
+  ([OptionsPanel.svelte:151](../src/lib/editor/OptionsPanel.svelte:151),
+  [ResizeOptions.svelte:41](../src/lib/editor/options/ResizeOptions.svelte:41),
+  [WebpOptions.svelte:47](../src/lib/editor/options/WebpOptions.svelte:47)). It
+  works (mutating a passed `$state` proxy is reactive) but ownership is implicit;
+  prefer `$bindable`/`bind:` or explicit setter methods. Pairs with the item
+  above. _Source: second AI; verified. Effort: medium._
 
 ## Wave 3 — Collapse the mirror-state panels
 
