@@ -161,19 +161,28 @@ Highest leverage — one change at the primitives ripples through every panel.
       ([+page.svelte:30](../src/routes/+page.svelte:30),
       [editor-session.svelte.ts:237](../src/lib/editor/editor-session.svelte.ts:237)).
       _Source: both. Effort: medium._
-- [ ] Diagnostics page: convert the `onMount` probes + manual `cancelled` guard
+- [x] Diagnostics page: convert the `onMount` probes + manual `cancelled` guard
       to per-probe `$effect`s with cleanup
-      ([diagnostics/+page.svelte:42](../src/routes/diagnostics/+page.svelte:42)).
-      _Source: Claude. Low priority (dev tool)._
+      ([diagnostics/+page.svelte](../src/routes/diagnostics/+page.svelte)).
+      **Done** (`faa14e4d`): three independent `$effect`s, each with its own
+      cancel guard (+ AbortController for the pipeline probe) and cleanup; the
+      SW registration stays in a small `onMount`. Browser-verified all three
+      probes resolve. _Source: Claude. Low priority (dev tool)._
 
 ## Wave 5 — Output attachments & small idiom wins
 
-- [ ] Convert the last `use:focusOnMount` action to `{@attach}` for consistency
-      with `file-drop.ts` ([Output.svelte:195](../src/lib/editor/output/Output.svelte:195)).
-- [ ] Extract the imperative event-retargeting `$effect` into a parameterized
-      `{@attach}` attachment ([Output.svelte:147](../src/lib/editor/output/Output.svelte:147));
-      optionally the canvas-draw/fit setup too. Localizes setup/teardown. _Source:
-      both._
+- [x] Convert the last `use:focusOnMount` action to `{@attach}` for consistency
+      with `file-drop.ts` ([Output.svelte](../src/lib/editor/output/Output.svelte)).
+      **Done** (`2660c1b9`).
+- [x] Extract the imperative event-retargeting `$effect` into a parameterized
+      `{@attach}` attachment. **Done** (`2660c1b9`): now `retargetViewEvents()`,
+      an `Attachment<HTMLElement>` factory in
+      [output/retarget-events.ts](../src/lib/editor/output/retarget-events.ts),
+      applied as `{@attach retargetViewEvents(() => pinchLeft)}` on `<two-up>`
+      (getter-parameterised so it re-runs once the left pinch-zoom is bound).
+      Left the canvas-draw/fit `$effect`s as-is (they read several reactive
+      props and read cleanly already). Browser-verified wheel-zoom retarget +
+      focus-on-reveal. _Source: both._
 - [x] Replace the `downloadAttributes` `$derived`-object spread on `<a>` with
       conditional attributes (`href={disabled ? undefined : …}`)
       ([Results.svelte](../src/lib/editor/Results.svelte)). **Done** (`780ad8af`).
