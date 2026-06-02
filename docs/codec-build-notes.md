@@ -209,10 +209,58 @@ in a big module.
      ~30 s vs a 20-min `make`) made the iterate-debug loop tractable —
      see `/tmp/jxl-fastlink.sh` pattern.
 
-### Rust codecs (oxipng, resize, hqx) — not yet attempted
-Need `rustup` + `rustup target add wasm32-unknown-unknown` + `wasm-pack`, and the
-squoosh rust build wires Emscripten's clang as the wasm sysroot (see
-`codecs/rust.Dockerfile`). Fiddlier; do last.
+### mozjpeg — ✅ DONE (emcc 3.1.0). v3.3.1 autotools → v4.1.5 CMake.
+9 CVEs (rebased onto libjpeg-turbo 2.x). **Compression is intentionally unchanged
+vs v3.3.1** — security/robustness rebuild only; a large size delta would signal a
+wiring bug, not an improvement. The whole effort is the build-system rewrite, not
+the wrapper (which uses the stable public libjpeg API). Three gotchas:
+
+1. **autotools → CMake.** v4 removed `configure.ac`. The Makefile now does
+   `emcmake cmake -DENABLE_SHARED=0 -DENABLE_STATIC=1 -DWITH_TURBOJPEG=0
+   -DWITH_SIMD=0 -DWITH_ARITH_ENC=0 -DWITH_ARITH_DEC=0 -DPNG_SUPPORTED=0` then
+   `make jpeg-static` → `libjpeg.a`. `jconfig.h`/`jconfigint.h` are generated into
+   the build dir at configure time → add `-I <build-dir>`.
+2. **`check_type_size(size_t)` is broken on emsdk 3.1.0 + `-flto`.** It mis-detects
+   `SIZEOF_SIZE_T` (9 without an emulator, 1 with `CMAKE_CROSSCOMPILING_EMULATOR=node`;
+   correct is 4). Emscripten's `CheckTypeSize.cmake` greps an `INFO:size[N]`
+   sentinel out of the compiled object, but `-flto` makes that object LLVM bitcode
+   (sentinel unreadable). jchuff.c then `#error`s "Cannot determine word size".
+   **Fix: pre-seed `-DSIZE_T=4 -DHAVE_SIZE_T=1` (+ `-DUNSIGNED_LONG=4
+   -DHAVE_UNSIGNED_LONG=1`)** so CMake skips the broken probe. (Bug class fixed
+   upstream in emscripten 3.1.28+; jSquash sidesteps it by using autotools
+   `--host=wasm32`. Don't pass the node emulator — it makes it worse here.)
+3. **`config.h` and `set_quality_ratings`/`rdswitch.o`.** The wrapper `#include
+   "config.h"` only for `MOZJPEG_VERSION` (autotools-only header) → drop the
+   include, pass `-DMOZJPEG_VERSION=4.1.5`. The wrapper also calls
+   `set_quality_ratings()` — a *cjpeg helper* in `rdswitch.c`, not in `libjpeg.a`.
+   v4's CMake only compiles it into the `cjpeg` exe, so compile `rdswitch.c`
+   ourselves (`emcc -c rdswitch.c -o rdswitch.o`) and link it **before**
+   `libjpeg.a`. Its unused file-I/O helpers resolve against emscripten libc stubs.
+
+### Rust codecs (oxipng ✅, resize ⏳, hqx) — emsdk clang for the C deps
+Need `rustup` + nightly (`-Z build-std` for the parallel/threaded variant) +
+`rustup target add wasm32-unknown-unknown` + `rust-src` + `wasm-pack`. **Put
+`~/.cargo/bin` FIRST on PATH** so the rustup shim wins over a Homebrew `cargo`
+(which can't do `+nightly`/`-Z build-std`).
+
+**oxipng 9.0.0 → 10.1.1 — done.** Byte-identical output at default preset (the
+value is robustness + fast-mode/ICC fixes). Wrapper: `Options.interlace`
+`Option<Interlacing>` → `Option<bool>`. Three build fixes:
+- oxipng 10 pulls **libdeflate-sys (C)**; the `cc` crate's default Apple clang has
+  no WebAssembly backend (`No available targets … wasm32`). Point it at emsdk's
+  clang (which has it) + emscripten's libc headers — this is exactly what
+  `codecs/rust.Dockerfile` does by COPYing emsdk's clang + libc:
+  `CC_wasm32_unknown_unknown=<emsdk>/upstream/bin/clang`,
+  `AR_wasm32_unknown_unknown=<emsdk>/upstream/bin/llvm-ar`,
+  `CPATH=<emsdk>/upstream/emscripten/cache/sysroot/include`.
+- **wasm-bindgen 0.2.73 is too old for nightly 1.98** ("update to v0.2.88"). Bump
+  the dep to `"0.2"` *and DELETE `Cargo.lock`* — the lock pinned 0.2.74, which
+  still satisfied `"0.2"`, so cargo kept it; a fresh resolve picks 0.2.122.
+- **The sync script's wasm-bindgen wrapper patch broke** on the new glue:
+  wasm-bindgen ≥0.2.9x renamed the loader var `input` → `module_or_path`. Fixed
+  `patchWasmBindgenWrapperFallbackUrl` in `scripts/sync-sveltekit-app.mjs` to match
+  the `new URL('<asset>', import.meta.url)` expression (variable-name-agnostic),
+  same approach as the emscripten patch.
 
 ## Verification loop (every codec)
 

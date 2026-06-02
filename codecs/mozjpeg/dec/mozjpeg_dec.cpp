@@ -1,6 +1,7 @@
 #include <emscripten/bind.h>
 #include <emscripten/val.h>
-#include "config.h"
+// mozjpeg v4 is CMake-only and has no autotools `config.h` (the decoder used
+// nothing from it). jconfig.h comes via jpeglib.h + the build-dir include path.
 #include "jpeglib.h"
 
 extern "C" {

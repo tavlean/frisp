@@ -5,7 +5,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "config.h"
+// mozjpeg v4 is CMake-only and has no autotools `config.h`; the only thing the
+// wrapper needed from it was MOZJPEG_VERSION, now supplied via -D in the Makefile.
 #include "jpeglib.h"
 
 extern "C" {
