@@ -28,6 +28,19 @@ const FIXTURES = [
   { name: 'photo', file: 'photo.jpg', warmup: 1, runs: 3 },
   { name: 'illustration', file: 'illustration.png', warmup: 1, runs: 3 },
   { name: 'transparent', file: 'transparent.png', warmup: 1, runs: 3 },
+  // Diverse synthetic stressors (all 512×512 except screenshot at 1280×800):
+  // gradients isolate banding-vs-noise, hard-edges stresses ringing, noise is
+  // the incompressible worst case, screenshot stresses text + flat + edges.
+  { name: 'gradient', file: 'gradient.png', warmup: 1, runs: 3 },
+  {
+    name: 'gradient-dithered',
+    file: 'gradient-dithered.png',
+    warmup: 1,
+    runs: 3,
+  },
+  { name: 'hard-edges', file: 'hard-edges.png', warmup: 1, runs: 3 },
+  { name: 'noise-synthetic', file: 'noise-synthetic.png', warmup: 1, runs: 3 },
+  { name: 'screenshot', file: 'screenshot.png', warmup: 1, runs: 3 },
   { name: 'photo-large', file: 'photo-large.jpg', warmup: 0, runs: 1 },
 ];
 
