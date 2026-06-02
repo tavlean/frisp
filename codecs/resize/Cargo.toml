@@ -9,25 +9,22 @@ publish = false
 crate-type = ["cdylib"]
 
 [features]
-default = ["console_error_panic_hook", "wee_alloc"]
+default = ["console_error_panic_hook"]
 
 [dependencies]
-cfg-if = "0.1.2"
-wasm-bindgen = "0.2.38"
-resize = "0.5.5"
+wasm-bindgen = "0.2"
+# resize 0.8.x defaults to ["std", "rayon"]; rayon CANNOT target
+# wasm32-unknown-unknown, so disable defaults and keep only "std" (single-thread).
+resize = { version = "0.8.9", default-features = false, features = ["std"] }
+# resize 0.8.x resizes typed pixel slices (rgb::RGBA<u8> / rgb::RGBA<f32>), not
+# raw &[u8]; the rgb crate's FromSlice gives us .as_rgba()/.as_rgba_mut().
+rgb = { version = "0.8.52", default-features = false }
 
 # The `console_error_panic_hook` crate provides better debugging of panics by
 # logging them with `console.error`. This is great for development, but requires
 # all the `std::fmt` and `std::panicking` infrastructure, so isn't great for
 # code size when deploying.
 console_error_panic_hook = { version = "0.1.1", optional = true }
-
-# `wee_alloc` is a tiny allocator for wasm that is only ~1K in code size
-# compared to the default allocator's ~10K. It is slower than the default
-# allocator, however.
-#
-# Unfortunately, `wee_alloc` requires nightly Rust when targeting wasm for now.
-wee_alloc = { version = "0.4.2", optional = true }
 
 [dev-dependencies]
 wasm-bindgen-test = "0.2"

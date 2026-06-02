@@ -1,27 +1,19 @@
-extern crate cfg_if;
 extern crate resize;
+extern crate rgb;
 extern crate wasm_bindgen;
 
 mod utils;
 
-use cfg_if::cfg_if;
-use resize::Pixel;
+// resize 0.8.x: pixel-format markers are RGBA8 (was the bare `RGBA`) and RGBAF32.
+use resize::Pixel::{RGBA8, RGBAF32};
 use resize::Type;
+// FromSlice reinterprets &[u8]/&[f32] as &[rgb::RGBA<_>] for the typed resize API.
+use rgb::FromSlice;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::Clamped;
 
 mod srgb;
-use srgb::{linear_to_srgb, Clamp};
-
-cfg_if! {
-    // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
-    // allocator.
-    if #[cfg(feature = "wee_alloc")] {
-        extern crate wee_alloc;
-        #[global_allocator]
-        static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
-    }
-}
+use srgb::linear_to_srgb;
 
 include!("./lut.inc");
 
@@ -88,10 +80,13 @@ pub fn resize(
             input_height,
             output_width,
             output_height,
-            Pixel::RGBA,
+            RGBA8,
             typ,
-        );
-        resizer.resize(input_image.as_slice(), output_image.as_mut_slice());
+        )
+        .unwrap();
+        resizer
+            .resize(input_image.as_rgba(), output_image.as_rgba_mut())
+            .unwrap();
         return Clamped(output_image);
     }
 
@@ -119,13 +114,16 @@ pub fn resize(
         input_height,
         output_width,
         output_height,
-        Pixel::RGBAF32,
+        RGBAF32,
         typ,
-    );
-    resizer.resize(
-        preprocessed_input_image.as_slice(),
-        unprocessed_output_image.as_mut_slice(),
-    );
+    )
+    .unwrap();
+    resizer
+        .resize(
+            preprocessed_input_image.as_rgba(),
+            unprocessed_output_image.as_rgba_mut(),
+        )
+        .unwrap();
 
     for i in 0..num_output_pixels {
         for j in 0..3 {
