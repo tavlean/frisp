@@ -1,37 +1,70 @@
-# Codec-Upgrade Handoff (run on a machine with Docker)
+# Codec-Upgrade Handoff
 
-Last updated: 2026-06-02. Status: **ready to execute — needs Docker (not present
-in the environment where this was prepared).**
+Last updated: 2026-06-02. Status: **in progress — proven; 2 of 4 urgent codecs
+done natively (no Docker).** See the progress log at the bottom.
 
 This is a self-contained handoff for actually **building** the codec upgrades.
 The audit ([codec-upgrade-audit.md](codec-upgrade-audit.md)) decided *what* to
 upgrade and *why*; the runbooks ([codec-upgrade-runbooks.md](codec-upgrade-runbooks.md))
-give the exact per-codec steps. This doc is the **orchestration + verification
-loop** to run them safely, plus a copy-paste prompt for a fresh AI session.
+give the per-codec details. This doc is the **build recipe + verification loop**.
 
-## Plain-English: what "building a codec" means here
+## Native build — NO DOCKER (proven 2026-06-02)
 
-Each codec (WebP, AVIF, …) is C/C++ or Rust source from its original authors. The
-app ships a pre-compiled **`.wasm`** (the browser-runnable form). To upgrade one:
+Docker is **not** required. The codecs' `build-cpp.sh`/`build-rust.sh` use Docker
+only to *provide* Emscripten — you can install Emscripten directly into a user
+folder (no sudo) and build natively. This was used to upgrade libimagequant and
+libwebp on Apple Silicon. The build outputs are functionally identical (verified
+by `npm run check`, the e2e suite, and the benchmark).
 
-1. **Bump the version** the codec points at (one line in its `Makefile` or
-   `Cargo.toml`).
-2. **Adjust the wrapper** if the new version renamed an API the small wrapper
-   file calls (the runbook says when).
-3. **Compile to `.wasm`** by running `npm run build` inside that codec's folder.
-   Each codec's build is a **Docker** command (`codecs/build-cpp.sh` /
-   `build-rust.sh`) — the Dockerfile already contains Emscripten/Rust, so you do
-   **not** install emsdk/wasm-pack by hand. You only need **Docker** installed.
-4. **Verify** the new `.wasm` in the app: `npm run check` + `npm run test:e2e`.
-5. **Commit** that one codec, then move to the next.
+**One-time toolchain setup (no Docker, no sudo):**
 
-That's it. The only prerequisite missing in the prep environment was Docker.
+```sh
+# Emscripten (C/C++ codecs):
+git clone --depth 1 https://github.com/emscripten-core/emsdk.git ~/emsdk
+cd ~/emsdk && ./emsdk install latest && ./emsdk activate latest
+# cmake (avif/webp/jxl need it):
+brew install cmake
+# Rust codecs (oxipng/resize/hqx) additionally need:
+#   rustup + `rustup target add wasm32-unknown-unknown` + wasm-pack
+#   (the squoosh rust build also wires emscripten's clang as the wasm sysroot —
+#    see codecs/rust.Dockerfile; this one is fiddlier, do it last).
+```
 
-## Prerequisite
+**Per C/C++ codec, build directly (bypassing the Docker wrapper):**
 
-- **Docker Desktop** (or Docker Engine) installed and running. Nothing else —
-  Node/npm are already set up by the repo.
-- Work on the `codec-cleanup-and-threading` branch (or a fresh branch off it).
+```sh
+source ~/emsdk/emsdk_env.sh
+cd codecs/<codec>
+rm -rf node_modules/<lib>           # force a fresh source download of the new version
+# The codecs' Dockerfile sets these; replicate them natively:
+export CFLAGS="-O3 -flto"
+export CXXFLAGS="-O3 -flto -std=c++17"
+export LDFLAGS="-O3 -flto -s FILESYSTEM=0 -s ALLOW_MEMORY_GROWTH=1 -s TEXTDECODER=2 -s NODEJS_CATCH_EXIT=0 -s NODEJS_CATCH_REJECTION=0"
+emmake make                          # writes the new .js/.wasm into the codec dir
+cd ../..
+```
+
+### Modern-toolchain gotchas already discovered (emcc 5.x / clang 16)
+
+- **sync-script patch is now toolchain-agnostic** (`scripts/sync-sveltekit-app.mjs`)
+  — it matches both `new URL(...).toString()` (emsdk 2.0.x) and `.href` (current).
+  Done; no action needed. This is what makes modern-emcc rebuilds integrate.
+- **libwebp**: since v1.3.0 `libsharpyuv` is a separate archive — the Makefile now
+  links `libsharpyuv.a` after `libwebp.a`. The SIMD variant needs **`-msimd128`**
+  (else it silently collapses to the non-SIMD baseline) and
+  `-Wno-error=implicit-function-declaration` for clang-16 strictness. Done.
+- Expect similar friction on **libaom/libjxl** (clang-16 `-Werror` defaults,
+  per-file SIMD flags). Add `-Wno-error=...` flags as the compiler complains.
+- **Disk**: libaom and libjxl are multi-GB builds. Check `df -h` first.
+
+**Docker alternative:** if you prefer, `cd codecs/<codec> && npm install && npm
+run build` still works on a machine with Docker (the original path).
+
+## The loop (per codec)
+
+```sh
+# 1. Edit the version pin + any wrapper changes — see the runbook for this codec.
+#    (codec-upgrade-runbooks.md has the exact Makefile/Cargo + wrapper diffs.)
 
 ## The loop (per codec)
 
@@ -75,12 +108,13 @@ fails loudly instead of silently shipping garbage. **Run it after every codec.**
 
 **Do first — urgent (each ships a known CVE to any file a user drops in):**
 
-1. **libimagequant** 2.12.1 → 2.18.0 — trivial one-line `CODEC_URL` bump, same C
-   build. Do it first to warm up the Docker pipeline.
-2. **libwebp** → v1.6.0 — CVE-2023-4863. Watch the libsharpyuv coupling with AVIF
-   (build webp before/with avif).
+1. ✅ **libimagequant** 2.12.1 → 2.18.0 — **DONE** (commit `f5f2b922`), verified
+   (new quantize e2e test reduces to 4 colours correctly).
+2. ✅ **libwebp** → v1.6.0 — **DONE** (commit `c32fc2db`), CVE-2023-4863.
+   Byte-identical output, zero size/speed regression. (libsharpyuv split +
+   `-msimd128` SIMD fix handled — see the gotchas above.)
 3. **libavif + libaom** → latest 1.x / 3.x — CVE-2024-5171 (CVSS 9.8) + real
-   compression gain. Refresh the libsharpyuv pin alongside libwebp.
+   compression gain. **NEXT.** Heavy build (libaom); check disk first.
 4. **libjxl** → v0.11.x — 6 CVEs + faster lossless. **Isolate this one** (both
    Squoosh and jSquash are stuck on the same old commit → expect build friction;
    the `JxlEncoderOptions*` removal in v0.9 may need wrapper edits).
@@ -106,24 +140,26 @@ can't handle today. Independent of the rebuilds above.
 
 ---
 
-## Copy-paste prompt for a fresh AI session (on the Docker machine)
+## Copy-paste prompt for a fresh AI session
 
 > I'm working in the Sqush repo (a browser/WASM image compressor) on the
-> `codec-cleanup-and-threading` branch. Docker is installed. I want to execute
-> the **codec upgrades** that were prepared but couldn't be built in the previous
-> environment (no Docker there).
+> `codec-rebuilds` branch. libimagequant and libwebp are already upgraded +
+> verified; continue the remaining codec upgrades.
 >
-> Read `docs/codec-upgrade-handoff.md`, `docs/codec-upgrade-runbooks.md`, and
-> `docs/codec-upgrade-audit.md` first. Then work the codecs **in the priority
-> order in the handoff** (urgent CVE codecs 1–4 first: libimagequant, libwebp,
-> libavif+libaom, libjxl; then gradual 5–7: oxipng, mozjpeg, resize).
+> Read `docs/codec-upgrade-handoff.md` (esp. "Native build — NO DOCKER" + the
+> gotchas), `docs/codec-upgrade-runbooks.md`, and `docs/codec-upgrade-audit.md`
+> first. Set up the toolchain per the handoff (install Emscripten directly — no
+> Docker, no sudo). Then work the remaining codecs in priority order: **libavif +
+> libaom**, **libjxl** (urgent CVEs), then gradual oxipng, mozjpeg, resize.
 >
-> For each codec: make the version + wrapper changes from the runbook, build it
-> with `npm run build` inside `codecs/<codec>/`, then run `npm run check` and
-> `npm run test:e2e`. **Only commit a codec if both are green**; if a build or
-> test fails, revert that codec with `git checkout -- codecs/<codec>` and tell me
-> before moving on. Commit each codec separately with a clear message. Keep
-> `docs/codec-upgrade-audit.md` and `docs/STATUS.md` updated as you complete each
-> one. Run autonomously; only stop for me if a codec needs a real decision (e.g.
-> an upstream API change the runbook didn't anticipate, or an e2e failure you
-> can't resolve).
+> For each codec: bump the version + any wrapper changes from the runbook, build
+> it natively (`source ~/emsdk/emsdk_env.sh` + the env flags + `emmake make` in
+> `codecs/<codec>/`), then run `npm run check`, `npm run test:e2e`, `npm run
+> bench` + `npm run bench:compare`. **Only commit a codec if check + e2e are green
+> AND bench:compare shows no regression**; if a build or test fails, fix the build
+> flag (clang-16 wants `-Wno-error=...`; SIMD wants `-msimd128`) or revert that
+> codec (`git checkout -- codecs/<codec>`) and tell me. Commit each codec
+> separately; re-baseline the benchmark after each. Check `df -h` before libaom
+> and libjxl — they're multi-GB builds. Run autonomously; only stop for a real
+> decision (an upstream API change the runbook didn't anticipate, or a failure
+> you can't resolve).
