@@ -1,5 +1,10 @@
 CODEC_URL = https://github.com/libjxl/libjxl.git
-CODEC_VERSION = 9f544641ec83f6abd9da598bdd08178ee8a003e0
+# v0.8.5 = tip of the 0.8.x branch (Path A). Keeps libjxl's INTERNAL C++ API
+# (enc_file.h / enc_color_management.h / EncodeFile / GetJxlCms) that the encoder
+# wrapper uses — removed at v0.9.0+. Fixes CVE-2023-0645, CVE-2023-35790,
+# CVE-2025-12474. CVE-2026-1837 is LCMS2-only and we link skcms, so N/A.
+# Upgrading past 0.8.x = a full public-C-API encoder rewrite (Path B), deferred.
+CODEC_VERSION = v0.8.5
 CODEC_DIR = node_modules/jxl
 CODEC_BUILD_ROOT := $(CODEC_DIR)/build
 CODEC_MT_BUILD_DIR := $(CODEC_BUILD_ROOT)/mt
@@ -84,7 +89,7 @@ $(CODEC_DIR)/CMakeLists.txt:
 	git init $(@D)
 	git -C $(@D) fetch $(CODEC_URL) $(CODEC_VERSION) --depth 1
 	git -C $(@D) checkout FETCH_HEAD
-	git -C $(@D) submodule update --init --depth 1 --recursive --jobs `nproc`
+	git -C $(@D) submodule update --init --depth 1 --recursive --jobs `nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 4`
 
 clean:
 	$(RM) $(OUT_JS) $(OUT_WASM) $(OUT_WORKER)

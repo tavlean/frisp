@@ -1,6 +1,6 @@
 {
   "label": "current",
-  "generatedAt": "2026-06-02T09:35:31.872Z",
+  "generatedAt": "2026-06-02T10:48:50.517Z",
   "machine": {
     "cores": 11,
     "isolated": true,
@@ -17,12 +17,12 @@
           "label": "WebP",
           "ok": true,
           "outputBytes": 49372,
-          "coldMs": 211,
-          "medianMs": 203,
+          "coldMs": 237,
+          "medianMs": 202,
           "runsMs": [
             202,
-            211,
-            203
+            200,
+            202
           ]
         },
         {
@@ -30,25 +30,25 @@
           "label": "AVIF",
           "ok": true,
           "outputBytes": 29874,
-          "coldMs": 609,
+          "coldMs": 594,
           "medianMs": 585,
           "runsMs": [
-            576,
             585,
-            585
+            585,
+            577
           ]
         },
         {
           "format": "jxl",
           "label": "JPEG XL",
           "ok": true,
-          "outputBytes": 59585,
-          "coldMs": 848,
-          "medianMs": 848,
+          "outputBytes": 56171,
+          "coldMs": 816,
+          "medianMs": 793,
           "runsMs": [
-            848,
-            840,
-            848
+            793,
+            792,
+            800
           ]
         },
         {
@@ -56,12 +56,12 @@
           "label": "MozJPEG",
           "ok": true,
           "outputBytes": 74780,
-          "coldMs": 193,
+          "coldMs": 186,
           "medianMs": 193,
           "runsMs": [
             193,
             193,
-            186
+            185
           ]
         },
         {
@@ -69,12 +69,12 @@
           "label": "OxiPNG",
           "ok": true,
           "outputBytes": 763645,
-          "coldMs": 858,
-          "medianMs": 850,
+          "coldMs": 864,
+          "medianMs": 857,
           "runsMs": [
             857,
-            849,
-            850
+            857,
+            857
           ]
         },
         {
@@ -82,12 +82,12 @@
           "label": "QOI",
           "ok": true,
           "outputBytes": 970632,
-          "coldMs": 145,
-          "medianMs": 145,
+          "coldMs": 144,
+          "medianMs": 144,
           "runsMs": [
+            138,
             145,
-            144,
-            145
+            144
           ]
         }
       ]
@@ -102,11 +102,11 @@
           "label": "WebP",
           "ok": true,
           "outputBytes": 3102,
-          "coldMs": 137,
-          "medianMs": 136,
+          "coldMs": 136,
+          "medianMs": 137,
           "runsMs": [
-            144,
-            136,
+            137,
+            137,
             136
           ]
         },
@@ -115,11 +115,11 @@
           "label": "AVIF",
           "ok": true,
           "outputBytes": 1213,
-          "coldMs": 376,
+          "coldMs": 385,
           "medianMs": 377,
           "runsMs": [
-            377,
-            368,
+            378,
+            370,
             377
           ]
         },
@@ -127,13 +127,13 @@
           "format": "jxl",
           "label": "JPEG XL",
           "ok": true,
-          "outputBytes": 5066,
-          "coldMs": 441,
-          "medianMs": 441,
+          "outputBytes": 4915,
+          "coldMs": 409,
+          "medianMs": 402,
           "runsMs": [
-            440,
-            442,
-            441
+            403,
+            402,
+            400
           ]
         },
         {
@@ -141,10 +141,10 @@
           "label": "MozJPEG",
           "ok": true,
           "outputBytes": 6778,
-          "coldMs": 137,
+          "coldMs": 138,
           "medianMs": 137,
           "runsMs": [
-            137,
+            136,
             137,
             137
           ]
@@ -155,11 +155,11 @@
           "ok": true,
           "outputBytes": 1290,
           "coldMs": 193,
-          "medianMs": 193,
+          "medianMs": 185,
           "runsMs": [
-            193,
-            194,
-            185
+            185,
+            184,
+            193
           ]
         },
         {
@@ -167,12 +167,12 @@
           "label": "QOI",
           "ok": true,
           "outputBytes": 6502,
-          "coldMs": 121,
-          "medianMs": 120,
+          "coldMs": 120,
+          "medianMs": 121,
           "runsMs": [
             121,
-            120,
-            120
+            121,
+            121
           ]
         }
       ]
@@ -187,12 +187,12 @@
           "label": "WebP",
           "ok": true,
           "outputBytes": 2600,
-          "coldMs": 178,
+          "coldMs": 177,
           "medianMs": 177,
           "runsMs": [
             177,
-            177,
-            176
+            176,
+            186
           ]
         },
         {
@@ -200,25 +200,25 @@
           "label": "AVIF",
           "ok": true,
           "outputBytes": 2832,
-          "coldMs": 419,
-          "medianMs": 417,
+          "coldMs": 425,
+          "medianMs": 424,
           "runsMs": [
-            416,
-            417,
-            417
+            424,
+            432,
+            419
           ]
         },
         {
           "format": "jxl",
           "label": "JPEG XL",
           "ok": true,
-          "outputBytes": 6296,
-          "coldMs": 433,
-          "medianMs": 432,
+          "outputBytes": 5999,
+          "coldMs": 392,
+          "medianMs": 401,
           "runsMs": [
-            433,
-            424,
-            432
+            401,
+            402,
+            401
           ]
         },
         {
@@ -226,12 +226,12 @@
           "label": "MozJPEG",
           "ok": true,
           "outputBytes": 6569,
-          "coldMs": 136,
+          "coldMs": 137,
           "medianMs": 137,
           "runsMs": [
             137,
             137,
-            137
+            129
           ]
         },
         {
@@ -239,12 +239,12 @@
           "label": "OxiPNG",
           "ok": true,
           "outputBytes": 3042,
-          "coldMs": 289,
-          "medianMs": 297,
+          "coldMs": 298,
+          "medianMs": 296,
           "runsMs": [
+            296,
             297,
-            297,
-            297
+            296
           ]
         },
         {
@@ -252,11 +252,11 @@
           "label": "QOI",
           "ok": true,
           "outputBytes": 110406,
-          "coldMs": 120,
-          "medianMs": 120,
+          "coldMs": 121,
+          "medianMs": 121,
           "runsMs": [
-            120,
-            120,
+            122,
+            121,
             121
           ]
         }
@@ -273,9 +273,9 @@
           "ok": true,
           "outputBytes": 285856,
           "coldMs": 0,
-          "medianMs": 1220,
+          "medianMs": 1240,
           "runsMs": [
-            1220
+            1240
           ]
         },
         {
@@ -284,20 +284,20 @@
           "ok": true,
           "outputBytes": 129823,
           "coldMs": 0,
-          "medianMs": 15003,
+          "medianMs": 15675,
           "runsMs": [
-            15003
+            15675
           ]
         },
         {
           "format": "jxl",
           "label": "JPEG XL",
           "ok": true,
-          "outputBytes": 400240,
+          "outputBytes": 376439,
           "coldMs": 0,
-          "medianMs": 11196,
+          "medianMs": 10954,
           "runsMs": [
-            11196
+            10954
           ]
         },
         {
@@ -306,9 +306,9 @@
           "ok": true,
           "outputBytes": 583978,
           "coldMs": 0,
-          "medianMs": 961,
+          "medianMs": 963,
           "runsMs": [
-            961
+            963
           ]
         },
         {
@@ -317,9 +317,9 @@
           "ok": true,
           "outputBytes": 6363066,
           "coldMs": 0,
-          "medianMs": 15612,
+          "medianMs": 15556,
           "runsMs": [
-            15612
+            15556
           ]
         },
         {
@@ -328,9 +328,9 @@
           "ok": true,
           "outputBytes": 11066948,
           "coldMs": 0,
-          "medianMs": 544,
+          "medianMs": 538,
           "runsMs": [
-            544
+            538
           ]
         }
       ]

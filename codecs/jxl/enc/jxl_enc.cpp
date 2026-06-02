@@ -8,8 +8,6 @@
 
 using namespace emscripten;
 
-thread_local const val Uint8Array = val::global("Uint8Array");
-
 struct JXLOptions {
   int effort;
   float quality;
@@ -51,25 +49,18 @@ val encode(std::string image, int width, int height, JXLOptions options) {
 
   float quality = options.quality;
 
-  // Quality settings roughly match libjpeg qualities.
-  if (options.lossyModular || quality == 100) {
-    cparams.modular_mode = true;
-    // Internal modular quality to roughly match VarDCT size.
-    if (quality < 7) {
-      cparams.quality_pair.first = cparams.quality_pair.second =
-          std::min(35 + (quality - 7) * 3.0f, 100.0f);
-    } else {
-      cparams.quality_pair.first = cparams.quality_pair.second =
-          std::min(35 + (quality - 7) * 65.f / 93.f, 100.0f);
-    }
+  // Quality settings roughly match libjpeg qualities. libjxl v0.8 drives BOTH
+  // VarDCT and modular modes from butteraugli_distance (lower = better quality);
+  // the old modular-only `quality_pair` field was removed, so map quality ->
+  // distance for both. quality == 100 -> distance 0 == lossless.
+  if (quality >= 100) {
+    cparams.butteraugli_distance = 0.0f;
+  } else if (quality >= 30) {
+    cparams.butteraugli_distance = 0.1 + (100 - quality) * 0.09;
   } else {
-    cparams.modular_mode = false;
-    if (quality >= 30) {
-      cparams.butteraugli_distance = 0.1 + (100 - quality) * 0.09;
-    } else {
-      cparams.butteraugli_distance = 6.4 + pow(2.5, (30 - quality) / 5.0f) / 6.25f;
-    }
+    cparams.butteraugli_distance = 6.4 + pow(2.5, (30 - quality) / 5.0f) / 6.25f;
   }
+  cparams.modular_mode = (options.lossyModular || quality == 100);
 
   if (options.progressive) {
     cparams.qprogressive_mode = true;
@@ -80,7 +71,8 @@ val encode(std::string image, int width, int height, JXLOptions options) {
   }
 
   if (cparams.modular_mode) {
-    if (cparams.quality_pair.first != 100 || cparams.quality_pair.second != 100) {
+    // Lossless modular (distance 0) keeps exact RGB (no XYB); lossy uses XYB.
+    if (cparams.butteraugli_distance != 0.0f) {
       cparams.color_transform = jxl::ColorTransform::kXYB;
     } else {
       cparams.color_transform = jxl::ColorTransform::kNone;
@@ -92,21 +84,28 @@ val encode(std::string image, int width, int height, JXLOptions options) {
     return val::null();
   }
 
-  uint8_t* inBuffer = (uint8_t*)image.c_str();
-
+  // libjxl v0.8 ConvertFromExternal takes a JxlPixelFormat instead of the old
+  // has_alpha/endianness/float_in args. 4 channels = RGBA (alpha comes from the
+  // SetAlphaBits(8) above); UINT8 little-endian matches the input buffer.
+  JxlPixelFormat format = {/*num_channels=*/4, /*data_type=*/JXL_TYPE_UINT8,
+                           /*endianness=*/JXL_LITTLE_ENDIAN, /*align=*/0};
   auto result = jxl::ConvertFromExternal(
       jxl::Span<const uint8_t>(reinterpret_cast<const uint8_t*>(image.data()), image.size()), width,
-      height, jxl::ColorEncoding::SRGB(/*is_gray=*/false), /*has_alpha=*/true,
-      /*alpha_is_premultiplied=*/false, /*bits_per_sample=*/8, /*endiannes=*/JXL_LITTLE_ENDIAN,
-      /*flipped_y=*/false, pool_ptr, main, /*(only true if bits_per_sample==32) float_in=*/false);
+      height, jxl::ColorEncoding::SRGB(/*is_gray=*/false), /*bits_per_sample=*/8, format, pool_ptr,
+      main);
 
   if (!result) {
     return val::null();
   }
 
   auto js_result = val::null();
-  if (EncodeFile(cparams, &io, &passes_enc_state, &bytes, jxl::GetJxlCms(), /*aux=*/nullptr, pool_ptr)) {
-    js_result = Uint8Array.new_(typed_memory_view(bytes.size(), bytes.data()));
+  if (EncodeFile(cparams, &io, &passes_enc_state, &bytes, jxl::GetJxlCms(), /*aux=*/nullptr,
+                 pool_ptr)) {
+    // Resolve the Uint8Array constructor at call time rather than via a
+    // namespace-scope `thread_local val::global(...)`: in this large module on
+    // emcc 3.1.0 the static-init handle can be created before the JS runtime is
+    // ready, yielding an invalid emval handle that throws when `.new_` is used.
+    js_result = val::global("Uint8Array").new_(typed_memory_view(bytes.size(), bytes.data()));
   }
 
   return js_result;

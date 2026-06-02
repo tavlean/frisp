@@ -8,9 +8,6 @@
 
 using namespace emscripten;
 
-thread_local const val Uint8ClampedArray = val::global("Uint8ClampedArray");
-thread_local const val ImageData = val::global("ImageData");
-
 // R, G, B, A
 #define COMPONENTS_PER_PIXEL 4
 
@@ -89,9 +86,14 @@ val decode(std::string data) {
       &jxl_profile, byte_pixels.get(), skcms_PixelFormat_RGBA_8888, skcms_AlphaFormat_Unpremul,
       skcms_sRGB_profile(), pixel_count));
 
-  return ImageData.new_(
-      Uint8ClampedArray.new_(typed_memory_view(component_count, byte_pixels.get())), info.xsize,
-      info.ysize);
+  // Resolve the JS constructors at call time rather than via namespace-scope
+  // `thread_local val::global(...)`: the static-init handles can be created
+  // before the JS runtime is ready in this module on emcc 3.1.0, yielding an
+  // invalid emval handle that throws when `.new_` is used.
+  return val::global("ImageData")
+      .new_(val::global("Uint8ClampedArray")
+                .new_(typed_memory_view(component_count, byte_pixels.get())),
+            info.xsize, info.ysize);
 }
 
 EMSCRIPTEN_BINDINGS(my_module) {
