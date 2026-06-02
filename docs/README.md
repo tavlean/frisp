@@ -18,20 +18,26 @@ The order to work things, highest priority first. "Urgency" flags genuine
 time-pressure (security); everything else is value/effort.
 
 > **Recently landed on branch `codec-cleanup-and-threading`** (pending merge to
-> `main`): cross-origin isolation **done & verified** (e2e-test-protected),
-> **WebP 2 removed** end to end, **dead code deleted** (`codecs/png/`,
-> `codecs/visdif/`, `storage.ts`), and a **Playwright e2e suite** (`npm run
-> test:e2e`) that encodes through every codec. See [STATUS.md](STATUS.md).
+> `main`): **all 7 WASM codecs rebuilt natively (no Docker)** — imagequant 2.18.0,
+> libwebp v1.6.0, libavif v1.4.2 + libaom v3.12.1, libjxl v0.8.5, oxipng 10.1.1,
+> mozjpeg v4.1.5, resize 0.8.9 — every CVE in scope fixed, verified by a 17-test
+> Playwright e2e suite **+ a WebKit (Safari engine) project** + the benchmark, no
+> regressions. Earlier work (cross-origin isolation, WebP2 removal, dead-code
+> deletion) is on `codec-cleanup-and-threading`. See [STATUS.md](STATUS.md) and the
+> journey log below.
 
-| # | Track | Plan | Urgency | Why |
-|---|-------|------|---------|-----|
-| 1 | **Codec security rebuilds** | [codec-upgrade-handoff.md](codec-upgrade-handoff.md) · [codec-upgrade-runbooks.md](codec-upgrade-runbooks.md) · [codec-upgrade-audit.md](codec-upgrade-audit.md) §7 | 🔴 **Urgent** | libwebp / libavif+libaom / libjxl each ship a known **CVE** to any file a user drops in. Plus the trivial libimagequant bump. **Turnkey handoff + runbooks now exist**; needs Docker (not installed here) — run on a Docker machine or CI. |
-| 2 | **Wire threaded MT runtime** | [threading-enablement.md](threading-enablement.md) | 🟢 Deferred | Cross-origin isolation is **done + verified + test-protected**. The threaded runtime itself is a *deliberately-disabled subsystem* (generator stubs it); re-enabling needs Emscripten/Safari nested-worker work + cross-browser human verification. Own session. |
-| 3 | **Gradual codec upgrades** | [codec-upgrade-runbooks.md](codec-upgrade-runbooks.md) · [codec-upgrade-audit.md](codec-upgrade-audit.md) §7 "do later" | ⚪ When convenient | OxiPNG, mozjpeg, resize — real value, more effort (API/build changes), no urgency. Same runbooks doc. |
-| 4 | **Investigate new codecs** | [new-codec-investigation.md](new-codec-investigation.md) | ⚪ Investigate | Researched, **not added**: SVGO for vector (do first), HEIC decode-in (later), jpegli / JPEG→JXL transcode (skip). Decide later. |
-| 5 | **Product features** | [road-map.md](road-map.md) | ⚪ Later | Multi-Format Compare (needs #1), then bulk optimization. |
+| # | Track | Plan | Status | Why |
+|---|-------|------|--------|-----|
+| 1 | **Wire threaded MT runtime (oxipng first)** | [threading-enablement.md](threading-enablement.md) | 🟡 **Active / blocked** | The make-or-break Safari nested-worker unknown is now **proven solvable** (WebKit e2e). The full oxipng wiring is **built and structurally working** on branch `oxipng-threading-wip`; blocked on ONE thing — the threaded wasm ships a non-shared `WebAssembly.Memory`. This is the next focused session. |
+| 2 | **Investigate new codecs** | [new-codec-investigation.md](new-codec-investigation.md) | ⚪ Investigate | Researched, **not added**: SVGO for vector (do first), HEIC decode-in (later), jpegli / JPEG→JXL transcode (skip). Decide later. |
+| 3 | **Product features** | [road-map.md](road-map.md) | ⚪ Later | Multi-Format Compare (now unblocked — codecs done; benefits from threading), then bulk optimization. |
+| ✓ | **Codec security rebuilds** | [codec-build-notes.md](codec-build-notes.md) · [codec-upgrade-audit.md](codec-upgrade-audit.md) | **✅ DONE** | All 7 codecs upgraded natively on `codec-rebuilds` (CVEs fixed; some faster). The engineering record is `codec-build-notes.md`; the planning docs (handoff/runbooks/audit) are now historical. |
 | ✓ | **Codec surface cleanup** | [codec-surface-cleanup.md](codec-surface-cleanup.md) | **Done** | WebP 2 removed; dead `codecs/png/` + `codecs/visdif/` + `storage.ts` deleted. Kept as the removal record. |
 | — | **Svelte cleanup remnants** | [svelte-hardening-plan.md](svelte-hardening-plan.md) | ⚪ Ongoing | Waves mostly done; Wave 2b + deferred items + the [codec-options-model.md](codec-options-model.md) project remain. Pick up between the above. |
+
+> **Writing the articles?** [journey-and-article-notes.md](journey-and-article-notes.md)
+> is the source material — every task, problem, and solution for both planned
+> write-ups (the SvelteKit migration + the codec sweep).
 
 ---
 

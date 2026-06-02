@@ -89,12 +89,25 @@ browser, the build is static, and offline reload must work after load.
   corpus was expanded 4 → 9 (added gradient, gradient-dithered, hard-edges,
   noise-synthetic, screenshot). The deep engineering record of HOW each codec was
   built (toolchains, gotchas, bugs) lives in
-  [codec-build-notes.md](codec-build-notes.md). Still deferred (NOT done): wiring
-  the multi-threaded (`_mt`) codec runtime — needs Safari testing; the `_mt`
-  variants are built but unused (`supportsThreads()` returns false). The
+  [codec-build-notes.md](codec-build-notes.md). The
   [new-codec-investigation.md](new-codec-investigation.md) records a
   researched-but-not-added shortlist (SVGO first, HEIC-decode later, jpegli /
   JPEG→JXL skip). Full docs map: [README.md](README.md).
+
+- MT threading POC (2026-06-02): **the deferral reason is gone, and the wiring is
+  built.** Using Playwright's WebKit (Safari's engine), `tests/e2e/threads-support.spec.ts`
+  proves modern Safari supports nested workers + SharedArrayBuffer (the *one*
+  reason this was parked). The full oxipng threaded-runtime wiring is built and
+  structurally works (Vite bundles the nested rayon worker; both engines encode) —
+  preserved on branch **`oxipng-threading-wip`**. **Blocked on one thing:** the
+  threaded `pkg-parallel` wasm ships a non-shared `WebAssembly.Memory` → rayon's
+  `postMessage(memory)` throws `DataCloneError` → single-thread fallback. `codec-rebuilds`
+  stays on clean single-thread. Exact diagnosis + next steps:
+  [threading-enablement.md](threading-enablement.md) → "POC status". **This is the
+  active next item.**
+
+- **Writing the articles** (migration + codec sweep): the task/problem/solution
+  source material is in [journey-and-article-notes.md](journey-and-article-notes.md).
 
 ## Product Scope For Launch
 
