@@ -27,6 +27,13 @@ const config = {
     }),
     serviceWorker: {
       register: false,
+      // `static/_headers` is a host-side config file (Netlify/Cloudflare consume
+      // it to set the COOP/COEP cross-origin-isolation headers); it is not a
+      // fetchable asset, so keep it out of the service-worker precache manifest
+      // or `cache.addAll` would reject on its 404. Mirrors the SvelteKit default
+      // that drops `.DS_Store`.
+      files: (filename) =>
+        !/\.DS_Store/.test(filename) && filename !== '_headers',
     },
   },
 };

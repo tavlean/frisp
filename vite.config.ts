@@ -4,6 +4,16 @@ import { defineConfig } from 'vite';
 
 const repoRoot = fileURLToPath(new URL('.', import.meta.url));
 
+// Cross-origin isolation headers. WASM threads need SharedArrayBuffer, which is
+// only available when the page is cross-origin isolated. These restore the
+// COOP/COEP pair that upstream Squoosh shipped (dropped when the app moved to
+// root), so the existing multithreaded codec builds (_mt / _mt_simd / parallel)
+// can light up. Production hosts get the same pair via static/_headers.
+const crossOriginIsolationHeaders = {
+  'Cross-Origin-Opener-Policy': 'same-origin',
+  'Cross-Origin-Embedder-Policy': 'require-corp',
+};
+
 export default defineConfig({
   plugins: [sveltekit()],
   build: {
@@ -44,8 +54,12 @@ export default defineConfig({
     },
   },
   server: {
+    headers: crossOriginIsolationHeaders,
     fs: {
       allow: [repoRoot],
     },
+  },
+  preview: {
+    headers: crossOriginIsolationHeaders,
   },
 });
