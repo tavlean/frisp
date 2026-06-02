@@ -15,20 +15,17 @@
     "check": "npm run format:check && npm run sync && svelte-kit sync && svelte-check --tsconfig ./tsconfig.json && npm run build && npm run audit:static-output",
     "audit": "npm audit --audit-level=low",
     "dev": "vite dev",
-    "format": "prettier --write \"**/*.{js,css,json,md,ts,tsx,svelte}\"",
-    "format:check": "prettier --check \"**/*.{js,css,json,md,ts,tsx,svelte}\"",
+    "format": "prettier --write \"**/*.{js,css,json,ts,tsx,svelte}\"",
+    "format:check": "prettier --check \"**/*.{js,css,json,ts,tsx,svelte}\"",
     "preview": "vite preview",
     "sync": "node scripts/sync-sveltekit-app.mjs",
-    "test": "npm run check",
-    "prepare": "husky install"
+    "test": "npm run check"
   },
   "devDependencies": {
     "@sveltejs/adapter-static": "3.0.10",
     "@sveltejs/kit": "2.61.1",
     "@sveltejs/vite-plugin-svelte": "7.1.2",
     "comlink": "^4.4.2",
-    "husky": "^7.0.4",
-    "lint-staged": "^10.5.4",
     "pointer-tracker": "^2.5.3",
     "prettier": "^3.8.3",
     "prettier-plugin-svelte": "^4.0.1",
@@ -40,10 +37,5 @@
   },
   "overrides": {
     "cookie": "1.1.1"
-  },
-  "lint-staged": {
-    "*.{js,css,json,md,ts,tsx,svelte}": "prettier --write",
-    "*.{c,h,cpp,hpp}": "clang-format -i",
-    "*.rs": "rustfmt"
   }
 }
