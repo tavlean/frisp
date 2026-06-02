@@ -18,14 +18,15 @@ The order to work things, highest priority first. "Urgency" flags genuine
 time-pressure (security); everything else is value/effort.
 
 > **Recently landed on branch `codec-cleanup-and-threading`** (pending merge to
-> `main`): multithreading **config** (COOP/COEP headers — in-browser verify still
-> open), **WebP 2 removed** end to end, and **dead code deleted** (`codecs/png/`,
-> `codecs/visdif/`, `storage.ts`). See [STATUS.md](STATUS.md) for details.
+> `main`): cross-origin isolation **done & verified** (e2e-test-protected),
+> **WebP 2 removed** end to end, **dead code deleted** (`codecs/png/`,
+> `codecs/visdif/`, `storage.ts`), and a **Playwright e2e suite** (`npm run
+> test:e2e`) that encodes through every codec. See [STATUS.md](STATUS.md).
 
 | # | Track | Plan | Urgency | Why |
 |---|-------|------|---------|-----|
-| 1 | **Finish multithreading** | [threading-enablement.md](threading-enablement.md) | 🟢 In progress | Headers are **set** (COOP/COEP); the remaining work is the **in-browser verification** — `crossOriginIsolated`, the three seams (Safari nested workers, helper-asset URLs, SW cache), and per-codec `_mt` loading. Biggest perf win; unlocks Multi-Format Compare. |
-| 2 | **Codec security rebuilds** | [codec-upgrade-runbooks.md](codec-upgrade-runbooks.md) · [codec-upgrade-audit.md](codec-upgrade-audit.md) §7 "do now" | 🔴 **Urgent** | libwebp / libavif+libaom / libjxl each ship a known **CVE** to any file a user drops in. Plus the trivial libimagequant bump. **Turnkey runbooks now exist**; needs the WASM toolchain (not installed here) — run locally/CI. |
+| 1 | **Codec security rebuilds** | [codec-upgrade-handoff.md](codec-upgrade-handoff.md) · [codec-upgrade-runbooks.md](codec-upgrade-runbooks.md) · [codec-upgrade-audit.md](codec-upgrade-audit.md) §7 | 🔴 **Urgent** | libwebp / libavif+libaom / libjxl each ship a known **CVE** to any file a user drops in. Plus the trivial libimagequant bump. **Turnkey handoff + runbooks now exist**; needs Docker (not installed here) — run on a Docker machine or CI. |
+| 2 | **Wire threaded MT runtime** | [threading-enablement.md](threading-enablement.md) | 🟢 Deferred | Cross-origin isolation is **done + verified + test-protected**. The threaded runtime itself is a *deliberately-disabled subsystem* (generator stubs it); re-enabling needs Emscripten/Safari nested-worker work + cross-browser human verification. Own session. |
 | 3 | **Gradual codec upgrades** | [codec-upgrade-runbooks.md](codec-upgrade-runbooks.md) · [codec-upgrade-audit.md](codec-upgrade-audit.md) §7 "do later" | ⚪ When convenient | OxiPNG, mozjpeg, resize — real value, more effort (API/build changes), no urgency. Same runbooks doc. |
 | 4 | **Investigate new codecs** | [new-codec-investigation.md](new-codec-investigation.md) | ⚪ Investigate | Researched, **not added**: SVGO for vector (do first), HEIC decode-in (later), jpegli / JPEG→JXL transcode (skip). Decide later. |
 | 5 | **Product features** | [road-map.md](road-map.md) | ⚪ Later | Multi-Format Compare (needs #1), then bulk optimization. |
@@ -47,10 +48,13 @@ time-pressure (security); everything else is value/effort.
 - [codec-upgrade-audit.md](codec-upgrade-audit.md) — **audit + action plan** for
   every codec: current vs latest upstream, CVEs, compression/speed wins, new
   codecs, WebP2 verdict, SVG. The authoritative codec-currency doc (the "why").
+- [codec-upgrade-handoff.md](codec-upgrade-handoff.md) — **how to actually build
+  the upgrades**: prerequisite (Docker), the per-codec build+verify+commit loop,
+  the priority order, and a copy-paste prompt for a fresh AI session on a Docker
+  machine. Start here when you're ready to run the rebuilds.
 - [codec-upgrade-runbooks.md](codec-upgrade-runbooks.md) — **turnkey per-codec
-  upgrade steps** (the "how"): exact Makefile/Cargo edits, wrapper API notes,
-  build commands, and verification per codec. Run later locally/CI (the WASM
-  toolchain is not installed here).
+  upgrade steps** (the "how" details): exact Makefile/Cargo edits, wrapper API
+  notes, build commands, and verification per codec.
 - [new-codec-investigation.md](new-codec-investigation.md) — researched-but-**not
   added** candidates (SVGO, HEIC-decode, jpegli, JPEG→JXL transcode); decision
   material, not a plan to execute.
@@ -67,6 +71,16 @@ time-pressure (security); everything else is value/effort.
 - [bulk-image-architecture.md](bulk-image-architecture.md) — technical reference
   for the future bulk-optimization feature.
 - [issue-list.md](issue-list.md) — small backlog seed / loose open items.
+
+## Testing
+
+- **Static gate:** `npm run check` (format, svelte-check, build, asset audit).
+- **Browser regression:** `npm run test:e2e` (Playwright, `tests/e2e/`) — boots
+  the production preview cross-origin-isolated and encodes through every codec,
+  asserting valid output bytes; plus offline reload. **Run after any codec/build
+  change.** `npm test` runs both.
+- **Manual / release QA:** [manual-qa.md](manual-qa.md) for what still needs eyes
+  (visual quality, Safari/Firefox, mobile layout).
 
 ## Reference (stable)
 

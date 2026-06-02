@@ -44,14 +44,15 @@ browser, the build is static, and offline reload must work after load.
 - Codec audit (2026-06-02): a full codec version + landscape audit ran (see
   [codec-upgrade-audit.md](codec-upgrade-audit.md)). Several outcomes have now
   **landed on the `codec-cleanup-and-threading` branch** (not yet on `main`):
-  - **Multithreading config landed (commit `27ae8b88`) — pending in-browser
-    verify.** COOP `same-origin` + COEP `require-corp` are now set in
-    `vite.config.ts` (dev + preview) and `static/_headers` (host), with
-    `static/_headers` excluded from the SW precache manifest in
-    `svelte.config.js`. The headers are the easy half;
-    `self.crossOriginIsolated`, the three seams (Safari nested workers, codec
-    helper-asset URLs, SW cache), and per-codec `_mt` loading still need a human
-    at a browser. See [threading-enablement.md](threading-enablement.md).
+  - **Cross-origin isolation DONE & verified (commits `27ae8b88`, `09f08f22`).**
+    COOP `same-origin` + COEP `require-corp` ship via a Vite middleware plugin
+    (dev + preview) and `static/_headers` (host). Verified in the production
+    preview: `self.crossOriginIsolated === true`, `SharedArrayBuffer` available —
+    and the e2e suite now **asserts** it so it can't regress. NOTE: the threaded
+    `_mt` runtime itself is still off — the code generator deliberately stubs it
+    (`supportsThreads: () => false`), so re-enabling it is a separate focused
+    subsystem task (Emscripten/Safari nested workers). See
+    [threading-enablement.md](threading-enablement.md).
   - **WebP 2 removed completely (commit `962bdd0f`)** — encoder and decoder,
     `codecs/wp2/`, the features/options wiring, and all data-driven references.
     See [codec-surface-cleanup.md](codec-surface-cleanup.md).
@@ -59,11 +60,17 @@ browser, the build is static, and offline reload must work after load.
     and the orphan `src/client/lazy-app/storage.ts`. See
     [codec-surface-cleanup.md](codec-surface-cleanup.md).
 
+  - **Automated test harness added (commit `97eaaf3c`).** A Playwright e2e suite
+    (`tests/e2e/`, `npm run test:e2e`) boots the production preview cross-origin
+    isolated and encodes through every codec asserting valid output bytes, plus
+    offline reload. This is the regression net for the codec rebuilds — run it
+    after each one. `npm test` now runs `check` + e2e.
+
   Still outstanding from the audit (not started): the **urgent** security-driven
-  codec rebuilds (libwebp, libavif/libaom, libjxl) + the easy libimagequant bump
-  — now with **turnkey per-codec steps** in
-  [codec-upgrade-runbooks.md](codec-upgrade-runbooks.md) (the WASM toolchain is
-  not installed here, so they run later locally/CI). The
+  codec rebuilds (libwebp, libavif/libaom, libjxl) + the easy libimagequant bump.
+  These only need **Docker** to build — [codec-upgrade-handoff.md](codec-upgrade-handoff.md)
+  is the build+verify+commit loop (with a fresh-session prompt), backed by the
+  per-codec [codec-upgrade-runbooks.md](codec-upgrade-runbooks.md). The
   [new-codec-investigation.md](new-codec-investigation.md) records a
   researched-but-not-added shortlist (SVGO first, HEIC-decode later, jpegli /
   JPEG→JXL skip). Full docs map: [README.md](README.md).
@@ -120,12 +127,17 @@ npm install
 npm run dev
 npm run build
 npm run preview
-npm run check
+npm run check       # static gate
+npm run test:e2e    # browser regression (Playwright; builds + previews)
+npm test            # check + e2e together
 npm run audit
 ```
 
-`npm run check` is the standard gate: formatting check, generator sync,
-SvelteKit sync, `svelte-check`, production build, and static-output audit.
+`npm run check` is the static gate: formatting check, generator sync, SvelteKit
+sync, `svelte-check`, production build, and static-output audit. `npm run
+test:e2e` is the browser regression net (`tests/e2e/`): it boots the production
+preview cross-origin isolated and encodes through every codec asserting valid
+output, plus offline reload — **run it after any codec or build change.**
 
 ## Verification State
 

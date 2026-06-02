@@ -3,6 +3,13 @@
 Use this before releases and after changes touching build tooling, workers,
 codecs, service workers, image processing, or editor behavior.
 
+> **Much of the per-format encode smoke is now automated** — `npm run test:e2e`
+> (Playwright, `tests/e2e/`) loads an image and encodes through every codec
+> asserting valid output bytes, checks cross-origin isolation, and tests offline
+> reload, all against the production preview. Run it first; this manual checklist
+> is for what automation can't judge: **visual quality**, real-photo results,
+> **Safari/Firefox**, and mobile layout.
+
 ## Setup
 
 ```sh

@@ -76,6 +76,25 @@ or Emscripten `locateFile`.
 `npm run audit:static-output` verifies the build emits one physical WASM copy
 per logical asset and that the service worker references the expected assets.
 
+The build emits **single-thread codec variants only.** The generator
+(`sync-sveltekit-app.mjs`) deliberately stubs the multithread runtime
+(`supportsThreads: () => false`), so the `_mt` / `pkg-parallel` builds are never
+imported and `audit:static-output` asserts their helper assets are absent. The
+data contract (`src/shared/codec-assets.ts`) already has `multi-thread` /
+`worker-helper` / `threaded-only` hooks for a future re-enablement — see
+[threading-enablement.md](threading-enablement.md). Cross-origin isolation
+(COOP/COEP) is enabled via the `sqush-cross-origin-isolation` Vite plugin in
+`vite.config.ts` (dev + preview) and `static/_headers` (host).
+
+## Tests
+
+- `npm run check` — static gate (format, svelte-check, build, asset audit).
+- `npm run test:e2e` — Playwright browser regression (`tests/e2e/`): boots the
+  production preview, asserts cross-origin isolation, encodes through every
+  codec asserting valid output magic bytes, and tests SW offline reload. The
+  webServer builds + previews automatically. **Run after any codec/build change.**
+- `npm test` runs both.
+
 ## Formatting
 
 Prettier is the formatter (`.prettierrc.json`). Run it manually:
