@@ -1,27 +1,36 @@
 # Threading Enablement (COOP/COEP) — Plan
 
-Last updated: 2026-06-02. Status: **config landed on branch — pending in-browser
-verification.** Owner: solo. Priority: **high (performance).**
+Last updated: 2026-06-02. Status: **isolation VERIFIED working in dev — two seams
+remain before it's done in production.** Owner: solo. Priority: **high (performance).**
 
 Read [STATUS.md](STATUS.md) for live state. This finishes a **parked migration
 item**, it is not new greenfield work.
 
-> **What landed (branch `codec-cleanup-and-threading`, commit `27ae8b88`):** the
-> cross-origin isolation headers are now set in the build (Plan step 1 below).
-> `vite.config.ts` sets `Cross-Origin-Opener-Policy: same-origin` +
-> `Cross-Origin-Embedder-Policy: require-corp` on **both** the dev server and
-> preview; `static/_headers` carries the same pair into the static output for
-> Netlify/Cloudflare-style hosts; and `svelte.config.js` excludes
-> `static/_headers` from the service-worker precache manifest (hosts consume it;
-> it is not a fetchable asset). No codec code changed.
+> **What landed & is VERIFIED (branch `codec-cleanup-and-threading`):**
+> cross-origin isolation now actually activates. `static/_headers` carries
+> COOP `same-origin` + COEP `require-corp` into the static output, and
+> `svelte.config.js` excludes `static/_headers` from the SW precache manifest so
+> `cache.addAll` won't 404 (commit `27ae8b88`). **The first attempt's
+> `server.headers`/`preview.headers` did NOT work** — SvelteKit renders the page
+> document itself and bypasses Vite's header config, so the document never became
+> isolated. **Fixed in commit `09f08f22`** with a Vite plugin
+> (`sqush-cross-origin-isolation`) that injects the pair via
+> `configureServer`/`configurePreviewServer` middleware on every response.
+> **Verified in the dev preview:** `self.crossOriginIsolated === true`,
+> `SharedArrayBuffer` available, a shared `WebAssembly.Memory` constructs, no
+> COEP-blocked resources, clean console, `npm run check` green. So
+> `checkThreadsSupport()` will now return true.
 >
-> **Still pending — the human/browser steps (Plan steps 2–5):** confirming
-> `self.crossOriginIsolated === true` and `SharedArrayBuffer` availability in a
-> real browser, re-proving the three seams (Safari nested workers, codec helper
-> asset URLs, SW cache), and confirming each codec actually loads its `_mt`
-> module across Chromium / Safari / Firefox. **None of that is done yet** — it
-> requires a human at a browser. The config is the easy half; this verification
-> is the real work and remains open.
+> **Two seams still remain before threading is real in PRODUCTION:**
+> 1. **Threaded helper-asset emission.** `audit:static-output` reports *"JPEG XL
+>    threaded worker helper assets: 0"* and *"OxiPNG parallel worker helper
+>    assets: 0"* — the production build does not yet emit the `_mt` /
+>    `pkg-parallel` `.worker.js` + threaded `.wasm` helper assets, so when threads
+>    engage the dynamic import of those builds may 404 in the static build (dev
+>    resolves them on the fly; prod won't). This is the real remaining work.
+> 2. **Cross-browser + encode confirmation.** Confirm each codec actually loads
+>    its `_mt` module and a real encode uses multiple cores, across Chromium,
+>    Safari (nested-worker gotcha), and Firefox.
 
 ## The finding (why this exists)
 
