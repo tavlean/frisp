@@ -53,8 +53,24 @@ cd ../..
   links `libsharpyuv.a` after `libwebp.a`. The SIMD variant needs **`-msimd128`**
   (else it silently collapses to the non-SIMD baseline) and
   `-Wno-error=implicit-function-declaration` for clang-16 strictness. Done.
-- Expect similar friction on **libaom/libjxl** (clang-16 `-Werror` defaults,
-  per-file SIMD flags). Add `-Wno-error=...` flags as the compiler complains.
+- **libavif/libaom — BLOCKED on emcc 5.x; use emsdk 2.0.34 instead.** Investigated
+  thoroughly (2026-06-02): libaom v3.12.1 + libavif v1.4.2 compile fine (fix:
+  `-DAVIF_LIBYUV=OFF`, libavif v1.4 newly requires libyuv), but emcc 5.0.7's
+  linker **strips libaom out of the encoder** (21 KB wasm instead of ~2.8 MB) and
+  the encoder doesn't run. Root cause: a DCE/archive-extraction behavior change
+  vs the codecs' original emsdk **2.0.34**. Diagnosis was exact — `avif_enc.o`
+  has correct undefined refs to `avifEncoderCreate` etc., `libavif.a` defines all
+  211 of them, but the modern linker won't pull them; only `--whole-archive
+  --no-gc-sections` force-includes libaom, and that binary traps at runtime.
+  Removing `-s ERROR_ON_UNDEFINED_SYMBOLS=0`, `--start-group`, and separate
+  compilation all failed. **libjxl will likely hit the same wall** (also a
+  complex multi-library C++ codec). The simple codecs (imagequant, webp) built
+  fine on emcc 5.x because they're single-library with direct calls.
+  → **Recommendation: build libavif + libjxl with emsdk 2.0.34** (the toolchain
+  they were designed for — `./emsdk install 2.0.34 && ./emsdk activate 2.0.34`;
+  on Apple Silicon this is x86_64 via Rosetta) **or via the original Docker
+  path** (`codecs/build-cpp.sh`, which pins `emscripten/emsdk:2.0.34`). AVIF was
+  reverted to its working v1.0.1 state to keep the branch green.
 - **Disk**: libaom and libjxl are multi-GB builds. Check `df -h` first.
 
 **Docker alternative:** if you prefer, `cd codecs/<codec> && npm install && npm
