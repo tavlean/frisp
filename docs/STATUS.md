@@ -1,6 +1,6 @@
 # Sqush Status
 
-Last updated: 2026-06-02.
+Last updated: 2026-06-03.
 
 Read this first. Sqush is a local-first image optimizer: image work stays in the
 browser, the build is static, and offline reload must work after load.
@@ -113,6 +113,21 @@ browser, the build is static, and offline reload must work after load.
     [threading-enablement.md](threading-enablement.md),
     [codec-build-notes.md](codec-build-notes.md).
 
+- Dev-env + editor UX (2026-06-03):
+  - **Threaded codecs now work under `vite dev`.** They were ~50× slower / stalled
+    in the dev server (fast in prod) because `vite dev` injects an ESM
+    `/@vite/client` import into the **classic** Emscripten pthread worker
+    (`*_mt.worker.js`), breaking the pool. Fixed with a dev-only
+    `sqush-raw-threaded-codec-workers` Vite plugin that serves those workers raw.
+    NOT a commit regression (dev-vs-prod; the live version under `vite dev` would
+    behave the same). Detail: [threading-enablement.md](threading-enablement.md).
+  - **Editor preview never goes blank + per-side "Optimising…/Re-optimising…"
+    badge.** Restored the original source-fallback (a side shows the loaded image
+    until it has its own result) and added a single consistent in-progress badge
+    (no blur). See [parity-audit.md](parity-audit.md) §A.
+  - **WebP default → Quality 80 / Effort (method) 6** (from upstream 75/4); the
+    persisted-settings key was bumped `v2 → v3` so stale saved side-settings are
+    discarded and the fresh default (left = Original, right = WebP) loads.
 - **Writing the articles** (migration + codec sweep): the task/problem/solution
   source material is in [journey-and-article-notes.md](journey-and-article-notes.md).
 

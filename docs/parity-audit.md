@@ -1,6 +1,6 @@
 # Editor parity audit & deviation log
 
-Last updated: 2026-06-01.
+Last updated: 2026-06-03.
 
 Goal: the Svelte editor must not **lose** any feature or gain any bug relative
 to the original Preact Squoosh editor. This doc tracks (a) deliberate deviations
@@ -67,6 +67,36 @@ behavior parity is preserved.
    live each render.
 5. **Results-bubble metrics shrunk** slightly so the size + percent badge +
    download blob fit the 300px panel without overflowing the viewport.
+6. **Preview in-progress UX — restored fallback + new per-side badge
+   (2026-06-03).** Two parts:
+   - *Parity restoration:* the original Squoosh Output falls back to
+     `source.preprocessed` so a side is never blank while it encodes
+     (`rightDrawable() = rightCompressed || source.preprocessed`). The Svelte
+     port had **lost** this — the right panel sat BLANK through the whole first
+     encode (very visible on slow codecs). Restored: each side now borrows the
+     other side's image (`leftDraw/rightDraw = own ?? other`) until it has its
+     own result. `Output.svelte`.
+   - *Deliberate enhancement (beyond parity):* a per-side in-progress **badge**
+     over the relevant half — **"Optimising…"** on the first encode,
+     **"Re-optimising…"** once a result exists and a setting change re-runs the
+     encoder (the prior result stays on screen, crisp, while the new one
+     computes). The original showed no in-canvas indicator and swapped silently.
+     Gated by the same 500ms `showSpinner` delay as the download spinner, so fast
+     encodes never flash it. **Design decision:** the badge is the *single*
+     consistent "this side is working" signal — an earlier draft also blurred the
+     placeholder, but that was inconsistent (blur on first encode, none on
+     re-encode) and read as a bug; a clear text label is more honest than a blur,
+     and keeping the previous result crisp on a re-encode lets the user still see
+     their current output. `Output.svelte`, `+page.svelte` (passes
+     `leftWorking/rightWorking`).
+7. **WebP default options diverge from upstream (2026-06-03):** quality **80**
+   (was 75) and method **6** — highest effort / best compression (was 4) — set as
+   the project's preferred default, since WebP is the default right-side encoder
+   and stays sub-second even at method 6.
+   `src/features/encoders/webP/shared/meta.ts`. The persisted-settings key was
+   bumped `sqush:settings:v2 → v3` so pre-existing saved side-settings (which
+   would otherwise mask the new default) are discarded and the fresh default
+   (left = Original, right = WebP) loads.
 
 > NOTE (import gotcha): shared `.svelte.ts` stores must be imported by the SAME
 > specifier everywhere (we use `$lib/editor/snackbar-store.svelte`). A mix of
