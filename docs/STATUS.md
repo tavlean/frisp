@@ -43,7 +43,8 @@ browser, the build is static, and offline reload must work after load.
 
 - Codec audit (2026-06-02): a full codec version + landscape audit ran (see
   [codec-upgrade-audit.md](codec-upgrade-audit.md)). Several outcomes have now
-  **landed on the `codec-cleanup-and-threading` branch** (not yet on `main`):
+  **landed and are merged into `main`** (via the former
+  `codec-cleanup-and-threading` / `codec-rebuilds` branches, now deleted):
   - **Cross-origin isolation DONE & verified (commits `27ae8b88`, `09f08f22`).**
     COOP `same-origin` + COEP `require-corp` ship via a Vite middleware plugin
     (dev + preview) and `static/_headers` (host). Verified in the production
@@ -67,7 +68,7 @@ browser, the build is static, and offline reload must work after load.
     after each one. `npm test` now runs `check` + e2e.
 
 - Codec rebuilds (2026-06-02): **✅ all 7 WASM codecs have been rebuilt/upgraded
-  and committed on the `codec-rebuilds` branch.** The audit's "do-now"
+  and merged into `main`.** The audit's "do-now"
   security-driven rebuilds and the gradual upgrades all landed in one sweep,
   built **natively with emsdk 3.1.0 + rustup nightly (no Docker, no sudo)**:
   - **imagequant** 2.12.1 → 2.18.0 (byte-identical; security/quality)
@@ -95,7 +96,7 @@ browser, the build is static, and offline reload must work after load.
   JPEG→JXL skip). Full docs map: [README.md](README.md).
 
 - MT threading (2026-06-03): **ALL THREE threaded codecs now thread multi-core —
-  oxipng, AVIF, JXL — LANDED & VERIFIED on `codec-rebuilds`.**
+  oxipng, AVIF, JXL — LANDED, VERIFIED, and merged into `main`.**
   - **oxipng (wasm-bindgen-rayon):** the threaded `pkg-parallel` wasm now ships a
     shared+imported `WebAssembly.Memory` (`flags=0x03`). Fix = the full explicit
     linker set (`--shared-memory`/`--max-memory`/`--import-memory` + TLS exports +
@@ -231,19 +232,22 @@ Only Wave 2b (explicit `options` ownership) and a few deferred items remain in
 is now the codec-audit fallout — see [README.md](README.md) for the one-screen
 priority view.
 
-**Landed on `codec-rebuilds`** (the live branch; merging to `main`): all 7 WASM
-codecs rebuilt natively; WebP 2 removed; dead code (`codecs/png/`,
-`codecs/visdif/`, `storage.ts`) deleted; cross-origin isolation (COOP/COEP)
-**and** the full MT threading runtime — oxipng, AVIF, JXL all verified threading
-multi-core in Chromium + WebKit.
+**Merged into `main`** (from the former `codec-rebuilds` /
+`codec-cleanup-and-threading` branches, now deleted): all 7 WASM codecs rebuilt
+natively; WebP 2 removed; dead code (`codecs/png/`, `codecs/visdif/`,
+`storage.ts`) deleted; cross-origin isolation (COOP/COEP) **and** the full MT
+threading runtime — oxipng, AVIF, JXL all verified threading multi-core in
+Chromium + WebKit. (Active uncommitted/branch work is the
+`dev-threading-and-editor-ux` branch: the `vite dev` threaded-worker fix, the
+editor preview UX, and the WebP 80/6 default.)
 
 What's next, in short:
 
 1. ✅ **Multithreading — DONE.** All three threaded codecs (oxipng, AVIF, JXL)
    thread multi-core in Chromium + WebKit, verified, single-thread fallback intact.
    [threading-enablement.md](threading-enablement.md).
-2. ✅ **Codec security rebuilds + gradual upgrades — DONE** (all 7 codecs landed
-   on `codec-rebuilds`; see the Current State entry above). Build details:
+2. ✅ **Codec security rebuilds + gradual upgrades — DONE** (all 7 codecs merged
+   into `main`; see the Current State entry above). Build details:
    [codec-build-notes.md](codec-build-notes.md). Audit/why:
    [codec-upgrade-audit.md](codec-upgrade-audit.md).
 3. **Investigate new codecs** — researched, not added:
@@ -258,13 +262,16 @@ What's next, in short:
 - WebP 2 is **gone** (branch commit `962bdd0f`, encoder + decoder); do not
   resurrect it. The removal record is in
   [codec-surface-cleanup.md](codec-surface-cleanup.md).
-- Multithreading is **configured but unverified**: the COOP/COEP headers are set
-  on the branch, but until a human confirms `crossOriginIsolated` and per-codec
-  `_mt` loading in real browsers, do not assume threads are actually running.
+- Multithreading is **done and verified** (Chromium + WebKit, e2e-protected) —
+  COOP/COEP isolation + all three threaded codecs engaging multi-core. One
+  caveat: under `vite dev` the classic Emscripten pthread workers must be served
+  raw, or they stall (~50× slower). The `sqush-raw-threaded-codec-workers` plugin
+  in `vite.config.ts` handles this; don't remove it. See
+  [threading-enablement.md](threading-enablement.md).
 - Do not touch `codecs/**` without codec provenance, build, service-worker, and
   browser verification. The 2026-06-02 codec rebuilds were built **natively with
-  emsdk 3.1.0 + rustup nightly (no Docker, no sudo)** and landed on
-  `codec-rebuilds` — the build record is in
+  emsdk 3.1.0 + rustup nightly (no Docker, no sudo)** and are now merged into
+  `main` — the build record is in
   [codec-build-notes.md](codec-build-notes.md); the per-codec runbooks
   ([codec-upgrade-runbooks.md](codec-upgrade-runbooks.md)) are now historical.
 - Preview browsers can keep old service workers. If behavior looks stale, clear

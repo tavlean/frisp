@@ -57,7 +57,7 @@ codecs not rebuilt in that sweep (qoi, hqx, rotate), treat the references as the
 rebuild recipe inputs, not as proof that the inherited committed `.wasm` was
 generated from exactly these inputs.
 
-> **Updated 2026-06-02 — codec rebuilds landed on `codec-rebuilds`.** Seven codecs
+> **Updated 2026-06-02 — codec rebuilds landed (merged into `main`).** Seven codecs
 > were upgraded and committed; the version column below reflects the **new pins**.
 > All were built **natively with emsdk 3.1.0 + rustup nightly (no Docker, no
 > sudo)**, and verified by the 17-test Playwright e2e suite + the benchmark with no

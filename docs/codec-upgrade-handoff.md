@@ -11,8 +11,9 @@ Last updated: 2026-06-02. Status: **✅ DONE — the 2026-06-02 sweep is complet
 > on **`codec-rebuilds`** — verified by the 17-test Playwright e2e suite + the
 > benchmark with no regressions. The as-built record (toolchains, gotchas, bugs)
 > is in [codec-build-notes.md](codec-build-notes.md). **This doc is kept as a
-> reference for future codec updates.** Still deferred: wiring the multi-threaded
-> (`_mt`) runtime — see [threading-enablement.md](threading-enablement.md).
+> reference for future codec updates.** The multi-threaded (`_mt`) runtime is now
+> wired and verified too (done 2026-06-03, merged to `main`) — see
+> [threading-enablement.md](threading-enablement.md).
 
 This is a self-contained handoff for actually **building** the codec upgrades.
 The audit ([codec-upgrade-audit.md](codec-upgrade-audit.md)) decided *what* to

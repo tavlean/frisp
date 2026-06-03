@@ -46,7 +46,7 @@ Read only the docs you need — context is finite; this index is the cheap looku
 
 | Doc | Contains | Read when | Update when |
 |---|---|---|---|
-| [threading-enablement.md](threading-enablement.md) | The MT-threading subsystem: COOP/COEP (done), the oxipng POC, the exact remaining blocker + next steps. The active/blocked track. | Before ANY threading/SharedArrayBuffer/worker-pool work. | After any threading progress — a blocker hit/cleared, the POC status, a codec's MT path wired/verified. |
+| [threading-enablement.md](threading-enablement.md) | The MT-threading subsystem: COOP/COEP + all three threaded codecs (oxipng/AVIF/JXL) multi-core — **done & verified, merged to `main`**; incl. the build fixes and the `vite dev` raw-worker fix. | Before ANY threading/SharedArrayBuffer/worker-pool work. | After any threading change — a build/runtime fix, a regression, or a new dev/prod gotcha. |
 
 ## Architecture & runtime
 

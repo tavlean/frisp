@@ -179,9 +179,10 @@ inner archive) before blaming the linker.**
 > Threaded `avif_enc_mt`: built fine on 3.1.0 (`-pthread` sets atomics/bulk-memory
 > automatically). The "`--shared-memory` disallowed … not compiled with
 > 'atomics'/'bulk-memory'" error was **emcc-5.x-only**. The app dynamically
-> imports `avif_enc_mt` but only instantiates it when `supportsThreads()` is true
-> (currently always false — threading deferred), so the MT path isn't exercised
-> at runtime yet, but the artifact is now correct and on the secure libaom.
+> imports `avif_enc_mt` and instantiates it when `supportsThreads()` is true —
+> which is now the case: threading landed 2026-06-03 (merged to `main`), so the MT
+> path IS exercised at runtime, and the artifact is correct and on the secure
+> libaom.
 
 ### libjxl — ✅ DONE (emcc 3.1.0, Path A v0.8.5). The runtime bug was embind, not the codec.
 pre-0.7 commit → **v0.8.5** (CVE-2023-0645, CVE-2023-35790, CVE-2025-12474;

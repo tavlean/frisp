@@ -1,6 +1,6 @@
 # Sqush Docs — Index & Map
 
-Last updated: 2026-06-02.
+Last updated: 2026-06-03.
 
 This is the human-friendly map of all project docs + the work order. **New here?
 Read [STATUS.md](STATUS.md) first** (live state), then this file. End-user docs
@@ -23,21 +23,22 @@ index in sync when you add, finish, or archive a doc — see
 The order to work things, highest priority first. "Urgency" flags genuine
 time-pressure (security); everything else is value/effort.
 
-> **Recently landed on branch `codec-cleanup-and-threading`** (pending merge to
-> `main`): **all 7 WASM codecs rebuilt natively (no Docker)** — imagequant 2.18.0,
-> libwebp v1.6.0, libavif v1.4.2 + libaom v3.12.1, libjxl v0.8.5, oxipng 10.1.1,
-> mozjpeg v4.1.5, resize 0.8.9 — every CVE in scope fixed, verified by a 17-test
-> Playwright e2e suite **+ a WebKit (Safari engine) project** + the benchmark, no
-> regressions. Earlier work (cross-origin isolation, WebP2 removal, dead-code
-> deletion) is on `codec-cleanup-and-threading`. See [STATUS.md](STATUS.md) and the
-> journey log below.
+> **Merged into `main`:** **all 7 WASM codecs rebuilt natively (no Docker)** —
+> imagequant 2.18.0, libwebp v1.6.0, libavif v1.4.2 + libaom v3.12.1, libjxl
+> v0.8.5, oxipng 10.1.1, mozjpeg v4.1.5, resize 0.8.9 — every CVE in scope fixed;
+> cross-origin isolation, WebP 2 removal, dead-code deletion; **and the full MT
+> threading runtime (oxipng/AVIF/JXL multi-core, verified Chromium + WebKit).**
+> Verified by the Playwright e2e suite (incl. a WebKit/Safari project) + the
+> benchmark, no regressions. The former `codec-rebuilds` /
+> `codec-cleanup-and-threading` branches are merged and deleted. See
+> [STATUS.md](STATUS.md) and the journey log below.
 
 | # | Track | Plan | Status | Why |
 |---|-------|------|--------|-----|
 | ✓ | **Wire threaded MT runtime** | [threading-enablement.md](threading-enablement.md) | **✅ DONE** | **oxipng, AVIF, JXL all thread multi-core** — full worker pool in Chromium, no fallback in WebKit, verified, ST fallback intact. oxipng needed a shared-memory build fix; AVIF/JXL needed the `?url`/`mainScriptUrlOrBlob` wiring **+ a `PTHREAD_POOL_SIZE` rebuild** (the `_mt` builds deadlocked spawning pthreads on-demand). |
 | 2 | **Investigate new codecs** | [new-codec-investigation.md](new-codec-investigation.md) | ⚪ Investigate | Researched, **not added**: SVGO for vector (do first), HEIC decode-in (later), jpegli / JPEG→JXL transcode (skip). Decide later. |
 | 3 | **Product features** | [road-map.md](road-map.md) | ⚪ Later | Multi-Format Compare (now unblocked — codecs done; benefits from threading), then bulk optimization. |
-| ✓ | **Codec security rebuilds** | [codec-build-notes.md](codec-build-notes.md) · [codec-upgrade-audit.md](codec-upgrade-audit.md) | **✅ DONE** | All 7 codecs upgraded natively on `codec-rebuilds` (CVEs fixed; some faster). The engineering record is `codec-build-notes.md`; the planning docs (handoff/runbooks/audit) are now historical. |
+| ✓ | **Codec security rebuilds** | [codec-build-notes.md](codec-build-notes.md) · [codec-upgrade-audit.md](codec-upgrade-audit.md) | **✅ DONE** | All 7 codecs upgraded natively, merged into `main` (CVEs fixed; some faster). The engineering record is `codec-build-notes.md`; the planning docs (handoff/runbooks/audit) are now historical. |
 | ✓ | **Codec surface cleanup** | [codec-surface-cleanup.md](codec-surface-cleanup.md) | **Done** | WebP 2 removed; dead `codecs/png/` + `codecs/visdif/` + `storage.ts` deleted. Kept as the removal record. |
 | — | **Svelte cleanup remnants** | [svelte-hardening-plan.md](svelte-hardening-plan.md) | ⚪ Ongoing | Waves mostly done; Wave 2b + deferred items + the [codec-options-model.md](codec-options-model.md) project remain. Pick up between the above. |
 
@@ -70,9 +71,10 @@ time-pressure (security); everything else is value/effort.
 - [new-codec-investigation.md](new-codec-investigation.md) — researched-but-**not
   added** candidates (SVGO, HEIC-decode, jpegli, JPEG→JXL transcode); decision
   material, not a plan to execute.
-- [threading-enablement.md](threading-enablement.md) — COOP/COEP so the
-  already-built `_mt` codecs run multi-core. **Headers landed on the branch;
-  in-browser verification is still open.**
+- [threading-enablement.md](threading-enablement.md) — the MT-threading subsystem:
+  COOP/COEP isolation + all three threaded codecs (oxipng/AVIF/JXL) engaging
+  multi-core. **Done & verified (Chromium + WebKit), merged into `main`** — incl.
+  the `vite dev` raw-worker fix.
 - [codec-surface-cleanup.md](codec-surface-cleanup.md) — **done.** Record of the
   WebP 2 removal and the dead-code (`codecs/png/`, `codecs/visdif/`, `storage.ts`)
   deletion.

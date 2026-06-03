@@ -6,36 +6,29 @@ and WebKit/Safari, with single-thread fallback intact. oxipng (wasm-bindgen-rayo
 needed a shared-memory build fix; AVIF + JXL (Emscripten pthreads) needed a
 `PTHREAD_POOL_SIZE` build fix + the `?url`/`mainScriptUrlOrBlob` JS wiring. Both
 blockers are solved (see below). Cross-origin isolation was already DONE and
-e2e-test-protected. Owner: solo. Priority: **high (performance) — essentially done.**
+e2e-test-protected. Owner: solo. Priority: **done.** All of this is **merged into
+`main`** (the former `codec-rebuilds` / `codec-cleanup-and-threading` branches are
+merged and deleted).
 
-Read [STATUS.md](STATUS.md) for live state. This finishes a **parked migration
+Read [STATUS.md](STATUS.md) for live state. This finished a **parked migration
 item**, it is not new greenfield work.
 
-> **What landed & is VERIFIED (branch `codec-cleanup-and-threading`):**
-> cross-origin isolation now actually activates. `static/_headers` carries
-> COOP `same-origin` + COEP `require-corp` into the static output, and
-> `svelte.config.js` excludes `static/_headers` from the SW precache manifest so
-> `cache.addAll` won't 404 (commit `27ae8b88`). **The first attempt's
-> `server.headers`/`preview.headers` did NOT work** — SvelteKit renders the page
-> document itself and bypasses Vite's header config, so the document never became
-> isolated. **Fixed in commit `09f08f22`** with a Vite plugin
-> (`sqush-cross-origin-isolation`) that injects the pair via
-> `configureServer`/`configurePreviewServer` middleware on every response.
-> **Verified in the dev preview:** `self.crossOriginIsolated === true`,
-> `SharedArrayBuffer` available, a shared `WebAssembly.Memory` constructs, no
-> COEP-blocked resources, clean console, `npm run check` green. So
-> `checkThreadsSupport()` will now return true.
->
-> **Two seams still remain before threading is real in PRODUCTION:**
-> 1. **Threaded helper-asset emission.** `audit:static-output` reports *"JPEG XL
->    threaded worker helper assets: 0"* and *"OxiPNG parallel worker helper
->    assets: 0"* — the production build does not yet emit the `_mt` /
->    `pkg-parallel` `.worker.js` + threaded `.wasm` helper assets, so when threads
->    engage the dynamic import of those builds may 404 in the static build (dev
->    resolves them on the fly; prod won't). This is the real remaining work.
-> 2. **Cross-browser + encode confirmation.** Confirm each codec actually loads
->    its `_mt` module and a real encode uses multiple cores, across Chromium,
->    Safari (nested-worker gotcha), and Firefox.
+> **ALL LANDED & VERIFIED (now on `main`).** Cross-origin isolation activates
+> (COOP/COEP via the `sqush-cross-origin-isolation` Vite plugin for dev/preview +
+> `static/_headers` for the host; commits `27ae8b88`, `09f08f22`), and all three
+> threaded codecs engage multi-core: oxipng (wasm-bindgen-rayon, shared-memory
+> build fix) and AVIF + JXL (Emscripten pthreads, `?url`/`mainScriptUrlOrBlob`
+> wiring + a `PTHREAD_POOL_SIZE` build fix). The production build emits the
+> threaded helper assets and `audit:static-output` asserts them; e2e
+> (`oxipng-threads.spec.ts`, `emscripten-threads.spec.ts`) confirms a real
+> multi-core encode in Chromium + WebKit with single-thread fallback intact. The
+> two "remaining seams" an earlier draft flagged (helper-asset emission;
+> cross-browser confirmation) are both resolved — see the detailed sections below.
+> The one later addition is the **`vite dev` raw-worker fix** (see "Dev server"
+> below), without which the threaded codecs stall in development only.
+
+The sections below preserve the plan + the engineering record of how each blocker
+was solved (kept for the article + future maintenance).
 
 ## The finding (why this exists)
 
@@ -95,7 +88,7 @@ seams audits. This plan closes it out.
    shared `WebAssembly.Memory` constructs. The e2e suite
    (`tests/e2e/app-shell.spec.ts`) now **asserts `crossOriginIsolated === true`**,
    so a future regression (e.g. someone dropping the headers again) fails CI.
-3. **Wire the multithread runtime. — DEFERRED (the real work; see below).**
+3. **Wire the multithread runtime. — ✅ DONE (all three codecs; see below).**
 
 ## How multithreading is currently disabled (exact, code-grounded)
 
