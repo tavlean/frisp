@@ -301,6 +301,60 @@ the SIMD variant), WebKit loads the threaded wasm with no fallback and no hang. 
 single-thread builds remain the fallback. `oxipng-threading-wip` is superseded by
 all of this landed work.
 
+## Dev server (`vite dev`) — threaded workers must be served RAW (2026-06-03)
+
+**Symptom.** Threaded AVIF/JXL were ~50× slower under `vite dev` (AVIF 24s+, often
+appearing to hang) than in a production build (<0.5s) — on the *same commit*,
+same machine, both cross-origin-isolated. A non-threaded codec (webP) was fast in
+dev, which was the tell: only the pthread path was affected.
+
+**This was misread as a commit regression — it is not.** The `8e2cb536..HEAD`
+diff (live-version → HEAD) is docs + cosmetic `package.json` only; the codec /
+worker / `vite.config` code is byte-identical to the fast live version, and a
+local production build of HEAD encodes AVIF in <0.5s. The variable was **dev vs
+prod**, not the commits. (Confusingly, the user had compared the *deployed prod*
+site against a *local dev* server. A macOS-CI "failure" seen around the same time
+was an unrelated `npm audit` DNS flake — `ENOTFOUND registry.npmjs.org` — not
+code.)
+
+**Root cause.** The Emscripten pthread workers (`avif_enc_mt.worker.js`,
+`jxl_enc_mt(.worker).js`) are **classic** workers. Under `vite dev`, a direct
+request for one of these `.js` files is run through Vite's JS transform, which
+**prepends** an ESM preamble:
+
+```
+import { injectQuery as __vite__injectQuery } from "/@vite/client";"use strict";var Module={}…
+```
+
+A static `import` is a syntax error in a classic worker, so it throws on load.
+Emscripten's glue then spawns its `PTHREAD_POOL_SIZE` workers, none come online,
+and the encode (blocking on `Atomics.wait`) waits → stall. A `vite build` emits
+these as raw hashed assets, so the bug is **dev-only** — which is exactly why it
+never appeared in the deployed app or CI. (Confirmed against Vite #7019 / #15377
+and Emscripten #22394; the ITK-Wasm and jSquash projects hit the same wall and
+also serve the workers raw.)
+
+**Fix (`vite.config.ts`, plugin `sqush-raw-threaded-codec-workers`).** A dev-only
+`configureServer` middleware that serves `/codecs/**/*_mt(_simd)?.worker.js`
+**raw from disk**, bypassing the transform — matching what the production build
+already emits. It deliberately leaves the `?url` / `?worker` *module* forms to
+Vite (those must return the JS that *exports* the asset URL, not the raw bytes),
+and short-circuits before Vite's internal middleware (registered in the
+`configureServer` body, not a returned post-hook). It's `configureServer`-only,
+so `vite build` ignores it entirely (prod output unchanged), needs no new
+dependency, and requires no per-developer setup — `npm run dev` "just works".
+
+**Scope.** Only the Emscripten **classic** pthread workers need this. oxipng's
+wasm-bindgen-rayon worker (`workerHelpers.js`) is a **module** worker, which
+tolerates Vite's transform, and was already fast in dev — left untouched.
+
+**Verified (2026-06-03):** after the fix, the dev server serves the worker
+un-injected (starts with `"use strict";var Module={}…`), and AVIF / JXL encode in
+<0.5s in `vite dev` (down from 24s+), with no console errors. This is the dev
+counterpart to the prod-side `?url` / `mainScriptUrlOrBlob` wiring above; the
+"Emscripten pthread URL resolution under Vite" watch-list item now covers BOTH
+dev (raw-serve middleware) and prod (raw hashed emit).
+
 ## Related
 
 - [codec-upgrade-audit.md](codec-upgrade-audit.md) — WASM framing; threading note.

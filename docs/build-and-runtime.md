@@ -76,15 +76,26 @@ or Emscripten `locateFile`.
 `npm run audit:static-output` verifies the build emits one physical WASM copy
 per logical asset and that the service worker references the expected assets.
 
-The build emits **single-thread codec variants only.** The generator
-(`sync-sveltekit-app.mjs`) deliberately stubs the multithread runtime
-(`supportsThreads: () => false`), so the `_mt` / `pkg-parallel` builds are never
-imported and `audit:static-output` asserts their helper assets are absent. The
-data contract (`src/shared/codec-assets.ts`) already has `multi-thread` /
-`worker-helper` / `threaded-only` hooks for a future re-enablement — see
-[threading-enablement.md](threading-enablement.md). Cross-origin isolation
-(COOP/COEP) is enabled via the `sqush-cross-origin-isolation` Vite plugin in
-`vite.config.ts` (dev + preview) and `static/_headers` (host).
+**Multithreading is enabled** (2026-06-03): the generator
+(`sync-sveltekit-app.mjs`) emits the threaded variants and real thread detection,
+so AVIF / JXL (Emscripten pthreads) and oxipng (wasm-bindgen-rayon) engage
+multi-core, with single-thread fallback intact. The data contract
+(`src/shared/codec-assets.ts`) carries the `multi-thread` / `worker-helper` /
+`threaded-only` records, and `audit:static-output` asserts the threaded helper
+assets are now present. Cross-origin isolation (COOP/COEP) — required for
+`SharedArrayBuffer` — is set via the `sqush-cross-origin-isolation` Vite plugin in
+`vite.config.ts` (dev + preview) and `static/_headers` (host). Full record:
+[threading-enablement.md](threading-enablement.md).
+
+**Dev-server caveat (`vite dev`):** the Emscripten pthread workers
+(`*_mt.worker.js`) are **classic** workers and must be served byte-for-byte. Vite's
+dev transform otherwise injects an ESM `/@vite/client` import into them (illegal in
+a classic worker), so the thread pool never engages and threaded encodes stall
+(~50× slower) — dev-only, since a `vite build` emits them as raw hashed assets. The
+`sqush-raw-threaded-codec-workers` plugin in `vite.config.ts` serves
+`codecs/**/*_mt(_simd)?.worker.js` raw in dev to fix this (`configureServer`-only;
+prod build unaffected). Details in
+[threading-enablement.md](threading-enablement.md).
 
 ## Tests
 
