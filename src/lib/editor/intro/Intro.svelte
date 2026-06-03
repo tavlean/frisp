@@ -174,8 +174,8 @@
 
   .main {
     /* The blob colour + softness, read by the canvas animation. Soft peach. */
-    --blob-color: hsl(20, 85%, 80%);
-    --center-blob-opacity: 0.2;
+    --blob-color: hsl(20, 90%, 80%);
+    --center-blob-opacity: 0.12;
     position: relative;
     min-height: 541px;
     display: grid;
@@ -199,20 +199,21 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 24px;
+    gap: 20px;
   }
   .logo {
     display: block;
-    width: 128px;
-    height: 128px;
+    width: 88px;
+    height: 88px;
   }
   /* Size the wordmark by height so it locks up optically with the 128px icon
      (its glyphs sit ~56px tall, a touch under half the icon — a balanced
      horizontal logo lockup). Width follows the SVG's intrinsic aspect ratio. */
   .wordmark {
     display: block;
-    height: 56px;
+    height: 48px;
     width: auto;
+    margin-top: 4px;
   }
 
   .load-img {

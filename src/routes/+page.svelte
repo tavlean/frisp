@@ -135,7 +135,7 @@
     height: 100%;
   }
   :global(body) {
-    background: #1a1a1a;
+    background: #18181b;
     color: #fff;
   }
 
