@@ -1,98 +1,63 @@
 # Sqush
 
-Sqush is a local-first image optimizer derived from [Squoosh]. Images are
-decoded, processed, encoded, previewed, and exported in the browser. There is no
-upload path and no server-side image processing.
+Optimize images inside your browser. Resize and compress them on your own machine, and export. Nothing is uploaded, and it works offline after the first load.
 
-Website: [sqush.app](https://sqush.app)
+It is a modern fork of the amazing [Squoosh app], which has gone quiet over the last few years. Sqush is carrying it forward on a modern stack, current codebase, with the codecs rebuilt and the app being actively maintained.
 
-## Current App
+[Try it at sqush.app](https://sqush.app)
 
-The SvelteKit 2 / Svelte 5 migration is complete. `main` is the production app,
-living at the repo root as a static SPA:
+<!-- screenshot -->
 
-- `src/routes/+page.svelte` is the single-image optimizer.
-- `src/lib/editor/` contains the Svelte editor shell, controls, output view, and
-  rune-backed editor session.
-- `src/lib/compress.ts` adapts the Svelte editor to the shared image pipeline.
-- `src/client/lazy-app/image-pipeline*` and `src/client/lazy-app/bulk/` remain
-  framework-neutral engine code.
-- `src/features/**`, `src/shared/codec-assets.ts`, and `codecs/**` remain the
-  codec/runtime foundation.
-- `src/service-worker.ts` is the SvelteKit-native offline service worker.
+## Why Sqush
 
-The original Preact/Rollup app is preserved on the `preact` branch (tag
-`preact-final`) for reference only; it is no longer a fallback for `main`.
+The codecs are built from current sources. That closed 14 known CVEs, one of them critical (CVSS 9.8), and made a few of them smaller or faster. Where a fix was security only, the output is identical to before, byte for byte.
 
-All seven WASM codecs have been rebuilt from source on current upstreams (closing
-14 CVEs, including a CVSS 9.8), and multi-threaded codec encoding is enabled and
-verified across browser engines, with a single-thread fallback — see
-[docs/codec-build-notes.md](docs/codec-build-notes.md) and
-[docs/threading-enablement.md](docs/threading-enablement.md). Post-migration
-Svelte hardening is essentially complete
-([docs/svelte-hardening-plan.md](docs/svelte-hardening-plan.md)).
+The app is built on SvelteKit and Svelte 5 as a static site, a smaller and clearer codebase that is easier to build on. A Playwright suite runs the real production build in Chromium and Safari's engine on every change.
 
-## Developing
+## Features
 
-Use the Node version in [.nvmrc](.nvmrc). The package metadata expects Node
-`>=24.12.0 <25` and npm `>=11`.
+- Add an image by file picker, drag and drop, or paste.
+- Encode to WebP, AVIF, JPEG XL, MozJPEG, OxiPNG, QOI, or the browser's own PNG and JPEG.
+- Resize, reduce the color palette, and rotate.
+- Compare before and after side by side, with zoom, pan, and a draggable split.
+- A different format and settings per side, remembered between sessions.
+- Installable, runs offline, codecs precached.
+
+## Privacy
+
+There is no upload and no server doing the work. Every step happens in the page, and it keeps running with the network off.
+
+## Status
+
+Maintained and ready for everyday single-image work. Bulk optimization and a multi-format compare view are next ([roadmap](docs/road-map.md), [live status](docs/STATUS.md)).
+
+## Browser support
+
+Recent Chrome, Edge, Firefox, and Safari. The [policy](docs/browser-support.md) has the version floors.
+
+## Running it locally
+
+Node 24.12 or newer and npm 11 or newer (see [.nvmrc](.nvmrc)).
 
 ```sh
 npm install
-npm run dev
-npm run build
-npm run preview
-npm run check
+npm run dev      # dev server
+npm run build    # static production build
+npm run check    # format, codegen, svelte-check, build, asset audit
+npm test         # check plus Playwright
 ```
-
-Useful maintenance commands:
-
-```sh
-npm run sync                 # regenerate .svelte-kit/sqush-generated/*
-npm run audit:static-output  # verify emitted worker/WASM assets
-npm run audit                # npm audit --audit-level=low
-npm run format:check
-```
-
-`npm run check` is the normal local gate. It runs formatting, generator sync,
-SvelteKit sync, `svelte-check`, production build, and the static-output audit.
-
-## Local-First Contract
-
-A working build must preserve:
-
-- local import, decode, process, encode, preview, and export;
-- WebP, AVIF, JPEG XL, MozJPEG, OxiPNG, QOI, and the browser encoders (WebP 2 was
-  deliberately removed — no browser can decode it);
-- object URL cleanup and downloadable outputs;
-- static output with no image-processing server;
-- service-worker/offline reload after the app has loaded.
-
-Regressions in single-image optimization, codec workers/WASM, exports, or
-offline behavior are release blockers.
 
 ## Docs
 
-[docs/README.md](docs/README.md) is the index and map of the full doc set; start
-there. Key entries:
+[docs/README.md](docs/README.md) maps everything. Useful starts:
+[overview](docs/overview.md), [how the codecs are built](docs/codec-build-notes.md),
+[multithreading](docs/threading-enablement.md),
+[user guide](docs/user-guide/index.md), [agent guide](AGENTS.md).
 
-- [Agent guide](AGENTS.md)
-- [Current status](docs/STATUS.md)
-- [Project overview](docs/overview.md)
-- [Build and runtime map](docs/build-and-runtime.md)
-- [Codec build notes](docs/codec-build-notes.md) — building each WASM codec from source
-- [Codec provenance](docs/codec-provenance.md)
-- [Multithreading](docs/threading-enablement.md)
-- [Browser support policy](docs/browser-support.md)
-- [Product roadmap](docs/road-map.md)
-- [User guide](docs/user-guide/index.md)
-- [Manual QA checklist](docs/manual-qa.md)
-- [Cleanup & Svelte hardening plan](docs/svelte-hardening-plan.md)
-- [Migration plan (archived)](docs/history/MIGRATION-PLAN.md)
+## Thanks
 
-## Attribution
-
-Sqush is derived from GoogleChromeLabs' Squoosh project and continues under the
-Apache 2.0 license.
+Sqush exists because of [Squoosh] from GoogleChromeLabs. They worked out how to do all this in the browser with no server and made it look easy. It continues from there under the same Apache 2.0 license.
 
 [squoosh]: https://github.com/GoogleChromeLabs/squoosh
+
+[Squoosh app]: https://github.com/GoogleChromeLabs/squoosh
