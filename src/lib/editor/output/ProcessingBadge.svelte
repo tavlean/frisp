@@ -121,13 +121,19 @@
       0 0 0 1px rgba(52, 211, 153, 0.25);
   }
 
-  /* Centre over the badge's own half; vertical (stacked) → top/bottom. */
+  /* Centre each badge in its side's VISIBLE region — i.e. between the two
+     option-panel insets (`--fit-inset-*`: 300px each on desktop, 0 on mobile,
+     set on .compress). Without this the right badge sits at 75% of the full
+     width and tucks behind the right options panel. Inherited custom props
+     resolve here even though the component's other styles are scoped. */
   .left {
-    left: 25%;
+    left: calc(25% + var(--fit-inset-left, 0px) / 2);
   }
   .right {
-    left: 75%;
+    left: calc(75% - var(--fit-inset-right, 0px) / 2);
   }
+  /* Stacked (mobile): panels are at the bottom, insets are 0 — just centre
+     horizontally and offset vertically. */
   .left.vertical {
     left: 50%;
     top: 25%;
