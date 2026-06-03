@@ -62,6 +62,31 @@
   // differing suffix visibly changes. Picked once per pass via `wasReencode`.
   const workingText = $derived(wasReencode ? 'Re-optimising…' : 'Optimising…');
   const successText = $derived(wasReencode ? 'Re-optimised' : 'Optimised');
+
+  // Reduced motion: we SHORTEN durations rather than snap to none. An abrupt swap
+  // is the opposite of calm, and `prefers-reduced-motion` is about spatial
+  // movement (sliding, parallax, big zooms) — this badge only transforms in
+  // place (opacity, colour, a tiny scale), so a quick smooth transition stays
+  // comfortable AND serves the people who flip the toggle because animations feel
+  // laggy. The CSS transitions are shortened via the media query below; the
+  // JS-driven fades read the same preference here. (The continuous spin is left
+  // at its normal pace — speeding a rotation up would be MORE motion, not less.)
+  let reduceMotion = $state(false);
+  $effect(() => {
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+    reduceMotion = mq.matches;
+    const onChange = (e: MediaQueryListEvent) => (reduceMotion = e.matches);
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  });
+  const fadeIn = $derived({
+    duration: reduceMotion ? 90 : 200,
+    easing: cubicOut,
+  });
+  const fadeOut = $derived({
+    duration: reduceMotion ? 120 : 300,
+    easing: cubicOut,
+  });
 </script>
 
 {#if phase !== 'hidden'}
@@ -71,8 +96,8 @@
     class:success={phase === 'success'}
     role="status"
     aria-live="polite"
-    in:fade={{ duration: 200, easing: cubicOut }}
-    out:fade={{ duration: 300, easing: cubicOut }}
+    in:fade={fadeIn}
+    out:fade={fadeOut}
   >
     <span class="indicator" aria-hidden="true">
       <!-- One element: a spinning ring in `working` that collapses + greens into
@@ -217,15 +242,18 @@
     }
   }
 
+  /* Reduced motion = keep it smooth, just QUICK (not abrupt). We only transform
+     in place — opacity, colour, a tiny scale — never move across the screen, so a
+     short transition stays calm. The spin keeps its normal pace (a faster
+     rotation would be more motion, not less). See the note in the script. */
   @media (prefers-reduced-motion: reduce) {
-    .ring {
-      animation-duration: 1.2s;
-    }
     .badge,
-    .morph,
+    .morph {
+      transition-duration: 120ms;
+    }
     .ring,
     .label > .l {
-      transition: none;
+      transition-duration: 90ms;
     }
   }
 </style>
