@@ -101,11 +101,11 @@
         class="logo"
         src={asset('/logo.webp')}
         alt=""
-        width="160"
-        height="160"
+        width="128"
+        height="128"
         fetchpriority="high"
       />
-      <span class="wordmark">Sqush</span>
+      <img class="wordmark" src={asset('/sqush-wordmark.svg')} alt="Sqush" />
     </h1>
 
     <div class="load-img" bind:this={target}>
@@ -174,7 +174,7 @@
 
   .main {
     /* The blob colour + softness, read by the canvas animation. Soft peach. */
-    --blob-color: hsl(20, 80%, 82%);
+    --blob-color: hsl(20, 85%, 80%);
     --center-blob-opacity: 0.2;
     position: relative;
     min-height: 541px;
@@ -196,19 +196,23 @@
   .logo-container {
     position: relative;
     margin: 0 0 1rem;
-    display: grid;
-    justify-items: center;
-    gap: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
   }
   .logo {
     display: block;
-    width: 96px;
-    height: 96px;
+    width: 128px;
+    height: 128px;
   }
+  /* Size the wordmark by height so it locks up optically with the 128px icon
+     (its glyphs sit ~56px tall, a touch under half the icon — a balanced
+     horizontal logo lockup). Width follows the SVG's intrinsic aspect ratio. */
   .wordmark {
-    font-size: 2.4rem;
-    font-weight: 600;
-    letter-spacing: -0.01em;
+    display: block;
+    height: 56px;
+    width: auto;
   }
 
   .load-img {
@@ -254,7 +258,7 @@
     width: var(--size);
     height: var(--size);
     fill: var(--white, #fff);
-    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.25));
+    filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.05));
   }
 
   .load-text {
@@ -287,13 +291,6 @@
     }
     .load-img-content {
       --size: 36rem;
-    }
-    .logo {
-      width: 112px;
-      height: 112px;
-    }
-    .wordmark {
-      font-size: 3rem;
     }
   }
 </style>
