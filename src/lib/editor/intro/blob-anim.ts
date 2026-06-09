@@ -215,28 +215,55 @@ export function startBlobAnim(
   let animating = true;
   let rafId = 0;
 
-  function drawFrame(delta: number) {
-    const canvasBounds = canvas.getBoundingClientRect();
-    if (!canvasBounds.width || !canvasBounds.height) return;
-    canvas.width = canvasBounds.width * devicePixelRatio;
-    canvas.height = canvasBounds.height * devicePixelRatio;
+  // Layout/style reads (getBoundingClientRect, getComputedStyle) are hoisted
+  // out of the frame loop: at 60fps they would force a style recalc every
+  // frame for values that only change on resize. The ResizeObserver below
+  // refreshes this snapshot when the canvas or target actually changes.
+  let canvasBounds = { width: 0, height: 0, left: 0, top: 0 };
+  let targetX = 0;
+  let targetY = 0;
+  let targetRadius = 0;
+  let blobColor = '';
+  let blobOpacity = 0;
 
+  function refreshGeometry() {
+    const bounds = canvas.getBoundingClientRect();
+    canvasBounds = {
+      width: bounds.width,
+      height: bounds.height,
+      left: bounds.left,
+      top: bounds.top,
+    };
     const targetBounds = targetEl.getBoundingClientRect();
     const computedStyles = getComputedStyle(canvas);
-    const blobColor = computedStyles.getPropertyValue('--blob-color');
-    const targetX =
-      targetBounds.left - canvasBounds.left + targetBounds.width / 2;
-    const targetY =
-      targetBounds.top - canvasBounds.top + targetBounds.height / 2;
-    const targetRadius = targetBounds.height / 2 / (1 + maxPointDistance);
+    blobColor = computedStyles.getPropertyValue('--blob-color');
+    blobOpacity = Number(
+      computedStyles.getPropertyValue('--center-blob-opacity'),
+    );
+    targetX = targetBounds.left - canvasBounds.left + targetBounds.width / 2;
+    targetY = targetBounds.top - canvasBounds.top + targetBounds.height / 2;
+    targetRadius = targetBounds.height / 2 / (1 + maxPointDistance);
+  }
 
-    ctx!.scale(devicePixelRatio, devicePixelRatio);
+  function drawFrame(delta: number) {
+    if (!canvasBounds.width || !canvasBounds.height) return;
+
+    // Only reallocate the backing store when its size actually changed —
+    // assigning canvas.width clears AND reallocates the bitmap, which is
+    // needless churn when done every frame.
+    const bitmapWidth = Math.round(canvasBounds.width * devicePixelRatio);
+    const bitmapHeight = Math.round(canvasBounds.height * devicePixelRatio);
+    if (canvas.width !== bitmapWidth || canvas.height !== bitmapHeight) {
+      canvas.width = bitmapWidth;
+      canvas.height = bitmapHeight;
+    }
+
+    ctx!.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
+    ctx!.clearRect(0, 0, canvasBounds.width, canvasBounds.height);
 
     centralBlobs.advance(delta);
 
-    ctx!.globalAlpha = Number(
-      computedStyles.getPropertyValue('--center-blob-opacity'),
-    );
+    ctx!.globalAlpha = blobOpacity;
     ctx!.fillStyle = blobColor;
 
     centralBlobs.draw(ctx!, targetX, targetY, targetRadius);
@@ -282,6 +309,7 @@ export function startBlobAnim(
     hasFocus = false;
   };
   const resizeObserver = new ResizeObserver(() => {
+    refreshGeometry();
     if (!animating) drawFrame(0);
   });
 
@@ -295,14 +323,18 @@ export function startBlobAnim(
 
   // Reduced motion: paint one settled frame and stop — no drifting, no spin.
   if (reduceMotion) {
+    refreshGeometry();
     drawFrame(0);
     resizeObserver.observe(canvas);
+    resizeObserver.observe(targetEl);
     return () => {
       resizeObserver.disconnect();
     };
   }
 
+  refreshGeometry();
   resizeObserver.observe(canvas);
+  resizeObserver.observe(targetEl);
   addEventListener('focus', focusListener);
   addEventListener('blur', blurListener);
   document.addEventListener('visibilitychange', visibilityListener);

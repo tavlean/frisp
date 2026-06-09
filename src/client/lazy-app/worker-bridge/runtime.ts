@@ -1,8 +1,12 @@
 import { wrap } from 'comlink';
 import { abortable } from '../abort';
 
-/** How long the worker should be idle before terminating. */
-const workerTimeout = 10_000;
+/** How long the worker should be idle before terminating. Upstream Squoosh
+ * used 10s, but respawning is pricier here: the threaded codecs re-instantiate
+ * their WASM and re-spawn a full pthread pool, so a slider tweak after a short
+ * pause paid a cold-start. 60s keeps the worker warm across natural editing
+ * pauses while still releasing memory on a genuinely idle tab. */
+const workerTimeout = 60_000;
 
 export type WorkerBridgeInstance<MethodName extends string> = {
   [Method in MethodName]: (
