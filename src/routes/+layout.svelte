@@ -1,4 +1,5 @@
 <script lang="ts">
+  import '@fontsource-variable/outfit';
   import type { Snippet } from 'svelte';
 
   let { children }: { children: Snippet } = $props();
@@ -22,12 +23,14 @@
     margin: 0;
     line-height: 1.3;
     font-family:
-      Inter,
+      'Outfit Variable',
       ui-sans-serif,
       system-ui,
       -apple-system,
       BlinkMacSystemFont,
       'Segoe UI',
       sans-serif;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
   }
 </style>

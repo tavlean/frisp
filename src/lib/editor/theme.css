@@ -1,70 +1,107 @@
 /*
- * Editor theme tokens, ported from Squoosh:
- *   src/shared/prerendered-app/colors.css  (palette)
- *   src/client/lazy-app/Compress/style.css (theme + radius vars)
+ * Sqush editor design tokens — the "studio" theme.
+ *
+ * A refined dark interface: floating glass panels over the canvas, with one
+ * warm accent per comparison side (coral = the brand squeeze-orange for the
+ * left, azure for the right). Replaces the pink/blue Squoosh port wholesale,
+ * but keeps the variable CONTRACT the components were built against:
+ * `--main-theme-color` / `--hot-theme-color` / `--header-text-color` resolve
+ * per side via .options-1 / .options-2, and every dimension stays rem-based
+ * against the 12px root set in +layout.svelte.
  * Scoped to .sqush-editor so diagnostics and any later pages are unaffected.
- * The single-image editor uses the blue "options-2" theme for its output panel.
  */
 .sqush-editor {
-  --pink: #ff3385;
-  --hot-pink: #ff0066;
+  /* Neutrals */
+  --bg-0: #0c0c0f;
+  --bg-1: #131318;
+  --surface: rgba(19, 19, 25, 0.82);
+  --surface-solid: #16161c;
+  --surface-raise: rgba(255, 255, 255, 0.05);
+  --surface-raise-2: rgba(255, 255, 255, 0.09);
+  --border: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.16);
+  --text-1: #f5f5f7;
+  --text-2: rgba(235, 235, 245, 0.62);
+  --text-3: rgba(235, 235, 245, 0.38);
+
+  /* Side accents: coral (brand) for the left, azure for the right. */
+  --accent-1: #ff8a5e;
+  --accent-1-hot: #ff6a3c;
+  --accent-1-glow: rgba(255, 122, 80, 0.32);
+  --accent-2: #53b2ff;
+  --accent-2-hot: #2b95f5;
+  --accent-2-glow: rgba(74, 163, 255, 0.32);
+
+  /* Semantics (size deltas, success beats). */
+  --good: #3ddc97;
+  --bad: #ff7d92;
+
+  /* Legacy aliases still read by ported pieces (two-up arrows, drop overlay). */
+  --pink: var(--accent-1);
+  --hot-pink: var(--accent-1-hot);
+  --blue: var(--accent-2);
+  --dim-blue: var(--accent-2-hot);
+  --deep-blue: var(--accent-2-hot);
+  --light-blue: var(--accent-2);
   --white: #fff;
   --black: #000;
-  --off-black: #1d1d1d;
-  --blue: #5fb4e4;
-  --dim-blue: #0a7bcc;
-  --deep-blue: #09f;
-  --light-blue: #76c8ff;
-  --less-light-gray: #bcbcbc;
-  --medium-light-gray: #d1d1d1;
+  --off-black: var(--surface-solid);
+  --dark-gray: #26262e;
+  --less-light-gray: #a6a6b0;
+  --medium-light-gray: rgba(255, 255, 255, 0.18);
   --light-gray: #eaeaea;
-  --dark-gray: #333;
-  --dim-text: #343a3e;
+  --dim-text: var(--text-2);
   --dark-text: #142630;
 
-  --options-radius: 7px;
-  --horizontal-padding: 15px;
+  --options-radius: 16px;
+  --control-radius: 9px;
+  --horizontal-padding: 16px;
+  --panel-shadow:
+    0 24px 48px -16px rgba(0, 0, 0, 0.55), 0 4px 16px rgba(0, 0, 0, 0.35);
 
   /* Accent used by the two-up scrubber thumb. */
-  --accent-color: var(--blue);
+  --accent-color: var(--accent-2);
 
-  /* Sensible fallback (blue); each side overrides these below. */
-  --main-theme-color: var(--blue);
-  --hot-theme-color: var(--deep-blue);
-  --header-text-color: var(--dark-text);
-  --scroller-radius: var(--options-radius) var(--options-radius) 0 0;
+  /* Sensible fallback; each side overrides these below. */
+  --main-theme-color: var(--accent-2);
+  --hot-theme-color: var(--accent-2-hot);
+  --main-theme-glow: var(--accent-2-glow);
+  --header-text-color: var(--text-1);
+  --scroller-radius: var(--options-radius);
 }
 
 /*
- * Per-side themes, ported from src/client/lazy-app/Compress/style.css
- * (.options-1-theme / .options-2-theme, desktop variant). The left side is
- * pink, the right side is blue, and each rounds only its inner (centre-facing)
- * edge and points its copy-over arrow towards the other side.
+ * Per-side accents. Both sides share the same glass panel chrome now; only
+ * the accent hue differs (left = coral, right = azure), which colours the
+ * sliders, toggles, headers' tick, the delta badge and the download button.
  */
 .sqush-editor .options-1 {
-  --main-theme-color: var(--pink);
-  --hot-theme-color: var(--hot-pink);
-  --header-text-color: var(--white);
-  --scroller-radius: 0 var(--options-radius) var(--options-radius) 0;
+  --main-theme-color: var(--accent-1);
+  --hot-theme-color: var(--accent-1-hot);
+  --main-theme-glow: var(--accent-1-glow);
+  --header-text-color: var(--text-1);
+  --scroller-radius: var(--options-radius);
   --rotate-copyoverbutton-angle: 0deg; /* point right, towards the other side */
 }
 
 .sqush-editor .options-2 {
-  --main-theme-color: var(--blue);
-  --hot-theme-color: var(--deep-blue);
-  --header-text-color: var(--dark-text);
-  --scroller-radius: var(--options-radius) 0 0 var(--options-radius);
+  --main-theme-color: var(--accent-2);
+  --hot-theme-color: var(--accent-2-hot);
+  --main-theme-glow: var(--accent-2-glow);
+  --header-text-color: var(--text-1);
+  --scroller-radius: var(--options-radius);
   --rotate-copyoverbutton-angle: 180deg; /* point left, towards the other side */
 }
 
 /*
- * Option-panel layout classes, ported from
- * src/client/lazy-app/Compress/Options/style.css. Shared by every per-encoder
- * panel; scoped under .sqush-editor so they don't leak to other pages.
+ * Option-panel layout classes shared by every per-encoder panel; scoped under
+ * .sqush-editor so they don't leak to other pages. The panels themselves are
+ * glass cards (see +page.svelte); these rows sit transparent on top with
+ * hairline separators.
  */
 .sqush-editor .options-section {
-  background: var(--off-black);
-  color: #fff;
+  background: transparent;
+  color: var(--text-1);
 }
 
 .sqush-editor .option-toggle {
@@ -73,7 +110,13 @@
   align-items: center;
   grid-template-columns: 1fr auto;
   gap: 0.7em;
-  padding: 10px var(--horizontal-padding);
+  padding: 11px var(--horizontal-padding);
+  color: var(--text-2);
+  transition: color 150ms ease;
+}
+
+.sqush-editor .option-toggle:hover {
+  color: var(--text-1);
 }
 
 .sqush-editor .option-one-cell {
@@ -88,6 +131,7 @@
   grid-template-columns: 87px 1fr;
   gap: 0.7em;
   padding: 10px var(--horizontal-padding);
+  color: var(--text-2);
 }
 
 .sqush-editor .option-reveal {
@@ -95,59 +139,73 @@
   display: grid;
   align-items: center;
   grid-template-columns: auto 1fr;
-  gap: 1em;
-  padding: 10px var(--horizontal-padding);
-  border-top: 1px solid #fff4;
-  transition-property: background-color;
-  transition-duration: 250ms;
+  gap: 0.8em;
+  padding: 11px var(--horizontal-padding);
+  border-top: 1px solid var(--border);
+  color: var(--text-2);
+  font-weight: 500;
+  transition:
+    background-color 200ms ease,
+    color 200ms ease;
 }
 
 .sqush-editor .option-reveal:focus-within,
 .sqush-editor .option-reveal:hover {
-  background-color: #fff2;
+  background-color: var(--surface-raise);
+  color: var(--text-1);
 }
 
+/* The Resize / Reduce-palette enabler rows: softly raised chips. */
 .sqush-editor .section-enabler {
-  background: var(--dark-gray);
-  border-top: 1px solid var(--off-black);
-  border-bottom: 1px solid var(--off-black);
-  padding: 15px var(--horizontal-padding);
+  background: var(--surface-raise);
+  border: 1px solid var(--border);
+  border-radius: var(--control-radius);
+  margin: 4px 10px;
+  padding: 10px calc(var(--horizontal-padding) - 10px + 12px);
+  font-weight: 500;
+  transition:
+    background-color 200ms ease,
+    border-color 200ms ease,
+    color 150ms ease;
+}
+
+.sqush-editor .section-enabler:hover {
+  background: var(--surface-raise-2);
+  border-color: var(--border-strong);
 }
 
 .sqush-editor .text-field {
-  background-color: var(--black);
-  color: var(--white);
+  background-color: rgba(0, 0, 0, 0.4);
+  color: var(--text-1);
   font: inherit;
-  border: none;
+  border: 1px solid var(--border);
   padding: 6px 6px 6px 10px;
   width: 100%;
   box-sizing: border-box;
-  border-radius: 4px;
+  border-radius: 8px;
+  transition: border-color 150ms ease;
+}
+
+.sqush-editor .text-field:focus {
+  outline: none;
+  border-color: var(--main-theme-color);
 }
 
 @media (dynamic-range: high) {
   @supports (color: oklch(0% 0 0)) {
     .sqush-editor {
-      --pink: oklch(75% 0.3 3);
-      --hot-pink: oklch(65% 0.3 3);
-      --blue: oklch(75% 0.3 248);
-      --deep-blue: oklch(65% 0.3 248);
+      --accent-1: oklch(76% 0.19 41);
+      --accent-1-hot: oklch(70% 0.21 38);
+      --accent-2: oklch(75% 0.17 250);
+      --accent-2-hot: oklch(67% 0.19 252);
     }
   }
 }
 
 @media (max-width: 760px) {
   .sqush-editor {
-    --horizontal-padding: 10px;
-    --options-radius: 6px;
-  }
-
-  .sqush-editor .options-1 {
-    --scroller-radius: 0 var(--options-radius) 0 0;
-  }
-
-  .sqush-editor .options-2 {
-    --scroller-radius: var(--options-radius) 0 0 0;
+    --horizontal-padding: 12px;
+    --options-radius: 14px;
   }
 
   .sqush-editor .option-toggle,
@@ -157,12 +215,13 @@
     padding: 8px var(--horizontal-padding);
   }
 
+  .sqush-editor .section-enabler {
+    margin: 4px 8px;
+    padding: 8px 10px;
+  }
+
   .sqush-editor .option-text-first {
     grid-template-columns: 1fr;
     gap: 6px;
-  }
-
-  .sqush-editor .section-enabler {
-    padding: 10px var(--horizontal-padding);
   }
 }
