@@ -130,6 +130,11 @@ Resolved 2026-05-31 (user: "restore them; for the rest, make the best call"):
 - **DONE — Browser-native encoders (Browser JPEG / PNG / GIF) restored** with
   runtime feature-detection (`getSupportedFormatIds()`); Browser GIF self-hides
   where canvas can't encode it. Browser JPEG got a 0–1 quality panel.
+  **Superseded 2026-06-27:** these were removed again — they only duplicated the
+  WASM codecs for the same formats (MozJPEG for JPEG, OxiPNG for PNG) and made
+  larger files, so they were never useful in a compression tool. The
+  feature-detection (`getSupportedFormatIds`) went with them. See
+  [codec-surface-cleanup.md](codec-surface-cleanup.md) §3.
 - **DONE — `contain` resize fitMethod** now letterboxes inside the original
   footprint (canvas object-fit), aligned at the two-up split.
 - **DONE — History → SvelteKit shallow routing** (`pushState`/`page.state` from
