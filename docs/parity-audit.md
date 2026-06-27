@@ -1,6 +1,6 @@
 # Editor parity audit & deviation log
 
-Last updated: 2026-06-11.
+Last updated: 2026-06-28.
 
 Goal: the Svelte editor must not **lose** any feature or gain any bug relative
 to the original Preact Squoosh editor. This doc tracks (a) deliberate deviations
@@ -45,6 +45,30 @@ prevFiles/dimsSeeded; `showSpinner` as a `$derived` AND-gate; encode/spinner
 browser-verified that these four expectations still hold: immediate first
 encode, 100ms-debounced option change, 500ms delayed spinner (seen appearing
 mid-encode and clearing on done), and reset-view-on-a-new-file. No regressions.
+
+**Re-run 2026-06-28 — targeted port-faithfulness re-audit + a found regression.**
+A user report (resizing the output made the two-up "resize in place" so the split
+stopped aligning) traced — via `git log -S` — to commit `6718bbc9` ("Align
+contain-resized output…", §B): the port had **narrowed** the original's
+*unconditional* canvas-box pinning to fire only when the resize fitMethod is
+`contain`, so the default `stretch` downscale rendered the output canvas at its
+intrinsic (smaller) size and the two halves no longer shared a footprint.
+**Fixed (commit `596661e2`):** restored the original `getOutputPreviewImageState`
+invariant — both canvases' CSS box is pinned to the preprocessed source dims
+unconditionally (shared `$derived` box dims + `style:` directives), with
+`object-fit: contain` added per-side only on a contain-resized side; `fitTarget`
+degated in lockstep. Guarded by a new e2e
+(`tests/e2e/resize-twoup-footprint.spec.ts`).
+
+Three agents then re-audited the **display layer**, the **options/processor
+surface**, and the **session state machine** against pristine upstream Squoosh —
+**no other major regression.** Recommend-leave leftovers: `leftDraw/rightDraw`
+borrows the sibling side rather than `source.preprocessed` (a documented
+deviation, §A.6); `onScaleInput`'s stricter parse (unreachable behind
+`<input type=number>`); the flex-center → JS-fit redesign. The cosmetic
+preset-label rounding is **fixed** (commit `3341bdb0`: the `0.3333` preset shows
+`33.33%`, not `33%`). The `two-up.ts` divider "2"-key value is the already-done
+Wave-0 item, not a new gap.
 
 ---
 
@@ -116,6 +140,19 @@ behavior parity is preserved.
    (only the resolved values changed). `npm run check` green; verified in the
    browser at desktop + mobile widths.
 
+9. **In-place file replace resets per-image state but keeps the encoder
+   (2026-06-28).** Dropping a new image over the open editor (or opening a fresh
+   one) keeps each side's `format` + `optionsByFormat` (quality/effort/…) but
+   **resets rotation and the whole processorState** — resize *and* palette
+   reduction. Upstream Squoosh preserved rotation + palette across an in-place
+   replace; resetting them is a deliberate product decision (user, 2026-06-28):
+   palette reduction is per-image and often *increases* size, so silently carrying
+   it onto an unrelated image is a footgun, and deliberate cross-image palette work
+   will live in bulk edit. The rationale is pinned in a `pickFiles` code comment
+   (commit `984788b1`) so a future audit doesn't "restore" the upstream behavior.
+   (A future Undo should make open/replace one checkpoint that snapshots the full
+   session, so the reset is recoverable in a single step.)
+
 > NOTE (import gotcha): shared `.svelte.ts` stores must be imported by the SAME
 > specifier everywhere (we use `$lib/editor/snackbar-store.svelte`). A mix of
 > `$lib/…` and relative `./…` makes Vite instantiate the store twice, so writes
@@ -135,8 +172,12 @@ Resolved 2026-05-31 (user: "restore them; for the rest, make the best call"):
   larger files, so they were never useful in a compression tool. The
   feature-detection (`getSupportedFormatIds`) went with them. See
   [codec-surface-cleanup.md](codec-surface-cleanup.md) §3.
-- **DONE — `contain` resize fitMethod** now letterboxes inside the original
-  footprint (canvas object-fit), aligned at the two-up split.
+- **DONE — `contain` resize fitMethod** letterboxes inside the original footprint
+  (canvas `object-fit: contain`), aligned at the two-up split. **Correction
+  (2026-06-28):** the commit that added this over-narrowed the box-pinning to the
+  `contain` case only, regressing the default `stretch` downscale; the box is now
+  pinned for *all* resizes, with `object-fit: contain` layered on only for Contain
+  (see the 2026-06-28 re-run at the top).
 - **DONE — History → SvelteKit shallow routing** (`pushState`/`page.state` from
   `$app/navigation`), replacing the raw `history` API (no more router warning).
 

@@ -1,6 +1,6 @@
 # Sqush Post-Migration Cleanup & Svelte Hardening Plan
 
-Last updated: 2026-06-10.
+Last updated: 2026-06-28.
 
 Read [STATUS.md](STATUS.md) first for live state. The SvelteKit 2 / Svelte 5
 migration is **concluded** — `main` is the production app and the retired
@@ -18,6 +18,15 @@ mutable "previous value" guards) — not in Svelte-4 syntax. There is **no**
 Findings below were produced by two independent read-only reviews (Claude's
 multi-agent audit + a second AI's pass) and cross-checked. Each item notes its
 source and whether it was verified against the code.
+
+> **Port-faithfulness re-audit (2026-06-28).** A user-reported resize/compare
+> regression (the two-up split stopped aligning on a resized-down output) was
+> traced to an over-narrowed conditional from the port and fixed; a 3-agent re-audit
+> of the display / options / session layers found no other major regression. The
+> full record — the fix, the audit, the new "in-place replace" reset-policy
+> deviation, and the cosmetic preset-label fix — lives in
+> [parity-audit.md](parity-audit.md) (the 2026-06-28 re-run + §A.9), not duplicated
+> here. The Wave-0 two-up divider "2"-key fix below was re-confirmed still correct.
 
 ## Working rules for this phase
 

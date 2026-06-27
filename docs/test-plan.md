@@ -42,12 +42,14 @@ built on.
 
 ## 2. What already exists (and is good — do not duplicate)
 
-- **10 Playwright E2E specs** (`tests/e2e/`), run on **Chromium + WebKit**
+- **11 Playwright E2E specs** (`tests/e2e/`), run on **Chromium + WebKit**
   against the **production** static build (`vite preview`) — so they exercise the
   real emitted WASM, the generated service worker, and the COOP/COEP headers.
   - `codec-encode` (8 encoders → correct magic bytes), `alpha` (4 encoders keep
     transparency), `quantize` + `resize` (functional: decode the output and
-    verify it), `large-image` (12 MP no-OOM), `offline` (SW reload),
+    verify it) + `resize-twoup-footprint` (a resized-down output keeps the
+    original on-screen footprint in the compare view — guards the two-up display
+    regression fixed 2026-06-28), `large-image` (12 MP no-OOM), `offline` (SW reload),
     `app-shell` (boot + cross-origin isolation), and 3 threading specs
     (`threads-support`, `oxipng-threads`, `emscripten-threads`) that prove MT
     threading actually engages, cross-engine.

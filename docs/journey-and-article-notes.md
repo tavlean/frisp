@@ -50,6 +50,17 @@ is on the `preact` branch).
 - **Dead weight removed:** WebP2 (`codecs/wp2/`) and dead codec dirs
   (`codecs/png/`, `codecs/visdif/`) — see
   [codec-surface-cleanup.md](codec-surface-cleanup.md).
+- **A narrowed conditional, found a month later (2026-06-28).** Porting Squoosh's
+  `getOutputPreviewImageState` to Svelte, the two-up output box was pinned to the
+  source dims only for the `contain` fit method — but the original pinned it
+  *unconditionally* and used the flag only to toggle `object-fit`. So every default
+  (`stretch`) downscale silently broke the before/after alignment — latent until a
+  user actually resized, months later. Traced with `git log -S` straight back to
+  the "alignment" commit. The tell that it was an accident, not a decision: the same
+  `pickFiles` reset kept the encoder but wiped the processors — half-and-half is the
+  fingerprint of a convenience default. Reinforces the lesson below: a faithful
+  port's bugs hide in *narrowed* conditionals — `always` quietly becomes
+  `if (specialCase)`.
 
 **The lesson angle:** a faithful framework migration is mostly about finding the
 *implicit* contracts (asset URLs, headers, worker spawning) the old framework

@@ -1,11 +1,26 @@
 # Sqush Status
 
-Last updated: 2026-06-11.
+Last updated: 2026-06-28.
 
 Read this first. Sqush is a local-first image optimizer: image work stays in the
 browser, the build is static, and offline reload must work after load.
 
 ## Current State
+
+- **Editor port re-audit + resize-compare fix (2026-06-28).** A user-reported
+  regression — resizing the output made the two-up compare "resize in place" so
+  the split stopped aligning — traced to the contain-alignment commit narrowing
+  the original's *unconditional* canvas-box pinning to the `contain` fit method
+  only. Fixed: the box is pinned to the source dims for *all* resizes again, with
+  `object-fit: contain` only on a Contain side (commit `596661e2`, + an e2e
+  footprint guard `resize-twoup-footprint.spec.ts`). A 3-agent re-audit (display /
+  options / session layers) found **no other major regression**. Also: the
+  `0.3333` resize preset shows `33.33%` again (commit `3341bdb0`), and the
+  deliberate "in-place replace resets rotation + palette but keeps the encoder
+  recipe" decision is pinned in a `pickFiles` comment (commit `984788b1`).
+  Deviation + audit logged in [parity-audit.md](parity-audit.md) (§A.9 + the
+  2026-06-28 re-run); user-guide reconciled. `svelte-check` green; resize e2e
+  specs pass.
 
 - **UI redesign (2026-06-11): the "studio" theme.** The whole interface was
   restyled — floating glass option panels, coral/azure per-side accents

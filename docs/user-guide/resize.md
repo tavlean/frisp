@@ -78,7 +78,7 @@ The methods fall into three families. The five "worker" methods (Lanczos3, Mitch
 ### Preset
 
 - **What it does:** A quick way to set width and height as a percentage of the original size, instead of typing exact numbers.
-- **Range & default:** Dropdown of fixed percentages — **25%, 33%, 50%, 100%, 200%, 300%, 400%** — plus **Custom** (option keys: `width` / `height`; preset multipliers `0.25, 0.3333, 0.5, 1, 2, 3, 4`). There is no single "default" preset; the dropdown shows whichever percentage currently matches your width/height, or **Custom** if it matches none (for example after you type your own numbers).
+- **Range & default:** Dropdown of fixed percentages — **25%, 33.33%, 50%, 100%, 200%, 300%, 400%** — plus **Custom** (option keys: `width` / `height`; preset multipliers `0.25, 0.3333, 0.5, 1, 2, 3, 4`). There is no single "default" preset; the dropdown shows whichever percentage currently matches your width/height, or **Custom** if it matches none (for example after you type your own numbers).
 - **How to choose:** Pick a percentage to scale both dimensions at once. 50% halves the size; 200% doubles it. Anything below 100% shrinks (and reduces file size); above 100% enlarges (which can't add real detail). Selecting a preset overwrites the Width and Height fields; typing your own values flips the dropdown to Custom.
 - **Recommended starting point:** **50%** is a common, safe first step for oversized photos — preview it, and adjust from there. Avoid going above 100% unless you specifically need a larger image (enlarging never recovers lost detail).
 
