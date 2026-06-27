@@ -24,6 +24,10 @@
      *  beat (so an error/abort just fades, no green). */
     leftDone?: boolean;
     rightDone?: boolean;
+    /** What each side's current pass is doing, for the badge wording:
+     *  'resize' → "Resizing…", otherwise "Optimizing"/"Re-optimizing". */
+    leftActivity?: 'optimize' | 'resize';
+    rightActivity?: 'optimize' | 'resize';
     /** Identity of the loaded source; changes force a re-fit even at same dims. */
     fileId?: string | number;
     /** Per-side "contain" resize: display the (smaller) output letterboxed
@@ -43,6 +47,8 @@
     rightWorking = false,
     leftDone = false,
     rightDone = false,
+    leftActivity = 'optimize',
+    rightActivity = 'optimize',
     fileId,
     leftContain = false,
     rightContain = false,
@@ -239,6 +245,7 @@
     working={leftWorking}
     done={leftDone}
     hasResult={!!leftImage}
+    activity={leftActivity}
   />
   <ProcessingBadge
     side="right"
@@ -246,6 +253,7 @@
     working={rightWorking}
     done={rightDone}
     hasResult={!!rightImage}
+    activity={rightActivity}
   />
 </div>
 

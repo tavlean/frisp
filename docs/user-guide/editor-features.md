@@ -17,11 +17,15 @@ The screen has three parts: the big image area in the middle, and two settings p
 - **How to choose:** Put the split roughly in the middle to compare the two sides side-by-side, or push it fully to one end to view a single side in isolation. Drag it slowly across a detailed area (text, skin, gradients) to watch where compression starts to hurt.
 - **Recommended starting point:** **Middle** — then drag across the busiest part of the image to check quality.
 
-### "Optimising…" while a side encodes
+### "Optimizing…" while a side works
 
-- **What it does:** Tells you when a side is busy compressing. The side never goes blank — until it has its own result it shows your loaded image as a stand-in, with a small **"Optimising…"** pill (a spinner + label) floating over that half of the view.
-- **Range & default:** Appears automatically over whichever side is encoding (left pill over the left half, right pill over the right half; top/bottom on a narrow screen). It only shows after a short delay, so quick encodes don't flash it — which is why on a fast format you may not see it at all.
-- **How to use it / how to read it:** The first time a side encodes it reads **"Optimising…"**. After that, whenever you change a setting and the side re-encodes, it reads **"Re-optimising…"** — and the previous result stays on screen, crisp, while the new one is computed, so you're never left looking at nothing. The pill is the single, consistent "this side is working" signal: if you see it, that side is (re-)optimising; when it disappears, the result you're looking at is final.
+- **What it does:** Tells you when a side is busy. The side never goes blank — until it has its own result it shows your loaded image as a stand-in, with a small pill (a spinner + label) floating over that half of the view that briefly morphs into a green "done" dot when the pass finishes.
+- **Range & default:** Appears automatically over whichever side is working (left pill over the left half, right pill over the right half; top/bottom on a narrow screen). It only shows after a short delay, so quick passes don't flash it — which is why on a fast format you may not see it at all.
+- **How to use it / how to read it:** The label reflects **what you just changed**, not just "busy":
+  - The first time a side runs it reads **"Optimizing…"** (settling into **"Optimized"**).
+  - Change a resize control (dimensions, preset, method…) and that side reads **"Resizing…" → "Resized"** — a reminder that resizing is what's driving this pass, even though the image is always re-encoded too.
+  - Any other change after the first pass — quality, format, palette reduction, rotation — reads **"Re-optimizing…" → "Re-optimized"**.
+  In every case the previous result stays on screen, crisp, while the new one is computed, so you're never left looking at nothing. The pill is the single, consistent "this side is working" signal; when it disappears, the result you're looking at is final.
 - **Recommended starting point:** Nothing to set — just know that a pill over a side means "still working," and a side with no pill is showing its finished result.
 
 ### Zoom (in / out / type a percentage)

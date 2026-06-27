@@ -66,6 +66,8 @@
         rightWorking={session.showSpinner[1]}
         leftDone={session.statuses[0] === 'done'}
         rightDone={session.statuses[1] === 'done'}
+        leftActivity={session.activities[0]}
+        rightActivity={session.activities[1]}
         fileId={session.loadId}
         leftContain={session.leftContain}
         rightContain={session.rightContain}

@@ -17,6 +17,11 @@ import type { ProcessorState } from 'client/lazy-app/feature-meta';
 
 export type SideIndex = 0 | 1;
 export type SideStatus = 'idle' | 'working' | 'done' | 'error';
+// What a side's current pass is doing, for the badge wording. 'resize' when the
+// pass was triggered by a resize-control change; 'optimize' for everything else
+// (quality, format, palette, rotate). A pass always re-encodes regardless — this
+// only labels the user's *action*, not the internal stages.
+export type SideActivity = 'optimize' | 'resize';
 
 export interface SideState {
   format: SideFormat;
@@ -188,6 +193,9 @@ export class EditorSession {
     null,
   ]);
   statuses = $state<[SideStatus, SideStatus]>(['idle', 'idle']);
+  // What each side's in-flight pass is doing, for the ProcessingBadge wording.
+  // Set at encode start by diffing the resize recipe against the previous pass.
+  activities = $state<[SideActivity, SideActivity]>(['optimize', 'optimize']);
   // The 500ms delayed loading spinner. `spinnerDelayPassed` is flipped true by
   // the updateSpinner effect once a side has been working for 500ms; showSpinner
   // AND-gates it with the live status so the spinner can never show outside a
@@ -209,6 +217,9 @@ export class EditorSession {
   //  - seededLoadId: loadId the resize dims were last seeded at (one-shot/file).
   private encodedLoadId: [number, number] = [-1, -1];
   private seededLoadId = -1;
+  // Resize recipe signature each side last encoded with, to tell a resize edit
+  // apart from any other re-encode (see encodeSide / activities).
+  private lastResizeSig: [string | null, string | null] = [null, null];
   // Disposes the per-side encode/spinner effects this instance owns (constructor).
   private stopEffects: (() => void) | null = null;
   // Debounced localStorage write for persistSettings (see flushSettings).
@@ -268,6 +279,22 @@ export class EditorSession {
     // at, so a fresh image encodes immediately and option tweaks stay debounced.
     const fileChanged = this.loadId !== this.encodedLoadId[index];
     this.encodedLoadId[index] = this.loadId;
+
+    // Label the badge by WHAT changed this pass, not by what's enabled: diff the
+    // resize recipe against the previous pass. A resize-control change → "Resizing";
+    // anything else (quality/format/palette/rotate) → "Optimizing". While resize is
+    // OFF its width/height are irrelevant (and get seeded after the first result),
+    // so collapse the disabled state to a constant signature — otherwise those
+    // background dim writes would masquerade as a resize edit. A new file always
+    // reads as 'optimize' (fileChanged short-circuits before the diff can fire).
+    const resize = request.processorState.resize;
+    const resizeSig = resize.enabled ? JSON.stringify(resize) : 'off';
+    const prevSig = this.lastResizeSig[index];
+    this.lastResizeSig[index] = resizeSig;
+    this.activities[index] =
+      !fileChanged && prevSig !== null && prevSig !== resizeSig
+        ? 'resize'
+        : 'optimize';
 
     if (!current) {
       this.statuses[index] = 'idle';

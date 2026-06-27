@@ -18,16 +18,21 @@
     /** Whether a result already existed when this pass started — picks the
      *  "Optimizing"/"Optimized" vs "Re-optimizing"/"Re-optimized" wording. */
     hasResult: boolean;
+    /** What this pass is doing. 'resize' overrides the wording to
+     *  "Resizing…"/"Resized"; 'optimize' uses the (Re-)optimizing wording. */
+    activity: 'optimize' | 'resize';
     side: 'left' | 'right';
     orientation: 'horizontal' | 'vertical';
   }
-  let { working, done, hasResult, side, orientation }: Props = $props();
+  let { working, done, hasResult, activity, side, orientation }: Props =
+    $props();
 
   // How long the green "Optimized" beat holds before it fades away.
   const SUCCESS_HOLD = 850;
 
   let phase = $state<'hidden' | 'working' | 'success'>('hidden');
   let wasReencode = $state(false);
+  let wasResize = $state(false);
   // Plain (non-reactive) edge tracker + hide timer.
   let prevWorking = false;
   let hideTimer: ReturnType<typeof setTimeout> | undefined;
@@ -40,8 +45,9 @@
     prevWorking = w;
     clearTimeout(hideTimer);
     if (w) {
-      // a (visible) encode started
+      // a (visible) encode started — sample the wording inputs at this edge
       wasReencode = untrack(() => hasResult);
+      wasResize = untrack(() => activity === 'resize');
       phase = 'working';
     } else if (untrack(() => done)) {
       // it finished successfully → green beat, then fade
@@ -57,11 +63,16 @@
 
   onDestroy(() => clearTimeout(hideTimer));
 
-  // Both texts are rendered, stacked, and crossfaded — they share the "Optimiz…"
-  // prefix, so left-aligning them keeps the prefix pixel-stable and only the
-  // differing suffix visibly changes. Picked once per pass via `wasReencode`.
-  const workingText = $derived(wasReencode ? 'Re-optimizing…' : 'Optimizing…');
-  const successText = $derived(wasReencode ? 'Re-optimized' : 'Optimized');
+  // Both texts are rendered, stacked, and crossfaded — each working/success pair
+  // shares a prefix ("Optimiz…" / "Resiz…"), so left-aligning them keeps the
+  // prefix pixel-stable and only the differing suffix visibly changes. The wording
+  // is picked once per pass via `wasResize` / `wasReencode` (sampled at the edge).
+  const workingText = $derived(
+    wasResize ? 'Resizing…' : wasReencode ? 'Re-optimizing…' : 'Optimizing…',
+  );
+  const successText = $derived(
+    wasResize ? 'Resized' : wasReencode ? 'Re-optimized' : 'Optimized',
+  );
 
   // Reduced motion: we SHORTEN durations rather than snap to none. An abrupt swap
   // is the opposite of calm, and `prefers-reduced-motion` is about spatial
