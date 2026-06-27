@@ -129,7 +129,7 @@ Three "do now" items (libwebp, AVIF, JXL) are driven by genuine security exposur
 - Pin **v0.1.3** is the latest tag *and* repo HEAD; upstream `wasmboy-rs` has been dead since Jan 2021. hqx is a fixed mathematical scaling filter with no development path. Nothing to do unless a project-wide `wasm-bindgen` bump forces a touch-up. ([repo](https://github.com/CryZe/wasmboy-rs))
 
 ### png (image-png crate) — Deleted
-- `codecs/png` was pinned at **0.16.7** (16 releases behind 0.18.1) but was a **dead directory** — the prebuilt `squoosh_png.js/.wasm` in `codecs/png/pkg/` was never imported by `src/`; browserPNG + OxiPNG handle every PNG path. The correct action was **deletion, not upgrade**, and it was deleted in the codec-cleanup pass (see §7). ([tags](https://github.com/image-rs/image-png/tags))
+- `codecs/png` was pinned at **0.16.7** (16 releases behind 0.18.1) but was a **dead directory** — the prebuilt `squoosh_png.js/.wasm` in `codecs/png/pkg/` was never imported by `src/`; OxiPNG (encode) and the browser's native PNG decode handle every PNG path. The correct action was **deletion, not upgrade**, and it was deleted in the codec-cleanup pass (see §7). ([tags](https://github.com/image-rs/image-png/tags))
 
 ---
 
@@ -228,7 +228,7 @@ When in doubt, match **jSquash** first — it's actively maintained (last commit
 13. **wp2** — ✅ **DONE: removed entirely** (encoder + decoder) on 2026-06-02. No browser decodes it; bitstream non-final. See [codec-surface-cleanup.md](codec-surface-cleanup.md).
 14. **QOI** — spec is **frozen**; only one real two-line commit (~1.4% encode). Bump the SHA opportunistically if you rebuild for another reason. (Also: QOI files are *larger* than optimised PNG — no compression rationale.)
 15. **hqx** — already on the latest tag; upstream abandoned; fixed-math filter.
-16. **png (image-png crate)** — **dead directory** (DELETED), never imported (browserPNG + OxiPNG own all PNG paths). `codecs/png/` was deleted in the codec-cleanup pass.
+16. **png (image-png crate)** — **dead directory** (DELETED), never imported (OxiPNG encode + native browser PNG decode own all PNG paths). `codecs/png/` was deleted in the codec-cleanup pass.
 17. **SVT-AV1 / HEIC encoder / ECT / zopflipng / JPEG XS** — not viable or not worth it in single-threaded WASM (see §4).
 
 **Suggested sequencing:** the codec-surface cleanup (WebP 2 removed, `codecs/png/` + `codecs/visdif/` deleted) and the multithreading headers are **already DONE** on the `codec-cleanup-and-threading` branch. The remaining codec work is the upgrades: do the four security-driven rebuilds (items 1–4) as one batch since they share the Emscripten/Docker pipeline and the libwebp↔AVIF libsharpyuv coupling means testing them together is cleaner — see [codec-upgrade-runbooks.md](codec-upgrade-runbooks.md) for turnkey steps. Defer mozjpeg's CMake rewrite, the resize crate edits, and the jpegli build to their own focused sessions.
