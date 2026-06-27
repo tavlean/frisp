@@ -42,10 +42,13 @@
     gap: 8px;
     max-width: 90vw;
     padding: 10px 8px 10px 16px;
-    border-radius: 6px;
-    background: #323232;
+    border-radius: 12px;
+    background: rgba(28, 28, 33, 0.92);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
     color: #fff;
-    box-shadow: 0 3px 14px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.5);
     z-index: 30;
     font-size: 0.95rem;
   }
@@ -58,7 +61,7 @@
     flex: none;
     background: none;
     border: none;
-    color: var(--blue, #5fb4e4);
+    color: var(--blue, #38bdf8);
     font: inherit;
     font-weight: 700;
     text-transform: uppercase;
