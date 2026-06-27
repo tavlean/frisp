@@ -1,7 +1,9 @@
 # Codec Surface Cleanup — Plan
 
-Last updated: 2026-06-02. Status: **DONE — both removals committed** on branch
-`codec-cleanup-and-threading`. Kept as the record of what was removed and why.
+Last updated: 2026-06-27. Status: **DONE** — three removals recorded here: WebP 2
+and the dead `codecs/png` dir (2026-06-02, branch `codec-cleanup-and-threading`),
+then the browser canvas encoders + QOI-as-output (2026-06-27, branch
+`chore/trim-encoder-surface`). Kept as the record of what was removed and why.
 
 Read [codec-provenance.md](codec-provenance.md) before touching `codecs/`, and
 follow its build / generated-metadata / service-worker / browser verification
@@ -51,13 +53,62 @@ and the orphaned `src/client/lazy-app/storage.ts` localStorage helper). Docs
 (`codec-provenance.md`, `user-guide/reference/engine-and-codecs.md`) were updated
 in the same commit to mark png/visdif deleted.
 
-The browser PNG path is fully covered without it:
-- **encode** → browserPNG (canvas `toBlob`),
-- **optimize** → OxiPNG,
+The PNG path is fully covered without it:
+- **encode / optimize** → OxiPNG (the canvas `browserPNG` encoder that originally
+  also covered plain encode was itself removed in §3),
 - **decode** → native browser (that's why `src/features/decoders/` has no `png`).
 
 No generated codec-asset record referenced it; `npm run check` stayed green after
 deletion.
+
+## 3. Remove the browser canvas encoders + drop QOI from the picker — DONE (2026-06-27)
+
+**Decision: a compression tool should offer one best-in-class encoder per output
+format, not redundant worse ones.** The three canvas (`canvas.toBlob`) encoders
+each duplicated a format already covered by a stronger WASM codec — browserJPEG
+vs MozJPEG, browserPNG vs OxiPNG — while browserGIF was almost never even
+feature-detectable (`canvas.toBlob('image/gif')` is unsupported in nearly every
+browser). They produced larger files for the tool's whole reason to exist, so
+they were removed end to end. **QOI was dropped from the output picker only** —
+it's a fast lossless format with effectively no support outside specialised
+tools, so it isn't a useful compression target; **its decoder stays**, so
+importing `.qoi` files still works.
+
+Three commits on `chore/trim-encoder-surface`:
+
+- **QOI, hide only (`7002520b`):** removed just the `qoi` row from
+  `src/lib/compress.ts` `OUTPUT_FORMATS`. Everything else QOI — encoder feature
+  dir, worker-bridge `qoiEncode`, codec assets, SW precache, the `/diagnostics`
+  pipeline probe, and the whole decoder path — is deliberately untouched. (A full
+  encoder rip-out is possible but low-ROI: the decoder shares the worker bridge,
+  codec-asset records, and `cache-plan.ts`, and the probe round-trips
+  `qoiEncode`.)
+- **Browser encoders, UI layer (`78c00415`):** their three `OUTPUT_FORMATS` rows
+  plus the now-dead runtime feature detection that existed solely to gate them
+  (`BROWSER_ENCODER_MIME`, `BROWSER_ENCODER_IDS`, `canvasSupportsMime`,
+  `getSupportedFormatIds` in `compress.ts`); the `supportedFormatIds` /
+  `loadSupportedFormats` machinery in `editor-session.svelte.ts` (`availableFormats`
+  is now static); the `onMount` probe call in `src/routes/+page.svelte`; and the
+  `browserJPEG` branch + import in `OptionsPanel.svelte`.
+- **Browser encoders, engine layer (`915187c1`):** the three names in
+  `scripts/sync-sveltekit-app.mjs` `appEncoderNames` (so the generated
+  `encoderMap`/`EncoderState` drop them); the three dispatch cases in
+  `src/client/lazy-app/image-pipeline.ts`; the feature dirs
+  `src/features/encoders/browser{GIF,JPEG,PNG}`; and
+  `src/lib/editor/options/BrowserJpegOptions.svelte`. These were canvas-only (no
+  WASM assets, no decoder twins), so no codec-asset record or `cache-plan.ts`
+  entry referenced them.
+
+**Verified:** `npm run check` passes (format:check, sync, svelte-kit sync,
+svelte-check 0/0, vite build, audit:static-output), and a dev-server smoke test
+confirms both format pickers now list exactly Original / WebP / AVIF / JPEG XL /
+MozJPEG / OxiPNG, with a clean WebP encode and no console errors.
+
+**Docs still to reconcile:** the end-user guide still documents the browser
+encoders and QOI-as-output across ~8 files (`choosing-a-format.md`,
+`formats/simple-formats.md`, `engine-and-codecs.md`, `recommended-settings.md`,
+`index.md`, and the `reference/` inventory). That's a separate authorial pass —
+see the user-guide registry row in `docs/README.md`.
 
 ## Out of scope here
 
