@@ -1,4 +1,9 @@
-export const sizePresets = [0.25, 0.3333, 0.5, 1, 2, 3, 4];
+// Shrink-only presets. Sqush is an optimizer, not an upscaler — it has no
+// super-resolution, so enlarging just spreads existing pixels (blurry, more
+// bytes, no real detail). Anyone who genuinely needs a larger output (e.g.
+// hitting an exact dimension, or hqx pixel-art magnification) can still type
+// values into the Custom width/height fields.
+export const sizePresets = [0.25, 0.3333, 0.5, 1];
 
 export interface ResizePresetSize {
   width: number;

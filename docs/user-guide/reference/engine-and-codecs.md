@@ -40,8 +40,10 @@ Shapes: `src/features/processors/resize/shared/meta.ts`,
 - **`browser-*`** map to canvas `imageSmoothingQuality` (pixelated/low/medium/high).
 - **`vector`** rasterises an SVG source at the target size; only offered when the
   input is SVG (`isVector`).
-- **Presets** (`resize/client/preset-state.ts`): `0.25, 0.3333, 0.5, 1, 2, 3, 4`
-  (shown as 25%-400%), plus `custom`.
+- **Presets** (`resize/client/preset-state.ts`): `0.25, 0.3333, 0.5, 1`
+  (shown as 25%-100%), plus `custom`. Shrink-only by design — no enlarge
+  presets (Sqush is an optimizer, not an upscaler); enlarging is reachable only
+  by typing larger Width/Height values via `custom`.
 
 ### Quantize / "Reduce palette" (`src/features/processors/quantize`)
 

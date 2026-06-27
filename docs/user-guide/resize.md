@@ -78,9 +78,9 @@ The methods fall into three families. The five "worker" methods (Lanczos3, Mitch
 ### Preset
 
 - **What it does:** A quick way to set width and height as a percentage of the original size, instead of typing exact numbers.
-- **Range & default:** Dropdown of fixed percentages — **25%, 33.33%, 50%, 100%, 200%, 300%, 400%** — plus **Custom** (option keys: `width` / `height`; preset multipliers `0.25, 0.3333, 0.5, 1, 2, 3, 4`). There is no single "default" preset; the dropdown shows whichever percentage currently matches your width/height, or **Custom** if it matches none (for example after you type your own numbers).
-- **How to choose:** Pick a percentage to scale both dimensions at once. 50% halves the size; 200% doubles it. Anything below 100% shrinks (and reduces file size); above 100% enlarges (which can't add real detail). Selecting a preset overwrites the Width and Height fields; typing your own values flips the dropdown to Custom.
-- **Recommended starting point:** **50%** is a common, safe first step for oversized photos — preview it, and adjust from there. Avoid going above 100% unless you specifically need a larger image (enlarging never recovers lost detail).
+- **Range & default:** Dropdown of fixed **shrink** percentages — **25%, 33.33%, 50%, 100%** — plus **Custom** (option keys: `width` / `height`; preset multipliers `0.25, 0.3333, 0.5, 1`). The presets stop at 100% on purpose: Sqush is an optimizer, not an upscaler, so it deliberately doesn't offer one-click _enlarge_ percentages (enlarging just spreads existing pixels — blurrier and bigger, with no real detail gained). There is no single "default" preset; the dropdown shows whichever percentage currently matches your width/height, or **Custom** if it matches none (for example after you type your own numbers, or set dimensions larger than the source).
+- **How to choose:** Pick a percentage to scale both dimensions down at once. 50% halves the size; 25% quarters it. Selecting a preset overwrites the Width and Height fields; typing your own values flips the dropdown to Custom. If you genuinely need a _larger_ output (an exact target dimension, or pixel-art magnification with **hqx**), type the bigger numbers into Width/Height yourself — the Custom path still allows it, it just isn't a preset.
+- **Recommended starting point:** **50%** is a common, safe first step for oversized photos — preview it, and adjust from there.
 
 ### Width
 
@@ -149,7 +149,7 @@ _Sources: [encoding/resampling guide](https://guideencodemoe-mkdocs.readthedocs.
 ## Tips & pitfalls
 
 - **Resize first, then compress.** Shrinking to the display size is the highest-impact thing you can do for file size — often bigger than any quality-slider change in the format panel.
-- **Enlarging never adds detail.** Scaling above 100% (or any preset over 100%) just spreads existing pixels over a bigger area; it can't recover detail that isn't there. For pixel art you want to blow up, use **hqx** or **Browser pixelated** instead of a photo filter.
+- **Enlarging never adds detail.** Scaling above 100% just spreads existing pixels over a bigger area; it can't recover detail that isn't there. That's why the presets only go down to 100% — to enlarge at all you have to type larger Width/Height values yourself. For pixel art you want to blow up, use **hqx** or **Browser pixelated** instead of a photo filter.
 - **The Premultiply and Linear RGB toggles only show up for the worker methods.** Switch the Method to Lanczos3/Mitchell/Catmull-Rom/Triangle/hqx and they appear; pick a Browser method or Vector and they're hidden (those paths don't use them).
 - **Browser methods can look different on different computers.** They rely on your browser/OS scaler, so the result isn't guaranteed to match across machines. For consistent, controllable output, prefer the worker methods.
 - **Ringing vs blur is a real trade-off.** If Lanczos3 gives you faint halos around sharp edges, step down to **Mitchell** (less ringing) or **Triangle** (no ringing, but softer). If everything looks too soft, step up toward Catmull-Rom or Lanczos3.
