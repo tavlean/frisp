@@ -4,8 +4,9 @@
   // elements inside a <two-up>: left draws the processed source, right draws the
   // decoded output. Only the left pinch-zoom is driven; pointer/wheel events are
   // retargeted to it and the right mirrors its transform.
-  import PinchZoom, { type ScaleToOpts } from './pinch-zoom';
+  import PinchZoom, { type ScaleToOpts, type ZoomMode } from './pinch-zoom';
   import './two-up';
+  import { browser } from '$app/environment';
   import { drawDataToCanvas } from 'client/lazy-app/util/canvas';
   import { isSafari } from 'client/lazy-app/util';
   import { retargetViewEvents } from './retarget-events';
@@ -112,6 +113,72 @@
     relativeTo: 'container',
     allowChangeEvent: true,
   } satisfies ScaleToOpts;
+
+  // --- SCROLL-ZOOM-MODE EXPERIMENT (temporary) -----------------------------
+  // A throwaway segmented control (rendered top-centre of the stage) that lets
+  // us A/B the five wheel/scroll-zoom anchoring strategies live and persists
+  // the pick across reloads. This ONLY affects mouse-wheel / trackpad-scroll
+  // zoom — pinch gestures always anchor at the gesture itself, untouched by the
+  // mode. Self-contained: remove this block + the markup + the .zoom-mode-bar
+  // styles to drop the experiment entirely.
+  const ZOOM_MODES: { value: ZoomMode; label: string; title: string }[] = [
+    {
+      value: 'cursor',
+      label: 'Pointer',
+      title: 'Zoom toward the pointer (current behaviour)',
+    },
+    {
+      value: 'center',
+      label: 'Center',
+      title: 'Always zoom toward the viewport centre (like the +/- buttons)',
+    },
+    {
+      value: 'smart',
+      label: 'Smart',
+      title:
+        'Pointer when over the image, viewport centre when over the backdrop',
+    },
+    {
+      value: 'adaptive',
+      label: 'Adaptive',
+      title: 'Viewport centre while the image fits; pointer once zoomed in past fit',
+    },
+    {
+      value: 'smart-bounded',
+      label: 'Framed',
+      title: 'Smart anchoring, and keeps the image framed on screen',
+    },
+  ];
+  const ZOOM_STORAGE_KEY = 'sqush:zoom-mode';
+
+  // Initial mode from localStorage (validated against the known modes), else
+  // the default 'cursor'. Only read storage in the browser.
+  let zoomMode = $state<ZoomMode>(readStoredZoomMode());
+
+  function readStoredZoomMode(): ZoomMode {
+    if (!browser) return 'cursor';
+    const stored = localStorage.getItem(ZOOM_STORAGE_KEY);
+    return ZOOM_MODES.some((m) => m.value === stored)
+      ? (stored as ZoomMode)
+      : 'cursor';
+  }
+
+  // Persist the pick across reloads.
+  $effect(() => {
+    if (browser) localStorage.setItem(ZOOM_STORAGE_KEY, zoomMode);
+  });
+
+  // Push the selected mode onto BOTH pinch instances and re-apply bounds, so
+  // switching to 'smart-bounded' re-frames immediately. Setting zoomMode on
+  // both keeps the left's bounds clamp and the mirrored right's clamp identical
+  // so the two panes can't desync.
+  $effect(() => {
+    const mode = zoomMode;
+    if (pinchLeft) pinchLeft.zoomMode = mode;
+    if (pinchRight) pinchRight.zoomMode = mode;
+    pinchLeft?.setTransform({ allowChangeEvent: true });
+  });
+  // --- end scroll-zoom-mode experiment -------------------------------------
 
   // Draw the pixels whenever they change. leftDraw/rightDraw fall back to the
   // other side's image while a side awaits its own result (see above).
@@ -255,6 +322,26 @@
     hasResult={!!rightImage}
     activity={rightActivity}
   />
+
+  <!-- SCROLL-ZOOM-MODE EXPERIMENT (temporary): top-centre segmented control to
+       A/B the five wheel/scroll-zoom anchoring strategies live. Radiogroup
+       pattern; the pick is persisted to localStorage. This ONLY changes how
+       mouse-wheel / trackpad-scroll zoom picks its anchor — pinch gestures
+       always anchor at the gesture and are unaffected. Remove this block (plus
+       the experiment script block and the .zoom-mode-bar styles) to drop it. -->
+  <div class="zoom-mode-bar" role="radiogroup" aria-label="Scroll-zoom behaviour">
+    {#each ZOOM_MODES as mode (mode.value)}
+      <button
+        type="button"
+        class="mode-button"
+        class:active={zoomMode === mode.value}
+        role="radio"
+        aria-checked={zoomMode === mode.value}
+        title={mode.title}
+        onclick={() => (zoomMode = mode.value)}
+      >{mode.label}</button>
+    {/each}
+  </div>
 </div>
 
 <div class="controls">
@@ -546,5 +633,66 @@
   input.zoom::-webkit-inner-spin-button {
     -webkit-appearance: none;
     margin: 0;
+  }
+
+  /* SCROLL-ZOOM-MODE EXPERIMENT (temporary): a single glass pill of 5 buttons,
+     pinned top-centre over the stage. Matches the .button-group aesthetic
+     (semi-transparent dark surface, backdrop blur, subtle border, rounded
+     pill, brighter active state). Centred + max-width so it clears the
+     top-corner ProcessingBadges, and allowed to shrink/wrap on narrow widths
+     so it never overflows the viewport. Remove this whole block to drop the
+     experiment. */
+  .zoom-mode-bar {
+    position: absolute;
+    top: 12px;
+    left: 0;
+    right: 0;
+    z-index: 5;
+    margin: 0 auto;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: max-content;
+    max-width: calc(100% - 24px);
+    /* The control itself is interactive, but keep it compact (width:max-content
+       + centred) so it doesn't blanket the stage and block gestures around it. */
+    pointer-events: auto;
+    background-color: var(--surface, rgba(19, 19, 25, 0.82));
+    backdrop-filter: blur(16px) saturate(1.3);
+    -webkit-backdrop-filter: blur(16px) saturate(1.3);
+    border: 1px solid var(--border, rgba(255, 255, 255, 0.08));
+    border-radius: 999px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+    overflow: hidden;
+  }
+
+  .mode-button {
+    flex: 0 1 auto;
+    min-width: 0;
+    box-sizing: border-box;
+    background: transparent;
+    border: none;
+    line-height: 1.1;
+    white-space: nowrap;
+    height: 32px;
+    padding: 0 12px;
+    font: inherit;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    color: var(--text-2, #bbb);
+    transition:
+      background-color 150ms ease,
+      color 150ms ease;
+  }
+
+  .mode-button:hover {
+    background: rgba(45, 45, 54, 0.92);
+    color: var(--text-1, #fff);
+  }
+
+  .mode-button.active {
+    background: rgba(62, 62, 74, 0.95);
+    color: var(--text-1, #fff);
   }
 </style>
