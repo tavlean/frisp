@@ -7,6 +7,19 @@ browser, the build is static, and offline reload must work after load.
 
 ## Current State
 
+- **Resize UX cleanup (2026-06-28).** Three small editor changes landed on `main`:
+  (1) size presets are now **shrink-only** — `0.25 / 0.5 / 1` (25 / 50 / 100%); the
+  enlarge presets (`200 / 300 / 400%`) and the awkward `33.33%` were dropped, since
+  Sqush is an optimizer, not an upscaler (enlarging stays reachable via Custom
+  Width/Height). (2) The in-progress pill reads **"Resizing…"** when a real resize
+  drives the pass, vs "(Re-)optimizing" otherwise. (3) A resize at **100% is a true
+  no-op** — `processImage` skips the identity resample and `encodeSide` skips the
+  whole re-encode when the effective request is unchanged, so enabling Resize (or
+  toggling Premultiply/Linear RGB, or switching method, Mitchell included) at 100%
+  does nothing. Commits `6a50f8bb` / `3741fe2b` / `059251c5` / `4a2a4af6`;
+  deviation logged in [parity-audit.md](parity-audit.md) §A.10; user-guide +
+  reference reconciled. `svelte-check` green; browser-verified.
+
 - **Editor port re-audit + resize-compare fix (2026-06-28).** A user-reported
   regression — resizing the output made the two-up compare "resize in place" so
   the split stopped aligning — traced to the contain-alignment commit narrowing
@@ -15,9 +28,10 @@ browser, the build is static, and offline reload must work after load.
   `object-fit: contain` only on a Contain side (commit `596661e2`, + an e2e
   footprint guard `resize-twoup-footprint.spec.ts`). A 3-agent re-audit (display /
   options / session layers) found **no other major regression**. Also: the
-  `0.3333` resize preset shows `33.33%` again (commit `3341bdb0`), and the
-  deliberate "in-place replace resets rotation + palette but keeps the encoder
-  recipe" decision is pinned in a `pickFiles` comment (commit `984788b1`).
+  `0.3333` resize preset shows `33.33%` again (commit `3341bdb0`; that preset was
+  **later removed** — see the resize-UX cleanup below), and the deliberate
+  "in-place replace resets rotation + palette but keeps the encoder recipe"
+  decision is pinned in a `pickFiles` comment (commit `984788b1`).
   Deviation + audit logged in [parity-audit.md](parity-audit.md) (§A.9 + the
   2026-06-28 re-run); user-guide reconciled. `svelte-check` green; resize e2e
   specs pass.

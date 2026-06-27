@@ -66,9 +66,10 @@ surface**, and the **session state machine** against pristine upstream Squoosh �
 borrows the sibling side rather than `source.preprocessed` (a documented
 deviation, §A.6); `onScaleInput`'s stricter parse (unreachable behind
 `<input type=number>`); the flex-center → JS-fit redesign. The cosmetic
-preset-label rounding is **fixed** (commit `3341bdb0`: the `0.3333` preset shows
-`33.33%`, not `33%`). The `two-up.ts` divider "2"-key value is the already-done
-Wave-0 item, not a new gap.
+preset-label rounding was **fixed** (commit `3341bdb0`: the `0.3333` preset
+showed `33.33%`, not `33%`) — but that preset has **since been removed** in the
+resize-UX cleanup (§A.10), so the point is moot. The `two-up.ts` divider "2"-key
+value is the already-done Wave-0 item, not a new gap.
 
 ---
 
@@ -112,7 +113,9 @@ behavior parity is preserved.
      re-encode) and read as a bug; a clear text label is more honest than a blur,
      and keeping the previous result crisp on a re-encode lets the user still see
      their current output. `Output.svelte`, `+page.svelte` (passes
-     `leftWorking/rightWorking`).
+     `leftWorking/rightWorking`). **Extended 2026-06-28 (§A.10):** the badge now
+     also reads **"Resizing…"** for resize-driven passes, and a resize at 100% is
+     a no-op (no pass, so no badge).
 7. **WebP default options diverge from upstream (2026-06-03):** quality **80**
    (was 75) and method **6** — highest effort / best compression (was 4) — set as
    the project's preferred default, since WebP is the default right-side encoder
@@ -152,6 +155,29 @@ behavior parity is preserved.
    (commit `984788b1`) so a future audit doesn't "restore" the upstream behavior.
    (A future Undo should make open/replace one checkpoint that snapshots the full
    session, so the reset is recoverable in a single step.)
+
+10. **Resize UX cleanup — shrink-only presets, context-aware badge, 100% no-op
+    (2026-06-28).** Three deliberate departures from upstream Squoosh's resize panel:
+    - **Shrink-only presets.** The preset dropdown is now `0.25 / 0.5 / 1`
+      (25 / 50 / 100%). Squoosh's `200 / 300 / 400%` enlarge presets and the awkward
+      repeating-decimal `33.33%` were dropped — Sqush is an optimizer, not an
+      upscaler (no super-resolution; enlarging only spreads existing pixels). An
+      exact larger target, or pixel-art hqx magnification, is still reachable by
+      typing Width/Height via Custom. `resize/client/preset-state.ts` (commits
+      `6a50f8bb`, `3741fe2b`). Supersedes the `33.33%` preset-label fix noted at the
+      top — that preset no longer exists.
+    - **Context-aware in-progress badge** (extends §A.6). The pill reads
+      **"Resizing…" → "Resized"** when a pass is driven by a real resize edit, vs
+      "(Re-)optimizing" otherwise; the call diffs each side's *effective* resize
+      recipe against the previous pass. `ProcessingBadge.svelte`,
+      `editor-session.svelte.ts` (commit `059251c5`).
+    - **Resize at 100% is a true no-op.** Squoosh always ran the resampler when
+      resize was enabled. Sqush skips it when the target equals the source size:
+      `processImage` skips the identity resample, and `editor-session` skips the
+      whole re-encode when the effective request is unchanged — so enabling Resize
+      (or toggling Premultiply/Linear RGB, or switching method, Mitchell included)
+      at 100% does nothing. `image-pipeline-shared.ts`, `editor-session.svelte.ts`
+      (commit `4a2a4af6`). Browser-verified; `svelte-check` 0/0.
 
 > NOTE (import gotcha): shared `.svelte.ts` stores must be imported by the SAME
 > specifier everywhere (we use `$lib/editor/snackbar-store.svelte`). A mix of

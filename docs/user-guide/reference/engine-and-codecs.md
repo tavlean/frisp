@@ -44,6 +44,12 @@ Shapes: `src/features/processors/resize/shared/meta.ts`,
   (shown as 25% / 50% / 100%), plus `custom`. Shrink-only by design — no enlarge
   presets (Sqush is an optimizer, not an upscaler); enlarging is reachable only
   by typing larger Width/Height values via `custom`.
+- **Identity resize is skipped.** `processImage` only calls the resampler when the
+  target dims differ from the (preprocessed) source — at 100% the default
+  interpolating filters are a mathematical no-op. `editor-session.svelte.ts`
+  mirrors this: a resize counts toward the encode signature / "Resizing" badge only
+  when it changes the size, so enabling Resize at 100% (or toggling
+  `premultiply`/`linearRGB` there) re-encodes nothing.
 
 ### Quantize / "Reduce palette" (`src/features/processors/quantize`)
 
