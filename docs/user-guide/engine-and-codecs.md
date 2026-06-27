@@ -4,13 +4,13 @@
 
 ## Overview / When to use it
 
-A **codec** (short for _coder–decoder_) is the piece of software that knows how to read one image format and write another — for example, turning a big PNG into a small WebP. In most online compressors, that work happens on a faraway server, which means your image leaves your device. Sqush is different: its core codecs and processors run locally in your browser, mostly through **WebAssembly** (WASM) workers; the few "Browser" encoders use your browser's own canvas encoder instead. You don't need to understand any of this to use Sqush; it just means your photos stay private, the app keeps working offline after it has cached itself, and there is no upload step.
+A **codec** (short for _coder–decoder_) is the piece of software that knows how to read one image format and write another — for example, turning a big PNG into a small WebP. In most online compressors, that work happens on a faraway server, which means your image leaves your device. Sqush is different: its codecs and processors run locally in your browser through **WebAssembly** (WASM) workers. You don't need to understand any of this to use Sqush; it just means your photos stay private, the app keeps working offline after it has cached itself, and there is no upload step.
 
 ## How the engine works
 
 ### Everything runs on your device
 
-When you drop an image into Sqush, it travels through a four-step pipeline — **decode → preprocess → process → encode** — and the heavy WASM work runs client-side inside a background **Web Worker** so the interface can stay responsive. Browser-native JPEG / PNG / GIF encoders are the exception: they use `canvas.toBlob()` on the page's main thread because that is the browser API. No server is involved and no image data is sent over the network. This is what "local-first" means in practice: the picture you compress never leaves the computer or phone you're using.
+When you drop an image into Sqush, it travels through a four-step pipeline — **decode → preprocess → process → encode** — and the heavy WASM work runs client-side inside a background **Web Worker** so the interface can stay responsive. No server is involved and no image data is sent over the network. This is what "local-first" means in practice: the picture you compress never leaves the computer or phone you're using.
 
 (Source of truth: `src/lib/compress.ts`, which drives `decode → preprocess → process → compressImage`; engine notes in `docs/user-guide/reference/engine-and-codecs.md`.)
 
@@ -40,14 +40,17 @@ The versions below come straight from the project's build recipes, recorded in `
 | **JPEG XL (beta)**           | libjxl                           | commit `9f544641…`                | Threads, SIMD | Newer high-efficiency format; labelled **beta** in the app.              |
 | **MozJPEG**                  | `mozilla/mozjpeg`                | `v3.3.1`                          | —             | Highly optimized classic JPEG encoder.                                   |
 | **OxiPNG**                   | `oxipng` (crates.io)             | `9.0`                             | —             | Lossless PNG optimizer; shrinks PNGs without quality loss.               |
-| **QOI**                      | `phoboslab/qoi`                  | commit `8d35d93c…`                | —             | Tiny, very fast lossless format.                                         |
-| **Browser PNG / JPEG / GIF** | your browser's own canvas        | n/a (built into the browser)      | —             | No WASM involved; availability varies by browser (GIF is often missing). |
 
-The three **Browser** encoders use the canvas that's already in your browser rather than a bundled codec, so Sqush feature-detects them at startup (`getSupportedFormatIds()` in `src/lib/compress.ts`). If your browser can't produce a given type, that option simply won't appear. The WASM codecs above are always available.
+All five output codecs are bundled WebAssembly and **always available** — there is nothing to feature-detect.
 
 ### Input formats (what you can open)
 
-Sqush can also _decode_ (read) WebP, AVIF, JPEG XL, and QOI, in addition to whatever your browser natively understands (JPEG, PNG, GIF, SVG, and so on). Decoding uses the matching libraries from the table above (`src/features/decoders`).
+**Sqush can read more formats than it can write** — the import list is separate from the output list above. There are two layers:
+
+- **Bundled WASM decoders** — WebP, AVIF, JPEG XL, and **QOI**. These work even on browsers that can't decode them natively (`src/features/decoders`).
+- **Whatever your browser decodes natively** — JPEG, PNG, GIF, **BMP**, SVG, and TIFF where the browser supports it. Sqush hands these to the browser's own decoder (`createImageBitmap`).
+
+So you can open GIF, BMP, SVG, and QOI files even though none of them are output options. **HEIC / HEIF is not supported** — there is no HEIC decoder, so a `.heic` file only opens if your browser/OS decodes it itself (in practice, Safari on Apple devices); elsewhere it fails to load.
 
 ### Helpers behind the editing controls
 
@@ -73,7 +76,6 @@ The service worker only activates on the **real deployed site**. During developm
 
 - **Privacy is structural, not a promise.** Because there is no server in the compression path, there is no upload to opt out of — your image physically cannot leave your device during compression.
 - **Encoding speed depends on your browser and CPU, not on Sqush settings alone.** A browser without thread/SIMD support will still produce identical output; it just takes longer. AVIF and JPEG XL are the most compute-heavy, so they feel slowest on older machines.
-- **"Browser GIF" may be missing.** Many browsers don't let the canvas write GIFs, so that menu entry can be absent. That's expected — use a WASM format instead.
 - **Beta labels mean what they say.** JPEG XL is marked **(beta)**. It works, but it's newer and less universally supported by other apps and browsers, so prefer WebP or AVIF for files you need to share widely.
 - **First offline use requires one online visit.** Offline reload can only work _after_ the service worker has cached the app, so open Sqush online once before relying on it without a connection.
 
