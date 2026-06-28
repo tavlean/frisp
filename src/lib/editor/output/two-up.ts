@@ -97,13 +97,7 @@ export default class TwoUp extends HTMLElement {
       this._relativePosition = 0;
       this._setPosition();
     } else if (event.code === 'Digit2' || event.code === 'Numpad2') {
-      const dimensionAxis =
-        this.orientation === 'vertical' ? 'height' : 'width';
-      const bounds = this.getBoundingClientRect();
-
-      this._position = bounds[dimensionAxis] / 2;
-      this._relativePosition = this._position / bounds[dimensionAxis];
-      this._setPosition();
+      this.centerSplit();
     } else if (event.code === 'Digit3' || event.code === 'Numpad3') {
       const dimensionAxis =
         this.orientation === 'vertical' ? 'height' : 'width';

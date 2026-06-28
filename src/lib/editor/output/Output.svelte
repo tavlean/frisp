@@ -104,7 +104,10 @@
   //
   // fitBaseline is the last fit/centre transform fitAndCenter() applied; the
   // view is "clean" only while the live transform still matches it.
-  let fitBaseline = $state({ scale: 1, x: 0, y: 0 });
+  // Reassigned wholesale (never mutated field-by-field), so $state.raw avoids
+  // the deep proxy and documents the reassign-only intent; viewDirty still
+  // updates because reassignment is what triggers the dependency.
+  let fitBaseline = $state.raw({ scale: 1, x: 0, y: 0 });
   // Live pan offsets, kept in sync with pinchLeft in onLeftChange().
   let viewX = $state(0);
   let viewY = $state(0);
