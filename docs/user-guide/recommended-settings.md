@@ -10,13 +10,13 @@ Each codec section links to its full page for the reasoning, ranges, and sources
 
 ## WebP — [full page](./formats/webp.md)
 
-| Use case                              | Recommended (Sqush controls)                                   |
-| ------------------------------------- | -------------------------------------------------------------- |
-| Web photo (lossy)                     | Quality 75–80, Effort 6                                         |
-| Graphics / screenshots / line art     | Lossless on (Effort 6), or near-lossless via Slight loss ~40   |
-| Sharp content kept lossy              | Quality ≥ 90                                                    |
-| Transparency / alpha                  | Lossy Quality ~90, Alpha quality 100                           |
-| Re-encoding an existing JPEG          | Lossy Quality ~80 (never Lossless)                             |
+| Use case                          | Recommended (Sqush controls)                                 |
+| --------------------------------- | ------------------------------------------------------------ |
+| Web photo (lossy)                 | Quality 75–80, Effort 6                                      |
+| Graphics / screenshots / line art | Lossless on (Effort 6), or near-lossless via Slight loss ~40 |
+| Sharp content kept lossy          | Quality ≥ 90                                                 |
+| Transparency / alpha              | Lossy Quality ~90, Alpha quality 100                         |
+| Re-encoding an existing JPEG      | Lossy Quality ~80 (never Lossless)                           |
 
 **Current Sqush default:** lossy, Quality 80, Effort 6 (updated 2026-06-03 from the upstream-Squoosh 75/4 — the "Web photo" recommendation below is now the shipped default).
 
@@ -26,12 +26,12 @@ Each codec section links to its full page for the reasoning, ranges, and sources
 
 ## AVIF — [full page](./formats/avif.md)
 
-| Use case                              | Recommended (Sqush controls)                                       |
-| ------------------------------------- | ------------------------------------------------------------------ |
-| Web photo (lossy)                     | Quality 60–70, Effort 6, 4:2:0, Tuning SSIM                        |
-| Graphics / screenshots / text         | Quality 80–88, 4:4:4, Effort 5–6                                   |
-| Transparency / alpha                  | Quality 70–80, Separate alpha quality matched to color            |
-| Archival / max-fidelity               | Lossless on (forces 4:4:4), Effort 6–8 — or steer toward JPEG XL  |
+| Use case                      | Recommended (Sqush controls)                                     |
+| ----------------------------- | ---------------------------------------------------------------- |
+| Web photo (lossy)             | Quality 60–70, Effort 6, 4:2:0, Tuning SSIM                      |
+| Graphics / screenshots / text | Quality 80–88, 4:4:4, Effort 5–6                                 |
+| Transparency / alpha          | Quality 70–80, Separate alpha quality matched to color           |
+| Archival / max-fidelity       | Lossless on (forces 4:4:4), Effort 6–8 — or steer toward JPEG XL |
 
 **Current Sqush default:** lossy, Quality 50, Effort 4, 4:2:0, Tuning Auto.
 
@@ -41,13 +41,13 @@ Each codec section links to its full page for the reasoning, ranges, and sources
 
 ## JPEG XL — [full page](./formats/jpeg-xl.md)
 
-| Use case                              | Recommended (Sqush controls)                                  |
-| ------------------------------------- | ------------------------------------------------------------- |
-| Web photo, high quality               | Quality ~90 (≈ distance 1.0), Effort 7                        |
-| Lighter web weight                    | Quality 75–85, Effort 7                                       |
-| Graphics / line art                   | Lossless on, Effort 7 (5 also fine)                           |
-| Transparency / alpha                  | Lossless on, or Quality ~90, Effort 7                         |
-| Archival / masters                    | Lossless on, Effort 7–9                                       |
+| Use case                | Recommended (Sqush controls)           |
+| ----------------------- | -------------------------------------- |
+| Web photo, high quality | Quality ~90 (≈ distance 1.0), Effort 7 |
+| Lighter web weight      | Quality 75–85, Effort 7                |
+| Graphics / line art     | Lossless on, Effort 7 (5 also fine)    |
+| Transparency / alpha    | Lossless on, or Quality ~90, Effort 7  |
+| Archival / masters      | Lossless on, Effort 7–9                |
 
 **Current Sqush default:** lossy, Quality 75, Effort 7.
 
@@ -59,13 +59,13 @@ Each codec section links to its full page for the reasoning, ranges, and sources
 
 Encoded with **MozJPEG** (shown as **JPEG** in the menu; the encoder name appears as a hover tooltip).
 
-| Use case                              | Recommended (Sqush controls)                                              |
-| ------------------------------------- | ------------------------------------------------------------------------ |
-| General web photography (default)     | Quality 80–85, Progressive on, Trellis multipass on, chroma auto (4:2:0) |
-| Thumbnails / retina (2×)              | Quality 60–70, Progressive on, 4:2:0                                      |
-| Text / screenshots / sharp edges      | Quality 90+, Auto subsample off + Subsample chroma by 1 (4:4:4)          |
-| Max-quality / archival                | Quality 92–95, 4:4:4, full trellis, Trellis passes 2                      |
-| Smallest file (slow)                  | Quality 72–80, full trellis, Progressive on, 4:2:0                        |
+| Use case                          | Recommended (Sqush controls)                                             |
+| --------------------------------- | ------------------------------------------------------------------------ |
+| General web photography (default) | Quality 80–85, Progressive on, Trellis multipass on, chroma auto (4:2:0) |
+| Thumbnails / retina (2×)          | Quality 60–70, Progressive on, 4:2:0                                     |
+| Text / screenshots / sharp edges  | Quality 90+, Auto subsample off + Subsample chroma by 1 (4:4:4)          |
+| Max-quality / archival            | Quality 92–95, 4:4:4, full trellis, Trellis passes 2                     |
+| Smallest file (slow)              | Quality 72–80, full trellis, Progressive on, 4:2:0                       |
 
 **Current Sqush default:** Quality 75, Progressive on, Trellis multipass off, quant table ImageMagick.
 
@@ -77,11 +77,11 @@ Encoded with **MozJPEG** (shown as **JPEG** in the menu; the encoder name appear
 
 Encoded with **OxiPNG** (shown as **PNG** in the menu; the encoder name appears as a hover tooltip).
 
-| Use case                              | Recommended (Sqush controls)      |
-| ------------------------------------- | --------------------------------- |
-| Interactive single-image (default)    | Effort 2, Interlace off           |
-| You can wait (balanced)               | Effort 4, Interlace off           |
-| Absolute smallest PNG (one-off)       | Effort 6 (max), Interlace off     |
+| Use case                           | Recommended (Sqush controls)  |
+| ---------------------------------- | ----------------------------- |
+| Interactive single-image (default) | Effort 2, Interlace off       |
+| You can wait (balanced)            | Effort 4, Interlace off       |
+| Absolute smallest PNG (one-off)    | Effort 6 (max), Interlace off |
 
 **Current Sqush default:** Effort 2, Interlace off.
 
@@ -91,12 +91,12 @@ Encoded with **OxiPNG** (shown as **PNG** in the menu; the encoder name appears 
 
 ## Image Resize — [full page](./resize.md)
 
-| Use case                              | Recommended (Sqush controls)                              |
-| ------------------------------------- | --------------------------------------------------------- |
-| Downscaling photographs               | Lanczos3, Premultiply on, Linear RGB on                   |
-| Flat graphics / illustrations         | Mitchell, Premultiply on, Linear RGB on                   |
-| Upscaling / enlarging                 | Lanczos3 generally; Mitchell if halos appear              |
-| Pixel art / sprites                   | hqx (pixel art), or Browser pixelated — integer scale only |
+| Use case                      | Recommended (Sqush controls)                               |
+| ----------------------------- | ---------------------------------------------------------- |
+| Downscaling photographs       | Lanczos3, Premultiply on, Linear RGB on                    |
+| Flat graphics / illustrations | Mitchell, Premultiply on, Linear RGB on                    |
+| Upscaling / enlarging         | Lanczos3 generally; Mitchell if halos appear               |
+| Pixel art / sprites           | hqx (pixel art), or Browser pixelated — integer scale only |
 
 **Current Sqush default:** Lanczos3, Premultiply on, Linear RGB on.
 
@@ -106,11 +106,11 @@ Encoded with **OxiPNG** (shown as **PNG** in the menu; the encoder name appears 
 
 ## Reduce palette (libimagequant) — [full page](./reduce-palette.md)
 
-| Use case                              | Recommended (Sqush controls)               |
-| ------------------------------------- | ------------------------------------------ |
-| Flat graphics: logos, icons, UI       | Colors 32–128, Dithering 0 (or ~0.2–0.5)   |
-| Illustrations / few-color art         | Colors 128, Dithering ~0.3                 |
-| Gradient / photographic-to-palette    | Colors 256, Dithering 1.0                  |
+| Use case                           | Recommended (Sqush controls)             |
+| ---------------------------------- | ---------------------------------------- |
+| Flat graphics: logos, icons, UI    | Colors 32–128, Dithering 0 (or ~0.2–0.5) |
+| Illustrations / few-color art      | Colors 128, Dithering ~0.3               |
+| Gradient / photographic-to-palette | Colors 256, Dithering 1.0                |
 
 **Current Sqush default:** Colors 256, Dithering 1.0.
 
@@ -120,12 +120,12 @@ Encoded with **OxiPNG** (shown as **PNG** in the menu; the encoder name appears 
 
 ## At-a-glance: where current defaults already match best practice
 
-| Codec / tool      | Default already optimal?                                                                 |
-| ----------------- | ---------------------------------------------------------------------------------------- |
-| WebP              | **Yes (since 2026-06-03)** — default is now Quality 80 / Effort 6, matching the web consensus. |
-| AVIF              | Quality 50 is conservative; community leans ~60–70 for photos. Effort under-surfaced.    |
-| JPEG XL           | **Yes** — Effort 7 is the Pareto-front sweet spot; Quality 75 is reasonable.             |
-| JPEG              | Quality 75 is a touch low; Trellis off is the notable gap vs the codec's whole point.    |
-| PNG               | **Yes** — Effort 2 matches OxiPNG's own default and suits interactive use.               |
-| Image Resize      | **Yes** — Lanczos3 + Linear RGB + Premultiply is the recommended photographic default.   |
-| Reduce palette    | Partly — Colors 256 is a safe default; Dithering 1.0 hurts the flat-graphic common case. |
+| Codec / tool   | Default already optimal?                                                                       |
+| -------------- | ---------------------------------------------------------------------------------------------- |
+| WebP           | **Yes (since 2026-06-03)** — default is now Quality 80 / Effort 6, matching the web consensus. |
+| AVIF           | Quality 50 is conservative; community leans ~60–70 for photos. Effort under-surfaced.          |
+| JPEG XL        | **Yes** — Effort 7 is the Pareto-front sweet spot; Quality 75 is reasonable.                   |
+| JPEG           | Quality 75 is a touch low; Trellis off is the notable gap vs the codec's whole point.          |
+| PNG            | **Yes** — Effort 2 matches OxiPNG's own default and suits interactive use.                     |
+| Image Resize   | **Yes** — Lanczos3 + Linear RGB + Premultiply is the recommended photographic default.         |
+| Reduce palette | Partly — Colors 256 is a safe default; Dithering 1.0 hurts the flat-graphic common case.       |
