@@ -108,6 +108,13 @@
   <AdvancedSection>
     <label class="option-text-first">
       Method:
+      <!-- Four distinct jobs: Lanczos3 (photos), Mitchell (graphics / less
+           ringing), hqx (pixel-art upscale), Browser pixelated (nearest
+           neighbour). Catmull-Rom and Triangle stay in the code path (catrom
+           finishes an hqx pass) but aren't offered — Lanczos3 + Mitchell cover
+           the useful sharpness range. The three browser quality levels were
+           dropped: lower quality than the worker filters and inconsistent
+           across machines. -->
       <Select
         value={options.method}
         onchange={(v) => (options.method = v as ResizeMethod)}
@@ -117,13 +124,8 @@
         {/if}
         <option value="lanczos3">Lanczos3</option>
         <option value="mitchell">Mitchell</option>
-        <option value="catrom">Catmull-Rom</option>
-        <option value="triangle">Triangle (bilinear)</option>
         <option value="hqx">hqx (pixel art)</option>
         <option value="browser-pixelated">Browser pixelated</option>
-        <option value="browser-low">Browser low quality</option>
-        <option value="browser-medium">Browser medium quality</option>
-        <option value="browser-high">Browser high quality</option>
       </Select>
     </label>
     {#if isWorker}
