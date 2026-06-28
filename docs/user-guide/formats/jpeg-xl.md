@@ -31,7 +31,7 @@ _(Only shown when Lossless is on.)_
 _(Only shown when Lossless is off.)_
 
 - **What it does:** Sets how much visual detail to preserve in lossy mode. Higher keeps more detail and produces a larger file; lower compresses harder and produces a smaller file.
-- **Range & default:** **0 to 99.9**, in steps of **0.1** (option key `quality`, default **75**). 100 isn't reachable on this slider — that value is reserved for the Lossless toggle. The value is shown to one decimal place, so you can fine-tune in tenths.
+- **Range & default:** **0 to 99**, in steps of **1** (whole numbers; option key `quality`, default **75**). 100 isn't reachable on this slider — that value is reserved for the Lossless toggle.
 - **How to choose:** JPEG XL's quality scale is tuned so that high values are close to visually lossless. Around **90** typically "looks identical to the original" for most photos, while values approaching 100 balloon in size for gains you can't see. Dropping below ~70 starts to show visible artifacts on detailed images (src: github.com/libjxl/libjxl). Use the live preview to find the lowest number that still looks clean to you. Note: setting Quality below **7** automatically forces "Alternative lossy mode" on (see below).
 - **Recommended starting point:** **75** (the default) is a good balance for general photos. Bump toward **85–90** when fidelity matters (faces, fine textures, product shots); pull down toward **60–70** when file size is the priority and the image is simple.
 
@@ -96,7 +96,7 @@ _(Only shown when Lossless is off.)_
 
 ## Recommended settings & community tips
 
-> The settings below are **community recommendations** from the libjxl docs and Cloudinary's Pareto-front analysis. JPEG XL's native quality knob on the command line is `--distance` (0 = lossless, ~1.0 = visually lossless); Sqush exposes the friendlier 0–99.9 **Quality** slider instead, where **~90 ≈ distance 1.0**. These are advice, not new defaults; the factual ranges above are unchanged. Sources are listed at the end.
+> The settings below are **community recommendations** from the libjxl docs and Cloudinary's Pareto-front analysis. JPEG XL's native quality knob on the command line is `--distance` (0 = lossless, ~1.0 = visually lossless); Sqush exposes the friendlier 0–99 **Quality** slider instead, where **~90 ≈ distance 1.0**. These are advice, not new defaults; the factual ranges above are unchanged. Sources are listed at the end.
 
 | Use case                                | Suggested settings                                                       | Why                                                                                                                                              |
 | --------------------------------------- | ------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -118,7 +118,7 @@ _Sources: [cjxl man page](https://manpages.debian.org/unstable/libjxl-tools/cjxl
 
 ## Tips & pitfalls
 
-- **Lossless is just Quality = 100.** There's no separate lossless flag in the file. Ticking Lossless maxes out quality; the Quality slider only goes to 99.9 precisely so the two states stay distinct.
+- **Lossless is just Quality = 100.** There's no separate lossless flag in the file. Ticking Lossless maxes out quality; the Quality slider only goes to 99 precisely so the two states stay distinct.
 - **The lossy controls vanish in lossless mode.** If you can't find Quality, Alternative lossy mode, Edge filter, decoding speed, or ISO noise, check whether Lossless is on — it hides all of them and shows only "Slight loss".
 - **Very low quality locks Alternative lossy mode on.** Below Quality 7 the "Alternative lossy mode" checkbox is forced on and greyed out; that's expected.
 - **Quality numbers aren't comparable across formats.** A JPEG XL "75" is not the same as a JPEG "75" or a WebP "75". Judge by the preview, not by matching numbers.

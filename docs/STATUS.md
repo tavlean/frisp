@@ -7,6 +7,18 @@ browser, the build is static, and offline reload must work after load.
 
 ## Current State
 
+- **Quality sliders integer + magnetic snapping (2026-06-28).** On branch
+  `slider-snapping` (not yet merged). (1) The WebP, JXL, and generic-fallback
+  Quality sliders dropped `step=0.1` → whole numbers (AVIF/MozJPEG were already
+  integer); JXL Quality max is now **99** (was `99.9`); Lossless is still the only
+  path to 100. (2) `Range.svelte` adds subtle magnetic snapping toward multiples
+  of 5/10 while dragging, auto-enabled on wide sliders (`max − min ≥ 50`); the
+  warp is monotonic so neighbours stay reachable and the number field is the exact
+  escape hatch — narrow knobs keep the plain native drag. Commits `391b45d5` +
+  `59781001`; deviation logged in [parity-audit.md](parity-audit.md) §A.11;
+  user-guide reconciled. `npm run check` green; browser-verified (89.3→90,
+  84.7→85, 83.0→83, no console errors).
+
 - **Resize UX cleanup (2026-06-28).** Three small editor changes landed on `main`:
   (1) size presets are now **shrink-only** — `0.25 / 0.5 / 1` (25 / 50 / 100%); the
   enlarge presets (`200 / 300 / 400%`) and the awkward `33.33%` were dropped, since

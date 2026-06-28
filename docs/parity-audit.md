@@ -179,6 +179,25 @@ behavior parity is preserved.
       at 100% does nothing. `image-pipeline-shared.ts`, `editor-session.svelte.ts`
       (commit `4a2a4af6`). Browser-verified; `svelte-check` 0/0.
 
+11. **Integer-only Quality + magnetic round-number snapping on wide sliders
+    (2026-06-28).** Two deliberate departures from upstream Squoosh's sliders:
+    - **Quality is whole numbers.** Squoosh ran the WebP, JXL, and generic
+      fallback Quality sliders at `step=0.1`; Sqush drops them to `step=1` (AVIF
+      and MozJPEG were already integer, so this also unifies the surface). The
+      `0.1` granularity was false precision the encoders don't reward perceptibly.
+      JXL's Quality max becomes **99** (was `99.9`, a hack to keep it distinct from
+      `100` = lossless); the Lossless toggle remains the only path to 100. The
+      generic fallback Quality is now integer too. Commit `391b45d5`.
+    - **Magnetic snapping (beyond parity).** `Range.svelte` now takes over the
+      pointer drag on wide sliders (`max − min ≥ 50`: Quality, filter strength,
+      smoothing, …) and warps the raw value toward the nearest multiple of 5
+      (subtle) / 10 (stronger) with a monotonic cubic magnet — round numbers
+      occupy more travel, but every integer stays reachable and the number field
+      is the exact escape hatch. Keyboard stepping + a11y stay on the native
+      input; narrow knobs (effort, sharpness) keep the plain native drag;
+      `snap={false}` forces it off. Commit `59781001`. Browser-verified
+      (89.3→90, 84.7→85, 83.0→83); `svelte-check` 0/0.
+
 > NOTE (import gotcha): shared `.svelte.ts` stores must be imported by the SAME
 > specifier everywhere (we use `$lib/editor/snackbar-store.svelte`). A mix of
 > `$lib/…` and relative `./…` makes Vite instantiate the store twice, so writes

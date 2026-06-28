@@ -16,6 +16,12 @@ Notes that apply throughout:
 
 - **Range step default**: `Range.svelte` defaults `step = 1` when none is passed.
   The on-screen value bubble shows `value/1000` with a `k` suffix once `value ≥ 10000`.
+  Quality sliders are all whole numbers (`step 1`); there is no decimal Quality.
+- **Magnetic snapping on wide sliders**: when `max − min ≥ 50` (Quality, filter
+  strength, smoothing, …) the slider gently snaps toward multiples of 5/10 while
+  dragging — round numbers are easier to land on, but every value stays reachable
+  and the number field beside the slider takes an exact value. Narrow knobs
+  (effort, sharpness, etc.) keep the plain drag.
 - **"Effort" mappings are UI-only inversions.** Several panels invert or remap the
   raw codec field (e.g. AVIF effort = `10 − speed`, WebP lossless "Effort" picks a
   preset pair, WebP filter sharpness = `7 − filter_sharpness`). The _option key_
@@ -78,7 +84,7 @@ struct. Lossless vs lossy splits the whole panel.
 | UI label | key       | control | range           | default |
 | -------- | --------- | ------- | --------------- | ------- |
 | Effort   | `method`  | range   | 0–6, step 1     | 6       |
-| Quality  | `quality` | range   | 0–100, step 0.1 | 80      |
+| Quality  | `quality` | range   | 0–100, step 1   | 80      |
 
 **Lossy → Advanced settings** (Revealer toggle, UI-only)
 
@@ -179,7 +185,7 @@ means "auto edge filter".
 
 | UI label                                        | key                 | control  | range / values                                    | default                            |
 | ----------------------------------------------- | ------------------- | -------- | ------------------------------------------------- | ---------------------------------- |
-| Quality                                         | `quality`           | range    | 0–99.9, step 0.1                                  | 75                                 |
+| Quality                                         | `quality`           | range    | 0–99, step 1                                      | 75                                 |
 | Alternative lossy mode                          | `lossyModular`      | checkbox | bool; **forced true & disabled when quality < 7** | false                              |
 | Auto edge filter                                | `epf` (`-1`)        | checkbox | toggles `epf = -1` (auto)                         | true (epf -1)                      |
 | Edge preserving filter                          | `epf`               | range    | 0–3, step 1 (only when Auto off)                  | 2 (the value used when epf was -1) |
@@ -251,7 +257,7 @@ No hidden options — the `EncodeOptions` interface is exactly `{ level, interla
 For any non-`identity` format with no dedicated panel branch:
 
 - If the options object has a numeric `quality` key → a generic **Quality** range
-  (min 0, max 100, step 0.1) bound to `options.quality`.
+  (min 0, max 100, step 1) bound to `options.quality`.
 - Otherwise → `"<label> has no adjustable options."`
 
 No shipped format hits this fallback today — all five output formats have a

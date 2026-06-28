@@ -40,7 +40,7 @@ The panel changes shape depending on the **Lossless** toggle. Two controls are a
 #### Quality
 
 - **What it does:** The main quality dial for lossy WebP. Lower values discard more detail for a smaller file; higher values keep more detail in a larger file.
-- **Range & default:** 0–100, step 0.1, default **80** (`quality`).
+- **Range & default:** 0–100, step 1 (whole numbers), default **80** (`quality`).
 - **How to choose:** This is the setting you'll adjust most. Watch the preview and the output size, then pick the lowest value that still looks good. Below ~50 you'll start seeing visible artifacts on most photos; above ~90 the file grows quickly for little visible gain.
 - **Recommended starting point:** **80** (the default). Try **65–85** for typical web photos — lower for smaller files, higher when quality matters most.
 
