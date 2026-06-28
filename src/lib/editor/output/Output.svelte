@@ -5,7 +5,10 @@
   // decoded output. Only the left pinch-zoom is driven; pointer/wheel events are
   // retargeted to it and the right mirrors its transform.
   import PinchZoom, { type ScaleToOpts, type ZoomMode } from './pinch-zoom';
-  import './two-up';
+  // Default import both registers the <two-up> custom element (side effect) AND
+  // gives us the TwoUp class for typing the ref — we now call its public API
+  // (centerSplit / splitFraction) and listen for its 'splitchange' event.
+  import TwoUp from './two-up';
   import { browser } from '$app/environment';
   import { drawDataToCanvas } from 'client/lazy-app/util/canvas';
   import { isSafari } from 'client/lazy-app/util';
@@ -78,7 +81,7 @@
   const boxWidth = $derived(containWidth ? `${containWidth}px` : null);
   const boxHeight = $derived(containHeight ? `${containHeight}px` : null);
 
-  let twoUp = $state<HTMLElement>();
+  let twoUp = $state<TwoUp>();
   let pinchLeft = $state<PinchZoom>();
   let pinchRight = $state<PinchZoom>();
   let canvasLeft = $state<HTMLCanvasElement>();
@@ -90,6 +93,24 @@
   let editingScale = $state(false);
   let pixelated = $state(false);
   let altBackground = $state(false);
+
+  // --- RESET-VIEW DIRTY TRACKING -------------------------------------------
+  // The "Reset view" button is always rendered (no layout reflow) but enabled
+  // only when the view differs from its default. "Default" = the fit/centre
+  // transform applied by fitAndCenter() (the baseline below) AND a centred
+  // divider. We track the live transform (scale/viewX/viewY, mirrored from the
+  // left pinch-zoom in onLeftChange) and the live divider position
+  // (splitFraction, mirrored from the <two-up> 'splitchange' event), then
+  // compare both against the baseline in the `viewDirty` derived.
+  //
+  // fitBaseline is the last fit/centre transform fitAndCenter() applied; the
+  // view is "clean" only while the live transform still matches it.
+  let fitBaseline = $state({ scale: 1, x: 0, y: 0 });
+  // Live pan offsets, kept in sync with pinchLeft in onLeftChange().
+  let viewX = $state(0);
+  let viewY = $state(0);
+  // Live divider position (0..1, 0.5 = centred), kept in sync via onsplitchange.
+  let splitFraction = $state(0.5);
 
   const orientation = $derived(
     viewportWidth <= 760 ? 'vertical' : 'horizontal',
@@ -189,8 +210,58 @@
     if (canvasRight && rightDraw) drawDataToCanvas(canvasRight, rightDraw);
   });
 
+  // Compute the fit/centre transform and apply it to the left pinch-zoom.
+  // Shared by the auto-fit $effect (on new file / resize / viewport change) and
+  // the "Reset view" button — so both produce an identical, canonical default
+  // view. Reads the two-up bounds and the four --fit-inset-* custom props (the
+  // CSS-reserved gutters around the visible stage), derives the largest scale
+  // that fits the source box (capped at 1× — never upscales) and the x/y that
+  // centres it within the inset box, then applies it with allowChangeEvent so
+  // the right pane mirrors via onLeftChange. The applied transform is also
+  // stored as fitBaseline, the reference point for viewDirty. No-ops safely if
+  // the target/pinch/two-up are missing or the stage has zero size.
+  //
+  // Returns whether it actually applied a transform: the auto-fit effect uses
+  // this to gate burning its fittedKey, so a zero-bounds frame (returns false)
+  // doesn't consume the key and the effect re-fits on a later, sized frame.
+  function fitAndCenter() {
+    const s = fitTarget;
+    const pz = pinchLeft;
+    const tu = twoUp;
+    if (!s || !pz || !tu) return false;
+    const bounds = tu.getBoundingClientRect();
+    if (!bounds.width || !bounds.height) return false;
+    const styles = getComputedStyle(tu);
+    const insetLeft =
+      Number.parseFloat(styles.getPropertyValue('--fit-inset-left')) || 0;
+    const insetRight =
+      Number.parseFloat(styles.getPropertyValue('--fit-inset-right')) || 0;
+    const insetTop =
+      Number.parseFloat(styles.getPropertyValue('--fit-inset-top')) || 0;
+    const insetBottom =
+      Number.parseFloat(styles.getPropertyValue('--fit-inset-bottom')) || 0;
+    const visibleWidth = Math.max(1, bounds.width - insetLeft - insetRight);
+    const visibleHeight = Math.max(1, bounds.height - insetTop - insetBottom);
+    const fit = Math.min(visibleWidth / s.width, visibleHeight / s.height);
+    const fitScale = fit < 1 ? fit : 1;
+    const fx = insetLeft + (visibleWidth - s.width * fitScale) / 2;
+    const fy = insetTop + (visibleHeight - s.height * fitScale) / 2;
+    pz.setTransform({
+      scale: fitScale,
+      x: fx,
+      y: fy,
+      allowChangeEvent: true,
+    });
+    // Record the applied transform as the clean baseline for viewDirty.
+    fitBaseline = { scale: fitScale, x: fx, y: fy };
+    return true;
+  }
+
   // Fit + centre the view when the image dimensions change (new file / resize),
-  // but not on every re-encode (which keeps the same dimensions).
+  // but not on every re-encode (which keeps the same dimensions). The actual
+  // fit/centre maths lives in fitAndCenter() (shared with Reset view); this
+  // effect just guards on the fittedKey so it runs once per dims/orientation/
+  // viewport change, and applies it inside a rAF (so layout has settled).
   let fittedKey = '';
   $effect(() => {
     const s = fitTarget;
@@ -200,40 +271,46 @@
     const key = `${fileId}:${s.width}x${s.height}:${orientation}:${viewportWidth}x${viewportHeight}`;
     if (key === fittedKey) return;
     const raf = requestAnimationFrame(() => {
-      const bounds = tu.getBoundingClientRect();
-      if (!bounds.width || !bounds.height) return;
-      const styles = getComputedStyle(tu);
-      const insetLeft =
-        Number.parseFloat(styles.getPropertyValue('--fit-inset-left')) || 0;
-      const insetRight =
-        Number.parseFloat(styles.getPropertyValue('--fit-inset-right')) || 0;
-      const insetTop =
-        Number.parseFloat(styles.getPropertyValue('--fit-inset-top')) || 0;
-      const insetBottom =
-        Number.parseFloat(styles.getPropertyValue('--fit-inset-bottom')) || 0;
-      const visibleWidth = Math.max(1, bounds.width - insetLeft - insetRight);
-      const visibleHeight = Math.max(1, bounds.height - insetTop - insetBottom);
-      fittedKey = key;
-      const fit = Math.min(visibleWidth / s.width, visibleHeight / s.height);
-      const fitScale = fit < 1 ? fit : 1;
-      pz.setTransform({
-        scale: fitScale,
-        x: insetLeft + (visibleWidth - s.width * fitScale) / 2,
-        y: insetTop + (visibleHeight - s.height * fitScale) / 2,
-        allowChangeEvent: true,
-      });
+      // Only burn the key once a fit actually applied; a zero-bounds frame
+      // returns false so the effect can re-fit on a later, sized frame.
+      if (fitAndCenter()) fittedKey = key;
     });
     return () => cancelAnimationFrame(raf);
   });
 
+  // True whenever the live view differs from its default (fit/centre baseline +
+  // centred divider): zoom changed, panned off-centre, OR the divider moved.
+  // Drives the Reset view button's enabled/dimmed state. Tolerances absorb the
+  // sub-pixel float noise of setTransform so a freshly-fit view reads as clean.
+  const viewDirty = $derived(
+    Math.abs(scale - fitBaseline.scale) > 1e-3 ||
+      Math.abs(viewX - fitBaseline.x) > 0.5 ||
+      Math.abs(viewY - fitBaseline.y) > 0.5 ||
+      Math.abs(splitFraction - 0.5) > 1e-3,
+  );
+
   function onLeftChange() {
     if (!pinchLeft || !pinchRight) return;
     scale = pinchLeft.scale;
+    // Track the live pan offsets so viewDirty can compare against fitBaseline.
+    viewX = pinchLeft.x;
+    viewY = pinchLeft.y;
     pinchRight.setTransform({
       scale: pinchLeft.scale,
       x: pinchLeft.x,
       y: pinchLeft.y,
     });
+  }
+
+  // Reset view: fit + centre the image AND re-centre the before/after divider in
+  // one click. fitAndCenter() applies the canonical transform (with
+  // allowChangeEvent → onLeftChange syncs scale/viewX/viewY to the baseline, so
+  // the zoom/pan part of viewDirty clears); centerSplit() recentres the divider
+  // and we read back the resulting splitFraction so the divider part clears too.
+  function resetView() {
+    fitAndCenter();
+    twoUp?.centerSplit();
+    if (twoUp) splitFraction = twoUp.splitFraction;
   }
 
   // The pinch-zoom event sync is an attachment on <two-up> (see retarget-events
@@ -269,6 +346,9 @@
     legacy-clip-compat
     {orientation}
     bind:this={twoUp}
+    onsplitchange={() => {
+      if (twoUp) splitFraction = twoUp.splitFraction;
+    }}
     {@attach retargetViewEvents(() => pinchLeft)}
   >
     <pinch-zoom
@@ -381,7 +461,7 @@
       </span>
     {/if}
     <button
-      class="button last-button"
+      class="button"
       onclick={() => zoomTo(scale * 1.25)}
       title="Zoom in"
       aria-label="Zoom in"
@@ -389,6 +469,19 @@
       <svg class="icon" viewBox="0 0 24 24"
         ><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" /></svg
       >
+    </button>
+    <!-- Reset view: trailing segment of the zoom pill. One click fits + centres
+         the image and re-centres the divider (see resetView). Always rendered
+         (no layout reflow) but disabled + dimmed while the view is already at
+         its default; enabled the moment zoom, pan, or the divider differ. -->
+    <button
+      class="button last-button"
+      onclick={resetView}
+      disabled={!viewDirty}
+      title="Reset view — fit, centre &amp; re-centre the divider"
+      aria-label="Reset view"
+    >
+      <svg class="icon" viewBox="0 0 24 24"><path d="M5 15H3v4c0 1.1.9 2 2 2h4v-2H5v-4zM5 5h4V3H5c-1.1 0-2 .9-2 2v4h2V5zm14-2h-4v2h4v4h2V5c0-1.1-.9-2-2-2zm0 16h-4v2h4c1.1 0 2-.9 2-2v-4h-2v4zM12 9c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
     </button>
   </div>
 
@@ -578,6 +671,19 @@
   .button.active {
     background: rgba(62, 62, 74, 0.95);
     color: var(--text-1, #fff);
+  }
+
+  /* Disabled = the "view already at default" state of the Reset view button:
+     dimmed and non-interactive, with hover neutralised so it can't brighten
+     back toward the enabled look. */
+  .button:disabled {
+    opacity: 0.35;
+    cursor: default;
+  }
+
+  .button:disabled:hover {
+    background-color: var(--surface, rgba(19, 19, 25, 0.82));
+    color: var(--text-2, #bbb);
   }
 
   .button-group {
