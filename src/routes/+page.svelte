@@ -17,7 +17,16 @@
   const session = new EditorSession();
   const sideIndexes = [0, 1] as const;
 
+  // Drives the shortcut hint in the Undo/Redo tooltips (⌘ on Apple, Ctrl else).
+  let isMac = $state(false);
+  const undoTitle = $derived(isMac ? 'Undo (⌘Z)' : 'Undo (Ctrl+Z)');
+  const redoTitle = $derived(isMac ? 'Redo (⇧⌘Z)' : 'Redo (Ctrl+Shift+Z)');
+
   onMount(() => {
+    isMac = /mac|iphone|ipad/i.test(
+      navigator.platform || navigator.userAgent || '',
+    );
+
     registerSqushServiceWorker().catch((error: unknown) => {
       console.error('Service worker registration failed', error);
     });
@@ -40,11 +49,44 @@
     if (typeof history !== 'undefined') history.back();
     else session.clearFile();
   }
+
+  // Global undo/redo shortcuts. ⌘/Ctrl+Z undoes, +Shift (or Ctrl+Y) redoes. We
+  // leave typeable fields alone so their native text-undo still works; range and
+  // checkbox inputs have no text undo, so the editor's undo takes over there.
+  function onKeydown(event: KeyboardEvent) {
+    if (!session.file) return;
+    const mod = event.metaKey || event.ctrlKey;
+    if (!mod) return;
+
+    const key = event.key.toLowerCase();
+    const isUndo = key === 'z' && !event.shiftKey;
+    const isRedo = (key === 'z' && event.shiftKey) || (key === 'y' && !isMac);
+    if (!isUndo && !isRedo) return;
+
+    const target = event.target as HTMLElement | null;
+    if (target) {
+      const tag = target.tagName;
+      const typeable =
+        tag === 'TEXTAREA' ||
+        target.isContentEditable ||
+        (tag === 'INPUT' &&
+          !['range', 'checkbox', 'radio'].includes(
+            (target as HTMLInputElement).type,
+          ));
+      if (typeable) return;
+    }
+
+    event.preventDefault();
+    if (isRedo) session.redo();
+    else session.undo();
+  }
 </script>
 
 <svelte:head>
   <title>{session.docTitle}</title>
 </svelte:head>
+
+<svelte:window onkeydown={onKeydown} />
 
 <!-- The whole app is a drop target so an image dropped ANYWHERE (intro padding,
      or over the open editor) loads/replaces it instead of the browser opening
@@ -91,6 +133,45 @@
           />
         </svg>
       </button>
+
+      <div class="history-controls">
+        <button
+          class="hist"
+          onclick={() => session.undo()}
+          disabled={!session.history.canUndo}
+          title={undoTitle}
+          aria-label={undoTitle}
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path
+              d="M9 14L4 9l5-5M4 9h10.5a5.5 5.5 0 0 1 0 11H9"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.1"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </button>
+        <button
+          class="hist"
+          onclick={() => session.redo()}
+          disabled={!session.history.canRedo}
+          title={redoTitle}
+          aria-label={redoTitle}
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path
+              d="M15 14l5-5-5-5M20 9H9.5a5.5 5.5 0 0 0 0 11H15"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.1"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </button>
+      </div>
 
       {#each sideIndexes as index (index)}
         <aside class="options options-{index + 1}">
@@ -258,6 +339,57 @@
     display: block;
   }
 
+  /* Undo / Redo: a pair of glass circles sitting just right of the Back button,
+     sharing its visual language. Disabled when there's nothing to step to. */
+  .history-controls {
+    position: absolute;
+    top: 0;
+    left: 0;
+    margin: 14px;
+    margin-left: 64px;
+    display: flex;
+    gap: 8px;
+    z-index: 10;
+  }
+  .hist {
+    width: 40px;
+    height: 40px;
+    display: grid;
+    place-items: center;
+    background: var(--surface, rgba(19, 19, 25, 0.82));
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--border, rgba(255, 255, 255, 0.08));
+    border-radius: 50%;
+    padding: 0;
+    cursor: pointer;
+    color: var(--text-2, #aaa);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+    transition:
+      color 150ms ease,
+      border-color 150ms ease,
+      transform 150ms ease,
+      opacity 150ms ease;
+  }
+  .hist:hover:not(:disabled) {
+    color: var(--text-1, #fff);
+    border-color: var(--border-strong, rgba(255, 255, 255, 0.16));
+    transform: scale(1.06);
+  }
+  .hist:focus-visible {
+    outline: 2px solid var(--accent-1, #ff8a5e);
+    outline-offset: 2px;
+  }
+  .hist:disabled {
+    opacity: 0.35;
+    cursor: default;
+  }
+  .hist svg {
+    width: 18px;
+    height: 18px;
+    display: block;
+  }
+
   /* Bottom-anchored option cards: floating glass panels, inset from the
      viewport edges; the canvas shows above and between them. */
   .options {
@@ -309,6 +441,20 @@
       height: 36px;
     }
     .back svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .history-controls {
+      margin: 8px;
+      margin-left: 52px;
+      gap: 6px;
+    }
+    .hist {
+      width: 36px;
+      height: 36px;
+    }
+    .hist svg {
       width: 16px;
       height: 16px;
     }
