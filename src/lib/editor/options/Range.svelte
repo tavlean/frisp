@@ -43,7 +43,7 @@
   // Catch radii (value units) for the cubic magnet. Multiples of 10 pull harder
   // than the in-between multiples of 5; outside the radius the mapping is linear.
   const MAGNET_R10 = 1.8;
-  const MAGNET_R5 = 0.9;
+  const MAGNET_R5 = 1.2;
 
   // Auto-enable on wide ranges (quality, filter strength, …); narrow knobs
   // (effort, sharpness) keep the plain native drag. `snap={false}` forces off.
