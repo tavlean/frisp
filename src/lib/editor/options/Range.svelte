@@ -13,6 +13,8 @@
     disabled?: boolean;
     /** Forces decimal places in the bubble; otherwise derived from `step`. */
     labelPrecision?: string;
+    /** Magnetic snapping to round numbers; auto-on for wide ranges. */
+    snap?: boolean;
     /** Fires with the committed numeric value (for derived/inverted fields). */
     oninput?: (value: number) => void;
     children?: Snippet;
@@ -26,11 +28,26 @@
     name,
     disabled = false,
     labelPrecision = '',
+    snap,
     oninput,
     children,
   }: Props = $props();
 
   let active = $state(false);
+  let dragging = false;
+  let inputEl: HTMLInputElement;
+
+  // Half the visual thumb width; the thumb centre travels inset by this much, so
+  // pointer-to-value mapping must use the same inset to stay aligned with it.
+  const THUMB_HALF = 7;
+  // Catch radii (value units) for the cubic magnet. Multiples of 10 pull harder
+  // than the in-between multiples of 5; outside the radius the mapping is linear.
+  const MAGNET_R10 = 1.8;
+  const MAGNET_R5 = 0.9;
+
+  // Auto-enable on wide ranges (quality, filter strength, …); narrow knobs
+  // (effort, sharpness) keep the plain native drag. `snap={false}` forces off.
+  const magnetic = $derived(snap ?? Number(max) - Number(min) >= 50);
 
   function precisionOf(s: string): number {
     const afterDecimal = s.split('.')[1];
@@ -47,23 +64,72 @@
     return precision ? value.toFixed(precision) : Math.round(value).toString();
   });
 
-  function commit(raw: string) {
-    if (!raw.trim()) return;
-    const next = Number(raw);
+  function emit(next: number) {
     if (Number.isNaN(next)) return;
     value = next;
     oninput?.(next);
   }
 
-  function onPointerDown() {
+  function commit(raw: string) {
+    if (!raw.trim()) return;
+    emit(Number(raw));
+  }
+
+  // Warp a raw value toward the nearest multiple of 5/10: flat near the magnet
+  // (round numbers occupy more travel) but still monotonic, so every value in
+  // between stays reachable — just over fewer pixels.
+  function magnetize(raw: number): number {
+    const m = Math.round(raw / 5) * 5;
+    const r = m % 10 === 0 ? MAGNET_R10 : MAGNET_R5;
+    const d = raw - m;
+    if (Math.abs(d) >= r) return raw;
+    return m + (d * d * d) / (r * r);
+  }
+
+  function valueFromClientX(clientX: number): number {
+    const lo = Number(min);
+    const hi = Number(max);
+    const stepSize = Number(step) || 1;
+    const rect = inputEl.getBoundingClientRect();
+    const travel = rect.width - THUMB_HALF * 2;
+    const frac = Math.min(
+      1,
+      Math.max(0, (clientX - rect.left - THUMB_HALF) / travel),
+    );
+    let v = lo + frac * (hi - lo);
+    if (magnetic) v = magnetize(v);
+    v = lo + Math.round((v - lo) / stepSize) * stepSize;
+    return Math.min(hi, Math.max(lo, v));
+  }
+
+  function onPointerDown(e: PointerEvent) {
+    if (disabled) return;
     active = true;
     const up = () => {
       active = false;
+      dragging = false;
       window.removeEventListener('pointerup', up);
       window.removeEventListener('pointercancel', up);
     };
     window.addEventListener('pointerup', up);
     window.addEventListener('pointercancel', up);
+
+    // Take over the drag so the pointer can warp toward round numbers; the
+    // native input still owns keyboard stepping and a11y semantics.
+    if (!magnetic) return;
+    e.preventDefault();
+    dragging = true;
+    inputEl.focus();
+    try {
+      inputEl.setPointerCapture(e.pointerId);
+    } catch {
+      // Odd pointer states can reject capture; the drag still works via move.
+    }
+    emit(valueFromClientX(e.clientX));
+  }
+
+  function onPointerMove(e: PointerEvent) {
+    if (dragging) emit(valueFromClientX(e.clientX));
   }
 </script>
 
@@ -77,6 +143,7 @@
       style="--value-percent: {percent}%"
     >
       <input
+        bind:this={inputEl}
         class="input"
         type="range"
         {name}
@@ -85,8 +152,10 @@
         {step}
         {disabled}
         {value}
+        style:touch-action={magnetic ? 'none' : null}
         oninput={(e) => commit(e.currentTarget.value)}
         onpointerdown={onPointerDown}
+        onpointermove={onPointerMove}
       />
       <div class="thumb-wrapper">
         <div class="thumb"></div>
