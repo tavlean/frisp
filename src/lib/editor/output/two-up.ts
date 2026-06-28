@@ -97,13 +97,7 @@ export default class TwoUp extends HTMLElement {
       this._relativePosition = 0;
       this._setPosition();
     } else if (event.code === 'Digit2' || event.code === 'Numpad2') {
-      const dimensionAxis =
-        this.orientation === 'vertical' ? 'height' : 'width';
-      const bounds = this.getBoundingClientRect();
-
-      this._position = bounds[dimensionAxis] / 2;
-      this._relativePosition = this._position / bounds[dimensionAxis];
-      this._setPosition();
+      this.centerSplit();
     } else if (event.code === 'Digit3' || event.code === 'Numpad3') {
       const dimensionAxis =
         this.orientation === 'vertical' ? 'height' : 'width';
@@ -149,6 +143,23 @@ export default class TwoUp extends HTMLElement {
     this.setAttribute(orientationAttr, val);
   }
 
+  /** Divider position as a fraction of the split axis (0 = left/top, 1 = right/bottom; 0.5 = centred). */
+  get splitFraction() {
+    return this._relativePosition;
+  }
+
+  /**
+   * Recentre the divider (50%). Public counterpart to the keyboard "2" shortcut,
+   * used by the editor's "reset view" control.
+   */
+  centerSplit() {
+    const dimensionAxis = this.orientation === 'vertical' ? 'height' : 'width';
+    const bounds = this.getBoundingClientRect();
+    this._relativePosition = 0.5;
+    this._position = bounds[dimensionAxis] / 2;
+    this._setPosition();
+  }
+
   private _childrenChange() {
     // Ensure the handle is the last child. The CSS depends on this.
     if (this.lastElementChild !== this._handle) {
@@ -175,6 +186,9 @@ export default class TwoUp extends HTMLElement {
 
   private _setPosition() {
     this.style.setProperty('--split-point', `${this._position}px`);
+    // Notify listeners (e.g. the editor's reset-view affordance) that the
+    // divider moved. Fires on drag, keyboard shortcuts, resize and centerSplit().
+    this.dispatchEvent(new Event('splitchange', { bubbles: true }));
   }
 }
 

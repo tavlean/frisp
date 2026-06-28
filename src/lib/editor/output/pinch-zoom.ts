@@ -276,12 +276,44 @@ export default class PinchZoom extends HTMLElement {
     const ratio = 1 - (zoomingOut ? -deltaY : deltaY) / divisor;
     const scaleDiff = zoomingOut ? 1 / ratio : ratio;
 
+    const { originX, originY } = this._wheelAnchor(event, currentRect);
     this._applyChange({
       scaleDiff,
-      originX: event.clientX - currentRect.left,
-      originY: event.clientY - currentRect.top,
+      originX,
+      originY,
       allowChangeEvent: true,
     });
+  }
+
+  /**
+   * Resolve the wheel-zoom anchor, in the content-relative px space
+   * `_applyChange` expects. "Smart" anchoring: the point under the pointer stays
+   * put while the pointer is over the image; over the backdrop we anchor at the
+   * viewport centre instead, so the image doesn't lurch toward an off-image
+   * point. Pinch gestures (touchscreen pinch and trackpad ctrl+wheel) are direct
+   * manipulation and always anchor at the pointer, whatever it's over.
+   */
+  private _wheelAnchor(
+    event: WheelEvent,
+    contentRect: DOMRect,
+  ): { originX: number; originY: number } {
+    const cursor = {
+      originX: event.clientX - contentRect.left,
+      originY: event.clientY - contentRect.top,
+    };
+
+    const overImage =
+      event.clientX >= contentRect.left &&
+      event.clientX <= contentRect.right &&
+      event.clientY >= contentRect.top &&
+      event.clientY <= contentRect.bottom;
+    if (event.ctrlKey || overImage) return cursor;
+
+    const containerRect = this.getBoundingClientRect();
+    return {
+      originX: containerRect.left + containerRect.width / 2 - contentRect.left,
+      originY: containerRect.top + containerRect.height / 2 - contentRect.top,
+    };
   }
 
   private _onPointerMove(
