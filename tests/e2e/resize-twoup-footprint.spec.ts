@@ -24,17 +24,23 @@ test('resized-down output keeps the original footprint in the two-up view', asyn
     const root = document.querySelector('.options-2')!;
     const fire = (el: Element, ...types: string[]) =>
       types.forEach((t) => el.dispatchEvent(new Event(t, { bubbles: true })));
-    const setVal = (el: HTMLInputElement, prop: 'value' | 'checked', v: unknown) =>
-      Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, prop)!.set!.call(
-        el,
-        v,
-      );
+    const setVal = (
+      el: HTMLInputElement,
+      prop: 'value' | 'checked',
+      v: unknown,
+    ) =>
+      Object.getOwnPropertyDescriptor(
+        HTMLInputElement.prototype,
+        prop,
+      )!.set!.call(el, v);
     const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-    const enabler = [...root.querySelectorAll('label.option-toggle')].find((l) =>
-      /Resize/.test(l.textContent ?? ''),
+    const enabler = [...root.querySelectorAll('label.option-toggle')].find(
+      (l) => /Resize/.test(l.textContent ?? ''),
     );
-    const cb = enabler?.querySelector<HTMLInputElement>('input[type="checkbox"]');
+    const cb = enabler?.querySelector<HTMLInputElement>(
+      'input[type="checkbox"]',
+    );
     if (cb && !cb.checked) {
       setVal(cb, 'checked', true);
       fire(cb, 'input', 'change');
@@ -78,7 +84,9 @@ test('resized-down output keeps the original footprint in the two-up view', asyn
     .toBe(256);
 
   const m = await page.evaluate(() => {
-    const c = document.querySelectorAll<HTMLCanvasElement>('canvas.pinch-target');
+    const c = document.querySelectorAll<HTMLCanvasElement>(
+      'canvas.pinch-target',
+    );
     const [left, right] = [c[0], c[1]];
     return {
       leftAttr: left.width, // intrinsic raster width (source dims)
@@ -92,12 +100,15 @@ test('resized-down output keeps the original footprint in the two-up view', asyn
 
   // The output really IS downscaled (intrinsic raster shrank)...
   expect(m.rightAttr, 'right raster should be the resized 256px').toBe(256);
-  expect(m.leftAttr, 'left raster should be the larger source').toBeGreaterThan(256);
+  expect(m.leftAttr, 'left raster should be the larger source').toBeGreaterThan(
+    256,
+  );
   // ...but its DISPLAYED box is pinned to the source dims, so the two sides share
   // the same on-screen footprint (the fix). Pre-fix, rightRect collapsed to ~256.
-  expect(m.rightCss, 'right CSS box should equal left CSS box (pinned to source)').toBe(
-    m.leftCss,
-  );
+  expect(
+    m.rightCss,
+    'right CSS box should equal left CSS box (pinned to source)',
+  ).toBe(m.leftCss);
   expect(
     Math.abs(m.rightRect - m.leftRect),
     `footprints should match (left=${m.leftRect} right=${m.rightRect})`,
