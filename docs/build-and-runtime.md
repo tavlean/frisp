@@ -107,6 +107,16 @@ control indefinitely):
   marks `/service-worker.js` `Cache-Control: no-cache` — together a stale copy
   in Cloudflare's edge or the browser HTTP cache can't hide a deploy.
 
+**Cloudflare zone setting (one-time, not in the repo):** the `_headers`
+`Cache-Control` rules only take effect if the zone's **Browser Cache TTL** is
+set to **"Respect Existing Headers"** (Caching → Configuration). The default
+(4 h) silently overrides *every* origin `Cache-Control`, which both pins the
+worker behind a 4 h cache and caps the content-hashed `/_app/immutable/*` assets
+at 4 h instead of the year-long `immutable` cache `_headers` grants them. Leave
+Pages **Build cache** (Beta) off — it caches build *outputs* between CI builds
+and can resurface stale-artifact confusion given the codec/`$service-worker`
+codegen; it has no effect on what users are served.
+
 `version` (hence `cacheName`) defaults to SvelteKit's build timestamp, so the
 worker bytes change every build and the update check always fires.
 
