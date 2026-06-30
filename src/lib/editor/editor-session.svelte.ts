@@ -148,6 +148,33 @@ function hasSavedSide(index: SideIndex): boolean {
   return parseSavedSide(localStorage.getItem(sideSaveKey(index))) !== null;
 }
 
+/**
+ * Coerce saved option values back to whole numbers wherever the format's
+ * default for that field is an integer. Older builds let the magnetic sliders
+ * persist fractional values (e.g. WebP `quality: 88.7`); the current sliders
+ * round on input, but a stale decimal already in localStorage would otherwise
+ * load and render as a decimal forever. Fields whose default is genuinely
+ * fractional are left untouched.
+ */
+function sanitizeSavedOptions(
+  defaults: Record<string, unknown>,
+  saved: Record<string, unknown>,
+): Record<string, unknown> {
+  const merged: Record<string, unknown> = { ...defaults, ...saved };
+  for (const [key, value] of Object.entries(merged)) {
+    const fallback = defaults[key];
+    if (
+      typeof value === 'number' &&
+      !Number.isInteger(value) &&
+      typeof fallback === 'number' &&
+      Number.isInteger(fallback)
+    ) {
+      merged[key] = Math.round(value);
+    }
+  }
+  return merged;
+}
+
 function buildSide(
   saved: SavedSide | undefined,
   fallback: SideFormat,
@@ -158,7 +185,9 @@ function buildSide(
       const savedForFormat = saved?.optionsByFormat?.[format.id];
       return [
         format.id,
-        savedForFormat ? { ...defaults, ...savedForFormat } : defaults,
+        savedForFormat
+          ? sanitizeSavedOptions(defaults, savedForFormat)
+          : defaults,
       ];
     }),
   );
