@@ -4,7 +4,10 @@
   import { pushState } from '$app/navigation';
   import { resolve } from '$app/paths';
   import { page } from '$app/state';
-  import { registerSqushServiceWorker } from '$lib/service-worker-registration';
+  import {
+    registerSqushServiceWorker,
+    applyServiceWorkerUpdate,
+  } from '$lib/service-worker-registration';
   import Output from '$lib/editor/output/Output.svelte';
   import OptionsPanel from '$lib/editor/OptionsPanel.svelte';
   import Snackbar from '$lib/editor/Snackbar.svelte';
@@ -27,7 +30,21 @@
       navigator.platform || navigator.userAgent || '',
     );
 
-    registerSqushServiceWorker().catch((error: unknown) => {
+    // When a new build is downloaded and waiting, offer a non-intrusive
+    // "refresh now" prompt rather than reloading mid-task. Clicking Refresh
+    // activates the waiting worker, which reloads the page onto the new build.
+    registerSqushServiceWorker({
+      onUpdateReady: () => {
+        void snackbar
+          .show('A new version of Sqush is available.', {
+            actions: ['Refresh'],
+            timeout: null,
+          })
+          .then((action) => {
+            if (action === 'Refresh') applyServiceWorkerUpdate();
+          });
+      },
+    }).catch((error: unknown) => {
       console.error('Service worker registration failed', error);
     });
 

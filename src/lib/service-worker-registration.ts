@@ -1,6 +1,11 @@
-import { registerServiceWorkerUrl } from 'client/lazy-app/sw-bridge/runtime';
+import {
+  registerServiceWorkerUrl,
+  applyServiceWorkerUpdate,
+} from 'client/lazy-app/sw-bridge/runtime';
 import { base } from '$app/paths';
 import { browser, dev } from '$app/environment';
+
+export { applyServiceWorkerUpdate };
 
 /** localStorage flag set by the `?sw` opt-in (see `localhostSwForced`). */
 const FORCE_LOCALHOST_SW_KEY = 'sqush:force-localhost-sw';
@@ -68,9 +73,9 @@ async function teardownServiceWorkers(): Promise<void> {
  * previously-polluted localhost origin on the next load. Use `?sw` to opt back
  * in for deliberate local SW/offline testing.
  */
-export async function registerSqushServiceWorker(): Promise<
-  ServiceWorkerRegistration | undefined
-> {
+export async function registerSqushServiceWorker(
+  { onUpdateReady }: { onUpdateReady?: () => void } = {},
+): Promise<ServiceWorkerRegistration | undefined> {
   if (!browser) return undefined;
 
   const skipRegistration =
@@ -83,5 +88,6 @@ export async function registerSqushServiceWorker(): Promise<
 
   return registerServiceWorkerUrl(`${base}/service-worker.js`, {
     isProduction: true,
+    onUpdateReady,
   });
 }

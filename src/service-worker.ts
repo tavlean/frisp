@@ -121,13 +121,19 @@ worker.addEventListener('install', (event) => {
       ]).map((url) => new URL(url, worker.location.origin).toString());
       const cache = await caches.open(cacheName);
       await cache.addAll(precacheUrls);
-      // Activate this build immediately instead of waiting for every open tab
-      // to close. Paired with clients.claim() (below) and a controllerchange
-      // reload in the registration code, a deploy reaches users on their next
-      // load rather than staying stuck behind the previously-installed worker.
-      await worker.skipWaiting();
     })(),
   );
+});
+
+// A new build installs into the waiting state (an active controller blocks
+// auto-activation) and stays there until the page's "new version available"
+// prompt asks it to take over. skipWaiting() promotes this build past waiting;
+// activate's clients.claim() then swaps the controller, which the page observes
+// via controllerchange and reloads onto the new build.
+worker.addEventListener('message', (event) => {
+  if ((event.data as { type?: string } | null)?.type === 'SKIP_WAITING') {
+    worker.skipWaiting();
+  }
 });
 
 worker.addEventListener('activate', (event) => {

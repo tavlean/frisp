@@ -14,6 +14,7 @@ function getServiceWorkerContainer(
 }
 
 let autoReloadBound = false;
+let waitingWorker: ServiceWorker | null = null;
 
 /**
  * Reload the page once when a freshly-deployed worker takes over an
@@ -36,12 +37,56 @@ function bindControllerReload(container: ServiceWorkerContainer): void {
   });
 }
 
+/**
+ * Surface a worker sitting in the waiting state — a deploy that's downloaded but
+ * not yet in control — via onUpdateReady, so the UI can offer a "refresh now"
+ * prompt instead of swapping the page out from under the user. Catches both a
+ * worker that finishes installing during this visit and one already waiting from
+ * a previous visit. Only fires when a controller is active: with none, the
+ * worker is the first install and activates on its own, replacing nothing.
+ */
+function trackWaitingWorker(
+  container: ServiceWorkerContainer,
+  registration: ServiceWorkerRegistration,
+  onUpdateReady?: () => void,
+): void {
+  const surface = (worker: ServiceWorker | null) => {
+    if (!worker || !container.controller) return;
+    waitingWorker = worker;
+    onUpdateReady?.();
+  };
+
+  surface(registration.waiting);
+
+  registration.addEventListener('updatefound', () => {
+    const installing = registration.installing;
+    if (!installing) return;
+    installing.addEventListener('statechange', () => {
+      if (installing.state === 'installed') surface(installing);
+    });
+  });
+}
+
+/**
+ * Ask the waiting worker to take over (it calls skipWaiting on this message).
+ * activate's clients.claim() then swaps the controller and the controllerchange
+ * listener reloads the tab onto the new build. No-op if nothing is waiting.
+ */
+export function applyServiceWorkerUpdate(): void {
+  waitingWorker?.postMessage({ type: 'SKIP_WAITING' });
+}
+
 export async function registerServiceWorkerUrl(
   serviceWorkerUrl: string,
   {
     isProduction,
     serviceWorker,
-  }: { isProduction: boolean; serviceWorker?: ServiceWorkerContainer },
+    onUpdateReady,
+  }: {
+    isProduction: boolean;
+    serviceWorker?: ServiceWorkerContainer;
+    onUpdateReady?: () => void;
+  },
 ): Promise<ServiceWorkerRegistration | undefined> {
   const container = getServiceWorkerContainer(serviceWorker);
   if (!isProduction || !container) return undefined;
@@ -49,5 +94,9 @@ export async function registerServiceWorkerUrl(
   // `updateViaCache: 'none'` forces the browser to revalidate service-worker.js
   // against the network on every check, so a stale copy in the HTTP/edge cache
   // can't hide a new deploy.
-  return container.register(serviceWorkerUrl, { updateViaCache: 'none' });
+  const registration = await container.register(serviceWorkerUrl, {
+    updateViaCache: 'none',
+  });
+  trackWaitingWorker(container, registration, onUpdateReady);
+  return registration;
 }

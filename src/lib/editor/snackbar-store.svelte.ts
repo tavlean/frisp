@@ -34,11 +34,13 @@ export const snackbar = {
   /**
    * Show a message. Resolves with the action the user picked, or 'timeout' if
    * it auto-dismissed, or 'dismiss' if superseded by another snack.
-   * Default timeout: 5s when there are actions, 4s otherwise.
+   * Default timeout: 5s when there are actions, 4s otherwise. Pass
+   * `timeout: null` for a persistent snack that stays until acted on or
+   * superseded (e.g. the "new version available" prompt).
    */
   show(
     message: string,
-    options: { actions?: string[]; timeout?: number } = {},
+    options: { actions?: string[]; timeout?: number | null } = {},
   ): Promise<string> {
     // Resolve any in-flight snack as 'dismiss' before replacing it.
     if (resolver) settle('dismiss');
@@ -48,8 +50,15 @@ export const snackbar = {
 
     return new Promise<string>((resolve) => {
       resolver = resolve;
-      const timeout = options.timeout ?? (actions.length ? 5000 : 4000);
-      timer = setTimeout(() => settle('timeout'), timeout);
+      const timeout =
+        options.timeout === undefined
+          ? actions.length
+            ? 5000
+            : 4000
+          : options.timeout;
+      if (timeout !== null) {
+        timer = setTimeout(() => settle('timeout'), timeout);
+      }
     });
   },
 
