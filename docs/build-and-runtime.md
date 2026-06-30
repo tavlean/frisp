@@ -76,12 +76,31 @@ Behavior (variant-aware precache, 2026-06-10 — first-visit payload
   `selectCodecPrecacheUrls()` in `src/sw/cache-plan.ts` (e.g. threads+SIMD
   Chromium gets `avif_enc_mt` + `jxl_enc_mt_simd` + `webp_enc_simd` +
   oxipng-MT and skips the single-thread/baseline builds and the natively
-  decodable AVIF/WebP WASM decoders);
+  decodable AVIF/WebP WASM decoders), then `skipWaiting()` so a
+  freshly-deployed worker activates without waiting for every tab to close;
 - activate: delete old Sqush caches and claim clients;
 - fetch: serve known assets cache-first (runtime-caching misses, so a
   non-precached variant still ends up cached after first use — a
   mis-detection costs one online network trip, never a broken codec),
   otherwise network-first with cache fallback.
+
+Auto-update flow (so a deploy reaches users instead of pinning them to the
+first build they cached — every asset, including the prerendered HTML, is
+served cache-first, so without this an old worker keeps control indefinitely):
+
+- `skipWaiting()` (install) + `clients.claim()` (activate) hand control to the
+  new build as soon as it installs, rather than parking it in the waiting state.
+- Registration (`sw-bridge/runtime.ts`) uses `updateViaCache: 'none'` so the
+  browser always revalidates `service-worker.js` against the network, and a
+  one-time `controllerchange` listener reloads an already-controlled tab when
+  the new worker takes over (guarded by `container.controller` so first-time
+  visitors don't get a spurious refresh — the running document otherwise keeps
+  referencing the previous build's hashed chunks, now purged from the cache).
+- `static/_headers` marks `/service-worker.js` `Cache-Control: no-cache` so a
+  stale copy in Cloudflare's edge or the browser HTTP cache can't hide a deploy.
+
+`version` (hence `cacheName`) defaults to SvelteKit's build timestamp, so the
+worker bytes change every build and the update check always fires.
 
 Known approximation: nested-worker support (the Safari 16 gap) can't be
 probed from SW scope, so such a browser precaches `_mt` builds it won't use;
