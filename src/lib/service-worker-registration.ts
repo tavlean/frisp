@@ -73,9 +73,11 @@ async function teardownServiceWorkers(): Promise<void> {
  * previously-polluted localhost origin on the next load. Use `?sw` to opt back
  * in for deliberate local SW/offline testing.
  */
-export async function registerSqushServiceWorker(
-  { onUpdateReady }: { onUpdateReady?: () => void } = {},
-): Promise<ServiceWorkerRegistration | undefined> {
+export async function registerSqushServiceWorker({
+  onUpdateReady,
+}: { onUpdateReady?: () => void } = {}): Promise<
+  ServiceWorkerRegistration | undefined
+> {
   if (!browser) return undefined;
 
   const skipRegistration =
