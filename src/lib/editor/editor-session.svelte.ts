@@ -71,6 +71,52 @@ const sideSaveKey = (index: SideIndex) =>
 
 const sideLabel = (index: SideIndex) => (index === 0 ? 'Left' : 'Right');
 
+/**
+ * JSON.stringify with sorted object keys, so logically-equal objects produce
+ * identical signatures regardless of key insertion order (imported/saved
+ * payloads arrive in an order we don't control; plain JSON.stringify would
+ * silently turn them into permanent cache misses). Signatures are in-memory
+ * only — cache keys and history dedupe — never persisted.
+ */
+function stableStringify(value: unknown): string {
+  if (value === null || typeof value !== 'object') return JSON.stringify(value);
+  if (Array.isArray(value))
+    return '[' + value.map(stableStringify).join(',') + ']';
+  const record = value as Record<string, unknown>;
+  return (
+    '{' +
+    Object.keys(record)
+      .sort()
+      .map((key) => JSON.stringify(key) + ':' + stableStringify(record[key]))
+      .join(',') +
+    '}'
+  );
+}
+
+/**
+ * The canonical OUTPUT-AFFECTING projection of one side's document state: only
+ * the active format's options matter (inactive formats can't be edited from
+ * the UI), and a resize that doesn't change the output folds to null (disabled
+ * resize in the history path; identity resize in the encode path). BOTH the
+ * cache/encode signature and the history signature are built from this one
+ * projection — that shared origin is what guarantees "undo lands on a cache
+ * hit". If the two ever disagreed about what matters, undo would silently
+ * degrade into re-encodes; change the projection here and nowhere else.
+ */
+function sideRecipe(
+  format: SideFormat,
+  options: unknown,
+  processorState: ProcessorState,
+  resizeCounts: boolean,
+) {
+  return {
+    format,
+    options: options ?? {},
+    quantize: processorState.quantize,
+    resize: resizeCounts ? processorState.resize : null,
+  };
+}
+
 function canUseLocalStorage(): boolean {
   return typeof localStorage !== 'undefined';
 }
@@ -386,7 +432,7 @@ export class EditorSession {
     // or flipping Premultiply/Linear RGB, which only matter while actually scaling —
     // never masquerades as a resize edit. A new file always reads as 'optimize'
     // (fileChanged short-circuits before the diff can fire).
-    const resizeSig = resizeIsReal ? JSON.stringify(resize) : 'off';
+    const resizeSig = resizeIsReal ? stableStringify(resize) : 'off';
     const prevSig = this.lastResizeSig[index];
     this.lastResizeSig[index] = resizeSig;
     this.activities[index] =
@@ -399,16 +445,20 @@ export class EditorSession {
       return;
     }
 
-    // The signature of this pass's inputs. These five fields are the complete
-    // input to compressFile (the source file aside, guarded by fileChanged), with
-    // the resize recipe folded in only when it actually changes the image. It both
-    // (a) detects a redundant pass and (b) keys the result cache.
-    const encodeSig = JSON.stringify({
-      format: request.format,
-      options: request.options,
+    // The signature of this pass's inputs: the preprocessor plus the canonical
+    // side recipe (the complete input to compressFile, the source file aside —
+    // that's guarded by fileChanged), with the resize folded in only when it
+    // actually changes the image. It both (a) detects a redundant pass and
+    // (b) keys the result cache. Built from the SAME sideRecipe projection as
+    // docSig, so a history restore always recomputes to a cache-hitting key.
+    const encodeSig = stableStringify({
       preprocessor: request.preprocessorState,
-      quantize: request.processorState.quantize,
-      resize: resizeIsReal ? resize : null,
+      recipe: sideRecipe(
+        request.format,
+        request.options,
+        request.processorState,
+        resizeIsReal,
+      ),
     });
 
     // Already on screen for this side? Re-encoding would reproduce identical
@@ -614,16 +664,20 @@ export class EditorSession {
    * output — never spawns a phantom undo step.
    */
   private docSig(doc: DocSnapshot): string {
-    return JSON.stringify({
-      pre: doc.preprocessorState,
-      sides: doc.sides.map((side) => ({
-        format: side.format,
-        options: side.optionsByFormat[side.format] ?? {},
-        quantize: side.processorState.quantize,
-        resize: side.processorState.resize.enabled
-          ? side.processorState.resize
-          : null,
-      })),
+    // resizeCounts = `enabled` here (not the encode path's "real resize"):
+    // history can't know the source dims, and an enabled-at-100% step is still
+    // a document state the user can undo to. The encode path folds it to the
+    // same key as resize-off anyway, so the restore still lands on a cache hit.
+    return stableStringify({
+      preprocessor: doc.preprocessorState,
+      sides: doc.sides.map((side) =>
+        sideRecipe(
+          side.format,
+          side.optionsByFormat[side.format] ?? {},
+          side.processorState,
+          side.processorState.resize.enabled,
+        ),
+      ),
     });
   }
 
