@@ -1,6 +1,6 @@
 # Review-hardening plan (2026-07-02)
 
-Status: **in progress** — Phase 1 ✅ (`0f034a78`, `fdeb0625`, `5a10b838`+`74b87e0f`, `9ac1886f`; bonus e2e repair `1009a486` — resize.spec had been silently red since the abebdfaf re-tiering hid the Method select behind AdvancedSection) · Phase 2 ✅ (`cbb6c9a5` bridges, `be978a9c` in-flight dedup, `da273584` stable signature, `4217ef77` guard removal) · Phase 3 pending · Phase 4 pending
+Status: **done** — Phase 1 ✅ (`0f034a78`, `fdeb0625`, `5a10b838`+`74b87e0f`, `9ac1886f`; bonus e2e repair `1009a486` — resize.spec had been silently red since the abebdfaf re-tiering hid the Method select behind AdvancedSection) · Phase 2 ✅ (`cbb6c9a5` bridges, `be978a9c` in-flight dedup, `da273584` stable signature, `4217ef77` guard removal) · Phase 3 ✅ (`89e69bb0` settings-storage extraction, `5c68787d` per-side SideRuntime object) · Phase 4 ✅ (final verification: `npm run check` 0 errors, full Playwright suite green on both browsers — 35 passed / 1 known webkit offline-config skip; docs reconciled)
 Last updated: 2026-07-02.
 
 Source: a full code review of the June 11 – July 1 commit window (studio UI,

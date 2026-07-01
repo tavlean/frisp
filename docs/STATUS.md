@@ -1,11 +1,39 @@
 # Sqush Status
 
-Last updated: 2026-06-28.
+Last updated: 2026-07-02.
 
 Read this first. Sqush is a local-first image optimizer: image work stays in the
 browser, the build is static, and offline reload must work after load.
 
 ## Current State
+
+- **Review-hardening batch (2026-07-02), landed on `main`.** A full code review
+  of the June 11 – July 1 window, executed via
+  [review-hardening-plan.md](review-hardening-plan.md). Four threads.
+  _(1) Encode-core performance:_ each side now keeps a **persistent worker
+  bridge** (`cbb6c9a5`) — no more tearing down and rebuilding a Worker + WASM
+  instance + pthread pool on every debounced slider tweak — and the two sides
+  **dedup in-flight encodes** (`be978a9c`): when both sides request the same
+  signature, they share one job, and a completed-but-aborted pass now feeds the
+  result cache instead of racing a URL revoke. _(2) Correctness:_ typed slider
+  values clamp to `[min, max]` before they reach options state / the signature /
+  localStorage / the WASM encoder (`0f034a78`); the two-up divider `1`/`2`/`3`
+  keys no longer fire from unrelated focused controls — they act only when focus
+  is on the viewer or nowhere and no modifier is held (`5a10b838`, logged in
+  [parity-audit.md](parity-audit.md) §A.16); the service worker ignores
+  cross-origin GETs so third-party requests pass straight through (`9ac1886f`).
+  _(3) Robustness / structure:_ one canonical stable-stringify signature is now
+  **shared by the cache and the history** so "undo is instant" can't drift out of
+  sync (`da273584`); a redundant `restoringHistory` guard was removed
+  (`4217ef77`); `localStorage` persistence was extracted to
+  `settings-storage.ts` with frozen wire formats (`89e69bb0`); and a per-side
+  `SideRuntime` object replaced eight parallel same-shape tuples (`5c68787d`).
+  _(4) Test debt:_ `resize.spec.ts` had been silently red since `abebdfaf` (the
+  option re-tiering hid the Method select behind AdvancedSection); repaired
+  (`1009a486`). Verification: `npm run check` 0 errors; full Playwright suite
+  green on both browsers (35 passed, 1 known webkit offline-config skip); scripted
+  interactive smoke — slider spam re-encodes responsively, undo restores instantly
+  from the cache, no console errors.
 
 - **Preview toggles grouped into a "View options" popover (2026-06-28), landed on
   `main`.** The two preview-only display toggles — smoothing
