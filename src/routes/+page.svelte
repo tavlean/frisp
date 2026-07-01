@@ -119,14 +119,14 @@
   {:else}
     <div class="compress sqush-editor">
       <Output
-        leftImage={session.results[0]?.outputImageData}
-        rightImage={session.results[1]?.outputImageData}
-        leftWorking={session.showSpinner[0]}
-        rightWorking={session.showSpinner[1]}
-        leftDone={session.statuses[0] === 'done'}
-        rightDone={session.statuses[1] === 'done'}
-        leftActivity={session.activities[0]}
-        rightActivity={session.activities[1]}
+        leftImage={session.runtime[0].result?.outputImageData}
+        rightImage={session.runtime[1].result?.outputImageData}
+        leftWorking={session.runtime[0].showSpinner}
+        rightWorking={session.runtime[1].showSpinner}
+        leftDone={session.runtime[0].status === 'done'}
+        rightDone={session.runtime[1].status === 'done'}
+        leftActivity={session.runtime[0].activity}
+        rightActivity={session.runtime[1].activity}
         fileId={session.loadId}
         leftContain={session.leftContain}
         rightContain={session.rightContain}
@@ -204,8 +204,8 @@
             naturalHeight={session.naturalHeight}
             sourceName={session.file.name}
             isVector={session.isVectorSource}
-            result={session.results[index]}
-            working={session.showSpinner[index]}
+            result={session.runtime[index].result}
+            working={session.runtime[index].showSpinner}
             canImport={session.canImport[index]}
             downloadName={session.downloadName(index)}
             onFormatChange={(f) => session.setFormat(index, f)}

@@ -169,34 +169,53 @@ function buildInitialSides(): [SideState, SideState] {
   ];
 }
 
+/**
+ * Per-side transient encode state, grouped so a side is one object instead of
+ * an index into eight parallel tuples. Reactive fields are individually
+ * $state/$derived (the containing tuple is a plain, never-reassigned pair —
+ * class instances are not proxied; their fields carry the reactivity).
+ */
+export class SideRuntime {
+  status = $state<SideStatus>('idle');
+  // Set at encode start by diffing the resize recipe against the previous pass.
+  activity = $state<SideActivity>('optimize');
+  // Flipped true by the updateSpinner effect once 'working' for 500ms.
+  spinnerDelayPassed = $state(false);
+  error = $state('');
+  // Raw: a CompressOutcome holds heavy host objects (File, ImageData, object
+  // URL) that must stay out of the reactive graph. Reassign-only.
+  result = $state.raw<CompressOutcome | null>(null);
+  // The delayed-spinner AND-gate: never shows outside a 'working' spell.
+  showSpinner = $derived(this.status === 'working' && this.spinnerDelayPassed);
+
+  // Non-reactive bookkeeping (see encodeSide).
+  displayedSig: string | null = null;
+  encodedLoadId = -1;
+  lastResizeSig: string | null = null;
+
+  /** New-file / editor-close reset — exactly the fields pickFiles cleared. */
+  reset(): void {
+    this.status = 'idle';
+    this.error = '';
+    this.spinnerDelayPassed = false;
+    this.result = null;
+    this.displayedSig = null;
+  }
+}
+
 export class EditorSession {
   sides = $state<[SideState, SideState]>(buildInitialSides());
 
   preprocessorState = $state(structuredClone(defaultPreprocessorState));
   file = $state<File | null>(null);
   loadId = $state(0);
-  // Raw, not deeply proxied: each CompressOutcome holds heavy browser host
-  // objects (File, ImageData, and a Blob object URL) that must stay out of
-  // reactive state. Updates trigger by reassigning the array (see encodeSide),
-  // not by mutating an element in place.
-  results = $state.raw<[CompressOutcome | null, CompressOutcome | null]>([
-    null,
-    null,
-  ]);
-  statuses = $state<[SideStatus, SideStatus]>(['idle', 'idle']);
-  // What each side's in-flight pass is doing, for the ProcessingBadge wording.
-  // Set at encode start by diffing the resize recipe against the previous pass.
-  activities = $state<[SideActivity, SideActivity]>(['optimize', 'optimize']);
-  // The 500ms delayed loading spinner. `spinnerDelayPassed` is flipped true by
-  // the updateSpinner effect once a side has been working for 500ms; showSpinner
-  // AND-gates it with the live status so the spinner can never show outside a
-  // 'working' spell and hides the instant a side stops working.
-  spinnerDelayPassed = $state<[boolean, boolean]>([false, false]);
-  showSpinner = $derived([
-    this.statuses[0] === 'working' && this.spinnerDelayPassed[0],
-    this.statuses[1] === 'working' && this.spinnerDelayPassed[1],
-  ] as [boolean, boolean]);
-  errors = $state<[string, string]>(['', '']);
+  // Per-side transient encode state. A PLAIN tuple, never reassigned: each
+  // SideRuntime is internally reactive (its $state/$derived fields carry the
+  // reactivity), so wrapping the tuple in $state would double-proxy for nothing.
+  readonly runtime: [SideRuntime, SideRuntime] = [
+    new SideRuntime(),
+    new SideRuntime(),
+  ];
   canImport = $state<[boolean, boolean]>([hasSavedSide(0), hasSavedSide(1)]);
 
   // Undo/redo over the editable document (see DocSnapshot). The UI reads
@@ -208,10 +227,6 @@ export class EditorSession {
   // instead of re-running the pipeline. Owns the object-URL lifecycle for every
   // result it holds — revoked on eviction and on clear().
   private cache = new ResultCache();
-  // The signature of the result currently displayed per side (set whenever a
-  // result lands on screen, from a fresh encode OR a cache hit). Replaces the old
-  // single-slot `encodedSig`: a pass whose signature still matches is redundant.
-  private displayedSig: [string | null, string | null] = [null, null];
   // Encodes currently running, keyed by the same signature as the cache, so a
   // side whose recipe matches the other side's in-flight pass piggybacks on it
   // instead of burning the identical multi-second encode twice ("Copy settings
@@ -222,15 +237,11 @@ export class EditorSession {
   private historyTimer: ReturnType<typeof setTimeout> | null = null;
   // Bookkeeping keyed to `loadId` (bumped on every new file). Comparing against
   // the live loadId replaces the old mutable prevFiles/dimsSeeded guards, so a
-  // new file is detected automatically with no hand-reset in pickFiles/clearFile:
-  //  - encodedLoadId: loadId each side last (re)started an encode at — a new
-  //    file therefore encodes immediately, while option tweaks stay debounced.
-  //  - seededLoadId: loadId the resize dims were last seeded at (one-shot/file).
-  private encodedLoadId: [number, number] = [-1, -1];
+  // new file is detected automatically with no hand-reset in pickFiles/clearFile.
+  // The per-side counterpart (`SideRuntime.encodedLoadId`, the loadId each side
+  // last (re)started an encode at) lives on the runtime object; this one tracks
+  // the resize-dimension seed (one-shot per file).
   private seededLoadId = -1;
-  // Resize recipe signature each side last encoded with, to tell a resize edit
-  // apart from any other re-encode (see encodeSide / activities).
-  private lastResizeSig: [string | null, string | null] = [null, null];
   // One persistent codec-worker bridge per side, created lazily on first encode
   // and kept for the session's lifetime. The bridge runtime is built for this:
   // lazy worker start, idle-timeout reclaim, terminate-on-abort with lazy
@@ -248,14 +259,14 @@ export class EditorSession {
   private pendingSettings: string | null = null;
 
   naturalWidth = $derived(
-    this.results[0]?.preprocessedWidth ??
-      this.results[1]?.preprocessedWidth ??
+    this.runtime[0].result?.preprocessedWidth ??
+      this.runtime[1].result?.preprocessedWidth ??
       0,
   );
 
   naturalHeight = $derived(
-    this.results[0]?.preprocessedHeight ??
-      this.results[1]?.preprocessedHeight ??
+    this.runtime[0].result?.preprocessedHeight ??
+      this.runtime[1].result?.preprocessedHeight ??
       0,
   );
 
@@ -266,10 +277,10 @@ export class EditorSession {
 
   leftContain = $derived(this.sideContains(0));
   rightContain = $derived(this.sideContains(1));
-  firstError = $derived(this.errors.find((error) => error) ?? '');
+  firstError = $derived(this.runtime[0].error || this.runtime[1].error);
 
   docTitle = $derived(
-    (this.statuses.some((status) => status === 'working') ? '⏳ ' : '') +
+    (this.runtime.some((r) => r.status === 'working') ? '⏳ ' : '') +
       (this.file ? `${this.file.name} - ` : '') +
       'Sqush — Compress an image',
   );
@@ -292,6 +303,7 @@ export class EditorSession {
   encodeSide(index: SideIndex): (() => void) | void {
     const current = this.file;
     const side = this.sides[index];
+    const runtime = this.runtime[index];
     const request = {
       format: side.format,
       options: $state.snapshot(side.optionsByFormat[side.format] ?? {}),
@@ -300,8 +312,8 @@ export class EditorSession {
     };
     // A new file bumps loadId; compare against the loadId this side last encoded
     // at, so a fresh image encodes immediately and option tweaks stay debounced.
-    const fileChanged = this.loadId !== this.encodedLoadId[index];
-    this.encodedLoadId[index] = this.loadId;
+    const fileChanged = this.loadId !== runtime.encodedLoadId;
+    runtime.encodedLoadId = this.loadId;
 
     // A resize only counts as a *real* resize when it targets a size different from
     // the (preprocessed) source. At the source's own dimensions the default
@@ -324,15 +336,15 @@ export class EditorSession {
     // never masquerades as a resize edit. A new file always reads as 'optimize'
     // (fileChanged short-circuits before the diff can fire).
     const resizeSig = resizeIsReal ? stableStringify(resize) : 'off';
-    const prevSig = this.lastResizeSig[index];
-    this.lastResizeSig[index] = resizeSig;
-    this.activities[index] =
+    const prevSig = runtime.lastResizeSig;
+    runtime.lastResizeSig = resizeSig;
+    runtime.activity =
       !fileChanged && prevSig !== null && prevSig !== resizeSig
         ? 'resize'
         : 'optimize';
 
     if (!current) {
-      this.statuses[index] = 'idle';
+      runtime.status = 'idle';
       return;
     }
 
@@ -357,9 +369,9 @@ export class EditorSession {
     // "enable resize at 100%" (and Premultiply/Linear RGB toggles at 100%) a true
     // no-op. `displayedSig` is set only when a result actually lands, so a prior
     // error or abort still retries.
-    if (!fileChanged && this.displayedSig[index] === encodeSig) {
-      this.statuses[index] = 'done';
-      this.errors[index] = '';
+    if (!fileChanged && runtime.displayedSig === encodeSig) {
+      runtime.status = 'done';
+      runtime.error = '';
       return;
     }
 
@@ -376,8 +388,8 @@ export class EditorSession {
       return;
     }
 
-    this.statuses[index] = 'working';
-    this.errors[index] = '';
+    runtime.status = 'working';
+    runtime.error = '';
 
     const controller = new AbortController();
 
@@ -417,15 +429,15 @@ export class EditorSession {
         .catch((error: unknown) => {
           settle();
           if (controller.signal.aborted) return;
-          this.errors[index] =
+          runtime.error =
             error instanceof Error ? error.message : String(error);
-          this.statuses[index] = 'error';
+          runtime.status = 'error';
         });
     };
 
     const run = () => {
-      this.statuses[index] = 'working';
-      this.errors[index] = '';
+      runtime.status = 'working';
+      runtime.error = '';
 
       // The other side already computing this exact recipe? Await its pass. If
       // the OWNER aborts (its recipe changed) while this side still wants the
@@ -444,9 +456,9 @@ export class EditorSession {
               startOwnPass();
               return;
             }
-            this.errors[index] =
+            runtime.error =
               error instanceof Error ? error.message : String(error);
-            this.statuses[index] = 'error';
+            runtime.status = 'error';
           });
         return;
       }
@@ -473,23 +485,20 @@ export class EditorSession {
 
   /**
    * Put a result (fresh or cached) on screen for a side and record what produced
-   * it. `results` is `$state.raw`, so we reassign the array rather than mutate an
-   * element in place — only reassignment triggers reactive updates.
+   * it. `displayedSig` is the signature of the result now on screen (set only
+   * when a result actually lands, from a fresh encode OR a cache hit), so a pass
+   * whose signature still matches is detected as redundant.
    */
   private showResult(
     index: SideIndex,
     outcome: CompressOutcome,
     sig: string,
   ): void {
-    const nextResults: [CompressOutcome | null, CompressOutcome | null] = [
-      this.results[0],
-      this.results[1],
-    ];
-    nextResults[index] = outcome;
-    this.results = nextResults;
-    this.displayedSig[index] = sig;
-    this.statuses[index] = 'done';
-    this.errors[index] = '';
+    const runtime = this.runtime[index];
+    runtime.result = outcome;
+    runtime.displayedSig = sig;
+    runtime.status = 'done';
+    runtime.error = '';
     this.pinDisplayedResults();
   }
 
@@ -499,21 +508,24 @@ export class EditorSession {
    */
   private pinDisplayedResults(): void {
     const keys: string[] = [];
-    if (this.displayedSig[0] !== null) keys.push(this.displayedSig[0]);
-    if (this.displayedSig[1] !== null) keys.push(this.displayedSig[1]);
+    for (const runtime of this.runtime) {
+      if (runtime.displayedSig !== null) keys.push(runtime.displayedSig);
+    }
     // A Set in ResultCache dedupes the two when both sides show the same recipe.
     this.cache.setPinned(keys);
   }
 
   updateSpinner(index: SideIndex): (() => void) | void {
-    // Manages only the 500ms delay; showSpinner is the $derived AND-gate above.
-    if (this.statuses[index] !== 'working') {
-      this.spinnerDelayPassed[index] = false;
+    const runtime = this.runtime[index];
+    // Manages only the 500ms delay; showSpinner is the $derived AND-gate on
+    // SideRuntime.
+    if (runtime.status !== 'working') {
+      runtime.spinnerDelayPassed = false;
       return;
     }
 
     const timer = setTimeout(() => {
-      this.spinnerDelayPassed[index] = true;
+      runtime.spinnerDelayPassed = true;
     }, SPINNER_DELAY);
 
     return () => clearTimeout(timer);
@@ -654,7 +666,7 @@ export class EditorSession {
   }
 
   seedResizeDimensions(): void {
-    const result = this.results[0] ?? this.results[1];
+    const result = this.runtime[0].result ?? this.runtime[1].result;
     if (!result || this.seededLoadId === this.loadId) return;
 
     this.seededLoadId = this.loadId;
@@ -716,15 +728,12 @@ export class EditorSession {
     // via the encode effects' cleanup; their settle() guard tolerates this).
     this.cache.clear();
     this.inflight.clear();
-    this.displayedSig = [null, null];
     this.file = next;
     this.loadId += 1;
-    this.results = [null, null];
-    this.errors = ['', ''];
-    this.statuses = ['idle', 'idle'];
-    // Reset the spinner delay so the new file re-earns the 500ms grace; loadId
+    // Reset each side's transient runtime (result, status, error, displayedSig,
+    // and the spinner delay so the new file re-earns the 500ms grace). loadId
     // (bumped above) re-arms the encode + seed bookkeeping with no manual reset.
-    this.spinnerDelayPassed = [false, false];
+    for (const runtime of this.runtime) runtime.reset();
 
     // New-file reset policy — applies to a fresh open AND an in-place drag-drop
     // replace. The ENCODER recipe is KEPT: each side's `format` + `optionsByFormat`
@@ -759,12 +768,8 @@ export class EditorSession {
 
   clearFile(): void {
     this.file = null;
-    this.results = [null, null];
-    this.errors = ['', ''];
-    this.statuses = ['idle', 'idle'];
-    this.spinnerDelayPassed = [false, false];
+    for (const runtime of this.runtime) runtime.reset();
     this.preprocessorState = structuredClone(defaultPreprocessorState);
-    this.displayedSig = [null, null];
     this.cache.clear();
     this.inflight.clear();
     this.history.clear();
