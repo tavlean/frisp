@@ -89,7 +89,16 @@ export default class TwoUp extends HTMLElement {
   }
 
   private _onKeyDown = (event: KeyboardEvent) => {
+    // This is a window-level shortcut, so scope it: only act when the key isn't
+    // already handled, carries no modifier, and focus is either nowhere in
+    // particular (document.body) or inside this viewer. Otherwise pressing "2"
+    // while a toolbar button/select is focused would silently recentre the split.
+    if (event.defaultPrevented) return;
+    if (event.ctrlKey || event.metaKey || event.altKey) return;
+
     const target = event.target;
+    if (target !== document.body && !this.contains(target as Node | null))
+      return;
     if (target instanceof HTMLElement && target.closest('input')) return;
 
     if (event.code === 'Digit1' || event.code === 'Numpad1') {
