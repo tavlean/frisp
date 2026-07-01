@@ -7,6 +7,31 @@ browser, the build is static, and offline reload must work after load.
 
 ## Current State
 
+- **Review-hardening follow-ups (2026-07-02), landed on `main`.** Closes the
+  gaps the batch below exposed. (1) **CI now runs the full Playwright e2e suite**
+  on every push/PR (`156b1bf0`, new `e2e` job, ubuntu, chromium + webkit with
+  browser caching; the webServer builds + previews the production app itself) —
+  this is the fix for the resize.spec silent-red failure mode. (2) `npm run
+  check` is fully clean: `@types/node@24` installed to satisfy the generated
+  tsconfig's `"types": ["node"]` (`9f9a82a4`) — 0 errors, 0 warnings. (3) New
+  `tests/e2e/editor-interactions.spec.ts` (`ed1b4d7e`) locks in the batch's
+  invariants: undo restores the EXACT prior blob URL (cache hit, not re-encode),
+  typed slider values clamp to min/max, divider keys ignore focused controls —
+  3/3 both browsers; full suite 41 passed / 1 known webkit-offline skip.
+  (4) **Benchmark verdict: no codec regressions from the encode-core changes** —
+  vs the post-threading capture (results/threaded.json), AVIF/JXL/MozJPEG/OxiPNG
+  are byte-identical on all 9 fixtures and real encode times are within the
+  harness's 12% noise; all `bench:compare` "regressions" trace to last month's
+  intentional WebP defaults change (`e184882f`) and AVIF threading tiling
+  (`e9b1be6c`) against the STALE committed baseline (2026-06-02 — the
+  README-mandated post-threading re-baseline never happened). **Known gap:** the
+  bench's warm runs now hit the in-session ResultCache (uniform 9ms poll ticks,
+  not encodes), so the harness can't measure warm encodes — or the
+  persistent-bridge win — until it busts the cache (e.g. vary a no-op option per
+  run or reload between runs). Fix the methodology first, THEN re-baseline;
+  baseline was deliberately NOT refreshed (it would bake cache-hit artifacts
+  into the timing reference).
+
 - **Review-hardening batch (2026-07-02), landed on `main`.** A full code review
   of the June 11 – July 1 window, executed via
   [review-hardening-plan.md](review-hardening-plan.md). Four threads.
