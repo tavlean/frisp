@@ -298,6 +298,19 @@ behavior parity is preserved.
       click-outside + Escape dismiss, no clipping at 375px, no console errors).
       User-guide + reference reconciled.
 
+16. **Two-up divider keys are scoped to the viewer (2026-07-02).** Upstream
+    Squoosh (and Sqush until now) wired the `1`/`2`/`3` divider shortcuts as a
+    window-level keydown guarded only against `<input>` targets, so they fire
+    globally — pressing "2" while a toolbar button, a `<select>`, or the zoom
+    `<span role="button">` was focused silently recentred the split. The handler
+    now acts only when the event is unhandled, carries no Ctrl/Meta/Alt modifier,
+    and focus is either on `document.body` or inside the viewer itself — keeping
+    the shortcut when nothing is focused or while interacting with the two-up, but
+    no longer hijacking "2" from unrelated controls. The `_position` math is
+    unchanged. `two-up.ts`; commit `fix(editor): stop two-up divider keys firing
+    from unrelated controls`. `npm run check` 0/0; `resize-twoup-footprint`
+    e2e green.
+
 ---
 
 ## B. Resolved decisions + still-open items
