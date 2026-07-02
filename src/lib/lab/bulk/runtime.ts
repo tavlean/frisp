@@ -135,6 +135,11 @@ export class LabRuntime {
     host.session = cancelActiveJobs(host.session);
   }
 
+  /** Alias for {@link cancelProcessing} (kept for API compatibility). */
+  cancel(host: LabRunnerHost): void {
+    this.cancelProcessing(host);
+  }
+
   /** Terminate the workers. Call on teardown / full reset of the lab. */
   disposeBridges(): void {
     this.#controller?.abort();
@@ -142,5 +147,10 @@ export class LabRuntime {
     this.#running = false;
     for (const bridge of this.#bridges) bridge?.dispose();
     this.#bridges = [null, null];
+  }
+
+  /** Alias for {@link disposeBridges} (kept for API compatibility). */
+  dispose(): void {
+    this.disposeBridges();
   }
 }
