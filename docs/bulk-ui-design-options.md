@@ -187,6 +187,18 @@ strip always visible; touch disables drag-select to preserve native strip
 scrolling (long-press toggle = recommended follow-up). Open: L2 grid's
 fate as a secondary view; L4 loses to L3 (remove at promotion).
 
+**Round 8-9 (2026-07-02).** Detail polish landed (measured icon centering,
+production download glyph on Save all, info rows Format → Size → Dimensions
+→ Aspect, SI units confirmed). A dev font-comparison toggle was added, then
+trimmed to Outfit / Geist / Satoshi per maintainer. **L1 and L4 removed**
+(L3 finalized; toggle = L2/L3, default L3). Bug fixed: global Resize landed
+on Custom 1×1 (the pseudo-side never got dimension seeding) — now seeds
+real dims and lands on the 100% no-op preset. **The mixed-size-batch resize
+question (§9 Q5) got its lab answer: PERCENTAGE presets resolve per image
+(each scales relative to its own dimensions) at process time; Custom stays
+fixed absolute pixels.** Verified: 50% halves every source regardless of
+its size. Phase 2 should adopt this semantics.
+
 So the two variants share the focus view itself; the lab question is **what
 you land on and how navigating scope feels**. B3 (table) stays rejected as
 primary; candidate for a grid density toggle later.
