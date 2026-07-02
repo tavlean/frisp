@@ -4,7 +4,8 @@
   //
   //  • IMAGE face (an image is selected): the panel TITLE is the filename (in
   //    azure, the single-image scope hue), then the info rows (Format /
-  //    Dimensions / Original size / Aspect chip), then the ● custom-settings +
+  //    Original size / Dimensions / Aspect chip — identity, then weight, then
+  //    the geometry pair together), then the ● custom-settings +
   //    "Reset to global" row when the job deviates.
   //  • GLOBAL face (nothing selected): the title is the image COUNT, then real
   //    batch facts (format breakdown / largest file computed from the actual
@@ -158,12 +159,12 @@
             <dd>{formatLabel(file)}</dd>
           </div>
           <div class="row">
-            <dt>Dimensions</dt>
-            <dd>{hasDims ? `${width} × ${height}` : '—'}</dd>
-          </div>
-          <div class="row">
             <dt>Original size</dt>
             <dd>{prettySize(file.size)}</dd>
+          </div>
+          <div class="row">
+            <dt>Dimensions</dt>
+            <dd>{hasDims ? `${width} × ${height}` : '—'}</dd>
           </div>
           <div class="row">
             <dt>Aspect</dt>
@@ -309,6 +310,18 @@
       class="save-all"
       onclick={() => labBulk.saveAllStub()}
     >
+      <!-- The same download glyph the production per-image Save button uses
+           (Results.svelte), sized to the button text. -->
+      <svg class="save-all-icon" viewBox="0 0 24 24" aria-hidden="true">
+        <path
+          d="M12 3v10.2m0 0l4.2-4.2M12 13.2L7.8 9M4.5 16.5v2.3c0 .9.8 1.7 1.7 1.7h11.6c.9 0 1.7-.8 1.7-1.7v-2.3"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </svg>
       Save all · ZIP
     </button>
   </div>
@@ -360,6 +373,7 @@
     margin: 6px 0 0;
     color: var(--text-3, rgba(235, 235, 245, 0.38));
     font-size: 0.9rem;
+    text-align: center;
   }
 
   /* Long size strings (e.g. "3.68 MB") shouldn't be forced onto one clipped
@@ -549,10 +563,11 @@
     margin-left: 2px;
     color: var(--main-theme-color, #ff8a5e);
   }
-  /* The ORIGINAL figure is the "before" — its unit stays neutral so the coral
-     accent is reserved for the OPTIMIZED win. */
+  /* The ORIGINAL figure is the "before" — its unit stays neutral (gray, not the
+     coral reserved for the OPTIMIZED win) but sits a step brighter than the
+     faint text-3 so the "before" reads comfortably. */
   .unit-quiet {
-    color: var(--text-3, rgba(235, 235, 245, 0.38));
+    color: var(--text-2, rgba(235, 235, 245, 0.62));
   }
 
   .pending {
@@ -606,6 +621,7 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    gap: 8px;
     width: 100%;
     margin-top: 22px;
     height: 40px;
@@ -641,6 +657,12 @@
   .save-all:focus-visible {
     outline: 2px solid var(--main-theme-color, #ff8a5e);
     outline-offset: 2px;
+  }
+  /* Match the download glyph to the button text size. */
+  .save-all-icon {
+    flex: none;
+    width: 1.15em;
+    height: 1.15em;
   }
 
   @keyframes spin {

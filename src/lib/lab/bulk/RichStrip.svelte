@@ -134,8 +134,12 @@
   .size-control button {
     display: grid;
     place-items: center;
+    /* Equal square hit box so every glyph shares one vertical axis and the
+       active pill is concentric with its icon. padding:0 is explicit — the UA
+       button padding was pushing the SVG ~2px off the button's own centre. */
     width: 30px;
-    height: 28px;
+    height: 30px;
+    padding: 0;
     border: none;
     border-radius: 999px;
     background: transparent;
