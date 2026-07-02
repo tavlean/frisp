@@ -108,3 +108,34 @@ Treat these as the regression checklist; re-run the editor parity expectations
   proving on real codecs first and keeping the smallest thing that works.
 - Subtle regressions in mode/inference logic. Mitigate with the acceptance
   checklist + parity audit + per-codec browser verification.
+
+## Sequencing vs bulk Phase 3 (analysis, 2026-07-02)
+
+A read-only analysis pass settled the open question "does this refactor precede
+the bulk per-image override UI (Phase 3)?" — verdict: **neither first-in-full.
+Do a minimal middle slice, then Phase 3, and defer the full refactor.**
+
+- The real Phase-3 blocker is **semantic sparsity**, not UI polish: bulk
+  overrides store `encoderState` wholesale, so touching one per-image control
+  freezes EVERY option of that encoder for that image — later global changes to
+  untouched fields stop flowing through, contradicting the design promise that
+  a touched control overrides just that control
+  ([bulk-ui-design-options.md](bulk-ui-design-options.md) §"sparse overrides").
+- Hand-rolling per-leaf logic without a model repeats the store's current
+  quality/method special case per codec × per transformed control (inverted
+  Effort, multi-field Lossless, inferred toggles…). Raw-field diffs cannot say
+  which VISIBLE control deserves a dot or what "reset this control" means.
+- The **minimal slice**: (1) per-leaf merge for same-format encoder overrides in
+  the bulk engine (format override stays wholesale); (2) a small per-codec
+  control registry — control id, raw-field dependencies, compare/apply/reset —
+  covering only the currently visible controls of the 5 encoders; (3) bulk UI
+  consumes it for dots/resets. Single-image panels stay untouched (their
+  mirror/`apply()` pattern is unaffected), so the frozen localStorage wire
+  format and parity are safe.
+- Maintainer decisions needed before the slice: do Phase-3 dots/resets cover
+  **all visible controls or only headline ones**, and is an "override path" a
+  **human control id** (recommended) or a raw codec field?
+
+The full model (steps 1–5 above) remains worthwhile but should follow Phase 3;
+its blast radius (all five panels + OptionsPanel + history/persist behavior)
+is not needed to unblock bulk.
