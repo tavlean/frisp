@@ -21,6 +21,7 @@
     "preview": "vite preview",
     "sync": "node scripts/sync-sveltekit-app.mjs",
     "test": "npm run check && npm run test:e2e",
+    "test:unit": "vitest run",
     "test:e2e": "playwright test",
     "bench": "playwright test --config benchmarks/playwright.config.ts",
     "bench:compare": "node benchmarks/compare.mjs"
@@ -41,6 +42,7 @@
     "svelte-check": "^4.6.0",
     "typescript": "6.0.3",
     "vite": "8.1.0",
+    "vitest": "^4.1.9",
     "wasm-feature-detect": "^1.8.0"
   },
   "overrides": {

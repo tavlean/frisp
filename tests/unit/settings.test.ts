@@ -1,0 +1,129 @@
+import { describe, expect, it } from 'vitest';
+import {
+  getEffectiveSettings,
+  getSettingsOverridePaths,
+  hasSettingsOverrides,
+  settingsHash,
+} from '../../src/client/lazy-app/bulk/settings';
+import { settings } from './fixtures';
+
+describe('bulk settings helpers', () => {
+  it('deep-merges sparse processor overrides without mutating global settings', () => {
+    const globalSettings = settings();
+
+    const effective = getEffectiveSettings(globalSettings, {
+      processorState: {
+        resize: {
+          enabled: true,
+          width: 320,
+        },
+      },
+    });
+
+    expect(effective.processorState.resize).toMatchObject({
+      ...globalSettings.processorState.resize,
+      enabled: true,
+      width: 320,
+    });
+    expect(globalSettings.processorState.resize.enabled).toBe(false);
+  });
+
+  it('replaces encoder state when an image override supplies one', () => {
+    const effective = getEffectiveSettings(settings(), {
+      encoderState: {
+        type: 'qoi',
+        options: {},
+      },
+    });
+
+    expect(effective.encoderState?.type).toBe('qoi');
+  });
+
+  it('keeps settings hashes stable regardless of object key insertion order', () => {
+    const left = settings({
+      processorState: {
+        resize: {
+          enabled: true,
+          width: 640,
+          height: 480,
+          method: 'lanczos3',
+          fitMethod: 'stretch',
+          premultiply: true,
+          linearRGB: true,
+        },
+        quantize: {
+          enabled: false,
+          numColors: 256,
+          dither: 1,
+        },
+      },
+    });
+    const right = {
+      processorState: {
+        quantize: {
+          dither: 1,
+          numColors: 256,
+          enabled: false,
+        },
+        resize: {
+          linearRGB: true,
+          premultiply: true,
+          fitMethod: 'stretch',
+          method: 'lanczos3',
+          height: 480,
+          width: 640,
+          enabled: true,
+        },
+      },
+      encoderState: left.encoderState,
+    };
+
+    expect(settingsHash(left)).toBe(settingsHash(right));
+  });
+
+  it('detects only defined override values', () => {
+    expect(hasSettingsOverrides(undefined)).toBe(false);
+    expect(
+      hasSettingsOverrides({
+        processorState: {
+          resize: {
+            width: undefined,
+          },
+        },
+      }),
+    ).toBe(false);
+    expect(
+      hasSettingsOverrides({
+        processorState: {
+          resize: {
+            enabled: false,
+          },
+        },
+      }),
+    ).toBe(true);
+  });
+
+  it('returns dot paths for defined overrides', () => {
+    expect(
+      getSettingsOverridePaths({
+        encoderState: {
+          type: 'qoi',
+          options: {},
+        },
+        processorState: {
+          resize: {
+            enabled: true,
+            width: 320,
+          },
+          quantize: {
+            numColors: undefined,
+          },
+        },
+      }),
+    ).toEqual([
+      'encoderState',
+      'processorState.resize.enabled',
+      'processorState.resize.width',
+    ]);
+  });
+});
