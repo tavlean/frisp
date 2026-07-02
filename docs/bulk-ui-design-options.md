@@ -1,12 +1,17 @@
 # Bulk UI — design options & feature roadmap
 
 Last updated: 2026-07-02.
-Status: in design. Round 1: options written. Round 2 (same day): maintainer
-confirmed **no separate `/bulk` route (A2 out)**, **ZIP in v1**, and the
-**size-increase guardrail in v1**; concept images generated to
+Status: in design → lab. Round 1: options written. Round 2 (same day):
+maintainer confirmed **no separate `/bulk` route (A2 out)**, **ZIP in v1**,
+and the **size-increase guardrail in v1**; concept images generated to
 `~/Downloads/sqush-ui-concepts/`; §10–§12 added (A1↔A3 horizons, save
-destination + settings panel, crop + export renditions). Awaiting layout +
-override-signaling shortlist.
+destination + settings panel, crop + export renditions). Round 3 (same day,
+after reviewing the images): **layout goes to a two-variant lab** (grid home
+vs focus-first home — §3); **left side becomes a dynamic contextual panel
+with image info by default** (§4, rewritten); **override signaling decided**
+(§5: dots; ring = selection only; no count badges); **A1 now → A3 later
+confirmed** (§10); **save-back-to-source deferred** but kept on the list;
+**folder import promoted into Phase 2** (§11).
 This is the "Design First" step required by [road-map.md](road-map.md) before
 any production bulk UI. Engine reference: [bulk-image-architecture.md](bulk-image-architecture.md).
 
@@ -103,40 +108,71 @@ Info-dense rows, pro-tool feel, but poor visual inspection — wrong identity
 for a visual compare tool. **Rejected as the primary**; keep as a possible
 density toggle on the grid later.
 
-**If B1 vs B2 can't be settled by reading → lab.** Both variants share ~all
-wiring (engine, pool, import, export); the lab delta is genuinely just the
-batch-home component, so a 2-variant lab is cheap and honest.
+**DECIDED (maintainer, 2026-07-02, after concept images): two-variant lab.**
+The pair is *not* B1-vs-B2 as originally framed — the images sharpened it:
+
+- **Variant L1 — "Focus-first home"** (maintainer favorite,
+  `bulk-focus-mode.png`): dropping N images lands directly in the focus view —
+  big before/after stage of the first image, mini-filmstrip below for
+  switching, batch card (totals + Save All + global entry point) top-left,
+  per-image panel right.
+- **Variant L2 — "Grid home"** (`bulk-grid-dashboard.png`): dropping N images
+  lands on the card grid with the global panel; clicking a card opens the
+  same focus view as L1.
+
+So the two variants share the focus view itself; the lab question is **what
+you land on and how navigating scope feels**. B3 (table) stays rejected as
+primary; candidate for a grid density toggle later.
 
 ## 4. Decision C — what the left side becomes
 
-Today each side is an encode slot; left defaults to "Original" (`identity`)
-and most sessions never change it. Its real value is A/B-ing two codecs.
+**DECIDED (maintainer, 2026-07-02): the left side is a DYNAMIC, contextual
+panel.** Governing principle: **LEFT = what you're looking at + its tools;
+RIGHT = compression settings for the current scope.**
 
-**In bulk (recommended):** the left panel as a format chooser disappears.
-Focus-mode comparison is fixed: original | effective result. The left slot
-gets a real job instead:
+**Default content — image info, always at a glance** (single-image mode and
+bulk focus view alike):
 
-- **Grid view:** left side hosts the **batch panel** — global settings, totals,
-  progress, Save All.
-- **Focus view:** left slot shrinks to a slim **batch card** (progress, totals,
-  "← All images"), right panel edits *this image*. LEFT = the whole batch,
-  RIGHT = this one image — the scope question answered by geography.
+- filename and **original format**;
+- **pixel dimensions** and original **file size** — today you must open
+  Resize just to learn the dimensions; that pain goes away;
+- **inferred nearest aspect ratio** from the dimensions (1:1, 5:4, 4:3, 3:2,
+  16:10, 16:9, 21:9 and portrait counterparts; label as "≈ 16:9" when not
+  exact) — orients "what shape is this image" instantly;
+- room for more (megapixels, has-alpha, EXIF orientation…) as needs appear.
 
-**In single-image mode (optional, later):** collapse the left panel to a chip
-("Original · 2.4 MB") whenever it's set to Original, with a "Compare…" action
-that expands the full second encode side. Default UX gets simpler; the codec
-A/B power feature stays one click away. (Removing the second side entirely and
-leaning on the future Multi-Format Compare was considered and rejected for
-now — live two-slider comparison is genuinely used, and MFC isn't built.)
+**Dynamic tool sections take over / stack in the same slot:**
 
-## 5. Override signaling & reset (applies to any layout)
+- **"Compare as…"** button — summons the second encode side on demand (the
+  old always-on left format panel becomes an opt-in power feature; live
+  two-slider codec A/B is preserved, just not the default);
+- **Exports/renditions** (later — §12) live here when used;
+- **Crop options** (aspect chips, size, reposition hints — §12) appear here
+  when the crop tool is active;
+- any future feature (the maintainer explicitly includes ideas as far out as
+  layers) reuses this slot instead of inventing new chrome.
 
-- **Card/strip badge:** one small ● dot = "has custom settings" (the
-  maintainer asked for a clean signal, not a detailed diff). Tooltip lists the
-  deviated fields via `getSettingsOverridePaths`.
-- **Per-control:** a dot next to each overridden control in the focus panel +
-  per-control reset; "Reset all to global" in the panel header
-  (`applyClearJobOverrides`).
+**Bulk grid scope:** the "thing you're looking at" is the batch itself, so
+the left panel shows batch info (count, total original → optimized, savings)
++ the global settings + Save All — same principle, batch scope.
+
+The right side stays the fixed compression panel for now; making it dynamic
+too is noted as a possible future step, not part of this design.
+
+## 5. Override signaling & reset — DECIDED (maintainer, 2026-07-02)
+
+Style: the **dots** concept (`override-signaling-dots.png`), with one
+reassignment — the coral **ring means "currently selected", never
+"overridden"**:
+
+- **Per-control:** a small coral ● dot next to each overridden control +
+  per-control reset affordance; **no slider recoloring, no row tinting**.
+  "Reset all to global" stays in the panel header (`applyClearJobOverrides`).
+- **Thumbnail/card:** a small corner ● dot = "has custom settings". **No
+  count badges** ("2 custom" pills rejected). Tooltip may list deviated
+  fields via `getSettingsOverridePaths`.
+- **Selection:** coral ring/outline around the thumbnail = selected. Ring and
+  dot are independent signals.
 - **Global changes** requeue only non-overridden stale jobs — engine already
   guarantees this (`applyGlobalSettings` → `requeueStaleJobs`).
 - Per-image **format** override is allowed (engine supports it) — e.g. one
@@ -185,10 +221,11 @@ toggle (default on). "Never ship a bigger file."
 | Phase | Contents | Needs |
 |---|---|---|
 | **0 — Engine safety net** | Vitest + `npm run test:unit`; top-8 engine tests, then the rest of test-plan §4; fix the stale ":covered with tests" claim in bulk-image-architecture.md | No design decisions; cheap-model executable; **can start now** |
-| **1 — Layout decision** | Maintainer shortlists B1/B2 (+ left-side treatment §4). If reading doesn't settle it → **lab**: two variants behind a dev-only route, shared engine wiring, pick by feel | Maintainer eyes |
-| **2 — Minimum Useful Bulk** | Multi-file entry (input `multiple` + boundary routing), reactive bulk store wrapping the engine, worker-bridge pool (2, per-side-bridge pattern), batch home per decision, global WebP panel (reuse existing panels), statuses/sizes/cancel/retry, totals bar, **Save All (ZIP)**, size-increase guard; bulk e2e smoke | Phase 1 decision |
-| **3 — Overrides & focus** | Focus mode reusing two-up + mini-strip nav, per-image scope panel, per-control override dots, card deviation badge, reset (control/image), per-image format override, shallow-routing back-button | Phase 2 |
-| **4 — Scale & polish** | Lazy thumbnails + decode LRU, mixed-size resize UX, AVIF as second bulk format, folder import, naming templates, presets, report, density toggle; **Settings panel + save destinations** (open-folder → save-back, remembered folders via IndexedDB handles — §11) | Phase 3 + usage feedback |
+| **1 — Layout LAB (active)** | Two variants behind a dev-only route, shared engine wiring: **L1 focus-first home** vs **L2 grid home** (§3). Winner promoted, choice recorded | Maintainer eyes on the lab |
+| **2 — Minimum Useful Bulk** | Multi-file entry (input `multiple` + boundary routing) **+ folder import** (webkitdirectory picker + dropped-folder traversal — §11), reactive bulk store wrapping the engine, worker-bridge pool (2, per-side-bridge pattern), batch home per lab winner, global WebP panel (reuse existing panels), statuses/sizes/cancel/retry, totals bar, **Save All (ZIP)**, size-increase guard; bulk e2e smoke | Phase 1 winner |
+| **2b — Contextual left panel v1** | Image-info panel (name, original format, dimensions, size, inferred ≈aspect — §4) + "Compare as…" button; ships in the single-image editor independently of bulk, then reused by focus view | Independent — can land any time |
+| **3 — Overrides & focus** | Focus mode reusing two-up + mini-strip nav, per-image scope panel, per-control override dots (§5: ring = selection, no count badges), corner-dot card marker, reset (control/image), per-image format override, shallow-routing back-button | Phase 2 |
+| **4 — Scale & polish** | Lazy thumbnails + decode LRU, mixed-size resize UX, AVIF as second bulk format, naming templates, presets, report, density toggle; **Settings panel** (§11; save destinations only if save-back is revived) | Phase 3 + usage feedback |
 | **5 — Crop** | Crop as a `ProcessorState` stage (aspect + normalized focal point — §12): single-image crop UI, bulk global crop + per-image reposition via the override machinery | Phase 3 (override UI) |
 | **Later track — Renditions** | One source → N named export recipes (§12): renditions panel, *(source × rendition)* jobs, grouped grid, naming templates | Phase 5 (crop) + own design pass |
 | **Later track — A3 convergence** | Focus-mode parity checklist → flip single-file entry to a 1-item batch, retire `EditorSession` (§10) | Parity checklist closed |
@@ -196,21 +233,20 @@ toggle (default on). "Never ship a bigger file."
 Priority note: maintainer decision 2026-07-02 — **bulk now outranks
 Multi-Format Compare** in the product order (road-map.md updated accordingly).
 
-## 9. What to answer to close Phase 1
+## 9. Design questions — resolution state
 
-1. Batch home: **grid (B1)** or **filmstrip (B2)** — or lab both?
-   *(Concept images generated 2026-07-02: `bulk-grid-dashboard.png`,
-   `bulk-focus-mode.png`, `bulk-filmstrip.png`, `bulk-list-table.png` in
-   `~/Downloads/sqush-ui-concepts/`.)*
-2. Left side in bulk: batch panel / batch card as in §4? (Recommended yes.)
-3. Single-image left panel: collapse-to-chip, an Exports/renditions panel
-   (see §12 + `single-left-renditions-panel.png`), or leave for later?
-4. ~~ZIP in v1~~ — **confirmed yes** (maintainer, 2026-07-02), with the
-   size-increase guardrail also confirmed for v1.
-5. Global resize default for mixed batches: percentage or fit-within box?
-6. Override signaling: dots (`override-signaling-dots.png`) or ring + tinted
-   rows (`override-signaling-ring.png`) — or a mix (dots on controls, ring on
-   cards)?
+1. ~~Batch home~~ → **LAB** (decided 2026-07-02): L1 focus-first home vs L2
+   grid home (§3). The lab's winner is the last open layout question.
+2. ~~Left side in bulk~~ → **decided**: dynamic contextual panel, batch scope
+   in grid view (§4).
+3. ~~Single-image left panel~~ → **decided**: image-info panel + "Compare
+   as…" button (§4) — not a chip; renditions join later (§12).
+4. ~~ZIP in v1~~ → **confirmed yes**, with the size-increase guardrail also
+   confirmed for v1.
+5. **STILL OPEN:** global resize default for mixed batches — percentage or
+   fit-within box? Decide at Phase 2 build.
+6. ~~Override signaling~~ → **decided**: dots; ring = selection only; no
+   count badges (§5).
 
 ---
 
@@ -256,7 +292,8 @@ entered from different ends**. The question is what you pay, and when.
 progress for weeks and absorb regression risk on the core promise — or if a
 lab prototype shows the unified UI is trivially simple. Otherwise:
 
-**The staged convergence (chosen): A1 now, A3 by rule.**
+**The staged convergence — CONFIRMED by maintainer 2026-07-02 ("A1 now, A3
+later"):**
 
 1. **No new feature enters `EditorSession`.** Anything both modes want is
    built batch-first in the framework-neutral layer, surfaced by thin UI in
@@ -297,12 +334,23 @@ is skipped.)
 hide what the browser can't do.
 
 **Verdict: feasible, moderate effort, Chromium progressive enhancement** — a
-save-target module + permission UX + IndexedDB handle store. Slotted in Phase
-4. And it seeds the **Settings panel** the maintainer asked about — starting
-small: default destination (Ask / ZIP / remembered folder / back-to-source
-when a folder was opened), "keep original when larger" default, and the
-standing rule that whenever two behaviors are both valid, the choice becomes
-a setting here later.
+save-target module + permission UX + IndexedDB handle store.
+**Maintainer decision 2026-07-02: DEFERRED — not in this roadmap's phases;
+keep on the consider-later list** (this section stays as the feasibility
+record). The **Settings panel** idea survives independently (Phase 4) —
+starting small: "keep original when larger" default, and the standing rule
+that whenever two behaviors are both valid, the choice becomes a setting
+here later; save destinations join it if/when save-back is picked up.
+
+**Folder IMPORT is the opposite: PROMOTED into this roadmap (Phase 2).**
+Users will expect to hand bulk a folder, and unlike save-back it is
+cross-browser feasible today: an "Open folder" affordance via
+`<input webkitdirectory>` (works in Chrome/Edge/Safari/Firefox) plus
+`showDirectoryPicker` where available, and **dropped folders** via
+`webkitGetAsEntry()` / `getAsFileSystemHandle()` traversal. Recursive walk,
+filter through the engine's existing `isSupportedBulkImage`, and keep each
+file's relative path (`webkitRelativePath`) so naming templates /
+structure-preserving export stay possible later.
 
 ## 12. Crop & export renditions — forward architecture (requested 2026-07-02)
 
