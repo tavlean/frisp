@@ -9,11 +9,17 @@
 // job id, decoded lazily off the source File. Object URLs (thumbnails AND
 // engine output download URLs) are revoked on remove/reset.
 //
-// FORMAT IS LOCKED TO WebP for the lab (design doc §3). The two layout variants
-// (L1 focus-first, L2 grid) are built on top of this store by other agents; the
-// store + runtime are the shared scaffold.
+// The two layout variants (L1 focus-first, L2 grid) are built on top of this
+// store. The store + runtime are the shared scaffold; the focused image itself
+// is rendered by a real EditorSession in the route.
 
 import { SvelteMap } from 'svelte/reactivity';
+import {
+  getDefaultOptions,
+  OUTPUT_FORMATS,
+  type SideFormat,
+} from '$lib/compress';
+import type { SideState } from '$lib/editor/editor-session.svelte';
 import {
   addBulkImportToSession,
   applyClearJobOverrides,
@@ -42,6 +48,8 @@ import {
 import {
   defaultProcessorState,
   encoderMap,
+  type EncoderState,
+  type EncoderType,
 } from 'client/lazy-app/feature-meta';
 // The lab is WebP-locked, so use the CONCRETE WebP option type (which has
 // `quality`/`method`) rather than the wide `EncoderOptions` union (whose members
@@ -71,6 +79,26 @@ const THUMB_MAX = 320;
 
 let sessionCounter = 0;
 
+function stableStringify(value: unknown): string {
+  if (value === null || typeof value !== 'object') return JSON.stringify(value);
+  if (Array.isArray(value))
+    return '[' + value.map(stableStringify).join(',') + ']';
+
+  const record = value as Record<string, unknown>;
+  return (
+    '{' +
+    Object.keys(record)
+      .sort()
+      .map((key) => JSON.stringify(key) + ':' + stableStringify(record[key]))
+      .join(',') +
+    '}'
+  );
+}
+
+export function deepEqual(a: unknown, b: unknown): boolean {
+  return stableStringify(a) === stableStringify(b);
+}
+
 /** WebP defaults from the codec meta — the lab's locked global format. */
 function defaultGlobalSettings(): BulkImageSettings {
   return {
@@ -79,6 +107,30 @@ function defaultGlobalSettings(): BulkImageSettings {
       options: structuredClone(encoderMap.webP.meta.defaultOptions),
     },
     processorState: structuredClone(defaultProcessorState),
+  };
+}
+
+function defaultOptionsByFormat(): Record<string, Record<string, unknown>> {
+  return Object.fromEntries(
+    OUTPUT_FORMATS.map((format) => [format.id, getDefaultOptions(format.id)]),
+  );
+}
+
+function sideFromSettings(settings: BulkImageSettings): SideState {
+  const optionsByFormat = defaultOptionsByFormat();
+  const encoderState = settings.encoderState;
+  const format = (encoderState?.type ?? 'webP') as SideFormat;
+
+  if (encoderState) {
+    optionsByFormat[encoderState.type] = structuredClone(
+      encoderState.options as Record<string, unknown>,
+    );
+  }
+
+  return {
+    format,
+    optionsByFormat,
+    processorState: structuredClone(settings.processorState),
   };
 }
 
@@ -161,6 +213,8 @@ export class LabBulk {
   session = $state.raw<BulkSession>(emptySession());
   // Which layout variant the lab is showing (bound to the top-bar toggle).
   variant = $state<LabVariant>('l1');
+  // Production OptionsPanel-compatible pseudo-side for GLOBAL bulk settings.
+  globalSide = $state<SideState>(sideFromSettings(this.session.globalSettings));
 
   // Thumbnails + natural dims, keyed by job id. SvelteMap entries are replaced
   // (never deeply mutated) so its shallow reactivity is sufficient.
@@ -193,6 +247,9 @@ export class LabBulk {
   readonly selectedFile = $derived<File | undefined>(
     this.selectedJob?.sourceFile,
   );
+  readonly selectedHasOverrides = $derived(
+    this.overridePaths(this.selectedId).length > 0,
+  );
   readonly hasJobs = $derived(this.session.jobs.length > 0);
   /** True while any job is decoding/processing (or the runtime loop is live). */
   readonly processing = $derived(
@@ -200,6 +257,8 @@ export class LabBulk {
   );
 
   // ── Actions ───────────────────────────────────────────────────────────────
+  #syncingGlobalSide = false;
+  #globalApplyTimer: ReturnType<typeof setTimeout> | null = null;
 
   /**
    * Import Files into the session, decode thumbnails, auto-select the first job
@@ -315,7 +374,10 @@ export class LabBulk {
       getEffectiveSettings(this.session.globalSettings, job.overrides),
     );
 
-    const merged: WebpEncodeOptions = { ...jobOptions, [leaf]: globalOptions[leaf] };
+    const merged: WebpEncodeOptions = {
+      ...jobOptions,
+      [leaf]: globalOptions[leaf],
+    };
     const stillDeviates = (['quality', 'method'] as const).some(
       (key) => merged[key] !== globalOptions[key],
     );
@@ -333,6 +395,64 @@ export class LabBulk {
   resetAllOverrides(id: string): void {
     this.session = applyClearJobOverrides(this.session, id);
     void this.runtime.run(this);
+  }
+
+  applySelectedOverrides(overrides: BulkImageOverrides): void {
+    const id = this.session.selectedJobId;
+    if (!id) return;
+
+    this.session = applyJobOverrides(this.session, id, overrides);
+    void this.runtime.run(this);
+  }
+
+  clearSelectedOverrides(): void {
+    const id = this.session.selectedJobId;
+    if (!id) return;
+
+    this.session = applyClearJobOverrides(this.session, id);
+    void this.runtime.run(this);
+  }
+
+  refreshGlobalSideFromSession(): void {
+    const next = sideFromSettings(this.session.globalSettings);
+    if (deepEqual($state.snapshot(this.globalSide), next)) return;
+
+    this.#syncingGlobalSide = true;
+    this.globalSide.format = next.format;
+    this.globalSide.optionsByFormat = next.optionsByFormat;
+    this.globalSide.processorState = next.processorState;
+    queueMicrotask(() => {
+      this.#syncingGlobalSide = false;
+    });
+  }
+
+  setGlobalFormat(format: SideFormat): void {
+    if (format === 'identity') return;
+    this.globalSide.format = format;
+  }
+
+  queueGlobalSideApply(onApplied?: () => void): void {
+    const snapshot = $state.snapshot(this.globalSide) as SideState;
+    if (this.#syncingGlobalSide || snapshot.format === 'identity') return;
+
+    if (this.#globalApplyTimer !== null) clearTimeout(this.#globalApplyTimer);
+    this.#globalApplyTimer = setTimeout(() => {
+      this.#globalApplyTimer = null;
+      const format = snapshot.format as EncoderType;
+      const nextSettings: BulkImageSettings = {
+        encoderState: {
+          type: format,
+          options: structuredClone(snapshot.optionsByFormat[format] ?? {}),
+        } as EncoderState,
+        processorState: structuredClone(snapshot.processorState),
+      };
+
+      if (deepEqual(nextSettings, this.session.globalSettings)) return;
+
+      this.session = applyGlobalSettings(this.session, nextSettings);
+      void this.runtime.run(this);
+      onApplied?.();
+    }, 150);
   }
 
   /** Effective (global + override) WebP options for a job, or the global. */
@@ -383,6 +503,7 @@ export class LabBulk {
     this.runtime.cancelProcessing(this);
     this.#revokeAll();
     this.session = emptySession();
+    this.refreshGlobalSideFromSession();
   }
 
   /** Phase-2 placeholder for ZIP export (the scaffold has no archiver yet). */
@@ -452,6 +573,10 @@ export class LabBulk {
 
   /** Full teardown (workers + URLs). Call from the route's onMount cleanup. */
   dispose(): void {
+    if (this.#globalApplyTimer !== null) {
+      clearTimeout(this.#globalApplyTimer);
+      this.#globalApplyTimer = null;
+    }
     this.runtime.disposeBridges();
     this.#revokeAll();
   }

@@ -45,6 +45,9 @@ export class LabRuntime {
   // Guards against two overlapping run() loops (e.g. import kicks a run while
   // one is already draining the queue).
   #running = false;
+  // If a settings change queues work while a run is already active, remember
+  // that the drain must check once more before it goes idle.
+  #rerunRequested = false;
 
   /** The persistent bridge for a round-robin slot, created on first use. */
   #bridgeFor(slot: 0 | 1): ImagePipelineWorkerBridge {
@@ -65,7 +68,10 @@ export class LabRuntime {
    * caller may have just queued).
    */
   async run(host: LabRunnerHost): Promise<void> {
-    if (this.#running) return;
+    if (this.#running) {
+      this.#rerunRequested = true;
+      return;
+    }
     this.#running = true;
     const controller = new AbortController();
     this.#controller = controller;
@@ -75,8 +81,12 @@ export class LabRuntime {
       // Re-read runnable jobs each pass: settings changes requeue stale jobs
       // mid-drain, and completed jobs free slots for still-queued ones.
       while (!signal.aborted) {
+        this.#rerunRequested = false;
         const runnable = getRunnableJobs(host.session, defaultBulkConcurrency);
-        if (runnable.length === 0) break;
+        if (runnable.length === 0) {
+          if (!this.#rerunRequested) break;
+          continue;
+        }
 
         // Mark this batch started up-front so the freed-slot math in the next
         // getRunnableJobs pass accounts for them (mirrors the engine runner).
@@ -145,6 +155,7 @@ export class LabRuntime {
     this.#controller?.abort();
     this.#controller = null;
     this.#running = false;
+    this.#rerunRequested = false;
     for (const bridge of this.#bridges) bridge?.dispose();
     this.#bridges = [null, null];
   }

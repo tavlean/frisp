@@ -1,39 +1,26 @@
 <script lang="ts">
-  // VARIANT L2 — "Grid home" (bulk-grid-dashboard.webp).
-  //
-  // Dropping N images lands on a CARD GRID with the batch/global panel on the
-  // left. Clicking a card opens the SAME focus view as L1 (shared FocusView)
-  // with "← All images" / Esc returning to the grid. Scope is geographic:
-  // grid = everyone, focus = this one image.
-  //
-  // Signaling per design doc §5: coral RING = selected (only), corner DOT =
-  // has overrides, spinner ring = encoding, amber ▲ pill = output larger.
   import { fade } from 'svelte/transition';
+  import type { EditorSession } from '$lib/editor/editor-session.svelte';
+  import BatchCard from './BatchCard.svelte';
   import FocusView from './FocusView.svelte';
-  import PanelControls from './PanelControls.svelte';
+  import GlobalOptionsPanel from './GlobalOptionsPanel.svelte';
+  import InfoPanel from './InfoPanel.svelte';
   import { labBulk } from './store.svelte';
 
+  interface Props {
+    focusSession: EditorSession;
+    onReseed: () => void;
+  }
+
+  let { focusSession, onReseed }: Props = $props();
   let mode = $state<'grid' | 'focus'>('grid');
 
   const items = $derived(labBulk.stripItems);
-  const summary = $derived(labBulk.summary);
-  const output = $derived(summary.output);
-  const progress = $derived(summary.progress);
-  const busy = $derived(progress.active + progress.queued > 0);
-
-  function openCard(id: string) {
-    labBulk.select(id);
-    mode = 'focus';
-  }
-
-  function onKeydown(event: KeyboardEvent) {
-    if (event.key === 'Escape' && mode === 'focus') {
-      event.preventDefault();
-      mode = 'grid';
-    }
-  }
+  const file = $derived(labBulk.selectedFile);
+  const thumb = $derived(labBulk.selectedThumb);
 
   const SIZE_UNITS = ['B', 'kB', 'MB', 'GB', 'TB'];
+
   function prettySize(bytes: number): string {
     if (bytes < 1) return '0 B';
     const exponent = Math.min(
@@ -51,65 +38,27 @@
     return { text: '0%', up: false };
   }
 
-  const batchDelta = $derived.by(() =>
-    output.optimized > 0 ? deltaFor(output.percentChange) : null,
-  );
+  function openCard(id: string): void {
+    labBulk.select(id);
+    mode = 'focus';
+    onReseed();
+  }
+
+  function onKeydown(event: KeyboardEvent): void {
+    if (event.key === 'Escape' && mode === 'focus') {
+      event.preventDefault();
+      mode = 'grid';
+    }
+  }
 </script>
 
 <svelte:window onkeydown={onKeydown} />
 
 {#if mode === 'grid'}
-  <div class="grid-home">
-    <aside class="batch-panel" aria-label="Batch settings">
-      <header class="head">
-        <h2>All images</h2>
-        <p class="count">{summary.totalJobs} images</p>
-      </header>
-
-      <PanelControls scope="global" />
-
-      <div class="totals">
-        <span class="sizes">
-          {prettySize(output.totalOriginalSize)}
-          <span class="arrow" aria-hidden="true">→</span>
-          {#if output.optimized > 0}
-            {prettySize(output.totalOutputSize)}
-          {:else}
-            …
-          {/if}
-        </span>
-        {#if batchDelta}
-          <span
-            class="pill"
-            class:up={batchDelta.up}
-            class:down={!batchDelta.up}
-          >
-            {batchDelta.text}
-          </span>
-        {/if}
-      </div>
-
-      {#if busy}
-        <p class="progress">
-          <span class="mini-spinner" aria-hidden="true"></span>
-          Encoding {progress.completed} of {progress.total}…
-        </p>
-      {:else if progress.failed > 0}
-        <p class="failed">{progress.failed} failed</p>
-      {/if}
-
-      <button
-        type="button"
-        class="save-all"
-        onclick={() => labBulk.saveAllStub()}
-      >
-        Save all · ZIP
-      </button>
-    </aside>
-
+  <div class="grid-home sqush-editor">
     <main class="cards" aria-label="Images">
       {#each items as item (item.id)}
-        {@const thumb = labBulk.thumbs.get(item.id)}
+        {@const itemThumb = labBulk.thumbs.get(item.id)}
         {@const delta = deltaFor(item.percentChange)}
         <button
           type="button"
@@ -120,8 +69,8 @@
           onclick={() => openCard(item.id)}
         >
           <span class="thumb-wrap">
-            {#if thumb}
-              <img src={thumb.url} alt="" draggable="false" />
+            {#if itemThumb}
+              <img src={itemThumb.url} alt="" draggable="false" />
             {:else}
               <span class="shimmer" aria-hidden="true"></span>
             {/if}
@@ -163,167 +112,42 @@
         </button>
       {/each}
     </main>
+
+    <aside class="options options-1">
+      <div class="left-stack">
+        <BatchCard compact />
+        <InfoPanel {file} width={thumb?.w ?? 0} height={thumb?.h ?? 0} />
+      </div>
+    </aside>
+
+    <aside class="options options-2">
+      <GlobalOptionsPanel {focusSession} {thumb} />
+    </aside>
   </div>
 {:else}
-  <FocusView onBack={() => (mode = 'grid')}>
-    {#snippet left()}
-      <section class="focus-batch-card" aria-label="Batch">
-        <div class="totals">
-          <span class="sizes">
-            {summary.totalJobs} images ·
-            {prettySize(output.totalOriginalSize)}
-            <span class="arrow" aria-hidden="true">→</span>
-            {#if output.optimized > 0}
-              {prettySize(output.totalOutputSize)}
-            {:else}
-              …
-            {/if}
-          </span>
-          {#if batchDelta}
-            <span
-              class="pill"
-              class:up={batchDelta.up}
-              class:down={!batchDelta.up}
-            >
-              {batchDelta.text}
-            </span>
-          {/if}
-        </div>
-        <button
-          type="button"
-          class="save-all"
-          onclick={() => labBulk.saveAllStub()}
-        >
-          Save all · ZIP
-        </button>
-      </section>
-    {/snippet}
-  </FocusView>
+  <FocusView {focusSession} onBack={() => (mode = 'grid')} {onReseed} />
 {/if}
 
 <style>
   .grid-home {
-    display: grid;
-    grid-template-columns: minmax(260px, 320px) minmax(0, 1fr);
-    gap: 16px;
-    height: 100%;
-    min-height: 0;
-  }
-
-  .batch-panel {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    padding: 16px;
-    border: 1px solid var(--border, rgba(255, 255, 255, 0.08));
-    border-radius: var(--options-radius, 16px);
-    background: var(--surface, rgba(19, 19, 25, 0.82));
-    backdrop-filter: blur(12px) saturate(1.2);
-    -webkit-backdrop-filter: blur(12px) saturate(1.2);
-    min-height: 0;
-    overflow-y: auto;
-    align-self: start;
-    max-height: 100%;
-  }
-
-  .head h2 {
-    margin: 0;
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: var(--text-1, #f5f5f7);
-  }
-
-  .count {
-    margin: 2px 0 0;
-    color: var(--text-3, rgba(235, 235, 245, 0.38));
-    font-size: 0.9rem;
-  }
-
-  .totals {
-    display: flex;
-    align-items: baseline;
-    gap: 10px;
-    flex-wrap: wrap;
-  }
-
-  .sizes {
-    color: var(--text-1, #f5f5f7);
-    font-weight: 700;
-    font-variant-numeric: tabular-nums;
-  }
-
-  .arrow {
-    color: var(--text-3, rgba(235, 235, 245, 0.38));
-    font-weight: 400;
-    margin: 0 2px;
-  }
-
-  .pill {
-    padding: 1px 9px;
-    border-radius: 999px;
-    font-weight: 700;
-    font-size: 0.85rem;
-    white-space: nowrap;
-  }
-
-  .pill.down {
-    background: rgba(61, 220, 151, 0.14);
-    color: var(--good, #3ddc97);
-  }
-
-  .pill.up {
-    background: rgba(255, 176, 32, 0.14);
-    color: var(--warn, #ffb020);
-  }
-
-  .progress {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin: 0;
-    color: var(--text-2, rgba(235, 235, 245, 0.62));
-    font-size: 0.9rem;
-    font-variant-numeric: tabular-nums;
-  }
-
-  .mini-spinner {
-    width: 13px;
-    height: 13px;
-    border: 2px solid rgba(255, 255, 255, 0.22);
-    border-top-color: var(--accent-1, #ff8a5e);
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-    flex: none;
-  }
-
-  .failed {
-    margin: 0;
-    color: var(--bad, #ff7d92);
-    font-size: 0.9rem;
-    font-weight: 600;
-  }
-
-  .save-all {
-    padding: 11px 16px;
-    border: none;
-    border-radius: 999px;
-    background: linear-gradient(
-      135deg,
-      var(--accent-1, #ff8a5e),
-      var(--accent-1-hot, #ff6a3c)
-    );
-    color: #16161c;
-    font: inherit;
-    font-weight: 700;
-    cursor: pointer;
-    transition: filter 150ms ease;
-  }
-
-  .save-all:hover {
-    filter: brightness(1.08);
+    --mobile-options-height: min(44dvh, 360px);
+    --panel-width: 312px;
+    --panel-inset: 14px;
+    --fit-inset-left: calc(var(--panel-width) + var(--panel-inset) * 2);
+    --fit-inset-right: calc(var(--panel-width) + var(--panel-inset) * 2);
+    position: relative;
+    width: 100vw;
+    height: 100dvh;
+    overflow: hidden;
+    background: var(--bg-0, #0c0c0f);
   }
 
   .cards {
+    position: absolute;
+    top: 72px;
+    left: var(--fit-inset-left);
+    right: var(--fit-inset-right);
+    bottom: var(--panel-inset);
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
     gap: 14px;
@@ -331,6 +155,40 @@
     min-height: 0;
     overflow-y: auto;
     padding: 2px 2px 12px;
+  }
+
+  .options {
+    position: absolute;
+    bottom: var(--panel-inset);
+    width: var(--panel-width);
+    max-height: calc(100% - 76px);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    color: var(--text-1, #fff);
+    font-size: 1.2rem;
+    z-index: 5;
+    background: var(--surface, rgba(19, 19, 25, 0.82));
+    backdrop-filter: blur(20px) saturate(1.3);
+    -webkit-backdrop-filter: blur(20px) saturate(1.3);
+    border: 1px solid var(--border, rgba(255, 255, 255, 0.08));
+    border-radius: var(--options-radius, 16px);
+    box-shadow: var(--panel-shadow, 0 24px 48px -16px rgba(0, 0, 0, 0.55));
+    overflow: hidden;
+  }
+  .options-1 {
+    left: var(--panel-inset);
+  }
+  .options-2 {
+    right: var(--panel-inset);
+  }
+
+  .left-stack {
+    display: grid;
+    gap: 12px;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 12px;
   }
 
   .card {
@@ -459,26 +317,60 @@
     text-overflow: ellipsis;
   }
 
-  .focus-batch-card {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    padding: 14px 16px;
-    border: 1px solid var(--border, rgba(255, 255, 255, 0.08));
-    border-radius: var(--options-radius, 16px);
-    background: var(--surface, rgba(19, 19, 25, 0.82));
-    backdrop-filter: blur(12px) saturate(1.2);
-    -webkit-backdrop-filter: blur(12px) saturate(1.2);
+  .arrow {
+    color: var(--text-3, rgba(235, 235, 245, 0.38));
+    font-weight: 400;
+    margin: 0 2px;
   }
 
-  @media (max-width: 900px) {
+  .pill {
+    padding: 1px 9px;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    white-space: nowrap;
+  }
+
+  .pill.down {
+    background: rgba(61, 220, 151, 0.14);
+    color: var(--good, #3ddc97);
+  }
+
+  .pill.up {
+    background: rgba(255, 176, 32, 0.14);
+    color: var(--warn, #ffb020);
+  }
+
+  @media (max-width: 760px) {
     .grid-home {
-      grid-template-columns: 1fr;
-      grid-template-rows: auto minmax(0, 1fr);
+      --panel-inset: 6px;
+      --fit-inset-left: 0px;
+      --fit-inset-right: 0px;
     }
 
-    .batch-panel {
-      max-height: none;
+    .cards {
+      top: 64px;
+      left: var(--panel-inset);
+      right: var(--panel-inset);
+      bottom: calc(var(--mobile-options-height) + var(--panel-inset) * 2);
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    }
+
+    .options {
+      width: calc(50vw - var(--panel-inset) * 1.5);
+      height: var(--mobile-options-height);
+      max-height: var(--mobile-options-height);
+      font-size: 0.95rem;
+    }
+  }
+
+  @media (max-width: 420px) {
+    .grid-home {
+      --mobile-options-height: 48dvh;
+    }
+
+    .cards {
+      grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
     }
   }
 
