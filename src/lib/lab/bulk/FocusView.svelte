@@ -203,23 +203,28 @@
       </aside>
     {/if}
 
-    <aside class="options options-2" class:l3={layout === 'l3'}>
-      {#if layout === 'l3' && leftMode === 'global'}
-        <div class="right-panel-fill">
-          <div class="left-scroll">
-            <button
-              type="button"
-              class="stack-link"
-              onclick={() => (leftMode = 'batch')}
-            >
-              ← Batch
-            </button>
-            <GlobalOptionsPanel {focusSession} />
-          </div>
-        </div>
-      {:else}
-        <div class="right-panel-fill">
-          <div class="options-slot">
+    {#if layout === 'l3'}
+      <!-- L3: two INDEPENDENT floating frosted panels, same width,
+           right-aligned. The pair is a bottom-up stack anchored above the
+           strip — the batch/info card sits just above the strip and the
+           OptionsPanel directly above it, so no viewport height ever opens a
+           gap between them. When the two together exceed the stage height the
+           OptionsPanel shrinks with internal scroll; the batch card keeps its
+           natural height. -->
+      <div class="l3-stack">
+        <aside class="options l3-options">
+          {#if leftMode === 'global'}
+            <div class="left-scroll">
+              <button
+                type="button"
+                class="stack-link"
+                onclick={() => (leftMode = 'batch')}
+              >
+                ← Batch
+              </button>
+              <GlobalOptionsPanel {focusSession} />
+            </div>
+          {:else}
             <OptionsPanel
               side="right"
               format={focusSession.sides[1].format}
@@ -241,22 +246,47 @@
               onSave={() => focusSession.saveSide(1)}
               onImport={() => focusSession.importSide(1)}
             />
-          </div>
-          {#if layout === 'l3'}
-            <div class="batch-slot">
-              <BatchInfoPanel
-                {file}
-                width={thumb?.w ?? 0}
-                height={thumb?.h ?? 0}
-                showGlobal
-                onGlobal={() => (leftMode = 'global')}
-                onReset={resetOverrides}
-              />
-            </div>
           {/if}
+        </aside>
+
+        <aside class="options l3-batch">
+          <BatchInfoPanel
+            {file}
+            width={thumb?.w ?? 0}
+            height={thumb?.h ?? 0}
+            showGlobal
+            onGlobal={() => (leftMode = 'global')}
+            onReset={resetOverrides}
+          />
+        </aside>
+      </div>
+    {:else}
+      <aside class="options options-2">
+        <div class="options-slot">
+          <OptionsPanel
+            side="right"
+            format={focusSession.sides[1].format}
+            {formats}
+            options={focusSession.sides[1].optionsByFormat[
+              focusSession.sides[1].format
+            ] ?? {}}
+            processorState={focusSession.sides[1].processorState}
+            naturalWidth={focusSession.naturalWidth}
+            naturalHeight={focusSession.naturalHeight}
+            sourceName={focusSession.file?.name}
+            isVector={focusSession.isVectorSource}
+            result={focusSession.runtime[1].result}
+            working={focusSession.runtime[1].showSpinner}
+            canImport={focusSession.canImport[1]}
+            downloadName={focusSession.downloadName(1)}
+            onFormatChange={setRightFormat}
+            onCopy={() => focusSession.copyToOther(1)}
+            onSave={() => focusSession.saveSide(1)}
+            onImport={() => focusSession.importSide(1)}
+          />
         </div>
-      {/if}
-    </aside>
+      </aside>
+    {/if}
   </div>
 
   <div class="strip-region">
@@ -297,24 +327,22 @@
     min-height: 0;
   }
 
-  /* Real layout space for the strip — no longer an overlay footer. */
+  /* Real layout space for the strip — no longer an overlay footer. The strip
+     spans the FULL viewport width (small breathing padding only) and its
+     content starts from the LEFT; the panels live in the stage region above,
+     so nothing overlaps. No panel-width side voids are reserved here. */
   .strip-region {
     flex: none;
     height: var(--strip-height);
     width: 100%;
     box-sizing: border-box;
-    padding: 0 12px;
-    padding-left: var(--fit-inset-left);
-    padding-right: var(--fit-inset-right);
+    padding: 0 10px;
     border-top: 1px solid var(--border, rgba(255, 255, 255, 0.06));
     background: color-mix(in srgb, var(--bg-0, #0c0c0f) 82%, transparent);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     display: flex;
     align-items: center;
-  }
-  .compress.flush-left .strip-region {
-    padding-left: var(--fit-inset-left);
   }
 
   .status-pill {
@@ -459,38 +487,56 @@
     right: var(--panel-inset);
   }
 
-  /* L3: the right column is a full-height flex stack — options on top, the
-     batch/info surface directly beneath it. It starts below the top-right
-     control cluster so the panel's own "EDIT" header is never occluded. */
-  .options-2.l3 {
-    top: 68px;
-    max-height: calc(100% - 68px - var(--panel-inset));
-    justify-content: flex-start;
-  }
-
-  .right-panel-fill {
+  /* The OptionsPanel exposes two sibling roots (scroller + results footer);
+     wrap them in a flex column so the scroller grows/scrolls and the footer
+     pins to the bottom of the card. */
+  .options-slot {
     display: flex;
     flex-direction: column;
     flex: 1 1 auto;
     min-height: 0;
-    max-height: 100%;
     width: 100%;
   }
 
-  /* In L3 the OptionsPanel takes the available height and scrolls internally;
-     the batch surface below keeps its natural height. */
-  .options-2.l3 .options-slot {
-    flex: 1 1 auto;
-    min-height: 0;
+  /* L3: two INDEPENDENT floating cards, right-aligned, stacked bottom-up with a
+     fixed gap. The stack is anchored to the strip (bottom) and clears the
+     top-right control cluster (top), so no viewport height ever opens a gap
+     between the two cards. */
+  .l3-stack {
+    position: absolute;
+    top: 68px;
+    bottom: var(--panel-inset);
+    right: var(--panel-inset);
+    width: var(--panel-width);
     display: flex;
     flex-direction: column;
-    overflow: hidden;
+    justify-content: flex-end;
+    gap: 12px;
+    z-index: 5;
   }
-  .options-2.l3 .batch-slot {
+
+  /* Each L3 card is its own frosted surface — override the absolute-positioning
+     the base `.options` uses for the L1/L2 panels, since here the cards are
+     flex children of `.l3-stack`. */
+  .l3-options,
+  .l3-batch {
+    position: static;
+    bottom: auto;
+    width: 100%;
+    max-height: none;
+  }
+
+  /* OptionsPanel card: takes the remaining height and scrolls internally. */
+  .l3-options {
+    flex: 0 1 auto;
+    min-height: 0;
+    justify-content: stretch;
+  }
+
+  /* Batch/info card: keeps its natural height, never squeezed. */
+  .l3-batch {
     flex: none;
-    max-height: 45%;
-    overflow-y: auto;
-    border-top: 1px solid var(--border, rgba(255, 255, 255, 0.08));
+    justify-content: stretch;
   }
 
   .left-scroll {
@@ -562,14 +608,24 @@
       max-height: var(--mobile-options-height);
       font-size: 0.95rem;
     }
-    .options-2.l3 {
-      top: auto;
-    }
     .options-1 {
       left: var(--panel-inset);
     }
     .options-2 {
       right: var(--panel-inset);
+    }
+
+    /* L3 on mobile: the two cards share the bottom-right corner, capped so the
+       pair fits above the (hidden) strip without covering the whole viewport. */
+    .l3-stack {
+      top: auto;
+      max-height: var(--mobile-options-height);
+      width: calc(60vw - var(--panel-inset) * 1.5);
+      gap: 8px;
+    }
+    .l3-stack .options {
+      width: 100%;
+      max-height: none;
     }
 
     .strip-region {

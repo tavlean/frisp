@@ -4,6 +4,11 @@
   // not stacked cards. Section headers borrow the production OptionsPanel
   // language: a small accent dash + quiet uppercase label. Meant to sit inside
   // an `aside.options`-style surface supplied by the parent layout.
+  //
+  // Round 2: IMAGE section on top, BATCH below it, and the card ENDS with a
+  // footer styled after the production Results footer (Results.svelte) — batch
+  // totals at the bottom-left, the coral "Save all · ZIP" button at the
+  // bottom-right — so this panel and the production OptionsPanel visually rhyme.
   import { labBulk } from './store.svelte';
   import { inferAspect } from './aspect';
 
@@ -49,6 +54,24 @@
     return `${(bytes / 1000 ** exponent).toPrecision(3)} ${SIZE_UNITS[exponent]}`;
   }
 
+  // The footer's leading figure: value + unit split so the unit can echo the
+  // production footer's smaller accented unit glyph.
+  function prettyParts(bytes: number): { value: string; unit: string } {
+    if (bytes < 1) return { value: '0', unit: 'B' };
+    const exponent = Math.min(
+      Math.floor(Math.log10(bytes) / 3),
+      SIZE_UNITS.length - 1,
+    );
+    return {
+      value: (bytes / 1000 ** exponent).toPrecision(3),
+      unit: SIZE_UNITS[exponent],
+    };
+  }
+
+  const outputParts = $derived(
+    output.optimized > 0 ? prettyParts(output.totalOutputSize) : null,
+  );
+
   const delta = $derived.by(() => {
     if (output.optimized === 0) return null;
     const rounded = Math.round(output.percentChange);
@@ -88,100 +111,117 @@
 </script>
 
 <div class="batch-info">
-  <section class="section" aria-label="Batch">
-    <h3 class="section-title">Batch</h3>
-    <div class="section-body">
-      <div class="totals">
-        <strong>
-          {summary.totalJobs}
-          {summary.totalJobs === 1 ? 'image' : 'images'}
-        </strong>
-        <span class="sizes">
-          {prettySize(output.totalOriginalSize)}
-          <span class="arrow" aria-hidden="true">→</span>
-          {#if output.optimized > 0}
-            {prettySize(output.totalOutputSize)}
-          {:else}
-            …
+  <div class="batch-info-scroll">
+    <section class="section" aria-label="Image information">
+      <h3 class="section-title">Image</h3>
+      <div class="section-body">
+        {#if file}
+          <p class="filename" title={file.name}>{file.name}</p>
+          <dl class="rows">
+            <div class="row">
+              <dt>Format</dt>
+              <dd>{formatLabel(file)}</dd>
+            </div>
+            <div class="row">
+              <dt>Dimensions</dt>
+              <dd>{hasDims ? `${width} × ${height}` : '—'}</dd>
+            </div>
+            <div class="row">
+              <dt>Original size</dt>
+              <dd>{prettySize(file.size)}</dd>
+            </div>
+            <div class="row">
+              <dt>Aspect</dt>
+              <dd>
+                {#if aspect}
+                  <span class="chip" class:approx={aspect.approx}
+                    >{aspect.label}</span
+                  >
+                {:else}
+                  —
+                {/if}
+              </dd>
+            </div>
+          </dl>
+
+          {#if hasOverrides}
+            <div class="override-row">
+              <span class="dot" aria-hidden="true">●</span>
+              <strong>Custom settings</strong>
+              <button type="button" onclick={() => onReset?.()}
+                >Reset to global</button
+              >
+            </div>
           {/if}
-        </span>
-        {#if delta}
-          <span class="pill" class:up={delta.up} class:down={!delta.up}>
-            {delta.text}
-          </span>
+        {:else}
+          <p class="empty">No image selected.</p>
         {/if}
       </div>
+    </section>
 
-      {#if busy}
-        <div class="progress" aria-label="Batch progress">
-          <span class="spinner" aria-hidden="true"></span>
-          <span>Encoding {progress.completed} of {progress.total}…</span>
-        </div>
-      {:else if progress.failed > 0}
-        <p class="failed">{progress.failed} failed</p>
-      {/if}
+    <section class="section" aria-label="Batch">
+      <h3 class="section-title">Batch</h3>
+      <div class="section-body">
+        <p class="count">
+          <strong>{summary.totalJobs}</strong>
+          {summary.totalJobs === 1 ? 'image' : 'images'}
+        </p>
 
-      <div class="actions">
-        <button
-          type="button"
-          class="save-all"
-          onclick={() => labBulk.saveAllStub()}
-        >
-          Save all · ZIP
-        </button>
+        {#if busy}
+          <div class="progress" aria-label="Batch progress">
+            <span class="spinner" aria-hidden="true"></span>
+            <span>Encoding {progress.completed} of {progress.total}…</span>
+          </div>
+        {:else if progress.failed > 0}
+          <p class="failed">{progress.failed} failed</p>
+        {/if}
+
         {#if showGlobal}
           <button type="button" class="global-link" onclick={onGlobal}>
             Global settings
           </button>
         {/if}
       </div>
-    </div>
-  </section>
+    </section>
+  </div>
 
-  <section class="section" aria-label="Image information">
-    <h3 class="section-title">Image</h3>
-    <div class="section-body">
-      {#if file}
-        <p class="filename" title={file.name}>{file.name}</p>
-        <dl class="rows">
-          <div class="row">
-            <dt>Format</dt>
-            <dd>{formatLabel(file)}</dd>
-          </div>
-          <div class="row">
-            <dt>Dimensions</dt>
-            <dd>{hasDims ? `${width} × ${height}` : '—'}</dd>
-          </div>
-          <div class="row">
-            <dt>Original size</dt>
-            <dd>{prettySize(file.size)}</dd>
-          </div>
-          <div class="row">
-            <dt>Aspect</dt>
-            <dd>
-              {#if aspect}
-                <span class="chip" class:approx={aspect.approx}
-                  >{aspect.label}</span
-                >
-              {:else}
-                —
-              {/if}
-            </dd>
-          </div>
-        </dl>
-      {:else}
-        <p class="empty">No image selected.</p>
-      {/if}
+  <!-- Panel footer, styled after the production Results footer: batch totals
+       at the left, the coral "Save all · ZIP" action at the right. -->
+  <div class="panel-footer">
+    <div class="stats">
+      <div class="size-row">
+        <span class="total-size">
+          {#if outputParts}
+            {outputParts.value}<span class="unit">{outputParts.unit}</span>
+          {:else}
+            <span class="pending">…</span>
+          {/if}
+        </span>
+        {#if delta}
+          <span class="delta" class:up={delta.up} class:down={!delta.up}>
+            {delta.text}
+          </span>
+        {/if}
+      </div>
+      <span class="from-to">
+        {prettySize(output.totalOriginalSize)}
+        <span class="arrow" aria-hidden="true">→</span>
+        {#if output.optimized > 0}
+          {prettySize(output.totalOutputSize)}
+        {:else}
+          …
+        {/if}
+      </span>
     </div>
-  </section>
 
-  {#if hasOverrides}
-    <div class="override-row">
-      <span class="dot" aria-hidden="true">●</span>
-      <strong>Custom settings</strong>
-      <button type="button" onclick={() => onReset?.()}>Reset to global</button>
-    </div>
-  {/if}
+    <button
+      type="button"
+      class="save-all"
+      onclick={() => labBulk.saveAllStub()}
+    >
+      Save all · ZIP
+    </button>
+  </div>
 </div>
 
 <style>
@@ -189,13 +229,19 @@
     display: flex;
     flex-direction: column;
     min-height: 0;
-    overflow-y: auto;
     color: var(--text-1, #f5f5f7);
   }
 
+  /* The IMAGE + BATCH sections scroll together; the footer stays pinned. */
+  .batch-info-scroll {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow-y: auto;
+  }
+
   /* Section header: quiet uppercase label with an accent dash, mirroring the
-     production OptionsPanel `.options-title`. Sticky so it reads as a divider
-     when the surface scrolls. */
+     production OptionsPanel `.options-title`. */
   .section-title {
     display: flex;
     align-items: center;
@@ -230,115 +276,6 @@
     display: grid;
     gap: 12px;
     padding: 2px 16px 14px;
-  }
-
-  .totals {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    gap: 7px;
-    font-variant-numeric: tabular-nums;
-  }
-
-  .totals strong {
-    font-weight: 800;
-  }
-
-  .sizes {
-    color: var(--text-2, rgba(235, 235, 245, 0.62));
-    font-weight: 650;
-  }
-
-  .arrow {
-    color: var(--text-3, rgba(235, 235, 245, 0.38));
-    margin: 0 2px;
-  }
-
-  .pill {
-    padding: 1px 8px;
-    border-radius: 999px;
-    font-weight: 800;
-    font-size: 0.85rem;
-    white-space: nowrap;
-  }
-
-  .pill.down {
-    background: rgba(61, 220, 151, 0.14);
-    color: var(--good, #3ddc97);
-  }
-
-  .pill.up {
-    background: rgba(255, 176, 32, 0.14);
-    color: var(--warn, #ffb020);
-  }
-
-  .progress {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    color: var(--text-2, rgba(235, 235, 245, 0.62));
-    font-size: 0.9rem;
-    font-variant-numeric: tabular-nums;
-  }
-
-  .spinner {
-    flex: none;
-    width: 13px;
-    height: 13px;
-    border: 2px solid rgba(255, 255, 255, 0.22);
-    border-top-color: var(--accent-1, #ff8a5e);
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-  }
-
-  .failed {
-    margin: 0;
-    color: var(--bad, #ff7d92);
-    font-size: 0.9rem;
-    font-weight: 700;
-  }
-
-  .actions {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
-  }
-
-  .save-all,
-  .global-link {
-    border: none;
-    font: inherit;
-    font-weight: 800;
-    cursor: pointer;
-  }
-
-  .save-all {
-    padding: 9px 14px;
-    border-radius: 999px;
-    background: linear-gradient(
-      135deg,
-      var(--main-theme-color, #ff8a5e),
-      var(--hot-theme-color, #ff5e8a)
-    );
-    color: #16161c;
-    box-shadow: 0 6px 18px -8px rgba(255, 122, 80, 0.7);
-    transition:
-      transform 150ms ease,
-      box-shadow 150ms ease;
-  }
-  .save-all:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 10px 22px -8px rgba(255, 122, 80, 0.75);
-  }
-
-  .global-link {
-    padding: 7px 3px;
-    background: transparent;
-    color: var(--text-2, rgba(235, 235, 245, 0.62));
-  }
-  .global-link:hover {
-    color: var(--text-1, #f5f5f7);
   }
 
   .filename {
@@ -399,12 +336,12 @@
     font-size: 0.95rem;
   }
 
+  /* Custom-settings affordance — closes out the IMAGE section. */
   .override-row {
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 10px 16px;
-    border-top: 1px solid var(--border, rgba(255, 255, 255, 0.08));
+    padding-top: 2px;
     color: var(--text-2, rgba(235, 235, 245, 0.62));
     font-size: 0.92rem;
   }
@@ -426,6 +363,176 @@
   }
   .override-row button:hover {
     color: var(--text-1, #f5f5f7);
+  }
+
+  .count {
+    margin: 0;
+    color: var(--text-2, rgba(235, 235, 245, 0.62));
+    font-size: 0.95rem;
+  }
+  .count strong {
+    color: var(--text-1, #f5f5f7);
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .progress {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-2, rgba(235, 235, 245, 0.62));
+    font-size: 0.9rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .spinner {
+    flex: none;
+    width: 13px;
+    height: 13px;
+    border: 2px solid rgba(255, 255, 255, 0.22);
+    border-top-color: var(--accent-1, #ff8a5e);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  .failed {
+    margin: 0;
+    color: var(--bad, #ff7d92);
+    font-size: 0.9rem;
+    font-weight: 700;
+  }
+
+  .global-link {
+    justify-self: start;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: var(--text-2, rgba(235, 235, 245, 0.62));
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .global-link:hover {
+    color: var(--text-1, #f5f5f7);
+  }
+
+  /* Footer: mirrors Results.svelte — size stats at the left, action at the
+     right, same paddings/radius rhythm as the production OptionsPanel footer
+     (border-top + faint inset background). */
+  .panel-footer {
+    flex: none;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px 12px;
+    border-top: 1px solid var(--border, rgba(255, 255, 255, 0.08));
+    background: rgba(0, 0, 0, 0.18);
+  }
+
+  .stats {
+    display: grid;
+    gap: 1px;
+    min-width: 0;
+  }
+
+  .size-row {
+    display: flex;
+    align-items: baseline;
+    gap: 7px;
+    min-width: 0;
+  }
+
+  .total-size {
+    font-size: 1.7rem;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-1, #f5f5f7);
+    white-space: nowrap;
+  }
+
+  .unit {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-left: 2px;
+    color: var(--main-theme-color, #ff8a5e);
+  }
+
+  .pending {
+    color: var(--text-3, rgba(235, 235, 245, 0.38));
+  }
+
+  .delta {
+    align-self: center;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 1.05rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  .delta.down {
+    color: var(--good, #3ddc97);
+    background: color-mix(in srgb, var(--good, #3ddc97) 14%, transparent);
+  }
+  .delta.up {
+    color: var(--warn, #ffb020);
+    background: color-mix(in srgb, var(--warn, #ffb020) 14%, transparent);
+  }
+
+  .from-to {
+    font-size: 0.95rem;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    color: var(--text-3, rgba(235, 235, 245, 0.38));
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .arrow {
+    margin: 0 2px;
+  }
+
+  .save-all {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 34px;
+    padding: 0 16px;
+    border: none;
+    border-radius: 999px;
+    font: inherit;
+    font-weight: 700;
+    font-size: 1.05rem;
+    white-space: nowrap;
+    cursor: pointer;
+    background: linear-gradient(
+      135deg,
+      var(--main-theme-color, #ff8a5e),
+      var(--hot-theme-color, #ff5e8a)
+    );
+    color: #16161c;
+    box-shadow:
+      0 4px 14px var(--main-theme-glow, rgba(255, 122, 80, 0.35)),
+      inset 0 1px 0 rgba(255, 255, 255, 0.25);
+    transition:
+      transform 150ms ease,
+      box-shadow 200ms ease,
+      filter 200ms ease;
+  }
+  .save-all:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.06);
+  }
+  .save-all:active {
+    transform: translateY(0);
+  }
+  .save-all:focus-visible {
+    outline: 2px solid var(--main-theme-color, #ff8a5e);
+    outline-offset: 2px;
   }
 
   @keyframes spin {
