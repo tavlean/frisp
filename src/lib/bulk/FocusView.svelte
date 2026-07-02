@@ -525,9 +525,10 @@
         <button
           type="button"
           class="summary-save"
-          onclick={() => bulkStore.saveAllStub()}
+          disabled={!bulkStore.canSaveAll}
+          onclick={() => void bulkStore.saveAll()}
         >
-          Save all
+          {bulkStore.exporting ? 'Saving…' : 'Save all'}
         </button>
       </div>
 
@@ -1500,8 +1501,14 @@
       );
       box-shadow: 0 2px 10px var(--accent-1-glow, rgba(255, 122, 80, 0.32));
     }
-    .summary-save:active {
+    .summary-save:active:not(:disabled) {
       transform: translateY(1px);
+    }
+    .summary-save:disabled {
+      opacity: 0.45;
+      cursor: default;
+      box-shadow: none;
+      filter: saturate(0.6);
     }
 
     /* ── Settings FAB ─────────────────────────────────────────────────────── */

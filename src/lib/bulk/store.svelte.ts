@@ -21,7 +21,9 @@ import {
 import type { SideState } from '$lib/editor/editor-session.svelte';
 import {
   addBulkImportToSession,
+  canExportBulkSession,
   clearJobOverrides,
+  createBulkExportPlan,
   createBulkSessionFromImport,
   createImageJobs,
   getBulkOutputFileName,
@@ -32,6 +34,7 @@ import {
   getJobSourceDimensions,
   getSelectedJob,
   getSettingsOverridePaths,
+  markBulkExportPlanExported,
   normalizeBulkSessionCounters,
   removeJobs,
   revokeJobObjectUrls,
@@ -70,6 +73,7 @@ import type { EncodeOptions as WebpEncodeOptions } from 'features/encoders/webP/
 import { snackbar } from '$lib/editor/snackbar-store.svelte';
 import { BulkOutputCache } from './output-cache';
 import { BulkRuntime } from './runtime';
+import { buildZipBlob, triggerBlobDownload } from './zip';
 
 /** Thumbnail + natural (source) dimensions for one job. */
 export interface BulkThumb {
@@ -287,6 +291,8 @@ export class BulkStore {
   #selectionOrder: string[] = [];
   // Which settings scope the right panel edits.
   panelScope = $state<BulkPanelScope>('global');
+  keepOriginalWhenLarger = $state(true);
+  exporting = $state(false);
   // Production OptionsPanel-compatible pseudo-side for GLOBAL bulk settings.
   globalSide = $state<SideState>(sideFromSettings(this.session.globalSettings));
 
@@ -359,6 +365,9 @@ export class BulkStore {
   /** True while any job is decoding/processing (or the runtime loop is live). */
   readonly processing = $derived(
     this.summary.progress.active > 0 || this.summary.actions.hasActiveJobs,
+  );
+  readonly canSaveAll = $derived(
+    canExportBulkSession(this.session) && !this.processing && !this.exporting,
   );
 
   // ── Actions ───────────────────────────────────────────────────────────────
@@ -1148,9 +1157,24 @@ export class BulkStore {
     this.refreshGlobalSideFromSession();
   }
 
-  /** Phase-2 placeholder for ZIP export (the scaffold has no archiver yet). */
-  saveAllStub(): void {
-    void snackbar.show('ZIP export lands in Phase 2');
+  async saveAll(): Promise<void> {
+    if (this.exporting) return;
+    const plan = createBulkExportPlan(this.session, undefined, {
+      keepOriginalWhenLarger: this.keepOriginalWhenLarger,
+    });
+    if (plan.entries.length === 0) return;
+    this.exporting = true;
+    try {
+      const blob = await buildZipBlob(plan);
+      triggerBlobDownload(blob, `${plan.archiveName}.zip`);
+      this.session = markBulkExportPlanExported(this.session, plan);
+      void snackbar.show(`Saved ${plan.entries.length} images as ZIP.`);
+    } catch (err) {
+      void snackbar.show('ZIP export failed.');
+      throw err;
+    } finally {
+      this.exporting = false;
+    }
   }
 
   // ── Output URL ownership ──────────────────────────────────────────────────

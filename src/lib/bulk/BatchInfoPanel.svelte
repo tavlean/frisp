@@ -308,7 +308,8 @@
     <button
       type="button"
       class="save-all"
-      onclick={() => bulkStore.saveAllStub()}
+      disabled={!bulkStore.canSaveAll}
+      onclick={() => void bulkStore.saveAll()}
     >
       <!-- The same download glyph the production per-image Save button uses
            (Results.svelte), sized to the button text. -->
@@ -322,8 +323,12 @@
           stroke-linejoin="round"
         />
       </svg>
-      Save all · ZIP
+      {bulkStore.exporting ? 'Saving…' : 'Save all · ZIP'}
     </button>
+    <label class="keep-originals">
+      <input type="checkbox" bind:checked={bulkStore.keepOriginalWhenLarger} />
+      <span>Keep originals when larger</span>
+    </label>
   </div>
 </div>
 
@@ -647,12 +652,18 @@
       box-shadow 200ms ease,
       filter 200ms ease;
   }
-  .save-all:hover {
+  .save-all:hover:not(:disabled) {
     transform: translateY(-1px);
     filter: brightness(1.06);
   }
-  .save-all:active {
+  .save-all:active:not(:disabled) {
     transform: translateY(0);
+  }
+  .save-all:disabled {
+    opacity: 0.45;
+    cursor: default;
+    filter: saturate(0.6);
+    box-shadow: none;
   }
   .save-all:focus-visible {
     outline: 2px solid var(--main-theme-color, #ff8a5e);
@@ -663,6 +674,24 @@
     flex: none;
     width: 1.15em;
     height: 1.15em;
+  }
+
+  .keep-originals {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 10px;
+    color: var(--text-3, rgba(235, 235, 245, 0.38));
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .keep-originals input {
+    width: 13px;
+    height: 13px;
+    margin: 0;
+    accent-color: var(--main-theme-color, #ff8a5e);
   }
 
   @keyframes spin {
