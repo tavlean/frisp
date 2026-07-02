@@ -157,6 +157,21 @@ NEW experiment variants (both with per-thumb hover DOWNLOAD buttons and
 the strip picks its shape from the count (big cells <=6, medium row 7-18,
 dense wrapping dock >18). Toggle is L1-L4; awaiting the maintainer's pick.
 
+**Round 6 (2026-07-02).** Maintainer signal: **L3 "Rich strip" is the
+favorite**. Landed: (1) **hero stat block** — the left panel footer now
+celebrates the selling point: big ORIGINAL → big OPTIMIZED (coral reserved
+for the win), a proud "↓97% · 10.2 MB saved" line, Save all · ZIP
+full-width beneath; encoding progress integrates with a subtle pulse.
+(2) **MULTI-SELECT** (maintainer feature; built in the lab, and a keeper
+for production): selection is a set — Cmd/Ctrl+click toggle, Shift+click
+range, DRAG across the strip sweeps a live range; the scope tab reads
+"N images"; edits apply the same override to every selected job;
+**selecting ALL images routes to the global settings** (maintainer's
+equivalence rule); Reset clears the whole selection's overrides; the left
+panel shows a subset face (count + Formats + Largest over the selection).
+Also same day: **Phase 0 landed on `main`** — Vitest bulk-engine suite,
+9 files / 58 tests (`npm run test:unit`), test-plan §4 statuses updated.
+
 So the two variants share the focus view itself; the lab question is **what
 you land on and how navigating scope feels**. B3 (table) stays rejected as
 primary; candidate for a grid density toggle later.
