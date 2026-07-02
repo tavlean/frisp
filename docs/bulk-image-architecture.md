@@ -154,7 +154,12 @@ interface ImageOutput {
 }
 ```
 
-`settingsHash` lets the app decide whether an image output is still valid after settings change.
+`settingsHash` lets the app decide whether an image output is still valid after
+settings change. The hash is a normalized effective recipe, not a dump of the
+raw controls: only the active encoder's options count, disabled resize and
+disabled quantize collapse out, enabled resize also collapses out when it does
+not change that job's source dimensions, and percentage resize presets resolve
+against each job before hashing.
 
 ### Session snapshots
 
@@ -188,8 +193,8 @@ Do not decode every full-resolution image immediately if the batch is large.
 
 When global settings change:
 
-- mark outputs stale if their effective settings changed;
-- reprocess images whose effective settings changed;
+- mark outputs stale only if their normalized effective per-job recipe changed;
+- reprocess images whose effective recipe changed;
 - preserve image-specific overrides.
 - Use `src/client/lazy-app/bulk/changes.ts` helpers when UI code wants the safe default behavior: update settings and requeue only outputs that became stale.
 
@@ -198,8 +203,8 @@ When global settings change:
 When an override changes:
 
 - update only the selected image job;
-- mark that image output stale;
-- reprocess only that image.
+- mark that image output stale only when the normalized effective recipe changes;
+- reprocess only the affected image or selected image set.
 - Use `applyJobOverrides` or `applyClearJobOverrides` so future UI code does not forget the stale-output requeue step.
 
 ### Concurrency
@@ -224,6 +229,9 @@ Rules:
 - Store object URLs for thumbnails/previews only when needed.
 - Revoke object URLs when replacing or removing them.
 - Shared cleanup helpers live in `src/client/lazy-app/bulk/urls.ts`.
+- The lab keeps a small per-job output cache keyed by normalized settings hash
+  so returning to a prior recipe can restore instantly. Cache eviction/reset
+  must revoke object URLs that are not currently displayed.
 - Do not keep decoded `ImageData` for every image forever.
 - Cache the selected image more aggressively than background images.
 - Consider an LRU cache for decoded image data later.
@@ -348,7 +356,9 @@ When implementation resumes, the safest technical path is:
    - They are built around two comparison sides.
    - Bulk settings need global defaults, selected-image overrides, and clear override indicators.
 
-Important open design decision: resize behavior for mixed-size batches. The current single-image editor resets resize defaults from the decoded source dimensions. Bulk mode needs a clear global rule before implementation.
+Mixed-size resize lab decision (2026-07-02): percentage presets resolve per
+image, based on that job's source dimensions; Custom remains fixed absolute
+pixels.
 
 ## Test plan
 
@@ -357,7 +367,8 @@ Start with pure unit tests:
 - global settings apply when no overrides exist;
 - overrides replace only specified fields;
 - clearing overrides restores global values;
-- settings hash changes only when effective settings change.
+- settings hash changes only when the normalized effective per-job recipe changes
+  (including source-dimension-aware resize normalization).
 
 Then add browser smoke tests:
 

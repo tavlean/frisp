@@ -16,7 +16,10 @@ the layout section is BUILT and live at `/lab/bulk` (dev-only). Round 5
 (same day): the lab was REBUILT on the real production editor components
 (real EditorSession/Output/OptionsPanel; sparse-override sync), then a design
 polish pass fixed the strip overlap + left-panel card nesting, and a THIRD
-variant **L3 "flush left"** was added — pick L1, L2, or L3 there.
+variant **L3 "flush left"** was added. Round 10 consolidated the lab into one
+UI: grid is now the top vertical picker mode, L/M/S are focus-strip modes,
+the L2/L3 variant toggle is gone, and the bulk path adopted the production
+editor's no-wasted-work encode discipline.
 This is the "Design First" step required by [road-map.md](road-map.md) before
 any production bulk UI. Engine reference: [bulk-image-architecture.md](bulk-image-architecture.md).
 
@@ -43,13 +46,13 @@ What does **not** exist:
 
 | Gap | Detail |
 |---|---|
-| All UI | No bulk route/mode, strip/grid, override panel, export controls |
+| Production UI | No production bulk route/mode yet; the current work lives in the dev-only `/lab/bulk` route |
 | Multi-file entry | `<input>` lacks `multiple`; `EditorSession.pickFiles` keeps only `list[0]` (drop layer already passes the full `FileList`) |
-| Worker pool | `runner.ts` accepts `workerBridges[]` but nothing instantiates a pool (editor has 2 per-side bridges — the proven pattern to copy) |
-| Reactive wrapper | No `.svelte.ts` store wrapping the pure reducers |
-| Thumbnails / memory | `thumbnailUrl`/`previewUrl` fields exist, nothing fills them; no decode-on-demand cache |
+| Production worker pool | The lab instantiates the proven two-bridge pattern; production route wiring still needs the same bounded pool |
+| Production reactive wrapper | The lab has a `.svelte.ts` store wrapping the reducers; production promotion still needs a deliberate integration point |
+| Thumbnails / memory | The lab fills thumbnails/previews and owns URLs; production needs the same lifecycle hardened with bulk e2e coverage |
 | ZIP | No archive lib in `package.json` |
-| Tests | 0 coverage of ~2,000 LOC; [test-plan.md](test-plan.md) §4 has the ready plan (~73 cases, top-8 first) |
+| Tests beyond Phase 0 | Phase 0 exists: 9 files / 63 Vitest cases. Browser/e2e coverage for the bulk UI remains future work |
 
 ---
 
@@ -170,7 +173,8 @@ range, DRAG across the strip sweeps a live range; the scope tab reads
 equivalence rule); Reset clears the whole selection's overrides; the left
 panel shows a subset face (count + Formats + Largest over the selection).
 Also same day: **Phase 0 landed on `main`** — Vitest bulk-engine suite,
-9 files / 58 tests (`npm run test:unit`), test-plan §4 statuses updated.
+9 files / 63 tests (`npm run test:unit` after the no-wasted-work additions),
+test-plan §4 statuses updated.
 
 **Round 7 (2026-07-02) — L3 FINALIZED as the layout direction.** With it:
 (1) **the before/after divider follows the IMAGE, not the viewport**
@@ -198,6 +202,18 @@ question (§9 Q5) got its lab answer: PERCENTAGE presets resolve per image
 (each scales relative to its own dimensions) at process time; Custom stays
 fixed absolute pixels.** Verified: 50% halves every source regardless of
 its size. Phase 2 should adopt this semantics.
+
+**Round 10 (2026-07-02).** The variant question is collapsed into one lab UI.
+The L2 grid is no longer a top-bar variant; it is the top option in the same
+vertical picker as L/M/S. Grid shows the current card dashboard with the picker
+kept visible at top-right; clicking a card enters focus view at the last-used
+strip size; Cmd/Ctrl-click toggles, Shift-click ranges, and Esc returns scope
+to global. The lab also inherited the production editor's no-wasted-work rules:
+effective per-job recipe hashes include only the active encoder, collapse
+disabled/identity resize and disabled quantize, resolve percentage resize per
+job, restore previously encoded per-job outputs from a small URL-owning cache,
+debounce selected override applies, and delay working badges by 500 ms. Sample
+loading is now one "Load samples" button that creates 12 files.
 
 So the two variants share the focus view itself; the lab question is **what
 you land on and how navigating scope feels**. B3 (table) stays rejected as
@@ -304,7 +320,7 @@ toggle (default on). "Never ship a bigger file."
 | Phase | Contents | Needs |
 |---|---|---|
 | **0 — Engine safety net** | Vitest + `npm run test:unit`; top-8 engine tests, then the rest of test-plan §4; fix the stale ":covered with tests" claim in bulk-image-architecture.md | No design decisions; cheap-model executable; **can start now** |
-| **1 — Layout LAB (active)** | Two variants behind a dev-only route, shared engine wiring: **L1 focus-first home** vs **L2 grid home** (§3). Winner promoted, choice recorded | Maintainer eyes on the lab |
+| **1 — Layout LAB (active)** | One consolidated dev-only route: grid as a picker mode, L/M/S focus-strip modes, shared engine wiring, no-wasted-work reprocessing, multi-select and overrides (§3). Promotion decision still belongs to Phase 2 | Maintainer eyes on the lab |
 | **2 — Minimum Useful Bulk** | Multi-file entry (input `multiple` + boundary routing) **+ folder import** (webkitdirectory picker + dropped-folder traversal — §11), reactive bulk store wrapping the engine, worker-bridge pool (2, per-side-bridge pattern), batch home per lab winner, global WebP panel (reuse existing panels), statuses/sizes/cancel/retry, totals bar, **Save All (ZIP)**, size-increase guard; bulk e2e smoke | Phase 1 winner |
 | **2b — Contextual left panel v1** | Image-info panel (name, original format, dimensions, size, inferred ≈aspect — §4) + "Compare as…" button; ships in the single-image editor independently of bulk, then reused by focus view | Independent — can land any time |
 | **3 — Overrides & focus** | Focus mode reusing two-up + mini-strip nav, per-image scope panel, per-control override dots (§5: ring = selection, no count badges), corner-dot card marker, reset (control/image), per-image format override, shallow-routing back-button | Phase 2 |
@@ -318,16 +334,18 @@ Multi-Format Compare** in the product order (road-map.md updated accordingly).
 
 ## 9. Design questions — resolution state
 
-1. ~~Batch home~~ → **LAB** (decided 2026-07-02): L1 focus-first home vs L2
-   grid home (§3). The lab's winner is the last open layout question.
+1. ~~Batch home~~ → **LAB** (decided 2026-07-02): one consolidated grid/focus
+   lab replaces the old L2/L3 toggle (§3). Production promotion is still a
+   Phase 2 decision.
 2. ~~Left side in bulk~~ → **decided**: dynamic contextual panel, batch scope
    in grid view (§4).
 3. ~~Single-image left panel~~ → **decided**: image-info panel + "Compare
    as…" button (§4) — not a chip; renditions join later (§12).
 4. ~~ZIP in v1~~ → **confirmed yes**, with the size-increase guardrail also
    confirmed for v1.
-5. **STILL OPEN:** global resize default for mixed batches — percentage or
-   fit-within box? Decide at Phase 2 build.
+5. ~~Global resize for mixed batches~~ → **lab answer**: percentage presets
+   resolve per image; Custom remains fixed absolute pixels. Phase 2 should
+   adopt unless new evidence appears.
 6. ~~Override signaling~~ → **decided**: dots; ring = selection only; no
    count badges (§5).
 
