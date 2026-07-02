@@ -7,6 +7,22 @@ browser, the build is static, and offline reload must work after load.
 
 ## Current State
 
+- **Bulk optimization — design phase opened (2026-07-02).** Bulk is now the
+  **top product priority** (maintainer decision; Multi-Format Compare moves
+  after it). A full audit found the bulk **engine already complete and proven
+  headless** (`src/client/lazy-app/bulk/` — ~15 pure modules: session, global
+  settings + sparse per-image overrides, queue/runner, headless processor,
+  import, stale-gated export, snapshots, strip/detail/summary view-models; the
+  diagnostics probe runs `processBulkImageJob` end-to-end). Remaining work is
+  UI, multi-file entry wiring (`pickFiles` keeps only `list[0]` today), a
+  worker-bridge pool instance, thumbnails/memory management, ZIP, and tests.
+  UI design options + phased roadmap:
+  [bulk-ui-design-options.md](bulk-ui-design-options.md) — **awaiting
+  maintainer shortlist** (grid vs filmstrip home, left-side treatment,
+  ZIP-in-v1, mixed-size resize default). Phase 0 (Vitest engine tests,
+  [test-plan.md](test-plan.md) §4) has no design dependency and can start any
+  time.
+
 - **Review-hardening follow-ups (2026-07-02), landed on `main`.** Closes the
   gaps the batch below exposed. (1) **CI now runs the full Playwright e2e suite**
   on every push/PR (`156b1bf0`, new `e2e` job, ubuntu, chromium + webkit with

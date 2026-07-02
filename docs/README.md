@@ -1,6 +1,6 @@
 # Sqush Docs — map, registry & work order
 
-Last updated: 2026-06-06.
+Last updated: 2026-07-02.
 
 The single hub for all project docs: the **work priority order** plus the
 **registry** of every doc with explicit "read when" / "update when" triggers.
@@ -36,7 +36,7 @@ time-pressure (security); everything else is value/effort.
 |---|-------|------|--------|-----|
 | ✓ | **Wire threaded MT runtime** | [threading-enablement.md](threading-enablement.md) | **✅ DONE** | **oxipng, AVIF, JXL all thread multi-core** — full worker pool in Chromium, no fallback in WebKit, verified, ST fallback intact. oxipng needed a shared-memory build fix; AVIF/JXL needed the `?url`/`mainScriptUrlOrBlob` wiring **+ a `PTHREAD_POOL_SIZE` rebuild** (the `_mt` builds deadlocked spawning pthreads on-demand). |
 | 2 | **Investigate new codecs** | [new-codec-investigation.md](new-codec-investigation.md) | ⚪ Investigate | Researched, **not added**: SVGO for vector (do first), HEIC decode-in (later), jpegli / JPEG→JXL transcode (skip). Decide later. |
-| 3 | **Product features** | [road-map.md](road-map.md) | ⚪ Later | Multi-Format Compare (now unblocked — codecs done; benefits from threading), then bulk optimization. |
+| 3 | **Bulk optimization** | [bulk-ui-design-options.md](bulk-ui-design-options.md) | 🟡 In design | **Top product priority (maintainer, 2026-07-02).** Engine already built + proven headless; UI options written, awaiting maintainer shortlist. Phase 0 (engine unit tests, [test-plan.md](test-plan.md) §4) is unblocked now. Multi-Format Compare follows bulk ([road-map.md](road-map.md)). |
 | ✓ | **Codec security rebuilds** | [codec-build-notes.md](codec-build-notes.md) · [codec-upgrade-audit.md](codec-upgrade-audit.md) | **✅ DONE** | All 7 codecs upgraded natively, merged into `main` (CVEs fixed; some faster). The engineering record is `codec-build-notes.md`; the planning docs (handoff/runbooks/audit) are now historical. |
 | ✓ | **Codec surface cleanup** | [codec-surface-cleanup.md](codec-surface-cleanup.md) | **Done** | WebP 2 removed; dead `codecs/png/` + `codecs/visdif/` + `storage.ts` deleted; browser canvas encoders removed + QOI dropped from the output picker (2026-06-27). Kept as the removal record. **User-guide reconcile pending** (8 files still document the browser encoders / QOI-output). |
 | — | **Svelte cleanup remnants** | [svelte-hardening-plan.md](svelte-hardening-plan.md) | ⚪ Ongoing | Waves mostly done; Wave 2b + deferred items + the [codec-options-model.md](codec-options-model.md) project remain. Pick up between the above. |
@@ -93,6 +93,7 @@ Every project doc: what it holds, when to **read** it, when to **update** it.
 | Doc | Contains | Read when | Update when |
 |---|---|---|---|
 | [road-map.md](road-map.md) | Product direction (codec strategy, performance, Multi-Format Compare, bulk, PWA). | Planning product work / priorities. | A roadmap item lands or its priority/feasibility changes (e.g. codecs done unblocks Multi-Format Compare). |
+| [bulk-ui-design-options.md](bulk-ui-design-options.md) | The bulk-UI design session (2026-07-02): gap inventory, layout options (grid vs filmstrip), left-panel rethink, override/reset signaling, ZIP-in-v1 export revision, phased roadmap, the 5 questions that close the design. | Choosing/refining the bulk UI direction; starting any bulk phase. | A design question is answered, a phase lands or re-scopes, or a lab variant changes the direction. |
 | [test-plan.md](test-plan.md) | The test strategy: two-layer model (unit always / E2E on codec-or-build change), the gap analysis, the bulk-engine unit-test plan, E2E additions, CI changes, and verified doc-accuracy fixes. | Before adding/changing tests, or building bulk/crop/compare (write the feature's test with it). | A test layer/tool lands, a gap is closed, the CI cadence changes, or a planned phase completes. |
 | [svelte-hardening-plan.md](svelte-hardening-plan.md) | The post-migration cleanup / Svelte-5 hardening backlog. | Doing cleanup/hardening work. | A hardening wave/item is done or added. |
 | [review-hardening-plan.md](review-hardening-plan.md) | The 2026-07-02 code-review execution plan: per-side persistent worker bridges, in-flight encode dedup, one canonical recipe signature, number-input clamp, two-up key scoping, SW cross-origin pass-through, settings-storage extraction, SideRuntime grouping — with per-task specs, commit messages, test gates, and the Svelte-docs research brief. | Doing or resuming any of those tasks. | A task in it lands, is re-scoped, or is dropped (update its Status line). |

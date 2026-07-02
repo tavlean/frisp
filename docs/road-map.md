@@ -1,6 +1,6 @@
 # Sqush Product Roadmap
 
-Last updated: 2026-06-10.
+Last updated: 2026-07-02.
 
 The SvelteKit migration is now **closed** (`main` is the production app). This
 roadmap is the product track that follows it — not a migration phase list. The
@@ -56,6 +56,14 @@ Bulk optimization is a product milestone, not part of the Svelte migration. The
 existing framework-neutral helper surface lives under
 `src/client/lazy-app/bulk/`; [bulk-image-architecture.md](bulk-image-architecture.md)
 is the technical reference.
+
+> **2026-07-02 — bulk is now the top product priority** (maintainer decision;
+> it outranks Multi-Format Compare below). The design-first step is done as a
+> written options document: **[bulk-ui-design-options.md](bulk-ui-design-options.md)**
+> — UI layout options, left-panel rethink, override/reset signaling, export
+> revision (ZIP proposed for v1), and the phased roadmap. That doc is the live
+> plan for this milestone; the sections below remain the product intent it was
+> built from.
 
 > **Test note.** That bulk engine exists but has no UI yet, so nothing currently
 > exercises it. A small, focused unit-test subset for its core logic (counter
@@ -164,7 +172,10 @@ browser advantage) — not planned, noted for completeness.
 
 ## Multi-Format Compare
 
-New feature surfaced by the codec audit. On import, encode the image across
+New feature surfaced by the codec audit. **Now sequenced after bulk
+optimization** (maintainer decision 2026-07-02); the bulk worker-bridge pool is
+the same substrate this feature needs, so bulk-first builds its foundation.
+On import, encode the image across
 several formats at once (MozJPEG / WebP / AVIF / JXL / OxiPNG) in parallel
 workers and present a size (and ideally quality) comparison table, so the user
 picks by *result* instead of guessing a format up front.

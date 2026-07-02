@@ -332,7 +332,7 @@ When implementation resumes, the safest technical path is:
    - It should produce `ImageOutput`.
    - It should not call or fork `Compress.updateImage()` because that method is tied to the two-side UI state machine.
    - Initial module: `src/client/lazy-app/bulk/processor.ts`
-   - Current status: processor orchestration exists and is covered with injected-pipeline tests.
+   - Current status: processor orchestration exists and is designed to be covered with injected-pipeline tests — no such tests exist yet; the test plan is [test-plan.md](test-plan.md) §4.
 
 3. Keep worker usage bounded.
    - `WorkerBridge` queues work per bridge.
