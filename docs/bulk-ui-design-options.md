@@ -11,7 +11,9 @@ vs focus-first home — §3); **left side becomes a dynamic contextual panel
 with image info by default** (§4, rewritten); **override signaling decided**
 (§5: dots; ring = selection only; no count badges); **A1 now → A3 later
 confirmed** (§10); **save-back-to-source deferred** but kept on the list;
-**folder import promoted into Phase 2** (§11).
+**folder import promoted into Phase 2** (§11). Round 4 (same day): the lab from
+the layout section is BUILT and live at `/lab/bulk` (dev-only); pick L1 or L2
+there.
 This is the "Design First" step required by [road-map.md](road-map.md) before
 any production bulk UI. Engine reference: [bulk-image-architecture.md](bulk-image-architecture.md).
 

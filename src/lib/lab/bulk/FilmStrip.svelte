@@ -130,6 +130,8 @@
   }
 
   .thumb img {
+    position: absolute;
+    inset: 0;
     width: 100%;
     height: 100%;
     object-fit: cover;
@@ -137,9 +139,8 @@
   }
 
   .placeholder {
-    display: block;
-    width: 100%;
-    height: 100%;
+    position: absolute;
+    inset: 0;
     background: linear-gradient(
       135deg,
       var(--surface-raise, rgba(255, 255, 255, 0.06)),

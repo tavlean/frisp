@@ -365,10 +365,13 @@
     display: block;
     width: 100%;
     aspect-ratio: 4 / 3;
+    overflow: hidden;
     background: var(--surface-solid, #16161c);
   }
 
   .thumb-wrap img {
+    position: absolute;
+    inset: 0;
     width: 100%;
     height: 100%;
     object-fit: cover;
@@ -376,9 +379,8 @@
   }
 
   .shimmer {
-    display: block;
-    width: 100%;
-    height: 100%;
+    position: absolute;
+    inset: 0;
     background: linear-gradient(
       135deg,
       var(--surface-raise, rgba(255, 255, 255, 0.06)),

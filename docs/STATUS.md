@@ -21,7 +21,13 @@ browser, the build is static, and offline reload must work after load.
   maintainer shortlist** (grid vs filmstrip home, left-side treatment,
   ZIP-in-v1, mixed-size resize default). Phase 0 (Vitest engine tests,
   [test-plan.md](test-plan.md) §4) has no design dependency and can start any
-  time.
+  time. UPDATE, same day: the two-variant layout LAB is BUILT and running at
+  `/lab/bulk` (dev-only route, commit `99ac5495`): L1 focus-first home vs L2
+  grid home, sharing one engine-backed store, two persistent WebP worker
+  bridges, real encodes, per-image overrides with dot signaling + per-control
+  reset, an image-info panel with inferred aspect ratio, and a 12-sample
+  generator for instant testing. Save-all ZIP is a stubbed toast. Awaiting the
+  maintainer's variant pick.
 
 - **Review-hardening follow-ups (2026-07-02), landed on `main`.** Closes the
   gaps the batch below exposed. (1) **CI now runs the full Playwright e2e suite**
