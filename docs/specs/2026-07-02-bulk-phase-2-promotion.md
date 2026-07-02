@@ -1,7 +1,8 @@
 # Spec: Bulk Phase 2 — promote the lab to production
 
-Last updated: 2026-07-02.
-Status: not started.
+Last updated: 2026-07-03.
+Status: done (executed 2026-07-03, commits `678bb5f7`–`55c0da46` + the
+e2e/docs sweep; all 10 acceptance criteria verified).
 Decision record: [bulk-ui-design-options.md](../bulk-ui-design-options.md)
 (design phase complete 2026-07-02 — every open question is decided there).
 Engine reference: [bulk-image-architecture.md](../bulk-image-architecture.md).

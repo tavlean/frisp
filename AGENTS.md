@@ -15,24 +15,27 @@ no longer a fallback for `main`. There is a single working tree at the repo
 root; the old `../Sqush-svelte` worktree and the `svelte` branch are gone.
 
 Recent focus (2026-06): all 7 WASM codecs were rebuilt from source natively
-(no Docker), and the multi-threaded (MT) codec runtime is now being wired
-(**active**, on branch `oxipng-threading-wip`). Ongoing alongside: post-migration
-cleanup and Svelte hardening — remove dead Preact-era code, make ported
-components idiomatic Svelte 5, fix review defects (all behavior-preserving;
-backlog [svelte-hardening-plan.md](docs/svelte-hardening-plan.md)). Bulk UI and
-other new product work remain roadmap items. **[docs/STATUS.md](docs/STATUS.md)
-is the source of truth for current state — read it first.**
+(no Docker), WebP 2 was removed, and the multi-threaded (MT) codec runtime
+landed for oxipng/AVIF/JXL. Ongoing alongside: post-migration cleanup and
+Svelte hardening — remove dead Preact-era code, make ported components
+idiomatic Svelte 5, fix review defects (all behavior-preserving; backlog
+[svelte-hardening-plan.md](docs/svelte-hardening-plan.md)). Bulk Phase 2
+shipped to production on 2026-07-03; the design record is
+[bulk-ui-design-options.md](docs/bulk-ui-design-options.md). Other new product
+work remains roadmap material. **[docs/STATUS.md](docs/STATUS.md) is the
+source of truth for current state — read it first.**
 
 ## Boundaries
 
-- Do not implement production bulk UI without maintainer/design discussion.
+- Bulk is production now (2026-07-03); use
+  [bulk-ui-design-options.md](docs/bulk-ui-design-options.md) as the design
+  record for further bulk work.
 - Do not treat new product features as part of the Svelte migration.
 - Do not introduce server-side image processing or upload paths.
 - Do not delete or move codecs, generated metadata, workers, or WASM assets
   unless the build and runtime consequences are proven.
-- Keep WebP as the first production codec focus, AVIF second, JPEG XL advanced,
-  and WebP 2 experimental but included for parity until there is evidence to
-  prune it.
+- Keep WebP as the first production codec focus, AVIF second, and JPEG XL
+  advanced. WebP 2 was removed in 2026-06; do not reintroduce it for parity.
 
 ## Engineering rules
 

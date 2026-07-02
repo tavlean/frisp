@@ -1,11 +1,29 @@
 # Sqush Status
 
-Last updated: 2026-07-02.
+Last updated: 2026-07-03.
 
 Read this first. Sqush is a local-first image optimizer: image work stays in the
 browser, the build is static, and offline reload must work after load.
 
 ## Current State
+
+- **Bulk optimization Phase 2 shipped (2026-07-03, `678bb5f7`–`55c0da46`;
+  spec `f341e212`).** Production bulk mode is now on the main route: picking or
+  dropping 2+ supported images opens the batch editor, one image keeps the
+  single-image editor unchanged, and additional imports append while bulk is
+  active. The promoted engine now carries `restoreJob`, relative folder paths,
+  and the keep-original-when-larger export option; the former lab modules live
+  under `src/lib/bulk` as the production `BulkStore`; Stack is the only resting
+  stage and `/lab/bulk` was deleted. Save all now creates a real client ZIP
+  (`client-zip`) with **Keep originals when larger** on by default; folder
+  import works from the picker and recursive dropped-folder traversal, preserves
+  relative paths, skips dot-files, and handles >100-entry directories. Remove
+  from batch offers snackbar Undo with URL revocation deferred until the removal
+  settles. Tests: unit coverage grew from 63 to 76+ cases, including
+  `restoreJob`, export guard, and `relativePath`; new
+  `tests/e2e/bulk.spec.ts` covers multi-entry bulk, single-image regression,
+  override dots, ZIP bytes, the keep-original toggle, and remove+Undo. Full
+  Playwright suite green on Chromium + WebKit.
 
 - **App typeface: Satoshi (2026-07-02, `c6ac6706`).** Chosen over Outfit and
   Geist via the bulk-lab font comparison. Self-hosted variable woff2
@@ -33,11 +51,11 @@ browser, the build is static, and offline reload must work after load.
   per-control reset, and an image-info panel with inferred aspect ratio. The lab now
   mirrors the production editor's no-wasted-work discipline: normalized
   per-job recipe hashes, percentage resize resolved per image, per-job output
-  cache, debounced override/global applies, and delayed working badges. Save-all
-  ZIP remains a stubbed toast. **The Phase-2 promotion spec is written
-  (2026-07-02):**
+  cache, debounced override/global applies, and delayed working badges. **Phase
+  2 has since shipped; see the 2026-07-03 entry above.** The promotion spec was
+  written (2026-07-02):
   [specs/2026-07-02-bulk-phase-2-promotion.md](specs/2026-07-02-bulk-phase-2-promotion.md)
-  — executing it is the next step. **The Phase-2b spec is written too**
+  and is now executed. **The Phase-2b spec is written too**
   ([specs/2026-07-02-phase-2b-contextual-left-panel.md](specs/2026-07-02-phase-2b-contextual-left-panel.md)):
   the single editor's left column becomes the shared image-info panel +
   "Compare as…" opt-in second side, reusing the bulk components — runs after

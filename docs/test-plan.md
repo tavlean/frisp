@@ -1,6 +1,6 @@
 # Test strategy & plan
 
-**Status: in progress. Last updated: 2026-07-02.**
+**Status: in progress. Last updated: 2026-07-03.**
 
 A prioritized plan to give Sqush a test safety net that protects the working
 app while we add **bulk processing, crop, vector optimization, and new codecs**.
@@ -99,6 +99,13 @@ builders. jsdom is not used; the current bulk-engine tests run in the default
 Node environment with lightweight `File` fixtures. Folding `test:unit` into
 `npm run check` or CI remains a separate decision so `npm test` continues to
 mean `check + e2e` until the integration cadence is changed deliberately.
+
+**Phase 2 landed 2026-07-03:** the engine unit layer added 13 cases for
+`restoreJob`, the keep-original-when-larger export option, and `relativePath`
+import/export naming, bringing bulk/helper coverage from 63 to 76+ cases. The
+new bulk e2e smoke (`tests/e2e/bulk.spec.ts`) covers multi-entry bulk routing,
+single-image editor regression, override dot signaling, real ZIP bytes, the
+keep-original toggle, and remove+Undo.
 
 The bulk engine is **clean to test**: every function is a pure reducer
 (`(session, …) => newSession`), there is **no hidden `Date.now`/`Math.random`/

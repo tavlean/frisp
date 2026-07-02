@@ -1,7 +1,7 @@
-# Sqush single-image editor — feature reference
+# Sqush editor — feature reference
 
 Exhaustive, code-derived inventory of every feature and user interaction in the
-single-image editor. Each entry lists the source file and one precise sentence
+editor and bulk mode. Each entry lists the source file and one precise sentence
 on what it does. Derived purely from reading the source — see "Notable / hidden
 behaviors" at the end for things not surfaced in the obvious UI.
 
@@ -22,6 +22,25 @@ behaviors" at the end for things not surfaced in the obvious UI.
 | Undo / Redo keyboard shortcuts         | `src/routes/+page.svelte` (`onKeydown` on `<svelte:window>`) | `⌘/Ctrl+Z` undoes, `⇧⌘Z` / `Ctrl+Shift+Z` / `Ctrl+Y` redoes. Suppressed when a typeable field (text/number input, textarea, contenteditable) is focused so native text-undo still works; range/checkbox inputs fall through to editor undo. |
 | Document title                         | `editor-session.svelte.ts` (`docTitle`)                  | The tab title is `"<filename> - Sqush — Compress an image"`, prefixed with an ⏳ hourglass while either side is encoding.                                                                                          |
 | Dev-only diagnostics link              | `src/routes/+page.svelte`                                | In dev builds only, a "Pipeline diagnostics →" link to `/diagnostics` appears on the intro screen.                                                                                                                 |
+
+## Bulk optimization
+
+| Feature                              | File                                                                 | What it does                                                                                                                                                                                                 |
+| ------------------------------------ | -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Bulk routing threshold               | `src/routes/+page.svelte`                                            | Picking/dropping 2+ supported images opens production bulk mode; picking/dropping 1 supported image keeps the normal single-image editor path.                                                               |
+| Append while bulk is active          | `src/routes/+page.svelte`, `src/lib/bulk/store.svelte.ts`            | Additional supported files dropped or picked while a batch is open are appended to the existing bulk session instead of replacing it.                                                                         |
+| Folder picker                        | `src/lib/editor/intro/Intro.svelte`, `src/lib/bulk/import-sources.ts` | The intro exposes a "Choose folder" picker; `webkitRelativePath` is carried as each file's folder-relative path.                                                                                              |
+| Dropped-folder traversal             | `src/lib/editor/file-drop.ts`, `src/lib/bulk/import-sources.ts`      | Dropped directories are walked recursively via browser directory-entry APIs, reading every batch from `readEntries()` so folders over 100 entries are handled; dot-files and dot-directories are skipped.      |
+| Production bulk store                | `src/lib/bulk/store.svelte.ts`, `src/client/lazy-app/bulk/*`         | A Svelte 5 store wraps the framework-neutral bulk engine, owns thumbnails/object URLs, derives strip/summary/detail view models, and drives the production batch UI.                                           |
+| Bulk processing runtime              | `src/lib/bulk/runtime.ts`                                            | Runs queued bulk jobs through persistent worker bridges with bounded concurrency, remembering outputs in the store and returning active jobs to the queue when cancelled.                                      |
+| Stack resting stage                  | `src/lib/bulk/StackStage.svelte`, `src/lib/bulk/FocusView.svelte`    | When no single image is selected, the stage shows a stack of batch images; selecting one image switches to the focused two-up view.                                                                            |
+| Rich strip and strip sizes           | `src/lib/bulk/RichStrip.svelte`, `src/lib/bulk/ViewModePicker.svelte` | Shows the batch thumbnails in S/M/L strip sizes; size changes affect only the viewing density.                                                                                                                 |
+| Multi-select                         | `src/lib/bulk/strip-selection.ts`, `src/lib/bulk/store.svelte.ts`    | Click selects one image, Cmd/Ctrl-click toggles, Shift-click ranges, and desktop drag-select sweeps a range; selecting every image routes edits to the global settings.                                       |
+| Per-image override dots              | `src/lib/bulk/store.svelte.ts`, `src/lib/bulk/StripCell.svelte`      | `getSettingsOverridePaths` and per-leaf WebP comparisons drive the custom-setting dot on thumbnails and controls.                                                                                            |
+| Divider follows image orientation    | `src/lib/bulk/FocusView.svelte`, `src/lib/editor/output/Output.svelte` | Bulk passes `orientationOverride` so landscape/square images keep a left-right divider even on narrow screens, while clearly portrait images use top-bottom; single-image mode keeps the default viewport rule. |
+| Save all as ZIP                      | `src/lib/bulk/store.svelte.ts`, `src/lib/bulk/zip.ts`                | `saveAll()` creates a bulk export plan, builds a real ZIP with `client-zip`, triggers a `.zip` download, and marks exported entries as exported.                                                              |
+| Keep originals when larger           | `src/lib/bulk/store.svelte.ts`, `src/client/lazy-app/bulk/export.ts` | The `keepOriginalWhenLarger` toggle defaults on; export entries whose optimized file would be larger use the original source file in the ZIP.                                                                 |
+| Remove from batch + Undo             | `src/lib/bulk/store.svelte.ts`, `src/lib/editor/snackbar-store.svelte.ts` | Removing images offers snackbar Undo; object URLs for removed jobs are revoked only after the snackbar settles without Undo.                                                                                  |
 
 ## Two-up before/after compare (Output)
 

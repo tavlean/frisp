@@ -24,6 +24,7 @@ Once you've picked a format, jump to that format's page below to understand its 
 | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | [Overview](./overview.md)                   | What Sqush is, the local-first promise, and the basic compress-and-compare workflow.                                                                               |
 | [Editor features](./editor-features.md)     | Loading and replacing images, the two-up before/after compare, zoom/pan/rotate, smoothing and background toggles, copy/save/import side settings, and downloading. |
+| [Bulk optimization](./bulk-optimization.md) | Importing several images or a folder, batch settings, per-image tweaks, strip sizes, Save all as ZIP, keep-originals, and remove+Undo.                              |
 | [Choosing a format](./choosing-a-format.md) | How to decide between formats for photos, illustrations, transparency, animation, and browser support.                                                             |
 | [Recommended settings](./recommended-settings.md) | A per-codec cheat sheet of community best-practice settings (in Sqush's controls), with notes on which could become app defaults or presets later.                  |
 

@@ -1,6 +1,6 @@
 # Sqush Product Roadmap
 
-Last updated: 2026-07-02.
+Last updated: 2026-07-03.
 
 The SvelteKit migration is now **closed** (`main` is the production app). This
 roadmap is the product track that follows it — not a migration phase list. The
@@ -65,12 +65,15 @@ is the technical reference.
 > plan for this milestone; the sections below remain the product intent it was
 > built from.
 
-> **Test note.** That bulk engine exists but has no UI yet, so nothing currently
-> exercises it. A small, focused unit-test subset for its core logic (counter
-> integrity, stale-output requeue, snapshot parse/restore) is the one piece of
-> testing genuinely worth doing *before/alongside* the bulk UI — it locks the
-> contract the UI sits on and makes the feature faster to build, not slower. See
-> [test-plan.md](test-plan.md) §4 (Phase 1). The rest of the test work can wait.
+> **2026-07-03 — Phase 2 shipped.** Minimum Useful Bulk is now production:
+> multi-file and folder import, batch routing on the main route, global WebP
+> settings + per-image tweaks, Stack resting stage, Save all as ZIP with the
+> keep-original-when-larger guard, remove+Undo, and bulk e2e coverage. Next
+> milestone: Phase 2b contextual left panel, then Phase 3 overrides polish.
+
+> **Test note.** Phase 2 shipped with the focused unit-test subset for the bulk
+> engine plus a production bulk e2e smoke suite. See [test-plan.md](test-plan.md)
+> §4 for what landed and what remains.
 
 ### Design First
 

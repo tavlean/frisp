@@ -1,6 +1,6 @@
 # Editor parity audit & deviation log
 
-Last updated: 2026-06-28.
+Last updated: 2026-07-03.
 
 Goal: the Svelte editor must not **lose** any feature or gain any bug relative
 to the original Preact Squoosh editor. This doc tracks (a) deliberate deviations
@@ -310,6 +310,16 @@ behavior parity is preserved.
     unchanged. `two-up.ts`; commit `fix(editor): stop two-up divider keys firing
     from unrelated controls`. `npm run check` 0/0; `resize-twoup-footprint`
     e2e green.
+
+17. **Production bulk mode is a deliberate Sqush addition (2026-07-03).**
+    Original Squoosh is a single-image editor; Sqush now opens a batch editor
+    when 2+ supported files are imported, with global WebP settings, per-image
+    overrides, folder import, Save all as ZIP, and remove+Undo. This is not a
+    parity gap. The single-image editor path is unchanged for one file. Within
+    bulk, the two-up divider follows the image shape via `orientationOverride`
+    (landscape/square stays left-right even on narrow screens; clearly portrait
+    images flip top-bottom), while the single-image `Output.svelte` default
+    remains byte-for-byte unchanged.
 
 ---
 
