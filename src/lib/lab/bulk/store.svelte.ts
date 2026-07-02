@@ -99,6 +99,52 @@ export function deepEqual(a: unknown, b: unknown): boolean {
   return stableStringify(a) === stableStringify(b);
 }
 
+function isProcessorSubEnabled(value: unknown): boolean {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    (value as { enabled?: unknown }).enabled === true
+  );
+}
+
+function normalizeProcessorSub<T extends { enabled?: unknown }>(
+  value: T,
+): T | { enabled: false } {
+  if (!isProcessorSubEnabled(value)) return { enabled: false };
+  return structuredClone(value);
+}
+
+export function normalizeProcessorStateForBulkDiff(
+  processorState: BulkImageSettings['processorState'],
+): BulkImageSettings['processorState'] {
+  return {
+    ...structuredClone(processorState),
+    resize: normalizeProcessorSub(processorState.resize),
+    quantize: normalizeProcessorSub(processorState.quantize),
+  } as BulkImageSettings['processorState'];
+}
+
+export function normalizeBulkSettingsForBulkDiff(
+  settings: BulkImageSettings,
+): BulkImageSettings {
+  return {
+    encoderState: settings.encoderState
+      ? structuredClone(settings.encoderState)
+      : undefined,
+    processorState: normalizeProcessorStateForBulkDiff(settings.processorState),
+  };
+}
+
+export function bulkSettingsEqualForBulkDiff(
+  left: BulkImageSettings,
+  right: BulkImageSettings,
+): boolean {
+  return deepEqual(
+    normalizeBulkSettingsForBulkDiff(left),
+    normalizeBulkSettingsForBulkDiff(right),
+  );
+}
+
 /** WebP defaults from the codec meta — the lab's locked global format. */
 function defaultGlobalSettings(): BulkImageSettings {
   return {
@@ -306,6 +352,11 @@ export class LabBulk {
         options: { ...current, ...partial } as WebpEncodeOptions,
       },
     };
+    if (
+      bulkSettingsEqualForBulkDiff(nextSettings, this.session.globalSettings)
+    ) {
+      return;
+    }
     this.session = applyGlobalSettings(this.session, nextSettings);
     void this.runtime.run(this);
   }
@@ -447,7 +498,11 @@ export class LabBulk {
         processorState: structuredClone(snapshot.processorState),
       };
 
-      if (deepEqual(nextSettings, this.session.globalSettings)) return;
+      if (
+        bulkSettingsEqualForBulkDiff(nextSettings, this.session.globalSettings)
+      ) {
+        return;
+      }
 
       this.session = applyGlobalSettings(this.session, nextSettings);
       void this.runtime.run(this);

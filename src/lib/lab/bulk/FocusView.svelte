@@ -188,7 +188,7 @@
             >
               ← Batch
             </button>
-            <GlobalOptionsPanel {focusSession} {thumb} />
+            <GlobalOptionsPanel {focusSession} />
           </div>
         {:else}
           <BatchInfoPanel
@@ -214,7 +214,7 @@
             >
               ← Batch
             </button>
-            <GlobalOptionsPanel {focusSession} {thumb} />
+            <GlobalOptionsPanel {focusSession} />
           </div>
         </div>
       {:else}

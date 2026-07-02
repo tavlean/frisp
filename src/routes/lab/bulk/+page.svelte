@@ -7,6 +7,7 @@
   import {
     labBulk,
     deepEqual,
+    normalizeProcessorStateForBulkDiff,
     type LabVariant,
   } from '$lib/lab/bulk/store.svelte';
   import { makeSampleFiles } from '$lib/lab/bulk/samples';
@@ -202,6 +203,12 @@
   ): BulkImageOverrides {
     const global = labBulk.session.globalSettings;
     const override: BulkImageOverrides = {};
+    const normalizedProcessorState = normalizeProcessorStateForBulkDiff(
+      processorStateSnapshot,
+    );
+    const normalizedGlobalProcessorState = normalizeProcessorStateForBulkDiff(
+      global.processorState,
+    );
 
     if (
       format !== 'identity' &&
@@ -217,10 +224,9 @@
     const processorState: BulkImageOverrides['processorState'] = {};
     for (const key of ['resize', 'quantize'] as const) {
       if (
-        processorSubOverridden(
-          key,
-          processorStateSnapshot[key],
-          global.processorState[key],
+        !deepEqual(
+          normalizedProcessorState[key],
+          normalizedGlobalProcessorState[key],
         )
       ) {
         processorState[key] = structuredClone(processorStateSnapshot[key]);
@@ -232,26 +238,6 @@
     }
 
     return override;
-  }
-
-  function processorSubOverridden<Key extends 'resize' | 'quantize'>(
-    _key: Key,
-    focusValue: ProcessorState[Key],
-    globalValue: ProcessorState[Key],
-  ): boolean {
-    const focusEnabled = isProcessorSubEnabled(focusValue);
-    const globalEnabled = isProcessorSubEnabled(globalValue);
-    if (!focusEnabled && !globalEnabled) return false;
-    if (focusEnabled !== globalEnabled) return true;
-    return !deepEqual(focusValue, globalValue);
-  }
-
-  function isProcessorSubEnabled(value: unknown): boolean {
-    return (
-      typeof value === 'object' &&
-      value !== null &&
-      (value as { enabled?: unknown }).enabled === true
-    );
   }
 
   function normalizeExistingOverrides(

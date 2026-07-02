@@ -1,14 +1,13 @@
 <script lang="ts">
   import OptionsPanel from '$lib/editor/OptionsPanel.svelte';
   import type { EditorSession } from '$lib/editor/editor-session.svelte';
-  import { labBulk, type LabThumb } from './store.svelte';
+  import { labBulk } from './store.svelte';
 
   interface Props {
     focusSession: EditorSession;
-    thumb?: LabThumb;
   }
 
-  let { focusSession, thumb }: Props = $props();
+  let { focusSession }: Props = $props();
 
   const formats = $derived(
     focusSession.availableFormats.filter(
@@ -18,6 +17,12 @@
 
   const summary = $derived(labBulk.summary);
   const output = $derived(summary.output);
+  const firstJobId = $derived(labBulk.session.jobs[0]?.id);
+  const firstThumb = $derived(
+    firstJobId ? labBulk.thumbs.get(firstJobId) : undefined,
+  );
+  const naturalWidth = $derived(firstThumb?.w ?? 0);
+  const naturalHeight = $derived(firstThumb?.h ?? 0);
 
   const SIZE_UNITS = ['B', 'kB', 'MB', 'GB', 'TB'];
   function prettySize(bytes: number): string {
@@ -54,8 +59,8 @@
     options={labBulk.globalSide.optionsByFormat[labBulk.globalSide.format] ??
       {}}
     processorState={labBulk.globalSide.processorState}
-    naturalWidth={thumb?.w ?? focusSession.naturalWidth}
-    naturalHeight={thumb?.h ?? focusSession.naturalHeight}
+    {naturalWidth}
+    {naturalHeight}
     sourceName={labBulk.selectedFile?.name}
     isVector={labBulk.selectedFile?.type === 'image/svg+xml'}
     result={null}

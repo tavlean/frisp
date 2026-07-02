@@ -117,7 +117,7 @@
     </aside>
 
     <aside class="options options-2">
-      <GlobalOptionsPanel {focusSession} {thumb} />
+      <GlobalOptionsPanel {focusSession} />
     </aside>
   </div>
 {:else}
