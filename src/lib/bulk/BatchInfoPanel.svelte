@@ -21,8 +21,9 @@
   // stats and the OPTIMIZED figure pulses as it climbs. On the IMAGE face a
   // tiny "ALL IMAGES" whisper-caption tops the footer so the info-for-one /
   // action-for-all seam reads intentionally.
+  import ImageInfoRows from '$lib/editor/ImageInfoRows.svelte';
+  import { prettySize, prettySizeParts } from '$lib/editor/pretty-size';
   import { bulkStore } from './store.svelte';
-  import { inferAspect } from './aspect';
   import DeltaPill from './DeltaPill.svelte';
 
   interface Props {
@@ -46,38 +47,12 @@
   const selectedCount = $derived(bulkStore.selectedCount);
   const multiSelected = $derived(selectedCount > 1);
 
-  const SIZE_UNITS = ['B', 'kB', 'MB', 'GB', 'TB'];
-  // Decimal (SI, base-1000), 3 significant figures — matches Results.svelte so
-  // sizes read identically across the app.
-  function prettySize(bytes: number): string {
-    if (bytes < 1) return '0 B';
-    const exponent = Math.min(
-      Math.floor(Math.log10(bytes) / 3),
-      SIZE_UNITS.length - 1,
-    );
-    return `${(bytes / 1000 ** exponent).toPrecision(3)} ${SIZE_UNITS[exponent]}`;
-  }
-
-  // The footer's leading figure: value + unit split so the unit can echo the
-  // production footer's smaller accented unit glyph.
-  function prettyParts(bytes: number): { value: string; unit: string } {
-    if (bytes < 1) return { value: '0', unit: 'B' };
-    const exponent = Math.min(
-      Math.floor(Math.log10(bytes) / 3),
-      SIZE_UNITS.length - 1,
-    );
-    return {
-      value: (bytes / 1000 ** exponent).toPrecision(3),
-      unit: SIZE_UNITS[exponent],
-    };
-  }
-
   // The two hero figures, value + unit split so each unit can echo the
   // production footer's smaller accented unit glyph. ORIGINAL is always known
   // (source sizes are on disk); OPTIMIZED only exists once results land.
-  const originalParts = $derived(prettyParts(output.totalOriginalSize));
+  const originalParts = $derived(prettySizeParts(output.totalOriginalSize));
   const outputParts = $derived(
-    output.optimized > 0 ? prettyParts(output.totalOutputSize) : null,
+    output.optimized > 0 ? prettySizeParts(output.totalOutputSize) : null,
   );
 
   const showDelta = $derived(output.optimized > 0);
@@ -115,9 +90,6 @@
     return map[raw] ?? (raw ? raw.toUpperCase() : 'Image');
   }
 
-  const hasDims = $derived(width > 0 && height > 0);
-  const aspect = $derived(hasDims ? inferAspect(width, height) : null);
-
   // ── Global-face batch facts (computed from the actual source files) ────────
   const jobs = $derived(bulkStore.session.jobs);
   const faceJobs = $derived(multiSelected ? bulkStore.selectedJobs : jobs);
@@ -153,32 +125,7 @@
         <p class="title filename" title={file.name}>{file.name}</p>
       </div>
       <div class="body">
-        <dl class="rows">
-          <div class="row">
-            <dt>Format</dt>
-            <dd>{formatLabel(file)}</dd>
-          </div>
-          <div class="row">
-            <dt>Original size</dt>
-            <dd>{prettySize(file.size)}</dd>
-          </div>
-          <div class="row">
-            <dt>Dimensions</dt>
-            <dd>{hasDims ? `${width} × ${height}` : '—'}</dd>
-          </div>
-          <div class="row">
-            <dt>Aspect</dt>
-            <dd>
-              {#if aspect}
-                <span class="chip" class:approx={aspect.approx}
-                  >{aspect.label}</span
-                >
-              {:else}
-                —
-              {/if}
-            </dd>
-          </div>
-        </dl>
+        <ImageInfoRows {file} {width} {height} />
 
         {#if hasOverrides}
           <div class="override-row">
@@ -422,20 +369,6 @@
     font-weight: 600;
     font-variant-numeric: tabular-nums;
     text-align: right;
-  }
-
-  .chip {
-    display: inline-block;
-    padding: 2px 9px;
-    border-radius: 999px;
-    background: var(--surface-raise, rgba(255, 255, 255, 0.06));
-    border: 1px solid var(--border, rgba(255, 255, 255, 0.08));
-    font-size: 0.9rem;
-    font-weight: 700;
-    color: var(--text-1, #f5f5f7);
-  }
-  .chip.approx {
-    color: var(--text-2, rgba(235, 235, 245, 0.62));
   }
 
   /* Custom-settings affordance — closes out the IMAGE face. */
