@@ -204,12 +204,12 @@
       isEmptyOverride(normalizedCurrent) &&
       !isEmptyOverride(current)
     ) {
-      labBulk.clearSelectedOverrides();
+      labBulk.clearAnchorOverrides();
     } else if (
       !deepEqual(seededOverride, current) &&
       deepEqual(seededOverride, normalizedCurrent)
     ) {
-      labBulk.applySelectedOverrides(seededOverride);
+      labBulk.applyAnchorOverrides(seededOverride);
     }
   }
 

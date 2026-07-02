@@ -36,10 +36,14 @@
   let isMac = $state(false);
 
   const selectedId = $derived(labBulk.selectedId);
+  const selectedCount = $derived(labBulk.selectedCount);
   const file = $derived(labBulk.selectedFile);
   const thumb = $derived(labBulk.selectedThumb);
   const imageScopeActive = $derived(
     selectedId !== undefined && labBulk.panelScope === 'image',
+  );
+  const imageTabLabel = $derived(
+    selectedCount > 1 ? `${selectedCount} images` : 'This image',
   );
   const formats = $derived(
     focusSession.availableFormats.filter(
@@ -61,9 +65,8 @@
   }
 
   function resetOverrides(): void {
-    const id = labBulk.selectedId;
-    if (!id) return;
-    labBulk.resetAllOverrides(id);
+    if (labBulk.selectedCount === 0) return;
+    labBulk.clearSelectedOverrides();
     onReseed?.();
   }
 
@@ -97,7 +100,7 @@
       }
     }
 
-    if (event.key === 'Escape' && !onBack && selectedId) {
+    if (event.key === 'Escape' && !onBack && selectedCount > 0) {
       event.preventDefault();
       labBulk.deselect();
       return;
@@ -113,7 +116,7 @@
 
   function onStripPointerdown(event: PointerEvent): void {
     const target = event.target as HTMLElement | null;
-    if (target?.closest('button')) return;
+    if (target?.closest('button, [data-bulk-cell-id]')) return;
     labBulk.deselect();
   }
 </script>
@@ -171,6 +174,10 @@
 
     {#if focusSession.firstError}
       <p class="status-pill error">{focusSession.firstError}</p>
+    {/if}
+
+    {#if selectedCount > 1}
+      <p class="selection-chip">{selectedCount} selected</p>
     {/if}
 
     {#if onBack}
@@ -269,7 +276,7 @@
           title={selectedId ? undefined : 'Select an image first'}
           onclick={() => setPanelScope('image')}
         >
-          This image
+          {imageTabLabel}
         </button>
       </div>
 
@@ -457,6 +464,27 @@
     color: var(--bad, #ff7d92);
     border-color: color-mix(in srgb, var(--bad, #ff7d92) 35%, transparent);
     font-weight: 600;
+  }
+
+  .selection-chip {
+    position: absolute;
+    top: 14px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9;
+    margin: 0;
+    padding: 6px 12px;
+    border-radius: 999px;
+    border: 1px solid
+      color-mix(in srgb, var(--accent-2, #53b2ff) 28%, transparent);
+    background: rgba(12, 12, 15, 0.68);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    color: var(--text-2, rgba(235, 235, 245, 0.62));
+    font-size: 0.85rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    pointer-events: none;
   }
 
   .back {

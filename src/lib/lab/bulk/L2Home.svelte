@@ -30,7 +30,16 @@
     return `${(bytes / 1000 ** exponent).toPrecision(3)} ${SIZE_UNITS[exponent]}`;
   }
 
-  function openCard(id: string): void {
+  function openCard(event: MouseEvent, id: string): void {
+    if (event.shiftKey) {
+      labBulk.selectRangeTo(id);
+      return;
+    }
+    if (event.metaKey || event.ctrlKey) {
+      labBulk.toggleSelection(id);
+      return;
+    }
+
     labBulk.select(id);
     mode = 'focus';
     onReseed();
@@ -54,10 +63,11 @@
         <button
           type="button"
           class="card"
-          class:selected={item.selected}
+          class:selected={labBulk.isSelected(item.id)}
+          class:anchor={labBulk.selectedId === item.id}
           in:fade={{ duration: 150 }}
           title={item.fileName}
-          onclick={() => openCard(item.id)}
+          onclick={(event) => openCard(event, item.id)}
         >
           <span class="thumb-wrap">
             {#if itemThumb}
@@ -204,6 +214,11 @@
   .card.selected {
     border-color: var(--accent-2, #53b2ff);
     box-shadow: 0 0 0 1px var(--accent-2, #53b2ff);
+  }
+  .card.anchor {
+    box-shadow:
+      0 0 0 1px var(--accent-2, #53b2ff),
+      0 0 20px var(--accent-2-glow, rgba(74, 163, 255, 0.32));
   }
 
   .thumb-wrap {

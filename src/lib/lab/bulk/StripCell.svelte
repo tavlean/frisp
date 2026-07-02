@@ -41,6 +41,8 @@
   const thumbUrl = $derived(labBulk.thumbs.get(item.id)?.url);
   const processing = $derived(item.statusGroup === 'active');
   const download = $derived(labBulk.downloadFor(item.id));
+  const selected = $derived(labBulk.isSelected(item.id));
+  const anchor = $derived(labBulk.selectedId === item.id);
   const hasOutput = $derived(
     item.outputSize !== undefined && item.percentChange !== undefined,
   );
@@ -68,16 +70,16 @@
   }
 </script>
 
-<div class="cell {mode}">
+<div class="cell {mode}" data-bulk-cell-id={item.id}>
   <div class="thumb-wrap">
     <button
       type="button"
       class="thumb"
-      class:selected={item.selected}
+      class:selected
+      class:anchor
       role="option"
-      aria-selected={item.selected}
+      aria-selected={selected}
       title={mode === 'dense' ? denseTitle : item.fileName}
-      onclick={() => labBulk.select(item.id)}
     >
       {#if thumbUrl}
         <img src={thumbUrl} alt="" draggable="false" />
@@ -216,6 +218,11 @@
   .thumb.selected {
     border-color: var(--accent-2, #53b2ff);
     box-shadow: 0 0 0 1px var(--accent-2, #53b2ff);
+  }
+  .thumb.anchor {
+    box-shadow:
+      0 0 0 1px var(--accent-2, #53b2ff),
+      0 0 18px var(--accent-2-glow, rgba(74, 163, 255, 0.32));
   }
 
   .thumb img {

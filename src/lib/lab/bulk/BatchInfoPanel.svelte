@@ -42,6 +42,8 @@
   const progress = $derived(summary.progress);
   const busy = $derived(progress.active + progress.queued > 0);
   const hasOverrides = $derived(labBulk.selectedHasOverrides);
+  const selectedCount = $derived(labBulk.selectedCount);
+  const multiSelected = $derived(selectedCount > 1);
 
   const SIZE_UNITS = ['B', 'kB', 'MB', 'GB', 'TB'];
   // Decimal (SI, base-1000), 3 significant figures — matches Results.svelte so
@@ -117,11 +119,12 @@
 
   // ── Global-face batch facts (computed from the actual source files) ────────
   const jobs = $derived(labBulk.session.jobs);
+  const faceJobs = $derived(multiSelected ? labBulk.selectedJobs : jobs);
 
   /** "8 JPEG · 4 PNG" — counts by short format label, most common first. */
   const formatBreakdown = $derived.by(() => {
     const counts = new Map<string, number>();
-    for (const job of jobs) {
+    for (const job of faceJobs) {
       const label = formatLabel(job.sourceFile);
       counts.set(label, (counts.get(label) ?? 0) + 1);
     }
@@ -134,7 +137,7 @@
   /** The heaviest source file — the one most worth a second look. */
   const largest = $derived.by(() => {
     let top: File | undefined;
-    for (const job of jobs) {
+    for (const job of faceJobs) {
       if (!top || job.sourceFile.size > top.size) top = job.sourceFile;
     }
     return top;
@@ -143,7 +146,7 @@
 
 <div class="batch-info">
   <div class="batch-info-scroll">
-    {#if file}
+    {#if file && !multiSelected}
       <!-- IMAGE face: filename is the title, then the info rows. -->
       <div class="head">
         <p class="title filename" title={file.name}>{file.name}</p>
@@ -187,11 +190,15 @@
         {/if}
       </div>
     {:else}
-      <!-- GLOBAL face: the count is the title, then batch facts, then a hint. -->
+      <!-- GLOBAL / MULTI face: count title, then facts over all jobs or the selected subset. -->
       <div class="head global-head">
         <p class="title count">
-          {summary.totalJobs}
-          {summary.totalJobs === 1 ? 'image' : 'images'}
+          {#if multiSelected}
+            {selectedCount} images selected
+          {:else}
+            {summary.totalJobs}
+            {summary.totalJobs === 1 ? 'image' : 'images'}
+          {/if}
         </p>
       </div>
       <div class="body">
@@ -211,7 +218,17 @@
             </div>
           {/if}
         </dl>
-        <p class="hint">Select an image below to fine-tune it</p>
+        {#if multiSelected && hasOverrides}
+          <div class="override-row">
+            <span class="dot" aria-hidden="true">●</span>
+            <strong>Custom settings</strong>
+            <button type="button" onclick={() => onReset?.()}
+              >Reset to global</button
+            >
+          </div>
+        {:else if !multiSelected}
+          <p class="hint">Select an image below to fine-tune it</p>
+        {/if}
       </div>
     {/if}
   </div>
@@ -225,7 +242,7 @@
        owns the ONE home of the batch result total; the count lives in the
        global title. -->
   <div class="panel-footer">
-    {#if file}
+    {#if selectedCount > 0}
       <!-- Under single-image info, a whisper-caption makes the seam explicit:
            the info above is for ONE image, the totals + action below are for
            the whole batch. -->

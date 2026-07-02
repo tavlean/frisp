@@ -5,9 +5,11 @@
   // and the strip-region height (via the CSS var FocusView reads back).
   import { labBulk, type StripSize } from './store.svelte';
   import StripCell from './StripCell.svelte';
+  import { createStripSelectionController } from './strip-selection';
 
   const items = $derived(labBulk.stripItems);
   const size = $derived(labBulk.stripSize);
+  const selection = createStripSelectionController();
 
   const SIZES: { id: StripSize; label: string; title: string }[] = [
     { id: 's', label: 'S', title: 'Small thumbnails' },
@@ -21,7 +23,18 @@
 </script>
 
 <div class="rich-strip size-{size}">
-  <div class="scroller" role="listbox" aria-label="Images">
+  <div
+    class="scroller"
+    role="listbox"
+    aria-label="Images"
+    tabindex="-1"
+    onclick={selection.onClick}
+    onkeydown={selection.onKeydown}
+    onpointerdown={selection.onPointerdown}
+    onpointermove={selection.onPointermove}
+    onpointerup={selection.onPointerup}
+    onpointercancel={selection.onPointercancel}
+  >
     {#each items as item (item.id)}
       <StripCell {item} mode={size} />
     {/each}

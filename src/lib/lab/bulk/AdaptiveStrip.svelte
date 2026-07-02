@@ -9,9 +9,11 @@
   // region; the wrapper cross-fades on the layout so count changes don't jank.
   import { labBulk } from './store.svelte';
   import StripCell from './StripCell.svelte';
+  import { createStripSelectionController } from './strip-selection';
 
   const items = $derived(labBulk.stripItems);
   const count = $derived(items.length);
+  const selection = createStripSelectionController();
 
   type AdaptiveLayout = 'big' | 'row' | 'dense';
   const layout = $derived<AdaptiveLayout>(
@@ -23,7 +25,18 @@
 </script>
 
 <div class="adaptive layout-{layout}">
-  <div class="scroller" role="listbox" aria-label="Images">
+  <div
+    class="scroller"
+    role="listbox"
+    aria-label="Images"
+    tabindex="-1"
+    onclick={selection.onClick}
+    onkeydown={selection.onKeydown}
+    onpointerdown={selection.onPointerdown}
+    onpointermove={selection.onPointermove}
+    onpointerup={selection.onPointerup}
+    onpointercancel={selection.onPointercancel}
+  >
     {#each items as item (item.id)}
       <StripCell {item} mode={cellMode} />
     {/each}

@@ -13,7 +13,7 @@
 // store. The store + runtime are the shared scaffold; the focused image itself
 // is rendered by a real EditorSession in the route.
 
-import { SvelteMap } from 'svelte/reactivity';
+import { SvelteMap, SvelteSet } from 'svelte/reactivity';
 import {
   getDefaultOptions,
   OUTPUT_FORMATS,
@@ -273,6 +273,10 @@ export class LabBulk {
   // L3's strip zoom (S/M/L). Session-scoped: persists across selections but not
   // reloads, matching the store's other in-memory lab state.
   stripSize = $state<StripSize>('m');
+  // Multi-select layer over the engine's single selectedJobId. The engine value
+  // remains the ANCHOR; this set is the batch editing surface.
+  readonly selectedIds = new SvelteSet<string>();
+  #selectionOrder: string[] = [];
   // Which settings scope the right panel edits.
   panelScope = $state<BulkPanelScope>('global');
   // Production OptionsPanel-compatible pseudo-side for GLOBAL bulk settings.
@@ -309,8 +313,16 @@ export class LabBulk {
   readonly selectedFile = $derived<File | undefined>(
     this.selectedJob?.sourceFile,
   );
+  readonly selectedCount = $derived(this.selectedIds.size);
+  readonly selectedJobs = $derived<ImageJob[]>(
+    this.session.jobs.filter((job) => this.selectedIds.has(job.id)),
+  );
   readonly selectedHasOverrides = $derived(
-    this.overridePaths(this.selectedId).length > 0,
+    this.selectedJobs.some((job) => this.overridePaths(job.id).length > 0),
+  );
+  readonly allJobsSelected = $derived(
+    this.session.jobs.length > 0 &&
+      this.selectedIds.size === this.session.jobs.length,
   );
   readonly hasJobs = $derived(this.session.jobs.length > 0);
   /** True while any job is decoding/processing (or the runtime loop is live). */
@@ -335,6 +347,7 @@ export class LabBulk {
     // addBulkImportToSession keeps existing jobs; auto-selects first if none.
     this.session = addBulkImportToSession(this.session, result);
     if (!hadSelection) this.deselect();
+    else this.#pruneSelection();
 
     // Decode thumbnails for the newly accepted jobs (fire-and-forget each).
     for (const job of result.accepted) {
@@ -345,21 +358,77 @@ export class LabBulk {
   }
 
   select(id: string): void {
-    this.session = selectJob(this.session, id);
-    if (this.session.selectedJobId === id) this.panelScope = 'image';
+    this.#replaceSelection([id], id);
   }
 
   selectNext(): void {
     this.session = selectNextJob(this.session);
-    if (this.session.selectedJobId) this.panelScope = 'image';
+    if (this.session.selectedJobId) {
+      this.#replaceSelection(
+        [this.session.selectedJobId],
+        this.session.selectedJobId,
+      );
+    }
   }
 
   selectPrevious(): void {
     this.session = selectPreviousJob(this.session);
-    if (this.session.selectedJobId) this.panelScope = 'image';
+    if (this.session.selectedJobId) {
+      this.#replaceSelection(
+        [this.session.selectedJobId],
+        this.session.selectedJobId,
+      );
+    }
+  }
+
+  toggleSelection(id: string): void {
+    if (!this.session.jobs.some((job) => job.id === id)) return;
+
+    if (this.selectedIds.has(id)) {
+      this.selectedIds.delete(id);
+      this.#selectionOrder = this.#selectionOrder.filter((item) => item !== id);
+      if (this.selectedIds.size === 0) {
+        this.deselect();
+        return;
+      }
+
+      if (this.session.selectedJobId === id) {
+        const nextAnchor = this.#selectionOrder.at(-1);
+        if (nextAnchor) this.#setAnchor(nextAnchor);
+      }
+      return;
+    }
+
+    this.selectedIds.add(id);
+    this.#selectionOrder = [
+      ...this.#selectionOrder.filter((item) => item !== id),
+      id,
+    ];
+    this.#setAnchor(id);
+    this.panelScope = 'image';
+  }
+
+  selectRangeTo(id: string): void {
+    const anchor = this.session.selectedJobId;
+    if (!anchor) {
+      this.select(id);
+      return;
+    }
+
+    const ids = this.#rangeIds(anchor, id);
+    if (ids.length === 0) return;
+    this.#replaceSelection(ids, anchor);
+  }
+
+  selectDragRange(startId: string, endId: string): void {
+    const ids = this.#rangeIds(startId, endId);
+    if (ids.length === 0) return;
+    this.#replaceSelection(ids, startId);
   }
 
   deselect(): void {
+    this.selectedIds.clear();
+    this.#selectionOrder = [];
     this.session = { ...this.session, selectedJobId: undefined };
     this.panelScope = 'global';
   }
@@ -474,7 +543,7 @@ export class LabBulk {
     void this.runtime.run(this);
   }
 
-  applySelectedOverrides(overrides: BulkImageOverrides): void {
+  applyAnchorOverrides(overrides: BulkImageOverrides): void {
     const id = this.session.selectedJobId;
     if (!id) return;
 
@@ -482,11 +551,54 @@ export class LabBulk {
     void this.runtime.run(this);
   }
 
-  clearSelectedOverrides(): void {
+  clearAnchorOverrides(): void {
     const id = this.session.selectedJobId;
     if (!id) return;
 
     this.session = applyClearJobOverrides(this.session, id);
+    void this.runtime.run(this);
+  }
+
+  applySelectedOverrides(overrides: BulkImageOverrides): void {
+    const ids = this.#selectedJobIds();
+    if (ids.length === 0) return;
+
+    if (this.allJobsSelected) {
+      const nextSettings = getEffectiveSettings(
+        this.session.globalSettings,
+        overrides,
+      );
+      if (
+        bulkSettingsEqualForBulkDiff(nextSettings, this.session.globalSettings)
+      ) {
+        return;
+      }
+      this.session = applyGlobalSettings(this.session, nextSettings);
+      void this.runtime.run(this);
+      return;
+    }
+
+    let nextSession = this.session;
+    for (const id of ids) {
+      nextSession = applyJobOverrides(
+        nextSession,
+        id,
+        structuredClone(overrides),
+      );
+    }
+    this.session = nextSession;
+    void this.runtime.run(this);
+  }
+
+  clearSelectedOverrides(): void {
+    const ids = this.#selectedJobIds();
+    if (ids.length === 0) return;
+
+    let nextSession = this.session;
+    for (const id of ids) {
+      nextSession = applyClearJobOverrides(nextSession, id);
+    }
+    this.session = nextSession;
     void this.runtime.run(this);
   }
 
@@ -568,6 +680,10 @@ export class LabBulk {
     return getSettingsOverridePaths(job?.overrides);
   }
 
+  isSelected(id: string): boolean {
+    return this.selectedIds.has(id);
+  }
+
   /**
    * Whether a specific WebP option leaf deviates from the global for a job.
    * Encoder overrides are stored wholesale, so `getSettingsOverridePaths` can't
@@ -598,6 +714,8 @@ export class LabBulk {
     this.runtime.cancelProcessing(this);
     this.#revokeAll();
     this.session = emptySession();
+    this.selectedIds.clear();
+    this.#selectionOrder = [];
     this.panelScope = 'global';
     this.refreshGlobalSideFromSession();
   }
@@ -613,6 +731,68 @@ export class LabBulk {
   // one of the URLs that helper collects).
   createOutputDownloadUrl(file: File): string {
     return URL.createObjectURL(file);
+  }
+
+  #setAnchor(id: string | undefined): void {
+    if (!id) {
+      this.deselect();
+      return;
+    }
+    if (!this.session.jobs.some((job) => job.id === id)) return;
+    if (!this.selectedIds.has(id)) {
+      this.selectedIds.add(id);
+      this.#selectionOrder = [
+        ...this.#selectionOrder.filter((item) => item !== id),
+        id,
+      ];
+    }
+    this.session = selectJob(this.session, id);
+  }
+
+  #replaceSelection(ids: string[], anchor: string | undefined): void {
+    const validIds = ids.filter((id) =>
+      this.session.jobs.some((job) => job.id === id),
+    );
+    if (validIds.length === 0 || !anchor) {
+      this.deselect();
+      return;
+    }
+
+    const nextAnchor = validIds.includes(anchor) ? anchor : validIds[0];
+    this.selectedIds.clear();
+    for (const id of validIds) this.selectedIds.add(id);
+    this.#selectionOrder = validIds;
+    this.session = selectJob(this.session, nextAnchor);
+    this.panelScope = 'image';
+  }
+
+  #rangeIds(fromId: string, toId: string): string[] {
+    const start = this.session.jobs.findIndex((job) => job.id === fromId);
+    const end = this.session.jobs.findIndex((job) => job.id === toId);
+    if (start === -1 || end === -1) return [];
+
+    const [lo, hi] = start < end ? [start, end] : [end, start];
+    return this.session.jobs.slice(lo, hi + 1).map((job) => job.id);
+  }
+
+  #selectedJobIds(): string[] {
+    const liveIds = new Set(this.session.jobs.map((job) => job.id));
+    return this.#selectionOrder.filter(
+      (id) => liveIds.has(id) && this.selectedIds.has(id),
+    );
+  }
+
+  #pruneSelection(): void {
+    const ids = this.#selectedJobIds();
+    const anchor = this.session.selectedJobId;
+    if (ids.length === 0) {
+      this.deselect();
+      return;
+    }
+    this.#replaceSelection(
+      ids,
+      anchor && ids.includes(anchor) ? anchor : ids.at(-1),
+    );
   }
 
   // ── Thumbnails ────────────────────────────────────────────────────────────
