@@ -135,9 +135,11 @@
     border-color: var(--border-strong, rgba(255, 255, 255, 0.16));
   }
 
+  /* Selection ring is BLUE — it marks "this is the image being inspected",
+     the same azure the right panel wears while editing a single image. */
   .thumb.selected {
-    border-color: var(--accent-1, #ff8a5e);
-    box-shadow: 0 0 0 1px var(--accent-1, #ff8a5e);
+    border-color: var(--accent-2, #53b2ff);
+    box-shadow: 0 0 0 1px var(--accent-2, #53b2ff);
   }
 
   .thumb img {
@@ -159,6 +161,8 @@
     );
   }
 
+  /* Custom-settings dot is BLUE — it marks a per-image deviation, which is
+     inherently a single-image (azure) concept, not a batch (coral) one. */
   .override-dot {
     position: absolute;
     top: 5px;
@@ -166,7 +170,7 @@
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: var(--accent-1, #ff8a5e);
+    background: var(--accent-2, #53b2ff);
     box-shadow: 0 0 0 2px var(--surface-solid, #16161c);
   }
 

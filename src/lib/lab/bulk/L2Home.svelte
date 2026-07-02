@@ -168,6 +168,15 @@
   .options-2 {
     right: var(--panel-inset);
   }
+  /* The grid's right panel only ever edits GLOBAL batch settings, so it wears
+     the coral scope colour. Scoped under .grid-home to out-specify theme.css's
+     `.sqush-editor .options-2` azure default. */
+  .grid-home .options-2 {
+    --main-theme-color: var(--accent-1, #ff8a5e);
+    --hot-theme-color: var(--accent-1-hot, #ff6a3c);
+    --main-theme-glow: var(--accent-1-glow, rgba(255, 122, 80, 0.32));
+    --accent-color: var(--accent-1, #ff8a5e);
+  }
 
   .card {
     display: flex;
@@ -191,9 +200,10 @@
     transform: translateY(-1px);
   }
 
+  /* Selection ring is BLUE — matches the strip + single-image scope. */
   .card.selected {
-    border-color: var(--accent-1, #ff8a5e);
-    box-shadow: 0 0 0 1px var(--accent-1, #ff8a5e);
+    border-color: var(--accent-2, #53b2ff);
+    box-shadow: 0 0 0 1px var(--accent-2, #53b2ff);
   }
 
   .thumb-wrap {
@@ -224,6 +234,7 @@
     );
   }
 
+  /* Custom-settings dot is BLUE — marks a per-image deviation. */
   .override-dot {
     position: absolute;
     top: 8px;
@@ -231,7 +242,7 @@
     width: 10px;
     height: 10px;
     border-radius: 50%;
-    background: var(--accent-1, #ff8a5e);
+    background: var(--accent-2, #53b2ff);
     box-shadow: 0 0 0 2px var(--surface-solid, #16161c);
   }
 

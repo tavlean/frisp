@@ -2,18 +2,21 @@
   // The left-panel surface for the bulk lab. It has two faces driven by
   // SELECTION (not the right-panel scope tab):
   //
-  //  • IMAGE face (an image is selected): the panel TITLE is the filename, then
-  //    the info rows (Format / Dimensions / Original size / Aspect chip), then
-  //    the ● custom-settings + "Reset to global" row when the job deviates.
-  //    No "IMAGE" section header — the filename is the title.
-  //  • GLOBAL face (nothing selected): the title is the image COUNT with a
-  //    quiet "Select an image below to inspect" hint, no info rows.
+  //  • IMAGE face (an image is selected): the panel TITLE is the filename (in
+  //    azure, the single-image scope hue), then the info rows (Format /
+  //    Dimensions / Original size / Aspect chip), then the ● custom-settings +
+  //    "Reset to global" row when the job deviates.
+  //  • GLOBAL face (nothing selected): the title is the image COUNT, then real
+  //    batch facts (format breakdown / total size / largest file computed from
+  //    the actual source files), then a quiet fine-tune hint.
   //
-  // A footer is ALWAYS present (both faces), styled after the production Results
-  // footer (Results.svelte): the big batch output total + delta pill, a
-  // secondary line carrying the count + transform ("12 images · 10.5 MB →
-  // 301 kB"), and the coral "Save all · ZIP" action at the right. The count
-  // living in the footer is what lets the old "BATCH" header disappear.
+  // A footer is ALWAYS present (both faces) and is the SINGLE home of the batch
+  // result, styled after the production Results footer (Results.svelte): the big
+  // batch output total + delta pill, a secondary transform line ("10.5 MB →
+  // 301 kB" — the count is NOT repeated here, the global title carries it), and
+  // the coral "Save all · ZIP" action. On the IMAGE face a tiny "ALL IMAGES"
+  // whisper-caption tops the footer so the info-for-one / action-for-all seam
+  // reads intentionally.
   import { labBulk } from './store.svelte';
   import { inferAspect } from './aspect';
   import DeltaPill from './DeltaPill.svelte';
@@ -97,6 +100,31 @@
 
   const hasDims = $derived(width > 0 && height > 0);
   const aspect = $derived(hasDims ? inferAspect(width, height) : null);
+
+  // ── Global-face batch facts (computed from the actual source files) ────────
+  const jobs = $derived(labBulk.session.jobs);
+
+  /** "8 JPEG · 4 PNG" — counts by short format label, most common first. */
+  const formatBreakdown = $derived.by(() => {
+    const counts = new Map<string, number>();
+    for (const job of jobs) {
+      const label = formatLabel(job.sourceFile);
+      counts.set(label, (counts.get(label) ?? 0) + 1);
+    }
+    return [...counts.entries()]
+      .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+      .map(([label, count]) => `${count} ${label}`)
+      .join(' · ');
+  });
+
+  /** The heaviest source file — the one most worth a second look. */
+  const largest = $derived.by(() => {
+    let top: File | undefined;
+    for (const job of jobs) {
+      if (!top || job.sourceFile.size > top.size) top = job.sourceFile;
+    }
+    return top;
+  });
 </script>
 
 <div class="batch-info">
@@ -145,13 +173,35 @@
         {/if}
       </div>
     {:else}
-      <!-- GLOBAL face: the count is the title, with a quiet inspect hint. -->
-      <div class="head">
+      <!-- GLOBAL face: the count is the title, then batch facts, then a hint. -->
+      <div class="head global-head">
         <p class="title count">
           {summary.totalJobs}
           {summary.totalJobs === 1 ? 'image' : 'images'}
         </p>
-        <p class="hint">Select an image below to inspect</p>
+      </div>
+      <div class="body">
+        <dl class="rows">
+          {#if formatBreakdown}
+            <div class="row">
+              <dt>Formats</dt>
+              <dd>{formatBreakdown}</dd>
+            </div>
+          {/if}
+          <div class="row">
+            <dt>Total size</dt>
+            <dd>{prettySize(output.totalOriginalSize)}</dd>
+          </div>
+          {#if largest}
+            <div class="row">
+              <dt>Largest</dt>
+              <dd class="largest" title={largest.name}>
+                {prettySize(largest.size)}
+              </dd>
+            </div>
+          {/if}
+        </dl>
+        <p class="hint">Select an image below to fine-tune it</p>
       </div>
     {/if}
 
@@ -166,43 +216,49 @@
   </div>
 
   <!-- Panel footer, styled after the production Results footer: the batch
-       output total + delta at the top, a secondary count + transform line, and
-       the coral "Save all · ZIP" action at the right. -->
+       output total + delta at the top, a secondary transform line, and the
+       coral "Save all · ZIP" action at the right. This footer owns the ONE
+       home of the batch result total; the count lives in the global title. -->
   <div class="panel-footer">
-    <div class="stats">
-      <div class="size-row">
-        <span class="total-size">
-          {#if outputParts}
-            {outputParts.value}<span class="unit">{outputParts.unit}</span>
+    {#if file}
+      <!-- Under single-image info, a whisper-caption makes the seam explicit:
+           the info above is for ONE image, the totals + action below are for
+           the whole batch. -->
+      <p class="footer-scope">All images</p>
+    {/if}
+    <div class="footer-main">
+      <div class="stats">
+        <div class="size-row">
+          <span class="total-size">
+            {#if outputParts}
+              {outputParts.value}<span class="unit">{outputParts.unit}</span>
+            {:else}
+              <span class="pending">…</span>
+            {/if}
+          </span>
+          {#if showDelta}
+            <DeltaPill percent={output.percentChange} />
+          {/if}
+        </div>
+        <span class="from-to">
+          {prettySize(output.totalOriginalSize)}
+          <span class="arrow" aria-hidden="true">→</span>
+          {#if output.optimized > 0}
+            {prettySize(output.totalOutputSize)}
           {:else}
-            <span class="pending">…</span>
+            …
           {/if}
         </span>
-        {#if showDelta}
-          <DeltaPill percent={output.percentChange} />
-        {/if}
       </div>
-      <span class="from-to">
-        {summary.totalJobs}
-        {summary.totalJobs === 1 ? 'image' : 'images'}
-        <span class="sep" aria-hidden="true">·</span>
-        {prettySize(output.totalOriginalSize)}
-        <span class="arrow" aria-hidden="true">→</span>
-        {#if output.optimized > 0}
-          {prettySize(output.totalOutputSize)}
-        {:else}
-          …
-        {/if}
-      </span>
-    </div>
 
-    <button
-      type="button"
-      class="save-all"
-      onclick={() => labBulk.saveAllStub()}
-    >
-      Save all · ZIP
-    </button>
+      <button
+        type="button"
+        class="save-all"
+        onclick={() => labBulk.saveAllStub()}
+      >
+        Save all · ZIP
+      </button>
+    </div>
   </div>
 </div>
 
@@ -236,19 +292,31 @@
     font-weight: 700;
     color: var(--text-1, #f5f5f7);
   }
+  /* The filename title leans azure — the single-image scope hue — so the
+     left panel's "who am I looking at" echoes the strip ring + right panel. */
   .filename {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    color: var(--accent-2, #53b2ff);
   }
   .count {
     font-variant-numeric: tabular-nums;
   }
 
   .hint {
-    margin: 0;
+    margin: 6px 0 0;
     color: var(--text-3, rgba(235, 235, 245, 0.38));
     font-size: 0.9rem;
+  }
+
+  /* Long size strings (e.g. "3.68 MB") shouldn't be forced onto one clipped
+     line the way a filename is. */
+  .largest {
+    max-width: 12ch;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .body {
@@ -308,8 +376,10 @@
     color: var(--text-2, rgba(235, 235, 245, 0.62));
     font-size: 0.92rem;
   }
+  /* Blue dot: a per-image deviation is a single-image (azure) concept, matching
+     the strip corner dot. */
   .override-row .dot {
-    color: var(--accent-1, #ff8a5e);
+    color: var(--accent-2, #53b2ff);
   }
   .override-row strong {
     color: var(--text-1, #f5f5f7);
@@ -361,13 +431,27 @@
      (border-top + faint inset background). */
   .panel-footer {
     flex: none;
+    padding: 10px 16px 12px;
+    border-top: 1px solid var(--border, rgba(255, 255, 255, 0.08));
+    background: rgba(0, 0, 0, 0.18);
+  }
+
+  .footer-main {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
     gap: 10px;
-    padding: 10px 16px 12px;
-    border-top: 1px solid var(--border, rgba(255, 255, 255, 0.08));
-    background: rgba(0, 0, 0, 0.18);
+  }
+
+  /* Tiny uppercase whisper in the section-header idiom — marks the batch seam
+     under single-image info. */
+  .footer-scope {
+    margin: 0 0 6px;
+    color: var(--text-3, rgba(235, 235, 245, 0.38));
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
   }
 
   .stats {
@@ -412,10 +496,6 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-  }
-
-  .sep {
-    margin: 0 3px;
   }
 
   .arrow {

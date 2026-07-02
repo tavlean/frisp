@@ -146,8 +146,10 @@
             stroke-linejoin="round"
           />
         </svg>
-        <p>Global settings apply to all {labBulk.summary.totalJobs} images</p>
-        <p class="blank-sub">Click one below to inspect it</p>
+        <p class="blank-title">
+          Global settings apply to all {labBulk.summary.totalJobs} images
+        </p>
+        <p class="blank-sub">Select an image below to fine-tune it</p>
       </div>
     {/if}
 
@@ -225,19 +227,25 @@
       />
     </aside>
 
-    <aside class="options options-2">
+    <aside
+      class="options options-2"
+      class:scope-global={!imageScopeActive}
+      class:scope-image={imageScopeActive}
+    >
       <div class="scope-tabs" role="tablist" aria-label="Settings scope">
         <button
           type="button"
+          class="tab-global"
           role="tab"
           aria-selected={labBulk.panelScope === 'global'}
           class:active={labBulk.panelScope === 'global'}
           onclick={() => setPanelScope('global')}
         >
-          All images
+          Global
         </button>
         <button
           type="button"
+          class="tab-image"
           role="tab"
           aria-selected={imageScopeActive}
           class:active={imageScopeActive}
@@ -316,6 +324,33 @@
     min-height: 0;
   }
 
+  /* Resting canvas texture: the SAME faint dot grid + soft vignette the
+     production Output stage uses (Output.svelte), so the idle global stage
+     reads as an intentional canvas awaiting work rather than an empty void.
+     Only painted when nothing is selected — the real Output paints its own
+     stage otherwise. */
+  .stage-region:not(:has(.blank-stage))::before {
+    content: none;
+  }
+  .stage-region::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-color: #101014;
+    background-image:
+      radial-gradient(
+        ellipse 120% 90% at 50% 40%,
+        rgba(255, 255, 255, 0.045),
+        transparent 70%
+      ),
+      radial-gradient(rgba(128, 128, 140, 0.3) 1px, transparent 1.4px);
+    background-size:
+      100% 100%,
+      22px 22px;
+    background-position: center;
+    pointer-events: none;
+  }
+
   /* Real layout space for the strip — no longer an overlay footer. The strip
      spans the FULL viewport width (small breathing padding only) and its
      content starts from the LEFT; the panels live in the stage region above,
@@ -351,22 +386,25 @@
     pointer-events: none;
   }
   .blank-icon {
-    width: 46px;
-    height: 46px;
-    margin-bottom: 10px;
-    opacity: 0.55;
+    width: 52px;
+    height: 52px;
+    margin-bottom: 14px;
+    opacity: 0.5;
   }
   .blank-stage p {
     margin: 0;
-    font-size: 0.95rem;
-    font-weight: 500;
-    color: var(--text-2, rgba(235, 235, 245, 0.62));
     font-variant-numeric: tabular-nums;
   }
+  .blank-stage .blank-title {
+    font-size: 1.1rem;
+    font-weight: 650;
+    color: var(--text-1, #f5f5f7);
+    max-width: 26ch;
+  }
   .blank-stage .blank-sub {
-    font-size: 0.85rem;
+    font-size: 0.95rem;
     font-weight: 400;
-    color: var(--text-3, rgba(235, 235, 245, 0.38));
+    color: var(--text-2, rgba(235, 235, 245, 0.62));
   }
 
   .status-pill {
@@ -511,6 +549,18 @@
     right: var(--panel-inset);
   }
 
+  /* Scope colour language: the right panel is coral while it edits the GLOBAL
+     batch, and switches to azure while it edits THIS image. theme.css sets
+     .options-2 azure by default (that's the image case); the global case
+     re-points the same variable contract at the coral accent, so every child
+     control (sliders, toggles, section-header ticks) recolours in one move. */
+  .options-2.scope-global {
+    --main-theme-color: var(--accent-1, #ff8a5e);
+    --hot-theme-color: var(--accent-1-hot, #ff6a3c);
+    --main-theme-glow: var(--accent-1-glow, rgba(255, 122, 80, 0.32));
+    --accent-color: var(--accent-1, #ff8a5e);
+  }
+
   /* The OptionsPanel exposes two sibling roots (scroller + results footer);
      wrap them in a flex column so the scroller grows/scrolls and the footer
      pins to the bottom of the card. */
@@ -538,18 +588,18 @@
     background: transparent;
     color: var(--text-2, rgba(235, 235, 245, 0.62));
     font: inherit;
-    font-size: 0.82rem;
-    font-weight: 700;
-    letter-spacing: 0.02em;
+    font-size: 0.92rem;
+    font-weight: 650;
+    letter-spacing: 0.01em;
     cursor: pointer;
-    padding: 8px 10px 9px;
+    padding: 11px 12px 12px;
     transition: color 150ms ease;
   }
   .scope-tabs button::after {
     content: '';
     position: absolute;
-    left: 10px;
-    right: 10px;
+    left: 12px;
+    right: 12px;
     bottom: -1px;
     height: 2px;
     border-radius: 2px 2px 0 0;
@@ -562,31 +612,85 @@
   .scope-tabs button.active {
     color: var(--text-1, #f5f5f7);
   }
-  .scope-tabs button.active::after {
-    background: linear-gradient(
-      90deg,
-      var(--main-theme-color, #ff8a5e),
-      var(--hot-theme-color, #ff5e8a)
-    );
-    box-shadow: 0 0 8px var(--main-theme-glow, transparent);
+  /* Each tab's active accent matches its OWN scope hue, independent of the
+     panel's currently-themed side: Global = coral, This image = azure. */
+  .scope-tabs button.tab-global.active::after {
+    background: var(--accent-1, #ff8a5e);
+    box-shadow: 0 0 8px var(--accent-1-glow, rgba(255, 122, 80, 0.32));
+  }
+  .scope-tabs button.tab-image.active::after {
+    background: var(--accent-2, #53b2ff);
+    box-shadow: 0 0 8px var(--accent-2-glow, rgba(74, 163, 255, 0.32));
   }
   .scope-tabs button:disabled {
     opacity: 0.4;
     cursor: default;
   }
-  .scope-tabs button:focus-visible {
-    outline: 2px solid var(--main-theme-color, #ff8a5e);
+  .scope-tabs button.tab-global:focus-visible {
+    outline: 2px solid var(--accent-1, #ff8a5e);
+    outline-offset: -2px;
+    border-radius: 6px;
+  }
+  .scope-tabs button.tab-image:focus-visible {
+    outline: 2px solid var(--accent-2, #53b2ff);
     outline-offset: -2px;
     border-radius: 6px;
   }
 
-  @media (max-width: 760px) {
+  /* ── Compact layout ───────────────────────────────────────────────────────
+     Below 900px the two 312px side panels no longer fit alongside a usable
+     stage without squeezing it to a sliver and hiding the viewer's control bar
+     behind the left card. So we drop the horizontal stage insets (stage goes
+     full width) and dock both panels as two half-width bottom sheets inside the
+     stage region — ABOVE the strip, which now stays put. The Output's own
+     control bar and canvas are lifted clear of the docked panels, mirroring the
+     production editor's bottom-sheet handling, so nothing is hidden behind
+     anything. */
+  @media (max-width: 900px) {
     .compress {
-      --panel-inset: 6px;
+      --panel-inset: 8px;
       --fit-inset-left: 0px;
       --fit-inset-right: 0px;
     }
 
+    /* Lift the reused production Output's control bar + canvas above the docked
+       panels (the panels live inside the stage region, so clearing their height
+       is enough — the strip sits outside/below the stage region). */
+    :global(.compress .stage-region .output) {
+      bottom: calc(var(--mobile-options-height) + var(--panel-inset));
+    }
+    :global(.compress .stage-region .controls) {
+      bottom: calc(var(--mobile-options-height) + var(--panel-inset) + 8px);
+      padding: 0 12px;
+      box-sizing: border-box;
+    }
+
+    /* Centre the resting-stage message in the visible canvas above the docked
+       panels, not behind them. */
+    .blank-stage {
+      inset-block-end: calc(var(--mobile-options-height) + var(--panel-inset));
+    }
+
+    /* Two half-width bottom sheets. They clamp to a usable minimum width so
+       controls inside stay legible; at ~700px 2×250 + insets still clears the
+       viewport, so the panels never reach across the stage or over each other. */
+    .options {
+      width: calc(50vw - var(--panel-inset) * 1.5);
+      min-width: 250px;
+      max-width: calc(50vw - var(--panel-inset) * 1.5);
+      height: var(--mobile-options-height);
+      max-height: var(--mobile-options-height);
+      font-size: 0.95rem;
+    }
+    .options-1 {
+      left: var(--panel-inset);
+    }
+    .options-2 {
+      right: var(--panel-inset);
+    }
+  }
+
+  @media (max-width: 760px) {
     .back {
       margin: 8px;
       width: 36px;
@@ -618,22 +722,6 @@
       top: 8px;
       max-width: calc(100vw - 112px);
       font-size: 0.85rem;
-    }
-
-    .options {
-      width: calc(50vw - var(--panel-inset) * 1.5);
-      max-height: var(--mobile-options-height);
-      font-size: 0.95rem;
-    }
-    .options-1 {
-      left: var(--panel-inset);
-    }
-    .options-2 {
-      right: var(--panel-inset);
-    }
-
-    .strip-region {
-      display: none;
     }
   }
 </style>
