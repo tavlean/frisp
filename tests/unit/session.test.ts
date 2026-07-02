@@ -12,6 +12,7 @@ import {
   markJobsExported,
   normalizeBulkSessionCounters,
   removeJobs,
+  restoreJob,
   selectJob,
   selectNextJob,
   selectPreviousJob,
@@ -66,6 +67,69 @@ describe('bulk session reducers and selectors', () => {
     expect(next.selectedJobId).toBe('c');
     expect(next.activeJobs).toBe(0);
     expect(next.exportedCount).toBe(0);
+  });
+
+  it('restores removed jobs at their original index without changing selection', () => {
+    const restored = job('b');
+    const current = session([job('a'), job('c')], { selectedJobId: 'c' });
+
+    const next = restoreJob(current, restored, 1);
+
+    expect(next.jobs.map((item) => item.id)).toEqual(['a', 'b', 'c']);
+    expect(next.selectedJobId).toBe('c');
+  });
+
+  it('clamps restored jobs to the available index range', () => {
+    const current = session([job('b')], { selectedJobId: 'b' });
+
+    const prepended = restoreJob(current, job('a'), -1);
+    const appended = restoreJob(current, job('c'), 99);
+
+    expect(prepended.jobs.map((item) => item.id)).toEqual(['a', 'b']);
+    expect(appended.jobs.map((item) => item.id)).toEqual(['b', 'c']);
+  });
+
+  it('returns the same session when restoring a duplicate job id', () => {
+    const current = session([job('a')]);
+
+    expect(restoreJob(current, job('a'), 0)).toBe(current);
+  });
+
+  it('recomputes counters after restoring active and exported jobs', () => {
+    const current = {
+      ...session([job('a')]),
+      activeJobs: 7,
+      exportedCount: 5,
+    };
+
+    const withActive = restoreJob(
+      current,
+      job('b', { status: 'processing' }),
+      1,
+    );
+    const withExported = restoreJob(
+      withActive,
+      job('c', { status: 'exported', output: fakeOutput() }),
+      2,
+    );
+
+    expect(withExported.activeJobs).toBe(1);
+    expect(withExported.exportedCount).toBe(1);
+  });
+
+  it('reports restored encoded jobs with output as completed progress', () => {
+    const current = session([job('a')]);
+
+    const next = restoreJob(
+      current,
+      job('b', { status: 'encoded', output: fakeOutput() }),
+      1,
+    );
+
+    expect(getDetailedBatchProgress(next)).toMatchObject({
+      queued: 1,
+      completed: 1,
+    });
   });
 
   it('selects existing jobs and ignores missing ids', () => {

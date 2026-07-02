@@ -264,6 +264,18 @@ export function removeJobs(
   };
 }
 
+/** Re-insert a previously removed job at (clamped) index. Undo for removal. */
+export function restoreJob(
+  session: BulkSession,
+  job: ImageJob,
+  index: number,
+): BulkSession {
+  if (session.jobs.some((existing) => existing.id === job.id)) return session;
+  const jobs = [...session.jobs];
+  jobs.splice(Math.max(0, Math.min(index, jobs.length)), 0, job);
+  return normalizeBulkSessionCounters({ ...session, jobs });
+}
+
 export function selectJob(
   session: BulkSession,
   selectedJobId: string,
