@@ -2,9 +2,17 @@ import { imagePipeline, SourceImage } from '../image-pipeline';
 import type { ImagePipelineWorkerBridge } from '../image-pipeline';
 import { defaultPreprocessorState } from 'client/lazy-app/feature-meta/shared';
 import type { PreprocessorState } from 'client/lazy-app/feature-meta/shared';
-import { getEffectiveSettings, settingsHash } from './settings';
+import {
+  getEffectiveSettings,
+  resolveSettingsForSource,
+  settingsHash,
+} from './settings';
 import type { BulkImageSettings } from './settings';
-import type { ImageJob, ImageOutput } from './session';
+import {
+  getJobSourceDimensions,
+  type ImageJob,
+  type ImageOutput,
+} from './session';
 import { getPercentChange } from './size';
 
 export interface BulkProcessorPipeline {
@@ -37,7 +45,11 @@ export function createBulkProcessPlan(
   job: ImageJob,
   globalSettings: BulkImageSettings,
 ): BulkProcessPlan {
-  const effectiveSettings = getEffectiveSettings(globalSettings, job.overrides);
+  const sourceDimensions = getJobSourceDimensions(job);
+  const effectiveSettings = resolveSettingsForSource(
+    getEffectiveSettings(globalSettings, job.overrides),
+    sourceDimensions,
+  );
 
   if (!effectiveSettings.encoderState) {
     throw Error('Bulk job requires an encoder');
@@ -46,7 +58,7 @@ export function createBulkProcessPlan(
   return {
     effectiveSettings,
     encoderState: effectiveSettings.encoderState,
-    settingsHash: settingsHash(effectiveSettings),
+    settingsHash: settingsHash(effectiveSettings, sourceDimensions),
     sourceFileName: job.sourceFile.name,
   };
 }

@@ -3,6 +3,7 @@ import {
   getEffectiveSettings,
   getSettingsOverridePaths,
   hasSettingsOverrides,
+  resolveSettingsForSource,
   settingsHash,
 } from '../../src/client/lazy-app/bulk/settings';
 import { settings } from './fixtures';
@@ -79,6 +80,90 @@ describe('bulk settings helpers', () => {
     };
 
     expect(settingsHash(left)).toBe(settingsHash(right));
+  });
+
+  it('collapses disabled processor options out of the settings hash', () => {
+    const left = settings();
+    const right = settings({
+      processorState: {
+        resize: {
+          enabled: false,
+          width: 999,
+          height: 777,
+          method: 'mitchell',
+          fitMethod: 'contain',
+          premultiply: false,
+          linearRGB: false,
+        },
+        quantize: {
+          enabled: false,
+          numColors: 8,
+          dither: 0.25,
+        },
+      },
+    });
+
+    expect(settingsHash(left, { width: 800, height: 600 })).toBe(
+      settingsHash(right, { width: 800, height: 600 }),
+    );
+  });
+
+  it('collapses enabled identity resize out of the per-source settings hash', () => {
+    const resizeOff = settings({
+      processorState: {
+        ...settings().processorState,
+        resize: {
+          ...settings().processorState.resize,
+          enabled: false,
+          width: 800,
+          height: 600,
+        },
+      },
+    });
+    const resizeIdentity = settings({
+      processorState: {
+        ...settings().processorState,
+        resize: {
+          ...settings().processorState.resize,
+          enabled: true,
+          width: 800,
+          height: 600,
+        },
+      },
+    });
+
+    expect(settingsHash(resizeIdentity, { width: 800, height: 600 })).toBe(
+      settingsHash(resizeOff, { width: 800, height: 600 }),
+    );
+  });
+
+  it('resolves percentage resize presets against each job before hashing', () => {
+    const global = settings({
+      resizeReference: { width: 1000, height: 500 },
+      processorState: {
+        ...settings().processorState,
+        resize: {
+          ...settings().processorState.resize,
+          enabled: true,
+          width: 500,
+          height: 250,
+        },
+      },
+    });
+
+    const resolved = resolveSettingsForSource(global, {
+      width: 300,
+      height: 150,
+    });
+
+    expect(resolved.processorState.resize).toMatchObject({
+      enabled: true,
+      width: 150,
+      height: 75,
+    });
+    expect(settingsHash(global, { width: 300, height: 150 })).toBe(
+      settingsHash(resolved, { width: 300, height: 150 }),
+    );
   });
 
   it('detects only defined override values', () => {

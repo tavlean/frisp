@@ -70,7 +70,11 @@ describe('bulk export selectors', () => {
       settings({
         processorState: {
           ...freshSettings.processorState,
-          resize: { ...freshSettings.processorState.resize, width: 200 },
+          resize: {
+            ...freshSettings.processorState.resize,
+            enabled: true,
+            width: 200,
+          },
         },
       }),
     );

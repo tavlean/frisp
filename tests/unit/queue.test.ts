@@ -96,6 +96,96 @@ describe('bulk queue reducers', () => {
     expect(next.exportedCount).toBe(0);
   });
 
+  it('does not requeue mixed-size jobs when global resize resolves to 100%', () => {
+    const base = settings();
+    const resize100 = settings({
+      resizeReference: { width: 800, height: 600 },
+      processorState: {
+        ...base.processorState,
+        resize: {
+          ...base.processorState.resize,
+          enabled: true,
+          width: 800,
+          height: 600,
+        },
+      },
+    });
+    const current = session(
+      [
+        job('a', {
+          status: 'encoded',
+          sourceWidth: 800,
+          sourceHeight: 600,
+          output: fakeOutput({
+            hash: settingsHash(base, { width: 800, height: 600 }),
+          }),
+        }),
+        job('b', {
+          status: 'encoded',
+          sourceWidth: 1024,
+          sourceHeight: 768,
+          output: fakeOutput({
+            hash: settingsHash(base, { width: 1024, height: 768 }),
+          }),
+        }),
+      ],
+      { globalSettings: resize100 },
+    );
+
+    const next = requeueStaleJobs(current);
+
+    expect(next.jobs.map((item) => item.status)).toEqual([
+      'encoded',
+      'encoded',
+    ]);
+    expect(next.jobs.every((item) => item.output)).toBe(true);
+  });
+
+  it('requeues mixed-size jobs once when global resize resolves to 50%', () => {
+    const base = settings();
+    const resize50 = settings({
+      resizeReference: { width: 800, height: 600 },
+      processorState: {
+        ...base.processorState,
+        resize: {
+          ...base.processorState.resize,
+          enabled: true,
+          width: 400,
+          height: 300,
+        },
+      },
+    });
+    const current = session(
+      [
+        job('a', {
+          status: 'encoded',
+          sourceWidth: 800,
+          sourceHeight: 600,
+          output: fakeOutput({
+            hash: settingsHash(base, { width: 800, height: 600 }),
+          }),
+        }),
+        job('b', {
+          status: 'encoded',
+          sourceWidth: 1024,
+          sourceHeight: 768,
+          output: fakeOutput({
+            hash: settingsHash(base, { width: 1024, height: 768 }),
+          }),
+        }),
+      ],
+      { globalSettings: resize50 },
+    );
+
+    const next = requeueStaleJobs(current);
+
+    expect(next.jobs.map((item) => [item.id, item.status])).toEqual([
+      ['a', 'queued'],
+      ['b', 'queued'],
+    ]);
+    expect(next.jobs.every((item) => item.output === undefined)).toBe(true);
+  });
+
   it('requeues failed, skipped, and active jobs without touching complete jobs', () => {
     const current = session([
       job('failed', { status: 'failed', error: 'bad' }),

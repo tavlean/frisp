@@ -9,17 +9,14 @@
     labBulk,
     deepEqual,
     normalizeProcessorStateForBulkDiff,
-    type LabVariant,
   } from '$lib/lab/bulk/store.svelte';
   import { makeSampleFiles } from '$lib/lab/bulk/samples';
   import { LAB_FONT_OPTIONS, fontLab } from '$lib/lab/bulk/font-lab.svelte';
   import { toast } from '$lib/lab/bulk/Toast.svelte';
   import Toast from '$lib/lab/bulk/Toast.svelte';
-  import L2Home from '$lib/lab/bulk/L2Home.svelte';
-  import L3Home from '$lib/lab/bulk/L3Home.svelte';
+  import Home from '$lib/lab/bulk/Home.svelte';
   import {
     getEffectiveSettings,
-    settingsHash,
     type BulkImageOverrides,
     type BulkImageSettings,
     type ImageJob,
@@ -117,12 +114,12 @@
     const current = labBulk.selectedJob.overrides ?? {};
 
     if (isEmptyOverride(override)) {
-      if (!isEmptyOverride(current)) labBulk.clearSelectedOverrides();
+      if (!isEmptyOverride(current)) labBulk.queueSelectedOverridesApply({});
       return;
     }
 
     if (!deepEqual(override, current)) {
-      labBulk.applySelectedOverrides(override);
+      labBulk.queueSelectedOverridesApply(override);
     }
   });
 
@@ -135,13 +132,10 @@
     focusPreviewController?.abort();
     const seedId = ++seedSerial;
 
-    const effective = getEffectiveSettings(
-      labBulk.session.globalSettings,
-      job.overrides,
-    );
+    const effective = effectiveSettingsForJob(job);
     if (
       effective.encoderState &&
-      job.output?.settingsHash === settingsHash(effective)
+      job.output?.settingsHash === labBulk.settingsHashForJob(job)
     ) {
       void hydrateFocusFromBulkOutput(job, effective, seedId);
       return;
@@ -173,10 +167,7 @@
 
     focusSession.seedResizeDimensions();
 
-    const effective = getEffectiveSettings(
-      labBulk.session.globalSettings,
-      job.overrides,
-    );
+    const effective = effectiveSettingsForJob(job);
     const encoderState = effective.encoderState;
     if (encoderState) {
       focusSession.setFormat(1, encoderState.type as SideFormat);
@@ -195,7 +186,7 @@
 
   function reconcileSeededOverrides(job: ImageJob): void {
     const seededOverride = buildOverrideFromFocus(snapshotFocusSide());
-    const normalizedCurrent = normalizeExistingOverrides(job.overrides);
+    const normalizedCurrent = normalizeExistingOverrides(job, job.overrides);
     const current = job.overrides ?? {};
 
     if (
@@ -497,10 +488,12 @@
     options: Record<string, unknown>;
     processorState: ProcessorState;
   }): BulkImageOverrides {
+    const job = labBulk.selectedJob;
     return buildOverrideFromSettings(
       snapshot.format,
       snapshot.options,
       snapshot.processorState,
+      job ? labBulk.processingGlobalSettingsForJob(job) : undefined,
     );
   }
 
@@ -508,20 +501,20 @@
     format: SideFormat,
     options: Record<string, unknown>,
     processorStateSnapshot: ProcessorState,
+    globalSettings: BulkImageSettings = labBulk.session.globalSettings,
   ): BulkImageOverrides {
-    const global = labBulk.session.globalSettings;
     const override: BulkImageOverrides = {};
     const normalizedProcessorState = normalizeProcessorStateForBulkDiff(
       processorStateSnapshot,
     );
     const normalizedGlobalProcessorState = normalizeProcessorStateForBulkDiff(
-      global.processorState,
+      globalSettings.processorState,
     );
 
     if (
       format !== 'identity' &&
-      (format !== global.encoderState?.type ||
-        !deepEqual(options, global.encoderState?.options ?? {}))
+      (format !== globalSettings.encoderState?.type ||
+        !deepEqual(options, globalSettings.encoderState?.options ?? {}))
     ) {
       override.encoderState = {
         type: format as EncoderType,
@@ -549,10 +542,11 @@
   }
 
   function normalizeExistingOverrides(
+    job: ImageJob,
     overrides: BulkImageOverrides | undefined,
   ): BulkImageOverrides {
     const effective = getEffectiveSettings(
-      labBulk.session.globalSettings,
+      labBulk.processingGlobalSettingsForJob(job),
       overrides,
     );
     const encoderState = effective.encoderState;
@@ -560,6 +554,14 @@
       (encoderState?.type ?? 'identity') as SideFormat,
       structuredClone((encoderState?.options ?? {}) as Record<string, unknown>),
       effective.processorState,
+      labBulk.processingGlobalSettingsForJob(job),
+    );
+  }
+
+  function effectiveSettingsForJob(job: ImageJob): BulkImageSettings {
+    return getEffectiveSettings(
+      labBulk.processingGlobalSettingsForJob(job),
+      job.overrides,
     );
   }
 
@@ -581,23 +583,17 @@
     void labBulk.importFiles(Array.from(list));
   }
 
-  const SAMPLE_COUNTS = [5, 12, 30] as const;
-
-  async function loadSamples(count: number) {
+  async function loadSamples() {
     if (loadingSamples) return;
     loadingSamples = true;
     try {
-      const files = await makeSampleFiles(count);
+      const files = await makeSampleFiles(12);
       await labBulk.importFiles(files);
     } catch (error) {
       toast(error instanceof Error ? error.message : 'Could not build samples');
     } finally {
       loadingSamples = false;
     }
-  }
-
-  function setVariant(variant: LabVariant): void {
-    labBulk.variant = variant;
   }
 
   function resetLab(): void {
@@ -634,32 +630,7 @@
     {@attach fileDrop(onDrop)}
   >
     <div class="lab-controls" aria-label="Lab controls">
-      <div class="variant-toggle" role="radiogroup" aria-label="Layout variant">
-        <button
-          type="button"
-          class:active={labBulk.variant === 'l2'}
-          role="radio"
-          aria-checked={labBulk.variant === 'l2'}
-          onclick={() => setVariant('l2')}
-        >
-          L2
-        </button>
-        <button
-          type="button"
-          class:active={labBulk.variant === 'l3'}
-          role="radio"
-          aria-checked={labBulk.variant === 'l3'}
-          onclick={() => setVariant('l3')}
-        >
-          L3
-        </button>
-      </div>
-
-      <div
-        class="variant-toggle font-toggle"
-        role="radiogroup"
-        aria-label="UI font"
-      >
+      <div class="font-toggle" role="radiogroup" aria-label="UI font">
         {#each LAB_FONT_OPTIONS as font (font.id)}
           <button
             type="button"
@@ -679,23 +650,14 @@
         Add images
       </button>
 
-      <div class="sample-load" aria-label="Load sample images">
-        <span class="sample-label">
-          {loadingSamples ? 'Building…' : 'Load samples'}
-        </span>
-        <div class="sample-counts">
-          {#each SAMPLE_COUNTS as count (count)}
-            <button
-              type="button"
-              class="sample-count"
-              disabled={loadingSamples}
-              onclick={() => loadSamples(count)}
-            >
-              {count}
-            </button>
-          {/each}
-        </div>
-      </div>
+      <button
+        type="button"
+        class="btn"
+        disabled={loadingSamples}
+        onclick={loadSamples}
+      >
+        {loadingSamples ? 'Building...' : 'Load samples'}
+      </button>
 
       <button type="button" class="btn ghost" onclick={resetLab}>Reset</button>
 
@@ -710,11 +672,7 @@
     </div>
 
     {#if labBulk.hasJobs}
-      {#if labBulk.variant === 'l2'}
-        <L2Home {focusSession} onReseed={seedFocusFromSelected} />
-      {:else}
-        <L3Home {focusSession} onReseed={seedFocusFromSelected} />
-      {/if}
+      <Home {focusSession} onReseed={seedFocusFromSelected} />
     {:else}
       <main class="dropzone">
         <div class="dropzone-inner">
@@ -792,7 +750,7 @@
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
   }
 
-  .variant-toggle {
+  .font-toggle {
     display: inline-flex;
     padding: 2px;
     border-radius: 999px;
@@ -800,14 +758,14 @@
   }
 
   /* The font pills carry each option's own face so the toggle previews
-     itself; slightly tighter than the variant pills (7 options). */
+     itself without adding another label to the lab chrome. */
   .font-toggle button {
     padding: 6px 9px;
     font-weight: 600;
     font-size: 0.85rem;
   }
 
-  .variant-toggle button,
+  .font-toggle button,
   .btn {
     border: none;
     border-radius: 999px;
@@ -820,13 +778,13 @@
       opacity 150ms ease;
   }
 
-  .variant-toggle button {
+  .font-toggle button {
     padding: 6px 10px;
     background: transparent;
     color: var(--text-2, rgba(235, 235, 245, 0.62));
   }
 
-  .variant-toggle button.active {
+  .font-toggle button.active {
     background: var(--accent-1, #ff8a5e);
     color: #16161c;
   }
@@ -848,48 +806,6 @@
 
   .btn.ghost {
     color: var(--text-2, rgba(235, 235, 245, 0.62));
-  }
-
-  /* Sample-count control: a quiet label + three count buttons (5 · 12 · 30),
-     replacing the single "Load 12 samples" button. Reads as one cluster. */
-  .sample-load {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 0 4px 0 8px;
-  }
-  .sample-label {
-    color: var(--text-2, rgba(235, 235, 245, 0.62));
-    font-weight: 650;
-    font-size: 0.9rem;
-    white-space: nowrap;
-  }
-  .sample-counts {
-    display: inline-flex;
-    padding: 2px;
-    border-radius: 999px;
-    background: var(--surface-raise, rgba(255, 255, 255, 0.06));
-  }
-  .sample-count {
-    border: none;
-    border-radius: 999px;
-    background: transparent;
-    color: var(--text-1, #f5f5f7);
-    font: inherit;
-    font-weight: 700;
-    font-variant-numeric: tabular-nums;
-    padding: 5px 10px;
-    cursor: pointer;
-    transition:
-      background-color 150ms ease,
-      opacity 150ms ease;
-  }
-  .sample-count:hover:not(:disabled) {
-    background: var(--surface-raise-2, rgba(255, 255, 255, 0.09));
-  }
-  .sample-count:disabled {
-    opacity: 0.5;
-    cursor: default;
   }
 
   .hidden-input {

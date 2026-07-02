@@ -1,10 +1,11 @@
 <script lang="ts">
   import { fade } from 'svelte/transition';
+  import { SvelteSet } from 'svelte/reactivity';
   import type { EditorSession } from '$lib/editor/editor-session.svelte';
   import BatchInfoPanel from './BatchInfoPanel.svelte';
-  import FocusView from './FocusView.svelte';
-  import GlobalOptionsPanel from './GlobalOptionsPanel.svelte';
   import DeltaPill from './DeltaPill.svelte';
+  import GlobalOptionsPanel from './GlobalOptionsPanel.svelte';
+  import ViewModePicker from './ViewModePicker.svelte';
   import { labBulk } from './store.svelte';
 
   interface Props {
@@ -13,11 +14,12 @@
   }
 
   let { focusSession, onReseed }: Props = $props();
-  let mode = $state<'grid' | 'focus'>('grid');
 
   const items = $derived(labBulk.stripItems);
   const file = $derived(labBulk.selectedFile);
   const thumb = $derived(labBulk.selectedThumb);
+  const visibleProcessingIds = new SvelteSet<string>();
+  const processingTimers = new Map<string, ReturnType<typeof setTimeout>>();
 
   const SIZE_UNITS = ['B', 'kB', 'MB', 'GB', 'TB'];
 
@@ -30,6 +32,35 @@
     return `${(bytes / 1000 ** exponent).toPrecision(3)} ${SIZE_UNITS[exponent]}`;
   }
 
+  $effect(() => {
+    const activeIds = new Set(
+      items
+        .filter((item) => item.statusGroup === 'active')
+        .map((item) => item.id),
+    );
+
+    for (const id of activeIds) {
+      if (visibleProcessingIds.has(id) || processingTimers.has(id)) continue;
+      processingTimers.set(
+        id,
+        setTimeout(() => {
+          processingTimers.delete(id);
+          visibleProcessingIds.add(id);
+        }, 500),
+      );
+    }
+
+    for (const [id, timer] of processingTimers) {
+      if (activeIds.has(id)) continue;
+      clearTimeout(timer);
+      processingTimers.delete(id);
+    }
+
+    for (const id of Array.from(visibleProcessingIds)) {
+      if (!activeIds.has(id)) visibleProcessingIds.delete(id);
+    }
+  });
+
   function openCard(event: MouseEvent, id: string): void {
     if (event.shiftKey) {
       labBulk.selectRangeTo(id);
@@ -41,88 +72,88 @@
     }
 
     labBulk.select(id);
-    mode = 'focus';
+    labBulk.openFocusFromGrid();
     onReseed();
   }
 
   function onKeydown(event: KeyboardEvent): void {
-    if (event.key === 'Escape' && mode === 'focus') {
+    if (event.key === 'Escape' && labBulk.selectedCount > 0) {
       event.preventDefault();
-      mode = 'grid';
+      labBulk.deselect();
     }
   }
 </script>
 
 <svelte:window onkeydown={onKeydown} />
 
-{#if mode === 'grid'}
-  <div class="grid-home sqush-editor">
-    <main class="cards" aria-label="Images">
-      {#each items as item (item.id)}
-        {@const itemThumb = labBulk.thumbs.get(item.id)}
-        <button
-          type="button"
-          class="card"
-          class:selected={labBulk.isSelected(item.id)}
-          class:anchor={labBulk.selectedId === item.id}
-          in:fade={{ duration: 150 }}
-          title={item.fileName}
-          onclick={(event) => openCard(event, item.id)}
-        >
-          <span class="thumb-wrap">
-            {#if itemThumb}
-              <img src={itemThumb.url} alt="" draggable="false" />
-            {:else}
-              <span class="shimmer" aria-hidden="true"></span>
-            {/if}
+<div class="grid-home sqush-editor">
+  <main class="cards" aria-label="Images">
+    {#each items as item (item.id)}
+      {@const itemThumb = labBulk.thumbs.get(item.id)}
+      <button
+        type="button"
+        class="card"
+        class:selected={labBulk.isSelected(item.id)}
+        class:anchor={labBulk.selectedId === item.id}
+        in:fade={{ duration: 150 }}
+        title={item.fileName}
+        onclick={(event) => openCard(event, item.id)}
+      >
+        <span class="thumb-wrap">
+          {#if itemThumb}
+            <img src={itemThumb.url} alt="" draggable="false" />
+          {:else}
+            <span class="shimmer" aria-hidden="true"></span>
+          {/if}
 
-            {#if item.hasOverrides}
-              <span class="override-dot" aria-label="Custom settings"></span>
-            {/if}
+          {#if item.hasOverrides}
+            <span class="override-dot" aria-label="Custom settings"></span>
+          {/if}
 
-            {#if item.statusGroup === 'active'}
-              <span class="spinner-overlay" aria-hidden="true">
-                <span class="spinner"></span>
-              </span>
-            {:else if item.statusGroup === 'failed'}
-              <span class="failed-overlay" aria-label="Failed">!</span>
-            {/if}
-          </span>
+          {#if visibleProcessingIds.has(item.id)}
+            <span class="spinner-overlay" aria-hidden="true">
+              <span class="spinner"></span>
+            </span>
+          {:else if item.statusGroup === 'failed'}
+            <span class="failed-overlay" aria-label="Failed">!</span>
+          {/if}
+        </span>
 
-          <span class="card-body">
-            <span class="name">{item.fileName}</span>
-            <span class="meta">
-              <span class="card-sizes">
-                {prettySize(item.originalSize)}
-                <span class="arrow" aria-hidden="true">→</span>
-                {#if item.outputSize !== undefined}
-                  {prettySize(item.outputSize)}
-                {:else if item.statusGroup === 'active'}
-                  …
-                {:else}
-                  queued
-                {/if}
-              </span>
-              {#if item.percentChange !== undefined}
-                <DeltaPill percent={item.percentChange} />
+        <span class="card-body">
+          <span class="name">{item.fileName}</span>
+          <span class="meta">
+            <span class="card-sizes">
+              {prettySize(item.originalSize)}
+              <span class="arrow" aria-hidden="true">-></span>
+              {#if item.outputSize !== undefined}
+                {prettySize(item.outputSize)}
+              {:else if item.statusGroup === 'active'}
+                ...
+              {:else}
+                queued
               {/if}
             </span>
+            {#if item.percentChange !== undefined}
+              <DeltaPill percent={item.percentChange} />
+            {/if}
           </span>
-        </button>
-      {/each}
-    </main>
+        </span>
+      </button>
+    {/each}
+  </main>
 
-    <aside class="options options-1">
-      <BatchInfoPanel {file} width={thumb?.w ?? 0} height={thumb?.h ?? 0} />
-    </aside>
-
-    <aside class="options options-2">
-      <GlobalOptionsPanel {focusSession} />
-    </aside>
+  <div class="view-picker">
+    <ViewModePicker />
   </div>
-{:else}
-  <FocusView {focusSession} onBack={() => (mode = 'grid')} {onReseed} />
-{/if}
+
+  <aside class="options options-1">
+    <BatchInfoPanel {file} width={thumb?.w ?? 0} height={thumb?.h ?? 0} />
+  </aside>
+
+  <aside class="options options-2">
+    <GlobalOptionsPanel {focusSession} />
+  </aside>
+</div>
 
 <style>
   .grid-home {
@@ -150,7 +181,14 @@
     align-content: start;
     min-height: 0;
     overflow-y: auto;
-    padding: 2px 2px 12px;
+    padding: 2px 48px 12px 2px;
+  }
+
+  .view-picker {
+    position: absolute;
+    top: 74px;
+    right: calc(var(--fit-inset-right) + 10px);
+    z-index: 8;
   }
 
   .options {
@@ -178,9 +216,6 @@
   .options-2 {
     right: var(--panel-inset);
   }
-  /* The grid's right panel only ever edits GLOBAL batch settings, so it wears
-     the coral scope colour. Scoped under .grid-home to out-specify theme.css's
-     `.sqush-editor .options-2` azure default. */
   .grid-home .options-2 {
     --main-theme-color: var(--accent-1, #ff8a5e);
     --hot-theme-color: var(--accent-1-hot, #ff6a3c);
@@ -210,7 +245,6 @@
     transform: translateY(-1px);
   }
 
-  /* Selection ring is BLUE — matches the strip + single-image scope. */
   .card.selected {
     border-color: var(--accent-2, #53b2ff);
     box-shadow: 0 0 0 1px var(--accent-2, #53b2ff);
@@ -249,7 +283,6 @@
     );
   }
 
-  /* Custom-settings dot is BLUE — marks a per-image deviation. */
   .override-dot {
     position: absolute;
     top: 8px;
@@ -344,6 +377,12 @@
       right: var(--panel-inset);
       bottom: calc(var(--mobile-options-height) + var(--panel-inset) * 2);
       grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      padding-right: 46px;
+    }
+
+    .view-picker {
+      top: 66px;
+      right: calc(var(--panel-inset) + 6px);
     }
 
     .options {

@@ -114,6 +114,8 @@ export function job(
     error,
     previewUrl,
     thumbnailUrl,
+    sourceWidth,
+    sourceHeight,
   }: {
     fileName?: string;
     fileSize?: number;
@@ -123,6 +125,8 @@ export function job(
     error?: string;
     previewUrl?: string;
     thumbnailUrl?: string;
+    sourceWidth?: number;
+    sourceHeight?: number;
   } = {},
 ): ImageJob {
   return {
@@ -133,6 +137,8 @@ export function job(
     error,
     previewUrl,
     thumbnailUrl,
+    sourceWidth,
+    sourceHeight,
   };
 }
 

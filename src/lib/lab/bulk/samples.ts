@@ -1,7 +1,7 @@
 // Synthetic sample-image generator for the Bulk UI lab.
 //
-// The lab is a dev-only sandbox for two layout variants; to exercise it without
-// hunting for real photos, `makeSampleFiles` paints varied canvases (gradients,
+// The lab is a dev-only sandbox for the bulk UI; to exercise it without hunting
+// for real photos, `makeSampleFiles` paints varied canvases (gradients,
 // shapes, banded noise) at a mix of aspect ratios and sizes, then encodes each
 // to JPEG or PNG. The output is an ordinary File[] the engine's import path
 // accepts unchanged. Deterministic-ish: a small seeded PRNG drives the variety

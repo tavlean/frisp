@@ -3,7 +3,11 @@ import {
   hasSettingsOverrides,
   settingsHash,
 } from './settings';
-import type { BulkImageOverrides, BulkImageSettings } from './settings';
+import type {
+  BulkImageOverrides,
+  BulkImageSettings,
+  BulkSourceDimensions,
+} from './settings';
 
 export type ImageJobStatus =
   | 'queued'
@@ -44,6 +48,8 @@ export interface ImageJob {
   sourceFile: File;
   status: ImageJobStatus;
   originalSize: number;
+  sourceWidth?: number;
+  sourceHeight?: number;
   previewUrl?: string;
   thumbnailUrl?: string;
   output?: ImageOutput;
@@ -131,6 +137,24 @@ export function createImageJob(id: string, sourceFile: File): ImageJob {
     sourceFile,
     status: 'queued',
     originalSize: sourceFile.size,
+  };
+}
+
+export function getJobSourceDimensions(
+  job: ImageJob,
+): BulkSourceDimensions | undefined {
+  if (
+    !Number.isFinite(job.sourceWidth) ||
+    !Number.isFinite(job.sourceHeight) ||
+    !job.sourceWidth ||
+    !job.sourceHeight
+  ) {
+    return;
+  }
+
+  return {
+    width: job.sourceWidth,
+    height: job.sourceHeight,
   };
 }
 
@@ -317,7 +341,10 @@ export function isJobOutputStale(session: BulkSession, job: ImageJob): boolean {
     session.globalSettings,
     job.overrides,
   );
-  return job.output.settingsHash !== settingsHash(effectiveSettings);
+  return (
+    job.output.settingsHash !==
+    settingsHash(effectiveSettings, getJobSourceDimensions(job))
+  );
 }
 
 export function isJobReadyForExport(

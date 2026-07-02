@@ -9,7 +9,7 @@
 // job id, decoded lazily off the source File. Object URLs (thumbnails AND
 // engine output download URLs) are revoked on remove/reset.
 //
-// The layout variants are built on top of this store. The store + runtime are
+// The unified lab home is built on top of this store. The store + runtime are
 // the shared scaffold; the focused image itself is rendered by a real
 // EditorSession in the route.
 
@@ -22,9 +22,7 @@ import {
 import type { SideState } from '$lib/editor/editor-session.svelte';
 import {
   addBulkImportToSession,
-  applyClearJobOverrides,
-  applyGlobalSettings,
-  applyJobOverrides,
+  clearJobOverrides,
   createBulkSessionFromImport,
   createImageJobs,
   getBulkOutputFileName,
@@ -32,12 +30,18 @@ import {
   getBulkSessionSummary,
   getBulkStripItems,
   getEffectiveSettings,
+  getJobSourceDimensions,
   getSelectedJob,
   getSettingsOverridePaths,
+  normalizeBulkSessionCounters,
   revokeSessionObjectUrls,
+  resetJobForQueue,
   selectJob,
   selectNextJob,
   selectPreviousJob,
+  settingsHash,
+  updateGlobalSettings,
+  updateJobOverrides,
   type BulkImageOverrides,
   type BulkImageSettings,
   type BulkSelectedJobDetail,
@@ -45,6 +49,7 @@ import {
   type BulkSessionSummary,
   type BulkStripItem,
   type ImageJob,
+  type ImageOutput,
 } from 'client/lazy-app/bulk';
 import {
   defaultProcessorState,
@@ -62,6 +67,7 @@ import {
 // `encoderState.options` for `type:'webP'` wants exactly this type).
 import type { EncodeOptions as WebpEncodeOptions } from 'features/encoders/webP/shared/meta';
 import { toast } from './Toast.svelte';
+import { LabOutputCache } from './output-cache';
 import { LabRuntime } from './runtime';
 
 /** Thumbnail + natural (source) dimensions for one job. */
@@ -74,10 +80,10 @@ export interface LabThumb {
   h: number;
 }
 
-export type LabVariant = 'l2' | 'l3';
 export type BulkPanelScope = 'global' | 'image';
-/** L3's strip zoom (persists for the session in the store). */
-export type StripSize = 's' | 'm' | 'l';
+/** Bulk lab view mode: grid overview, or focus view with S/M/L strip zoom. */
+export type StripSize = 'grid' | 's' | 'm' | 'l';
+export type FocusStripSize = Exclude<StripSize, 'grid'>;
 
 /** A ready-to-download output for one job: the URL the engine minted + the
  *  export-safe filename. `undefined` while the job has no current output. */
@@ -272,11 +278,10 @@ function omitOverridePath(
 export class LabBulk {
   // The immutable engine session; reassigned on every reducer call.
   session = $state.raw<BulkSession>(emptySession());
-  // Which layout variant the lab is showing (bound to the top-bar toggle).
-  variant = $state<LabVariant>('l3');
-  // L3's strip zoom (S/M/L). Session-scoped: persists across selections but not
-  // reloads, matching the store's other in-memory lab state.
+  // Grid overview or focus strip zoom (S/M/L). Session-scoped: persists across
+  // selections but not reloads, matching the store's other in-memory lab state.
   stripSize = $state<StripSize>('m');
+  #lastFocusStripSize: FocusStripSize = 'm';
   // Multi-select layer over the engine's single selectedJobId. The engine value
   // remains the ANCHOR; this set is the batch editing surface.
   readonly selectedIds = new SvelteSet<string>();
@@ -292,6 +297,7 @@ export class LabBulk {
 
   // The processing driver (two persistent bridges + abort control).
   readonly runtime = new LabRuntime();
+  readonly #outputCache = new LabOutputCache({ maxEntriesPerJob: 3 });
 
   // ── Derived view-models (engine selectors) ────────────────────────────────
   readonly stripItems = $derived<BulkStripItem[]>(
@@ -329,6 +335,9 @@ export class LabBulk {
       this.selectedIds.size === this.session.jobs.length,
   );
   readonly hasJobs = $derived(this.session.jobs.length > 0);
+  readonly focusStripSize = $derived<FocusStripSize>(
+    this.stripSize === 'grid' ? this.#lastFocusStripSize : this.stripSize,
+  );
   /** True while any job is decoding/processing (or the runtime loop is live). */
   readonly processing = $derived(
     this.summary.progress.active > 0 || this.summary.actions.hasActiveJobs,
@@ -337,6 +346,13 @@ export class LabBulk {
   // ── Actions ───────────────────────────────────────────────────────────────
   #syncingGlobalSide = false;
   #globalApplyTimer: ReturnType<typeof setTimeout> | null = null;
+  #selectedApplyTimer: ReturnType<typeof setTimeout> | null = null;
+  #pendingSelectedApply: {
+    ids: string[];
+    allJobsSelected: boolean;
+    overrides: BulkImageOverrides;
+    onApplied?: () => void;
+  } | null = null;
   #globalResizeSeededJobId: string | null = null;
   #globalResizeReference: {
     jobId: string;
@@ -365,6 +381,15 @@ export class LabBulk {
     }
 
     void this.runtime.run(this);
+  }
+
+  setStripSize(next: StripSize): void {
+    this.stripSize = next;
+    if (next !== 'grid') this.#lastFocusStripSize = next;
+  }
+
+  openFocusFromGrid(): void {
+    this.stripSize = this.#lastFocusStripSize;
   }
 
   select(id: string): void {
@@ -445,8 +470,8 @@ export class LabBulk {
 
   /**
    * Update GLOBAL WebP encode options (merged onto the current global options).
-   * Routes through applyGlobalSettings so non-overridden stale jobs requeue,
-   * then kicks a run to re-encode them.
+   * Routes through the cache-aware global settings applicator so only genuinely
+   * stale jobs queue, then kicks a run to encode the misses.
    */
   updateGlobal(partial: Partial<WebpEncodeOptions>): void {
     const current = webpOptions(this.session.globalSettings);
@@ -462,8 +487,7 @@ export class LabBulk {
     ) {
       return;
     }
-    this.session = applyGlobalSettings(this.session, nextSettings);
-    void this.runtime.run(this);
+    this.#applyGlobalSettings(nextSettings);
   }
 
   /**
@@ -490,8 +514,7 @@ export class LabBulk {
         options: { ...base, ...partial } as WebpEncodeOptions,
       },
     };
-    this.session = applyJobOverrides(this.session, id, overrides);
-    void this.runtime.run(this);
+    this.#applyJobOverrides(id, overrides);
   }
 
   /**
@@ -513,8 +536,7 @@ export class LabBulk {
       next = omitOverridePath(job.overrides, path);
     }
 
-    this.session = applyJobOverrides(this.session, id, next);
-    void this.runtime.run(this);
+    this.#applyJobOverrides(id, next);
   }
 
   /**
@@ -549,24 +571,21 @@ export class LabBulk {
 
   /** Clear ALL overrides on a job ("Reset all to global"). */
   resetAllOverrides(id: string): void {
-    this.session = applyClearJobOverrides(this.session, id);
-    void this.runtime.run(this);
+    this.#clearJobOverrides(id);
   }
 
   applyAnchorOverrides(overrides: BulkImageOverrides): void {
     const id = this.session.selectedJobId;
     if (!id) return;
 
-    this.session = applyJobOverrides(this.session, id, overrides);
-    void this.runtime.run(this);
+    this.#applyJobOverrides(id, overrides);
   }
 
   clearAnchorOverrides(): void {
     const id = this.session.selectedJobId;
     if (!id) return;
 
-    this.session = applyClearJobOverrides(this.session, id);
-    void this.runtime.run(this);
+    this.#clearJobOverrides(id);
   }
 
   applySelectedOverrides(overrides: BulkImageOverrides): void {
@@ -583,21 +602,19 @@ export class LabBulk {
       ) {
         return;
       }
-      this.session = applyGlobalSettings(this.session, nextSettings);
-      void this.runtime.run(this);
+      this.#applyGlobalSettings(nextSettings);
       return;
     }
 
     let nextSession = this.session;
     for (const id of ids) {
-      nextSession = applyJobOverrides(
+      nextSession = updateJobOverrides(
         nextSession,
         id,
         structuredClone(overrides),
       );
     }
-    this.session = nextSession;
-    void this.runtime.run(this);
+    this.#adoptSettingsSession(nextSession);
   }
 
   clearSelectedOverrides(): void {
@@ -606,10 +623,145 @@ export class LabBulk {
 
     let nextSession = this.session;
     for (const id of ids) {
-      nextSession = applyClearJobOverrides(nextSession, id);
+      nextSession = clearJobOverrides(nextSession, id);
     }
+    this.#adoptSettingsSession(nextSession);
+  }
+
+  queueSelectedOverridesApply(
+    overrides: BulkImageOverrides,
+    onApplied?: () => void,
+  ): void {
+    const ids = this.#selectedJobIds();
+    if (ids.length === 0) return;
+
+    this.#pendingSelectedApply = {
+      ids,
+      allJobsSelected: this.allJobsSelected,
+      overrides: structuredClone(overrides),
+      onApplied,
+    };
+
+    if (this.#selectedApplyTimer !== null) {
+      clearTimeout(this.#selectedApplyTimer);
+    }
+    this.#selectedApplyTimer = setTimeout(() => {
+      this.#selectedApplyTimer = null;
+      this.#flushSelectedApply();
+    }, 200);
+  }
+
+  #flushSelectedApply(): void {
+    const pending = this.#pendingSelectedApply;
+    this.#pendingSelectedApply = null;
+    if (!pending) return;
+
+    const liveIds = new Set(this.session.jobs.map((job) => job.id));
+    const ids = pending.ids.filter((id) => liveIds.has(id));
+    if (ids.length === 0) return;
+
+    if (pending.allJobsSelected && ids.length === this.session.jobs.length) {
+      const nextSettings = getEffectiveSettings(
+        this.session.globalSettings,
+        pending.overrides,
+      );
+      if (
+        bulkSettingsEqualForBulkDiff(nextSettings, this.session.globalSettings)
+      ) {
+        return;
+      }
+      this.#applyGlobalSettings(nextSettings);
+      pending.onApplied?.();
+      return;
+    }
+
+    let nextSession = this.session;
+    for (const id of ids) {
+      nextSession = updateJobOverrides(
+        nextSession,
+        id,
+        structuredClone(pending.overrides),
+      );
+    }
+    this.#adoptSettingsSession(nextSession);
+    pending.onApplied?.();
+  }
+
+  #applyGlobalSettings(globalSettings: BulkImageSettings): void {
+    this.#adoptSettingsSession(
+      updateGlobalSettings(this.session, globalSettings),
+    );
+  }
+
+  #applyJobOverrides(jobId: string, overrides: BulkImageOverrides): void {
+    this.#adoptSettingsSession(
+      updateJobOverrides(this.session, jobId, overrides),
+    );
+  }
+
+  #clearJobOverrides(jobId: string): void {
+    this.#adoptSettingsSession(clearJobOverrides(this.session, jobId));
+  }
+
+  #adoptSettingsSession(session: BulkSession): void {
+    const nextSession = this.#restoreCachedOrQueueStale(session);
+    if (nextSession === this.session) return;
+
     this.session = nextSession;
-    void this.runtime.run(this);
+    this.#pinCurrentOutputs();
+    if (this.session.jobs.some((job) => job.status === 'queued')) {
+      void this.runtime.run(this);
+    }
+  }
+
+  #restoreCachedOrQueueStale(session: BulkSession): BulkSession {
+    const normalizedSession = normalizeBulkSessionCounters(session);
+    let changed = false;
+
+    const jobs = normalizedSession.jobs.map((job) => {
+      const hash = this.#settingsHashForJob(normalizedSession, job);
+      if (job.output?.settingsHash === hash) return job;
+
+      if (job.output) {
+        this.#outputCache.put(job.id, job.output.settingsHash, job.output);
+      }
+
+      const cached = this.#outputCache.get(job.id, hash);
+      if (cached) {
+        changed = true;
+        return {
+          ...job,
+          status: 'encoded' as const,
+          output: cached,
+          error: undefined,
+        };
+      }
+
+      if (!job.output) return job;
+
+      changed = true;
+      return resetJobForQueue(job);
+    });
+
+    return changed
+      ? normalizeBulkSessionCounters({ ...normalizedSession, jobs })
+      : normalizedSession;
+  }
+
+  rememberOutput(jobId: string, output: ImageOutput): void {
+    this.#outputCache.put(jobId, output.settingsHash, output);
+    this.#pinCurrentOutputs();
+  }
+
+  cachedOutputFor(job: ImageJob): ImageOutput | undefined {
+    return this.#outputCache.get(
+      job.id,
+      this.#settingsHashForJob(this.session, job),
+    );
+  }
+
+  settingsHashForJob(job: ImageJob): string {
+    return this.#settingsHashForJob(this.session, job);
   }
 
   refreshGlobalSideFromSession(): void {
@@ -697,6 +849,12 @@ export class LabBulk {
           options: structuredClone(snapshot.optionsByFormat[format] ?? {}),
         } as EncoderState,
         processorState: structuredClone(snapshot.processorState),
+        resizeReference: this.#globalResizeReference
+          ? {
+              width: this.#globalResizeReference.width,
+              height: this.#globalResizeReference.height,
+            }
+          : undefined,
       };
 
       if (
@@ -705,10 +863,9 @@ export class LabBulk {
         return;
       }
 
-      this.session = applyGlobalSettings(this.session, nextSettings);
-      void this.runtime.run(this);
+      this.#applyGlobalSettings(nextSettings);
       onApplied?.();
-    }, 150);
+    }, 200);
   }
 
   /** Effective (global + override) WebP options for a job, or the global. */
@@ -765,6 +922,35 @@ export class LabBulk {
       getEffectiveSettings(this.session.globalSettings, job.overrides),
     );
     return jobOptions[leaf] !== globalOptions[leaf];
+  }
+
+  #settingsHashForJob(session: BulkSession, job: ImageJob): string {
+    return settingsHash(
+      getEffectiveSettings(session.globalSettings, job.overrides),
+      getJobSourceDimensions(job) ?? this.#thumbDimensions(job.id),
+    );
+  }
+
+  #thumbDimensions(jobId: string):
+    | {
+        width: number;
+        height: number;
+      }
+    | undefined {
+    const thumb = this.thumbs.get(jobId);
+    if (!thumb) return;
+    return {
+      width: thumb.w,
+      height: thumb.h,
+    };
+  }
+
+  #pinCurrentOutputs(): void {
+    this.#outputCache.setPinned(
+      this.session.jobs
+        .map((job) => job.output)
+        .filter((output): output is ImageOutput => output !== undefined),
+    );
   }
 
   /** Cancel any in-flight processing (returns active jobs to the queue). */
@@ -893,6 +1079,7 @@ export class LabBulk {
 
       // A job may have been removed/reset while decoding — don't leak a URL.
       if (!this.session.jobs.some((job) => job.id === id)) return;
+      this.#recordJobDimensions(id, natW, natH);
       this.thumbs.set(id, {
         url: URL.createObjectURL(blob),
         w: natW,
@@ -905,10 +1092,26 @@ export class LabBulk {
     }
   }
 
+  #recordJobDimensions(id: string, width: number, height: number): void {
+    this.session = {
+      ...this.session,
+      jobs: this.session.jobs.map((job) =>
+        job.id === id
+          ? {
+              ...job,
+              sourceWidth: width,
+              sourceHeight: height,
+            }
+          : job,
+      ),
+    };
+  }
+
   /** Revoke every thumbnail URL and every engine-owned output/preview URL. */
   #revokeAll(): void {
     for (const thumb of this.thumbs.values()) URL.revokeObjectURL(thumb.url);
     this.thumbs.clear();
+    this.#outputCache.clear();
     revokeSessionObjectUrls(this.session);
   }
 

@@ -17,9 +17,7 @@ import {
   startJob,
   cancelActiveJobs,
   defaultBulkConcurrency,
-  getEffectiveSettings,
   processBulkImageJob,
-  settingsHash,
   type ImageJob,
   type ImageOutput,
 } from 'client/lazy-app/bulk';
@@ -36,6 +34,9 @@ export interface LabRunnerHost {
   processingGlobalSettingsForJob?(
     job: ImageJob,
   ): LabBulk['session']['globalSettings'];
+  cachedOutputFor?(job: ImageJob): ImageOutput | undefined;
+  rememberOutput?(jobId: string, output: ImageOutput): void;
+  settingsHashForJob?(job: ImageJob): string;
 }
 
 export class LabRuntime {
@@ -119,9 +120,14 @@ export class LabRuntime {
   ): Promise<void> {
     try {
       if (signal.aborted) return;
-      const canonicalSettingsHash = settingsHash(
-        getEffectiveSettings(host.session.globalSettings, job.overrides),
-      );
+      const cached = host.cachedOutputFor?.(job);
+      if (cached) {
+        host.session = completeJob(host.session, job.id, cached);
+        return;
+      }
+
+      const canonicalSettingsHash =
+        host.settingsHashForJob?.(job) ?? job.output?.settingsHash;
       const output: ImageOutput = await processBulkImageJob({
         job,
         globalSettings:
@@ -132,10 +138,12 @@ export class LabRuntime {
         createDownloadUrl: (file) => host.createOutputDownloadUrl(file),
       });
       if (signal.aborted) return;
-      host.session = completeJob(host.session, job.id, {
+      const completedOutput = {
         ...output,
-        settingsHash: canonicalSettingsHash,
-      });
+        settingsHash: canonicalSettingsHash ?? output.settingsHash,
+      };
+      host.session = completeJob(host.session, job.id, completedOutput);
+      host.rememberOutput?.(job.id, completedOutput);
     } catch (error) {
       // An abort is a clean cancel, not a job failure: leave the reducer to
       // cancelActiveJobs() (called from cancel()) so the job returns to queued.

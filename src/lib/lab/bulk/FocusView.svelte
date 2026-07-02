@@ -13,15 +13,14 @@
 
   interface Props {
     focusSession: EditorSession;
-    onBack?: (() => void) | null;
     onReseed?: (() => void) | null;
     /**
      * Optional custom strip renderer. When omitted, FocusView renders the
-     * baseline FilmStrip used by L2 focus mode.
+     * baseline FilmStrip.
      */
     strip?: Snippet | null;
     /**
-     * Strip-region height in CSS px. Lets a variant grow the dock. Defaults to
+     * Strip-region height in CSS px. Lets the home grow the dock. Defaults to
      * the baseline 104px.
      */
     stripHeight?: number;
@@ -29,7 +28,6 @@
 
   let {
     focusSession,
-    onBack = null,
     onReseed = null,
     strip = null,
     stripHeight = 104,
@@ -171,7 +169,7 @@
       return;
     }
 
-    if (event.key === 'Escape' && !onBack && selectedCount > 0) {
+    if (event.key === 'Escape' && selectedCount > 0) {
       event.preventDefault();
       labBulk.deselect();
       return;
@@ -256,28 +254,8 @@
       <p class="selection-chip">{selectedCount} selected</p>
     {/if}
 
-    {#if onBack}
-      <button
-        class="back"
-        onclick={onBack}
-        title="Back to grid"
-        aria-label="Back to grid"
-      >
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path
-            d="M15 6l-6 6 6 6"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2.2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
-        </svg>
-      </button>
-    {/if}
-
     {#if selectedId}
-      <div class="history-controls" class:no-back={!onBack}>
+      <div class="history-controls">
         <button
           class="hist"
           onclick={() => focusSession.undo()}
@@ -573,7 +551,7 @@
     -webkit-backdrop-filter: blur(10px);
     display: flex;
     align-items: center;
-    /* Smooth the dock resize when L3's S/M/L changes, so the stage
+    /* Smooth the dock resize when S/M/L changes, so the stage
        grows/shrinks without jank. */
     transition: height 220ms cubic-bezier(0.22, 0.61, 0.36, 1);
   }
@@ -670,57 +648,14 @@
     pointer-events: none;
   }
 
-  .back {
-    position: absolute;
-    top: 0;
-    left: 0;
-    margin: 14px;
-    width: 40px;
-    height: 40px;
-    display: grid;
-    place-items: center;
-    background: var(--surface, rgba(19, 19, 25, 0.82));
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid var(--border, rgba(255, 255, 255, 0.08));
-    border-radius: 50%;
-    padding: 0;
-    cursor: pointer;
-    color: var(--text-2, #aaa);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
-    z-index: 10;
-    transition:
-      color 150ms ease,
-      border-color 150ms ease,
-      transform 150ms ease;
-  }
-  .back:hover {
-    color: var(--text-1, #fff);
-    border-color: var(--border-strong, rgba(255, 255, 255, 0.16));
-    transform: scale(1.06);
-  }
-  .back:focus-visible {
-    outline: 2px solid var(--accent-1, #ff8a5e);
-    outline-offset: 2px;
-  }
-  .back svg {
-    width: 18px;
-    height: 18px;
-    display: block;
-  }
-
   .history-controls {
     position: absolute;
     top: 0;
     left: 0;
     margin: 14px;
-    margin-left: 64px;
     display: flex;
     gap: 8px;
     z-index: 10;
-  }
-  .history-controls.no-back {
-    margin-left: 14px;
   }
   .hist {
     width: 40px;
@@ -931,23 +866,9 @@
   }
 
   @media (max-width: 760px) {
-    .back {
-      margin: 8px;
-      width: 36px;
-      height: 36px;
-    }
-    .back svg {
-      width: 16px;
-      height: 16px;
-    }
-
     .history-controls {
       margin: 8px;
-      margin-left: 52px;
       gap: 6px;
-    }
-    .history-controls.no-back {
-      margin-left: 8px;
     }
     .hist {
       width: 36px;
@@ -1006,7 +927,6 @@
     }
 
     /* Move the top-left chrome below the summary bar so nothing collides. */
-    .back,
     .history-controls {
       top: calc(var(--summary-top) + var(--summary-h) - 6px);
     }

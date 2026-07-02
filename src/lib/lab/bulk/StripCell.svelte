@@ -45,6 +45,19 @@
   const hasOutput = $derived(
     item.outputSize !== undefined && item.percentChange !== undefined,
   );
+  let showProcessing = $state(false);
+
+  $effect(() => {
+    if (!processing) {
+      showProcessing = false;
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      showProcessing = true;
+    }, 500);
+    return () => clearTimeout(timer);
+  });
 
   // Compact "251 kB → 26.2 kB" transform line (m / l captions).
   const transform = $derived(
@@ -80,7 +93,7 @@
         <span class="override-dot" aria-label="Custom settings"></span>
       {/if}
 
-      {#if processing}
+      {#if showProcessing}
         <span class="spinner-overlay" aria-hidden="true">
           <span class="spinner"></span>
         </span>
