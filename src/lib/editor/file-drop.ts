@@ -14,6 +14,7 @@
 // overlay.
 
 import type { Attachment } from 'svelte/attachments';
+import { fromDataTransfer, type ImportedFile } from '$lib/bulk/import-sources';
 
 /** True when the drag actually carries files (not text, links, etc.). */
 function dragHasFiles(event: DragEvent): boolean {
@@ -22,10 +23,10 @@ function dragHasFiles(event: DragEvent): boolean {
 }
 
 /**
- * @param onFiles Called with the dropped FileList (always non-empty).
+ * @param onFiles Called with dropped files plus optional folder-relative paths.
  */
 export function fileDrop(
-  onFiles: (files: FileList) => void,
+  onFiles: (files: ImportedFile[]) => void,
 ): Attachment<HTMLElement> {
   return (node) => {
     let depth = 0;
@@ -58,8 +59,11 @@ export function fileDrop(
       event.preventDefault();
       depth = 0;
       setActive(false);
-      const files = event.dataTransfer?.files;
-      if (files && files.length) onFiles(files);
+      if (!event.dataTransfer) return;
+
+      void fromDataTransfer(event.dataTransfer).then((files) => {
+        if (files.length) onFiles(files);
+      });
     };
 
     node.addEventListener('dragenter', onDragEnter);

@@ -14,6 +14,7 @@
   import Intro from '$lib/editor/intro/Intro.svelte';
   import BulkMode from '$lib/bulk/BulkMode.svelte';
   import { bulkStore } from '$lib/bulk/store.svelte';
+  import type { ImportedFile } from '$lib/bulk/import-sources';
   import { snackbar } from '$lib/editor/snackbar-store.svelte';
   import { fileDrop } from '$lib/editor/file-drop';
   import { EditorSession } from '$lib/editor/editor-session.svelte';
@@ -82,8 +83,8 @@
     session.pickFiles(list, () => pushState('', { editor: true }));
   }
 
-  function routeFiles(list: FileList | File[] | null | undefined): void {
-    const files = Array.from(list ?? []).filter(isSupportedBulkImage);
+  function routeFiles(imported: ImportedFile[]): void {
+    const files = imported.filter((item) => isSupportedBulkImage(item.file));
     if (files.length === 0) {
       void snackbar.show('No supported images found.');
       return;
@@ -101,7 +102,7 @@
       if (!page.state.editor) pushState('', { editor: true });
       return;
     }
-    pickFiles(files);
+    pickFiles([files[0].file]);
   }
 
   function exitBulk() {

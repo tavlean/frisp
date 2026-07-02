@@ -7,11 +7,12 @@
   // click-to-open and paste affordances.
   import type { Attachment } from 'svelte/attachments';
   import { asset } from '$app/paths';
+  import { fromFileList, type ImportedFile } from '$lib/bulk/import-sources';
   import { startBlobAnim } from './blob-anim';
 
   interface Props {
-    /** Hand a chosen image (from the dialog or a paste) up to the page. */
-    onFiles: (list: FileList | null | undefined) => void;
+    /** Hand chosen files (from picker/folder/paste) up to the page. */
+    onFiles: (files: ImportedFile[]) => void;
     /** Shown when a paste contains no image (reuses the page's snackbar). */
     onMessage?: (text: string) => void;
   }
@@ -27,8 +28,12 @@
 
   // The hidden file input, captured on mount for the open/change handlers.
   let fileInput: HTMLInputElement | undefined;
+  let folderInput: HTMLInputElement | undefined;
   const captureInput: Attachment<HTMLInputElement> = (node) => {
     fileInput = node;
+  };
+  const captureFolderInput: Attachment<HTMLInputElement> = (node) => {
+    folderInput = node;
   };
 
   // Blob animation (canvas). It gravitates towards the load target, so it needs
@@ -43,22 +48,23 @@
     if (blobTarget) return startBlobAnim(canvas, blobTarget);
   };
 
-  // Deliver a single File as a real FileList, so it flows through the same
-  // pickFiles path as the dialog and the drop handler.
+  // Deliver a single pasted File through the same ImportedFile[] boundary.
   function deliver(file: File) {
-    const dt = new DataTransfer();
-    dt.items.add(file);
-    onFiles(dt.files);
+    onFiles([{ file }]);
   }
 
   function onOpenClick() {
     fileInput?.click();
   }
 
-  function onFileChange() {
-    if (!fileInput) return;
-    onFiles(fileInput.files);
-    fileInput.value = '';
+  function onFolderClick() {
+    folderInput?.click();
+  }
+
+  function onFileChange(event: Event) {
+    const input = event.currentTarget as HTMLInputElement;
+    if (input.files?.length) onFiles(fromFileList(input.files));
+    input.value = '';
   }
 
   async function onPasteClick() {
@@ -101,6 +107,13 @@
     type="file"
     accept="image/*"
     multiple
+    onchange={onFileChange}
+  />
+  <input
+    class="hide"
+    {@attach captureFolderInput}
+    type="file"
+    {...{ webkitdirectory: true }}
     onchange={onFileChange}
   />
 
@@ -148,13 +161,18 @@
         </button>
         <div class="load-text">
           <span class="drop-text">Drop</span>, click, or
-          {#if supportsClipboardRead}
-            <button class="paste-btn" type="button" onclick={onPasteClick}
-              >paste</button
+          <span class="secondary-actions">
+            {#if supportsClipboardRead}
+              <button class="paste-btn" type="button" onclick={onPasteClick}
+                >Paste image</button
+              >
+            {:else}
+              paste
+            {/if}
+            <button class="paste-btn" type="button" onclick={onFolderClick}
+              >Choose folder</button
             >
-          {:else}
-            paste
-          {/if}
+          </span>
         </div>
       </div>
     </div>
@@ -373,9 +391,17 @@
     font-weight: 500;
     color: rgba(255, 255, 255, 0.85);
     text-shadow: 0 1px 6px rgba(0, 0, 0, 0.25);
+    text-align: center;
   }
   .drop-text {
     font-weight: 700;
+  }
+  .secondary-actions {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75ch;
+    flex-wrap: wrap;
   }
 
   .paste-btn {

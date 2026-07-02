@@ -71,6 +71,7 @@ import {
 // `encoderState.options` for `type:'webP'` wants exactly this type).
 import type { EncodeOptions as WebpEncodeOptions } from 'features/encoders/webP/shared/meta';
 import { snackbar } from '$lib/editor/snackbar-store.svelte';
+import type { ImportedFile } from './import-sources';
 import { BulkOutputCache } from './output-cache';
 import { BulkRuntime } from './runtime';
 import { buildZipBlob, triggerBlobDownload } from './zip';
@@ -388,16 +389,20 @@ export class BulkStore {
   } | null = null;
 
   /**
-   * Import Files into the session, decode thumbnails, auto-select the first job
+   * Import files into the session, decode thumbnails, auto-select the first job
    * (the engine's addJobs does this when nothing is selected), and kick
    * processing. Files that aren't images are dropped by the import filter.
    */
-  async importFiles(files: File[]): Promise<void> {
-    if (files.length === 0) return;
+  async importFiles(imported: ImportedFile[]): Promise<void> {
+    if (imported.length === 0) return;
 
     const hadSelection = this.session.selectedJobId !== undefined;
     const previousJobCount = this.session.jobs.length;
-    const result = createImageJobs(files);
+    const relativePaths = new Map(
+      imported.map(({ file, relativePath }) => [file, relativePath]),
+    );
+    const files = imported.map((item) => item.file);
+    const result = createImageJobs(files, (file) => relativePaths.get(file));
     // addBulkImportToSession keeps existing jobs; auto-selects first if none.
     this.session = addBulkImportToSession(this.session, result);
     if (!hadSelection) this.deselect();

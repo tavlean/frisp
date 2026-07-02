@@ -8,6 +8,7 @@
     deepEqual,
     normalizeProcessorStateForBulkDiff,
   } from '$lib/bulk/store.svelte';
+  import { fromFileList } from '$lib/bulk/import-sources';
   import Home from '$lib/bulk/Home.svelte';
   import {
     getEffectiveSettings,
@@ -571,7 +572,7 @@
 
   function onPick(event: Event) {
     const input = event.currentTarget as HTMLInputElement;
-    const files = input.files ? Array.from(input.files) : [];
+    const files = input.files ? fromFileList(input.files) : [];
     if (files.length) void bulkStore.importFiles(files);
     input.value = '';
   }
