@@ -19,7 +19,15 @@ polish pass fixed the strip overlap + left-panel card nesting, and a THIRD
 variant **L3 "flush left"** was added. Round 10 consolidated the lab into one
 UI: grid is now the top vertical picker mode, L/M/S are focus-strip modes,
 the L2/L3 variant toggle is gone, and the bulk path adopted the production
-editor's no-wasted-work encode discipline.
+editor's no-wasted-work encode discipline. Round 11 (same day): strip fade
+masks; remove-from-batch (hover ✕ + Delete-key; Undo = production note);
+duplicate adds fixed and SANCTIONED as the interim multi-format pattern
+(strengthens the renditions track's priority); drag-select from blank strip
+space; the view picker re-homed beside the stage toolbar (top-right
+rejected); and the **STACK resting stage experiment** (Stack|Blank toggle,
+Stack default): the global/multi-selection stage shows a fanned stack of
+the scope's images with a before/after split top card — the stage always
+shows the work. Awaiting maintainer verdict on Stack vs Blank.
 This is the "Design First" step required by [road-map.md](road-map.md) before
 any production bulk UI. Engine reference: [bulk-image-architecture.md](bulk-image-architecture.md).
 
