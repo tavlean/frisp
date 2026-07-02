@@ -1,10 +1,9 @@
 <script lang="ts">
   import { fade } from 'svelte/transition';
   import type { EditorSession } from '$lib/editor/editor-session.svelte';
-  import BatchCard from './BatchCard.svelte';
+  import BatchInfoPanel from './BatchInfoPanel.svelte';
   import FocusView from './FocusView.svelte';
   import GlobalOptionsPanel from './GlobalOptionsPanel.svelte';
-  import InfoPanel from './InfoPanel.svelte';
   import { labBulk } from './store.svelte';
 
   interface Props {
@@ -114,10 +113,7 @@
     </main>
 
     <aside class="options options-1">
-      <div class="left-stack">
-        <BatchCard compact />
-        <InfoPanel {file} width={thumb?.w ?? 0} height={thumb?.h ?? 0} />
-      </div>
+      <BatchInfoPanel {file} width={thumb?.w ?? 0} height={thumb?.h ?? 0} />
     </aside>
 
     <aside class="options options-2">
@@ -181,14 +177,6 @@
   }
   .options-2 {
     right: var(--panel-inset);
-  }
-
-  .left-stack {
-    display: grid;
-    gap: 12px;
-    min-height: 0;
-    overflow-y: auto;
-    padding: 12px;
   }
 
   .card {

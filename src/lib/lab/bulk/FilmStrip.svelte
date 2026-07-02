@@ -89,19 +89,38 @@
 </div>
 
 <style>
+  /* Quiet dock: sits inside the strip-region the layout reserves for it.
+     Horizontal scroll with no scrollbar chrome until the strip is hovered. */
   .filmstrip {
     display: flex;
-    gap: 12px;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
     overflow-x: auto;
-    padding: 4px 2px 8px;
+    padding: 6px 0;
+    scrollbar-width: none;
+    scroll-snap-type: x proximity;
+  }
+  .filmstrip::-webkit-scrollbar {
+    height: 6px;
+  }
+  .filmstrip::-webkit-scrollbar-thumb {
+    background: transparent;
+    border-radius: 999px;
+  }
+  .filmstrip:hover {
     scrollbar-width: thin;
+  }
+  .filmstrip:hover::-webkit-scrollbar-thumb {
+    background: var(--border-strong, rgba(255, 255, 255, 0.16));
   }
 
   .cell {
     flex: none;
-    width: 132px;
+    width: 104px;
     display: grid;
-    gap: 5px;
+    gap: 4px;
+    scroll-snap-align: start;
   }
 
   .thumb {
@@ -110,8 +129,8 @@
     width: 100%;
     aspect-ratio: 16 / 10;
     padding: 0;
-    border: 2px solid var(--border, rgba(255, 255, 255, 0.08));
-    border-radius: 10px;
+    border: 1.5px solid var(--border, rgba(255, 255, 255, 0.08));
+    border-radius: 8px;
     background: var(--surface-solid, #16161c);
     overflow: hidden;
     cursor: pointer;
@@ -150,10 +169,10 @@
 
   .override-dot {
     position: absolute;
-    top: 6px;
-    right: 6px;
-    width: 9px;
-    height: 9px;
+    top: 5px;
+    right: 5px;
+    width: 8px;
+    height: 8px;
     border-radius: 50%;
     background: var(--accent-1, #ff8a5e);
     box-shadow: 0 0 0 2px var(--surface-solid, #16161c);
@@ -169,9 +188,9 @@
   }
 
   .spinner {
-    width: 22px;
-    height: 22px;
-    border: 2.5px solid rgba(255, 255, 255, 0.25);
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(255, 255, 255, 0.25);
     border-top-color: var(--accent-1, #ff8a5e);
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
@@ -185,20 +204,22 @@
     background: rgba(12, 12, 15, 0.55);
     color: var(--bad, #ff7d92);
     font-weight: 700;
-    font-size: 1.4rem;
+    font-size: 1.2rem;
   }
 
+  /* One compact line: dim size + smaller delta pill. */
   .caption {
     display: flex;
     align-items: baseline;
-    gap: 6px;
-    padding: 0 2px;
-    font-size: 0.85rem;
+    gap: 5px;
+    padding: 0 1px;
+    font-size: 0.72rem;
     font-variant-numeric: tabular-nums;
+    line-height: 1.2;
   }
 
   .size {
-    color: var(--text-2, rgba(235, 235, 245, 0.62));
+    color: var(--text-3, rgba(235, 235, 245, 0.38));
     font-weight: 600;
     white-space: nowrap;
     overflow: hidden;
@@ -215,7 +236,7 @@
   }
 
   .delta.up {
-    color: var(--bad, #ff7d92);
+    color: var(--warn, #ffb020);
   }
 
   .pending {

@@ -69,7 +69,7 @@ export interface LabThumb {
   h: number;
 }
 
-export type LabVariant = 'l1' | 'l2';
+export type LabVariant = 'l1' | 'l2' | 'l3';
 
 /** The two overridable WebP option leaves the lab exposes as controls. */
 export type LabOverridablePath = 'quality' | 'method';

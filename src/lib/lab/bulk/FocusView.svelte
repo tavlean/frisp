@@ -5,18 +5,28 @@
   import type { EditorSession } from '$lib/editor/editor-session.svelte';
   import type { SideFormat } from '$lib/compress';
   import { labBulk } from './store.svelte';
-  import BatchCard from './BatchCard.svelte';
+  import BatchInfoPanel from './BatchInfoPanel.svelte';
   import FilmStrip from './FilmStrip.svelte';
   import GlobalOptionsPanel from './GlobalOptionsPanel.svelte';
-  import InfoPanel from './InfoPanel.svelte';
 
   interface Props {
     focusSession: EditorSession;
     onBack?: (() => void) | null;
     onReseed?: (() => void) | null;
+    /**
+     * 'l1' — left batch/info panel + right options panel, strip spans between.
+     * 'l3' — no left panel; image + strip run flush to the left edge and the
+     *        batch/info surface stacks under the right options panel.
+     */
+    layout?: 'l1' | 'l3';
   }
 
-  let { focusSession, onBack = null, onReseed = null }: Props = $props();
+  let {
+    focusSession,
+    onBack = null,
+    onReseed = null,
+    layout = 'l1',
+  }: Props = $props();
 
   let leftMode = $state<'batch' | 'global'>('batch');
   let isMac = $state(false);
@@ -85,141 +95,171 @@
 
 <svelte:window onkeydown={onKeydown} />
 
-<div class="compress sqush-editor">
-  <Output
-    leftImage={focusSession.runtime[0].result?.outputImageData}
-    rightImage={focusSession.runtime[1].result?.outputImageData}
-    leftWorking={focusSession.runtime[0].showSpinner}
-    rightWorking={focusSession.runtime[1].showSpinner}
-    leftDone={focusSession.runtime[0].status === 'done'}
-    rightDone={focusSession.runtime[1].status === 'done'}
-    leftActivity={focusSession.runtime[0].activity}
-    rightActivity={focusSession.runtime[1].activity}
-    fileId={focusSession.loadId}
-    leftContain={focusSession.leftContain}
-    rightContain={focusSession.rightContain}
-    containWidth={focusSession.naturalWidth}
-    containHeight={focusSession.naturalHeight}
-    onRotate={() => focusSession.rotate()}
-  />
+<div class="compress sqush-editor" class:flush-left={layout === 'l3'}>
+  <div class="stage-region">
+    <Output
+      leftImage={focusSession.runtime[0].result?.outputImageData}
+      rightImage={focusSession.runtime[1].result?.outputImageData}
+      leftWorking={focusSession.runtime[0].showSpinner}
+      rightWorking={focusSession.runtime[1].showSpinner}
+      leftDone={focusSession.runtime[0].status === 'done'}
+      rightDone={focusSession.runtime[1].status === 'done'}
+      leftActivity={focusSession.runtime[0].activity}
+      rightActivity={focusSession.runtime[1].activity}
+      fileId={focusSession.loadId}
+      leftContain={focusSession.leftContain}
+      rightContain={focusSession.rightContain}
+      containWidth={focusSession.naturalWidth}
+      containHeight={focusSession.naturalHeight}
+      onRotate={() => focusSession.rotate()}
+    />
 
-  {#if focusSession.firstError}
-    <p class="status-pill error">{focusSession.firstError}</p>
-  {/if}
+    {#if focusSession.firstError}
+      <p class="status-pill error">{focusSession.firstError}</p>
+    {/if}
 
-  {#if onBack}
-    <button
-      class="back"
-      onclick={onBack}
-      title="Back to grid"
-      aria-label="Back to grid"
-    >
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path
-          d="M15 6l-6 6 6 6"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2.2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        />
-      </svg>
-    </button>
-  {/if}
+    {#if onBack}
+      <button
+        class="back"
+        onclick={onBack}
+        title="Back to grid"
+        aria-label="Back to grid"
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path
+            d="M15 6l-6 6 6 6"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+      </button>
+    {/if}
 
-  <div class="history-controls" class:no-back={!onBack}>
-    <button
-      class="hist"
-      onclick={() => focusSession.undo()}
-      disabled={!focusSession.history.canUndo}
-      title={undoTitle}
-      aria-label={undoTitle}
-    >
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path
-          d="M9 14L4 9l5-5M4 9h10.5a5.5 5.5 0 0 1 0 11H9"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2.1"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        />
-      </svg>
-    </button>
-    <button
-      class="hist"
-      onclick={() => focusSession.redo()}
-      disabled={!focusSession.history.canRedo}
-      title={redoTitle}
-      aria-label={redoTitle}
-    >
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path
-          d="M15 14l5-5-5-5M20 9H9.5a5.5 5.5 0 0 0 0 11H15"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2.1"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        />
-      </svg>
-    </button>
+    <div class="history-controls" class:no-back={!onBack}>
+      <button
+        class="hist"
+        onclick={() => focusSession.undo()}
+        disabled={!focusSession.history.canUndo}
+        title={undoTitle}
+        aria-label={undoTitle}
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path
+            d="M9 14L4 9l5-5M4 9h10.5a5.5 5.5 0 0 1 0 11H9"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.1"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+      </button>
+      <button
+        class="hist"
+        onclick={() => focusSession.redo()}
+        disabled={!focusSession.history.canRedo}
+        title={redoTitle}
+        aria-label={redoTitle}
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path
+            d="M15 14l5-5-5-5M20 9H9.5a5.5 5.5 0 0 0 0 11H15"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.1"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+      </button>
+    </div>
+
+    {#if layout === 'l1'}
+      <aside class="options options-1">
+        {#if leftMode === 'global'}
+          <div class="left-scroll">
+            <button
+              type="button"
+              class="stack-link"
+              onclick={() => (leftMode = 'batch')}
+            >
+              ← Batch
+            </button>
+            <GlobalOptionsPanel {focusSession} {thumb} />
+          </div>
+        {:else}
+          <BatchInfoPanel
+            {file}
+            width={thumb?.w ?? 0}
+            height={thumb?.h ?? 0}
+            showGlobal
+            onGlobal={() => (leftMode = 'global')}
+            onReset={resetOverrides}
+          />
+        {/if}
+      </aside>
+    {/if}
+
+    <aside class="options options-2" class:l3={layout === 'l3'}>
+      {#if layout === 'l3' && leftMode === 'global'}
+        <div class="right-panel-fill">
+          <div class="left-scroll">
+            <button
+              type="button"
+              class="stack-link"
+              onclick={() => (leftMode = 'batch')}
+            >
+              ← Batch
+            </button>
+            <GlobalOptionsPanel {focusSession} {thumb} />
+          </div>
+        </div>
+      {:else}
+        <div class="right-panel-fill">
+          <div class="options-slot">
+            <OptionsPanel
+              side="right"
+              format={focusSession.sides[1].format}
+              {formats}
+              options={focusSession.sides[1].optionsByFormat[
+                focusSession.sides[1].format
+              ] ?? {}}
+              processorState={focusSession.sides[1].processorState}
+              naturalWidth={focusSession.naturalWidth}
+              naturalHeight={focusSession.naturalHeight}
+              sourceName={focusSession.file?.name}
+              isVector={focusSession.isVectorSource}
+              result={focusSession.runtime[1].result}
+              working={focusSession.runtime[1].showSpinner}
+              canImport={focusSession.canImport[1]}
+              downloadName={focusSession.downloadName(1)}
+              onFormatChange={setRightFormat}
+              onCopy={() => focusSession.copyToOther(1)}
+              onSave={() => focusSession.saveSide(1)}
+              onImport={() => focusSession.importSide(1)}
+            />
+          </div>
+          {#if layout === 'l3'}
+            <div class="batch-slot">
+              <BatchInfoPanel
+                {file}
+                width={thumb?.w ?? 0}
+                height={thumb?.h ?? 0}
+                showGlobal
+                onGlobal={() => (leftMode = 'global')}
+                onReset={resetOverrides}
+              />
+            </div>
+          {/if}
+        </div>
+      {/if}
+    </aside>
   </div>
 
-  <aside class="options options-1">
-    {#if leftMode === 'global'}
-      <div class="left-stack">
-        <button
-          type="button"
-          class="stack-link"
-          onclick={() => (leftMode = 'batch')}
-        >
-          ← Batch
-        </button>
-        <GlobalOptionsPanel {focusSession} {thumb} />
-      </div>
-    {:else}
-      <div class="left-stack">
-        <BatchCard compact showGlobal onGlobal={() => (leftMode = 'global')} />
-        <InfoPanel {file} width={thumb?.w ?? 0} height={thumb?.h ?? 0} />
-        {#if labBulk.selectedHasOverrides}
-          <div class="override-row">
-            <span aria-hidden="true">●</span>
-            <strong>Custom settings</strong>
-            <button type="button" onclick={resetOverrides}
-              >Reset to global</button
-            >
-          </div>
-        {/if}
-      </div>
-    {/if}
-  </aside>
-
-  <aside class="options options-2">
-    <OptionsPanel
-      side="right"
-      format={focusSession.sides[1].format}
-      {formats}
-      options={focusSession.sides[1].optionsByFormat[
-        focusSession.sides[1].format
-      ] ?? {}}
-      processorState={focusSession.sides[1].processorState}
-      naturalWidth={focusSession.naturalWidth}
-      naturalHeight={focusSession.naturalHeight}
-      sourceName={focusSession.file?.name}
-      isVector={focusSession.isVectorSource}
-      result={focusSession.runtime[1].result}
-      working={focusSession.runtime[1].showSpinner}
-      canImport={focusSession.canImport[1]}
-      downloadName={focusSession.downloadName(1)}
-      onFormatChange={setRightFormat}
-      onCopy={() => focusSession.copyToOther(1)}
-      onSave={() => focusSession.saveSide(1)}
-      onImport={() => focusSession.importSide(1)}
-    />
-  </aside>
-
-  <div class="filmstrip-dock">
+  <div class="strip-region">
     <FilmStrip />
   </div>
 </div>
@@ -229,15 +269,52 @@
     --mobile-options-height: min(44dvh, 360px);
     --panel-width: 312px;
     --panel-inset: 14px;
+    --strip-height: 96px;
     --fit-inset-left: calc(var(--panel-width) + var(--panel-inset) * 2);
     --fit-inset-right: calc(var(--panel-width) + var(--panel-inset) * 2);
     --fit-inset-top: 0px;
     --fit-inset-bottom: 0px;
     position: relative;
+    display: flex;
+    flex-direction: column;
     width: 100vw;
     height: 100dvh;
     overflow: hidden;
     background: var(--bg-0, #0c0c0f);
+  }
+
+  /* L3: image + strip run flush to the left edge; there is no left panel, so
+     the fit inset on the left is just a small breathing margin. */
+  .compress.flush-left {
+    --fit-inset-left: 12px;
+  }
+
+  /* The stage takes all the height above the strip; the production Output fills
+     it and its own bottom control bar sits naturally above the strip. */
+  .stage-region {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+  }
+
+  /* Real layout space for the strip — no longer an overlay footer. */
+  .strip-region {
+    flex: none;
+    height: var(--strip-height);
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0 12px;
+    padding-left: var(--fit-inset-left);
+    padding-right: var(--fit-inset-right);
+    border-top: 1px solid var(--border, rgba(255, 255, 255, 0.06));
+    background: color-mix(in srgb, var(--bg-0, #0c0c0f) 82%, transparent);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+  }
+  .compress.flush-left .strip-region {
+    padding-left: var(--fit-inset-left);
   }
 
   .status-pill {
@@ -354,6 +431,8 @@
     display: block;
   }
 
+  /* Side panels are anchored to the BOTTOM of the stage region (which already
+     excludes the strip), so they always clear the strip. */
   .options {
     position: absolute;
     bottom: var(--panel-inset);
@@ -380,7 +459,41 @@
     right: var(--panel-inset);
   }
 
-  .left-stack {
+  /* L3: the right column is a full-height flex stack — options on top, the
+     batch/info surface directly beneath it. It starts below the top-right
+     control cluster so the panel's own "EDIT" header is never occluded. */
+  .options-2.l3 {
+    top: 68px;
+    max-height: calc(100% - 68px - var(--panel-inset));
+    justify-content: flex-start;
+  }
+
+  .right-panel-fill {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: 100%;
+    width: 100%;
+  }
+
+  /* In L3 the OptionsPanel takes the available height and scrolls internally;
+     the batch surface below keeps its natural height. */
+  .options-2.l3 .options-slot {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .options-2.l3 .batch-slot {
+    flex: none;
+    max-height: 45%;
+    overflow-y: auto;
+    border-top: 1px solid var(--border, rgba(255, 255, 255, 0.08));
+  }
+
+  .left-scroll {
     display: grid;
     gap: 12px;
     min-height: 0;
@@ -397,47 +510,8 @@
     font-weight: 800;
     cursor: pointer;
   }
-
   .stack-link:hover {
     color: var(--text-1, #f5f5f7);
-  }
-
-  .override-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 10px 12px;
-    border-top: 1px solid var(--border, rgba(255, 255, 255, 0.08));
-    color: var(--text-2, rgba(235, 235, 245, 0.62));
-    font-size: 0.95rem;
-  }
-  .override-row span {
-    color: var(--accent-1, #ff8a5e);
-  }
-  .override-row strong {
-    color: var(--text-1, #f5f5f7);
-  }
-  .override-row button {
-    margin-left: auto;
-    border: none;
-    background: transparent;
-    color: var(--text-2, rgba(235, 235, 245, 0.62));
-    font: inherit;
-    font-weight: 700;
-    cursor: pointer;
-  }
-  .override-row button:hover {
-    color: var(--text-1, #f5f5f7);
-  }
-
-  .filmstrip-dock {
-    position: absolute;
-    left: var(--fit-inset-left);
-    right: var(--fit-inset-right);
-    bottom: 0;
-    z-index: 6;
-    padding: 0 12px 8px;
-    box-sizing: border-box;
   }
 
   @media (max-width: 760px) {
@@ -446,15 +520,8 @@
       --fit-inset-left: 0px;
       --fit-inset-right: 0px;
     }
-
-    :global(.sqush-editor .output) {
-      bottom: calc(var(--mobile-options-height) + var(--panel-inset));
-    }
-
-    :global(.sqush-editor .controls) {
-      bottom: calc(var(--mobile-options-height) + var(--panel-inset) + 8px);
-      padding: 0 56px;
-      box-sizing: border-box;
+    .compress.flush-left {
+      --fit-inset-left: 0px;
     }
 
     .back {
@@ -492,9 +559,11 @@
 
     .options {
       width: calc(50vw - var(--panel-inset) * 1.5);
-      height: var(--mobile-options-height);
       max-height: var(--mobile-options-height);
       font-size: 0.95rem;
+    }
+    .options-2.l3 {
+      top: auto;
     }
     .options-1 {
       left: var(--panel-inset);
@@ -503,19 +572,8 @@
       right: var(--panel-inset);
     }
 
-    .filmstrip-dock {
+    .strip-region {
       display: none;
-    }
-  }
-
-  @media (max-width: 420px) {
-    .compress {
-      --mobile-options-height: 48dvh;
-    }
-
-    :global(.sqush-editor .controls) {
-      bottom: calc(var(--mobile-options-height) + var(--panel-inset) + 6px);
-      padding: 0 48px;
     }
   }
 </style>
