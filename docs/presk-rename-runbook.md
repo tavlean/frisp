@@ -33,14 +33,14 @@ Renaming the project from **Sqush** to **Presk**.
 
 Each numbered group = one checkpoint commit.
 
-- [ ] **A0 — Prep** ✅ done: stopped Sqush `vite dev`; created branch `rename/presk`; wrote this runbook.
-- [ ] **A1 — Identity & metadata:** `package.json` (`name`, `homepage`), copyright headers `Sqush Contributors → Presk Contributors`, `package-lock.json` root name.
-- [ ] **A2 — User-visible strings:** doc title `Sqush — Compress an image` (`editor-session.svelte.ts`), SW-update snackbar copy (`+page.svelte`), diagnostics `<title>`/`<h1>`/body, `Intro.svelte` wordmark `alt`, brand mentions in comments.
-- [ ] **A3 — Brand asset:** `git mv static/sqush-wordmark.svg static/presk-wordmark.svg` + update ref in `Intro.svelte`. Check `static/logo.webp`/favicons for embedded wordmark art (re-export later if needed — tracked in User Actions).
-- [ ] **A4 — SW cache name:** `sqush-${version}` → `presk-${version}` in `src/service-worker.ts` (safe cache-bust; activate handler purges old keys).
-- [ ] **A5 — Internal identifiers:** `registerSqushServiceWorker` → `registerPreskServiceWorker` (def + call sites); `.sqush-editor` CSS class → `.presk-editor` (theme.css, +page.svelte, FocusView, BulkMode).
-- [ ] **A6 — `sqush-generated` alias (COUPLED — atomic):** rename `sqush-generated → presk-generated` across `scripts/sync-sveltekit-app.mjs`, `scripts/audit-static-output.mjs`, `svelte.config.js`, `vite.config.ts`, `tsconfig.json`, and importers (`src/lib/codec-assets.ts`, `service-worker-codec-assets.ts`, `sveltekit-worker-bridge.ts`, `webp-encode-probe.worker.ts`). Then `rm -rf .svelte-kit && npm run sync` to regenerate.
-- [ ] **A7 — Docs:** `Sqush → Presk` across `docs/**` and `README.md`, `AGENTS.md` (preserve every `Squoosh` attribution; leave history docs factually intact, rename own-name only).
+- [x] **A0 — Prep** ✅ done: stopped Sqush `vite dev`; created branch `rename/presk`; wrote this runbook.
+- [x] **A1 — Identity & metadata:** `package.json` (`name`, `homepage`), copyright headers `Sqush Contributors → Presk Contributors`, `package-lock.json` root name.
+- [x] **A2 — User-visible strings:** doc title `Sqush — Compress an image` (`editor-session.svelte.ts`), SW-update snackbar copy (`+page.svelte`), diagnostics `<title>`/`<h1>`/body, `Intro.svelte` wordmark `alt`, brand mentions in comments.
+- [x] **A3 — Brand asset:** `git mv static/sqush-wordmark.svg static/presk-wordmark.svg` + update ref in `Intro.svelte`. Check `static/logo.webp`/favicons for embedded wordmark art (re-export later if needed — tracked in User Actions).
+- [x] **A4 — SW cache name:** `sqush-${version}` → `presk-${version}` in `src/service-worker.ts` (safe cache-bust; activate handler purges old keys).
+- [x] **A5 — Internal identifiers:** `registerSqushServiceWorker` → `registerPreskServiceWorker` (def + call sites); `.sqush-editor` CSS class → `.presk-editor` (theme.css, +page.svelte, FocusView, BulkMode).
+- [x] **A6 — `sqush-generated` alias (COUPLED — atomic):** rename `sqush-generated → presk-generated` across `scripts/sync-sveltekit-app.mjs`, `scripts/audit-static-output.mjs`, `svelte.config.js`, `vite.config.ts`, `tsconfig.json`, and importers (`src/lib/codec-assets.ts`, `service-worker-codec-assets.ts`, `sveltekit-worker-bridge.ts`, `webp-encode-probe.worker.ts`). Then `rm -rf .svelte-kit && npm run sync` to regenerate.
+- [x] **A7 — Docs:** `Sqush → Presk` across `docs/**` and `README.md`, `AGENTS.md` (preserve every `Squoosh` attribution; leave history docs factually intact, rename own-name only).
 - [ ] **A8 — Verify:** `rm -rf .svelte-kit .tmp node_modules/.vite` → `npm run check` → `npx playwright test` (offline/app-shell/bulk exercise SW + codecs). Fix, re-run.
 - [ ] **A9 — Merge:** `git switch main && git merge --ff-only rename/presk`; confirm signatures intact; push.
 

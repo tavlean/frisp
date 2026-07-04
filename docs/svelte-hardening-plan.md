@@ -1,4 +1,4 @@
-# Sqush Post-Migration Cleanup & Svelte Hardening Plan
+# Presk Post-Migration Cleanup & Svelte Hardening Plan
 
 Last updated: 2026-06-28.
 

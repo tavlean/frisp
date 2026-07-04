@@ -16,17 +16,17 @@ Prototype evidence branch: `code/sveltekit-prototype`.
 Current SvelteKit migration-seams review branch:
 `code/sveltekit-migration-seams`.
 
-Standalone GitHub repo: `tavlean/sqush`.
+Standalone GitHub repo: `tavlean/presk`.
 
 Default branch: `main`.
 
-Project homepage metadata: `https://sqush.app`.
+Project homepage metadata: `https://presk.app`.
 
 Historical archived fork, not the current project: `tavlean/SquooshPlus`.
 
-Project identity note: see [Project identity](../project-identity.md). The current app/repo/package name is Sqush. The local checkout has been renamed to `/Users/tav/Development/Tavlean/Sqush`. Any remaining `SquooshPlus` references should be historical fork references or temporary tool compatibility paths.
+Project identity note: see [Project identity](../project-identity.md). The current app/repo/package name is Presk. The local checkout has been renamed to `/Users/tav/Development/Tavlean/Presk`. Any remaining `SquooshPlus` references should be historical fork references or temporary tool compatibility paths.
 
-Current local checkout: `/Users/tav/Development/Tavlean/Sqush`.
+Current local checkout: `/Users/tav/Development/Tavlean/Presk`.
 
 For SvelteKit prototype evidence, read
 `docs/sveltekit-prototype-handoff.md`. For the current reusable seam review,
@@ -227,18 +227,18 @@ Latest verification run:
 - `npm run test:helpers`: passed after extracting the initial app startup workflow.
 - `npm run check`: passed after extracting the initial app startup workflow and updating helper coverage.
 - `npm run smoke:browser`: passed after extracting the initial app startup workflow; production build still imports PNG, exports WebP, resizes WebP to `64px`, imports saved side settings, handles extensionless input naming, reloads the app shell offline, and loads with service worker disabled.
-- `gh run list --repo tavlean/sqush --branch main --limit 5`: latest pushed CI run `26378286324` completed successfully for `e6f048a`.
+- `gh run list --repo tavlean/presk --branch main --limit 5`: latest pushed CI run `26378286324` completed successfully for `e6f048a`.
 - `npm run check`: passed after extracting result render-state composition and updating dashboard/docs.
 - `npm run smoke:browser`: passed after extracting result render-state composition; production build still imports PNG, exports WebP, resizes WebP to `64px`, imports saved side settings, handles extensionless input naming, reloads the app shell offline, and loads with service worker disabled.
 - `npm run dashboard`: passed after extracting result render-state composition and updating dashboard/docs.
 - `npm run check`: passed after extracting the update workflow coordinator, adding no-work helper coverage, and updating dashboard/docs.
 - `npm run smoke:browser`: passed after extracting the update workflow coordinator; production build still imports PNG, exports WebP, resizes WebP to `64px`, imports saved side settings, handles extensionless input naming, reloads the app shell offline, and loads with service worker disabled.
 - `npm run dashboard`: confirmed the dashboard is already running at `http://localhost:4177`; local dashboard HTML shows update workflow helper, five top cards, and no stale top-card deltas.
-- `gh run list --repo tavlean/sqush --branch main --limit 3`: latest pushed CI run `26377994493` completed successfully for `598b0c1`.
-- `gh run list --repo tavlean/sqush --branch main --limit 5`: latest pushed CI run `26377765152` completed successfully for `616acb5`.
+- `gh run list --repo tavlean/presk --branch main --limit 3`: latest pushed CI run `26377994493` completed successfully for `598b0c1`.
+- `gh run list --repo tavlean/presk --branch main --limit 5`: latest pushed CI run `26377765152` completed successfully for `616acb5`.
 - `npm run check`: passed after refreshing README local-first verification guidance and dashboard/docs.
 - `npm run dashboard`: confirmed the dashboard is already running at `http://localhost:4177`; local dashboard HTML shows README verification docs, five top cards, and only the Documentation `+1` top-card delta.
-- `gh run list --repo tavlean/sqush --branch main --limit 5`: latest pushed CI run `26377593784` completed successfully for `82c65eb`.
+- `gh run list --repo tavlean/presk --branch main --limit 5`: latest pushed CI run `26377593784` completed successfully for `82c65eb`.
 - `npm run test:helpers`: passed after extracting options async load/listener workflow.
 - `npm run check`: passed after extracting options async load/listener workflow and updating dashboard/docs.
 - `npm run dashboard`: confirmed the dashboard is already running at `http://localhost:4177`; local dashboard HTML shows options workflow, five top cards, and only the Svelte `+1` top-card delta.
@@ -246,31 +246,31 @@ Latest verification run:
 - `npm run check`: passed after extracting output mount/update workflow and updating dashboard/docs.
 - `npm run smoke:browser`: passed after extracting output mount/update workflow; production build still imports PNG, exports WebP, resizes WebP to `64px`, imports saved side settings, handles extensionless input naming, reloads the app shell offline, and loads with service worker disabled.
 - `npm run dashboard`: confirmed the dashboard is already running at `http://localhost:4177`; local dashboard HTML shows output workflow, five top cards, and only the Svelte `+1` top-card delta.
-- `gh run list --repo tavlean/sqush --branch main --limit 3`: latest pushed CI run `26377344412` completed successfully for `fcbc5e8`.
+- `gh run list --repo tavlean/presk --branch main --limit 3`: latest pushed CI run `26377344412` completed successfully for `fcbc5e8`.
 - `npm run test:helpers`: passed after extracting result loading timer workflow.
 - `npm run check`: passed after extracting result loading timer workflow and updating dashboard/docs.
 - `npm run dashboard`: confirmed the dashboard is already running at `http://localhost:4177`; local dashboard HTML shows result loading workflow, five top cards, and only the Svelte `+1` top-card delta.
-- `gh run list --repo tavlean/sqush --branch main --limit 5`: latest pushed CI run `26377109562` completed successfully for `06f25f9`.
+- `gh run list --repo tavlean/presk --branch main --limit 5`: latest pushed CI run `26377109562` completed successfully for `06f25f9`.
 - `npm run test:helpers`: passed after extracting editor update workflow orchestration.
 - `npm run check`: passed after extracting editor update workflow orchestration.
 - `npm run smoke:browser`: passed after extracting editor update workflow orchestration; production build still imports PNG, exports WebP, resizes WebP to `64px`, imports saved side settings, handles extensionless input naming, reloads the app shell offline, and loads with service worker disabled.
 - `npm run dashboard`: confirmed the dashboard is already running at `http://localhost:4177`; local dashboard HTML shows editor update workflow, five top cards, and only the Svelte `+1` top-card delta.
-- `gh run list --repo tavlean/sqush --branch main --limit 3`: latest pushed CI run `26376944247` completed successfully for `afbe11e`.
+- `gh run list --repo tavlean/presk --branch main --limit 3`: latest pushed CI run `26376944247` completed successfully for `afbe11e`.
 - `npm run test:helpers`: passed after extracting side image workflow orchestration.
 - `npm run check`: passed after extracting side image workflow orchestration and updating dashboard/docs.
 - `npm run smoke:browser`: passed after extracting side image workflow orchestration; production build still imports PNG, exports WebP, resizes WebP to `64px`, imports saved side settings, handles extensionless input naming, reloads the app shell offline, and loads with service worker disabled.
 - `npm run dashboard`: confirmed the dashboard is already running at `http://localhost:4177`; local dashboard HTML shows side workflow, five top cards, and only the Svelte `+1` top-card delta.
-- `gh run list --repo tavlean/sqush --branch main --limit 3`: latest pushed CI run `26376811905` completed successfully for `c6031ca`.
+- `gh run list --repo tavlean/presk --branch main --limit 3`: latest pushed CI run `26376811905` completed successfully for `c6031ca`.
 - `npm run test:helpers`: passed after extracting editor cleanup runtime orchestration.
 - `npm run check`: passed after extracting editor cleanup runtime orchestration and updating dashboard/docs.
 - `npm run smoke:browser`: passed after extracting editor cleanup runtime orchestration; production build still imports PNG, exports WebP, resizes WebP to `64px`, imports saved side settings, handles extensionless input naming, reloads the app shell offline, and loads with service worker disabled.
 - `npm run dashboard`: confirmed the dashboard is already running at `http://localhost:4177`; local dashboard HTML shows editor cleanup, five top cards, and only the Svelte `+1` top-card delta.
-- `gh run list --repo tavlean/sqush --branch main --limit 3`: latest pushed CI run `26376678137` completed successfully for `e7bdbeb`.
+- `gh run list --repo tavlean/presk --branch main --limit 3`: latest pushed CI run `26376678137` completed successfully for `e7bdbeb`.
 - `npm run test:helpers`: passed after extracting image update debounce/runtime scheduling into a framework-neutral helper.
 - `npm run check`: passed after extracting image update debounce/runtime scheduling and updating dashboard/docs.
 - `npm run smoke:browser`: passed after extracting image update debounce/runtime scheduling; production build still imports PNG, exports WebP, resizes WebP to `64px`, imports saved side settings, handles extensionless input naming, reloads the app shell offline, and loads with service worker disabled.
 - `npm run dashboard`: confirmed the dashboard is already running at `http://localhost:4177`; local dashboard HTML shows update queue, five top cards, and only the Svelte `+1` top-card delta.
-- `gh run list --repo tavlean/sqush --branch main --limit 5`: latest pushed CI run `26376496241` completed successfully for `b5c404f`.
+- `gh run list --repo tavlean/presk --branch main --limit 5`: latest pushed CI run `26376496241` completed successfully for `b5c404f`.
 - `npm run check`: passed after extracting source workflow orchestration and updating dashboard/docs.
 - `npm run smoke:browser`: passed after extracting source workflow orchestration; production build still imports PNG, exports WebP, resizes WebP to `64px`, imports saved side settings, handles extensionless input naming, reloads the app shell offline, and loads with service worker disabled.
 - `npm run dashboard`: confirmed the dashboard is already running at `http://localhost:4177`; local dashboard HTML shows source workflow, five top cards, and only the Svelte `+1` top-card delta.
@@ -279,7 +279,7 @@ Latest verification run:
 - `npm run check`: passed after extracting initial app editor-open state and updating dashboard/docs.
 - `npm run smoke:browser`: passed after extracting initial app editor-open state; production build still imports PNG, exports WebP, resizes WebP to `64px`, imports saved side settings, handles extensionless input naming, reloads the app shell offline, and loads with service worker disabled.
 - `npm run dashboard`: confirmed the dashboard is already running at `http://localhost:4177`; local dashboard HTML shows initial app open state, five top cards, and only Repo/Svelte `+1` deltas.
-- `gh run list --repo tavlean/sqush --branch main --limit 3`: latest pushed CI run `26374439011` completed successfully for `6c5b35a` after pushing the accumulated local batch.
+- `gh run list --repo tavlean/presk --branch main --limit 3`: latest pushed CI run `26374439011` completed successfully for `6c5b35a` after pushing the accumulated local batch.
 - `npm run typecheck`: passed after adding app-shell listener cleanup.
 - `npm run check`: passed after adding app-shell listener cleanup and updating dashboard/docs.
 - `npm run smoke:browser`: passed after adding app-shell listener cleanup; production build still imports PNG, exports WebP, resizes WebP to `64px`, imports saved side settings, handles extensionless input naming, reloads the app shell offline, and loads with service worker disabled.
@@ -296,14 +296,14 @@ Latest verification run:
 - `npm run check`: passed after adding editor async error guards and updating dashboard/docs.
 - `npm run smoke:browser`: passed after adding editor async error guards; production build still imports PNG, exports WebP, resizes WebP to `64px`, imports saved side settings, handles extensionless input naming, reloads the app shell offline, and loads with service worker disabled.
 - `npm run dashboard`: confirmed the dashboard is already running at `http://localhost:4177`; local dashboard HTML shows editor error async guards, five top cards, and no stale top-card deltas.
-- `gh run list --repo tavlean/sqush --branch main --limit 3`: latest pushed CI run `26374750959` completed successfully for `980e87f`.
+- `gh run list --repo tavlean/presk --branch main --limit 3`: latest pushed CI run `26374750959` completed successfully for `980e87f`.
 - `npm run typecheck`: passed after tightening the file-drop custom element handler type.
 - `npm run check`: passed after tightening the file-drop custom element handler type and updating dashboard/docs.
 - `npm run dashboard`: confirmed the dashboard is already running at `http://localhost:4177`; local dashboard HTML shows file-drop handler type, five top cards, and no stale top-card deltas.
 - `npm run check`: passed after adding worker bridge disposal cleanup and updating dashboard/docs.
 - `npm run smoke:browser`: passed after adding worker bridge disposal cleanup; production build still imports PNG, exports WebP, resizes WebP to `64px`, imports saved side settings, handles extensionless input naming, reloads the app shell offline, and loads with service worker disabled.
 - `npm run dashboard`: confirmed the dashboard is already running at `http://localhost:4177`; local dashboard HTML shows worker bridge dispose cleanup, five top cards, and no stale top-card deltas.
-- `gh run list --repo tavlean/sqush --branch main --limit 3`: latest pushed CI run `26374912708` completed successfully for `5ef6bd7`.
+- `gh run list --repo tavlean/presk --branch main --limit 3`: latest pushed CI run `26374912708` completed successfully for `5ef6bd7`.
 - `npm run test:helpers`: passed after extracting expander transition completion state.
 - `npm run typecheck`: passed after adding the expander transition unmount guard.
 - `npm run check`: passed after adding expander transition cleanup and updating dashboard/docs.
@@ -316,7 +316,7 @@ Latest verification run:
 - `npm run check`: passed after adding custom element listener cleanup and updating dashboard/docs.
 - `npm run smoke:browser`: passed after adding custom element listener cleanup; production build still imports PNG, exports WebP, resizes WebP to `64px`, imports saved side settings, handles extensionless input naming, reloads the app shell offline, and loads with service worker disabled.
 - `npm run dashboard`: confirmed the dashboard is already running at `http://localhost:4177`; local dashboard HTML shows custom element listener cleanup, five top cards, and no stale top-card deltas.
-- `gh run list --repo tavlean/sqush --branch main --limit 3`: latest pushed CI run `26375095128` completed successfully for `d972760`.
+- `gh run list --repo tavlean/presk --branch main --limit 3`: latest pushed CI run `26375095128` completed successfully for `d972760`.
 - `npm run test:helpers`: passed after extracting range display formatting helpers.
 - `npm run typecheck`: passed after moving range thumb-label formatting into tested helper logic.
 - `npm run check`: passed after extracting range display helpers and updating dashboard/docs.
@@ -339,7 +339,7 @@ Latest verification run:
 - `npm run dashboard`: confirmed the dashboard is already running at `http://localhost:4177`; local dashboard HTML shows side job run records, five top cards, and only the Svelte `+1` top-card delta.
 - `npm run test:helpers`: passed after hardening runnable side job records for missing job-state entries.
 - `npm run dashboard`: confirmed the dashboard is already running at `http://localhost:4177`; local dashboard HTML shows runnable job hardening, five top cards, and no stale top-card deltas.
-- `gh run list --repo tavlean/sqush --branch main --limit 1`: latest pushed CI run `26375595677` completed successfully for `72ef7ba`.
+- `gh run list --repo tavlean/presk --branch main --limit 1`: latest pushed CI run `26375595677` completed successfully for `72ef7ba`.
 - `npm run format:check`: passed after documenting local codec source references.
 - `npm run dashboard`: confirmed the dashboard is already running at `http://localhost:4177`; local dashboard HTML shows codec source references, five top cards, and only the Documentation `+1` top-card delta.
 - `npm run test:helpers`: passed after extracting single-image side job execution into a framework-neutral runner.
@@ -348,7 +348,7 @@ Latest verification run:
 - `npm run dashboard`: confirmed the dashboard is already running at `http://localhost:4177`; local dashboard HTML shows side job runner helper, five top cards, and only the Svelte `+1` top-card delta.
 - `npm run format:check`: passed after syncing the bulk architecture note with the side-job runner extraction.
 - `npm run dashboard`: confirmed the dashboard is already running at `http://localhost:4177`; local dashboard HTML shows bulk architecture sync, five top cards, and no stale top-card deltas.
-- `gh run list --repo tavlean/sqush --branch main --limit 1`: latest pushed CI run `26375807878` completed successfully for `2229b9e`.
+- `gh run list --repo tavlean/presk --branch main --limit 1`: latest pushed CI run `26375807878` completed successfully for `2229b9e`.
 - `npm run test:helpers`: passed after extracting source decode/preprocess execution into a framework-neutral runner.
 - `npm run check`: passed after extracting source decode/preprocess execution into a framework-neutral runner and updating dashboard/docs.
 - `npm run smoke:browser`: passed after extracting source decode/preprocess execution; production build still imports PNG, exports WebP, resizes WebP to `64px`, imports saved side settings, handles extensionless input naming, reloads the app shell offline, and loads with service worker disabled.
@@ -357,17 +357,17 @@ Latest verification run:
 - `npm run check`: passed after extracting work-start abort/controller cycling into a framework-neutral runner and tightening the controller tuple type.
 - `npm run smoke:browser`: passed after extracting work-start abort/controller cycling; production build still imports PNG, exports WebP, resizes WebP to `64px`, imports saved side settings, handles extensionless input naming, reloads the app shell offline, and loads with service worker disabled.
 - `npm run dashboard`: confirmed the dashboard is already running at `http://localhost:4177`; local dashboard HTML shows work start runner helper, five top cards, and only the Svelte `+1` top-card delta.
-- `gh run list --repo tavlean/sqush --branch main --limit 5`: latest pushed CI run `26376109158` completed successfully for `1e6f061`.
+- `gh run list --repo tavlean/presk --branch main --limit 5`: latest pushed CI run `26376109158` completed successfully for `1e6f061`.
 - `npm run test:helpers`: passed after moving runnable side-job loop orchestration into the side-job runner.
 - `npm run check`: passed after moving runnable side-job loop orchestration into the side-job runner and updating dashboard/docs.
 - `npm run smoke:browser`: passed after moving runnable side-job loop orchestration; production build still imports PNG, exports WebP, resizes WebP to `64px`, imports saved side settings, handles extensionless input naming, reloads the app shell offline, and loads with service worker disabled.
 - `npm run dashboard`: confirmed the dashboard is already running at `http://localhost:4177`; local dashboard HTML shows side job loop runner, five top cards, and only the Svelte `+1` top-card delta.
-- `gh run list --repo tavlean/sqush --branch main --limit 3`: latest pushed CI run `26376241687` completed successfully for `a885e92`.
+- `gh run list --repo tavlean/presk --branch main --limit 3`: latest pushed CI run `26376241687` completed successfully for `a885e92`.
 - `npm run test:helpers`: passed after extracting saved-settings save/import workflows.
 - `npm run check`: passed after extracting saved-settings save/import workflows and updating dashboard/docs.
 - `npm run smoke:browser`: passed after extracting saved-settings save/import workflows; production build still imports PNG, exports WebP, resizes WebP to `64px`, imports saved side settings, handles extensionless input naming, reloads the app shell offline, and loads with service worker disabled.
 - `npm run dashboard`: confirmed the dashboard is already running at `http://localhost:4177`; local dashboard HTML shows saved settings workflow, five top cards, and only the Svelte `+1` top-card delta.
-- `gh run list --repo tavlean/sqush --branch main --limit 3`: latest pushed CI run `26376381672` completed successfully for `2542c6c`.
+- `gh run list --repo tavlean/presk --branch main --limit 3`: latest pushed CI run `26376381672` completed successfully for `2542c6c`.
 - `npm run test:helpers`: passed after extracting copy-to-other-side workflow and undo orchestration.
 - `npm run check`: passed after extracting copy-to-other-side workflow and undo orchestration.
 - `npm run smoke:browser`: passed after extracting copy-to-other-side workflow; production build still imports PNG, exports WebP, resizes WebP to `64px`, imports saved side settings, handles extensionless input naming, reloads the app shell offline, and loads with service worker disabled.
@@ -678,7 +678,7 @@ Latest verification run:
 - `npm run check`: passed after service-worker/shared type cleanup.
 - `npm run smoke:browser`: passed after service-worker/shared type cleanup.
 - `npm audit --audit-level=low`: passed after dependency drift review.
-- `npm outdated --cache /private/tmp/sqush-npm-cache`: reviewed on 2026-05-24; remaining drift is major-version migration work, not routine patch cleanup.
+- `npm outdated --cache /private/tmp/presk-npm-cache`: reviewed on 2026-05-24; remaining drift is major-version migration work, not routine patch cleanup.
 - `npm run check`: passed after saved-settings storage refactor.
 - `npm run smoke:browser`: passed after saved-settings storage refactor.
 - `npm run smoke:browser`: passed after adding real-editor saved side settings verification.
@@ -847,9 +847,9 @@ Latest verification run:
 - Latest observed GitHub Actions state after stale bulk export guard: `6618b01` passed on Ubuntu, Windows, and macOS.
 - Latest observed GitHub Actions state after active incomplete-job requeueing: `1f213d8` passed on Ubuntu, Windows, and macOS.
 - `npm run serve` wrapper: launched successfully on port 55194.
-- Browser production-preview smoke: passed after shared image pipeline extraction; app shell, Sqush logo, and drop target rendered.
-- Playwright CLI production-build smoke: passed after the Sqush rename, with `Sqush` title, file input present, Sqush logo alt text present, and zero console messages.
-- Playwright CLI production-build image import smoke: passed on `2026-05-23`; built app loaded, `icon-large.png` imported into `/editor`, processing completed with title `icon-large.png - Sqush`, WebP options were present, and console errors were 0.
+- Browser production-preview smoke: passed after shared image pipeline extraction; app shell, Presk logo, and drop target rendered.
+- Playwright CLI production-build smoke: passed after the Presk rename, with `Presk` title, file input present, Presk logo alt text present, and zero console messages.
+- Playwright CLI production-build image import smoke: passed on `2026-05-23`; built app loaded, `icon-large.png` imported into `/editor`, processing completed with title `icon-large.png - Presk`, WebP options were present, and console errors were 0.
 - Playwright CLI production-build WebP output smoke: passed on `2026-05-24`; built app loaded, `icon-large.png` imported into `/editor`, output side switched to `WebP`, `icon-large.webp` blob download was present, output was `24.1 kB` with a 9% reduction, and console errors were 0.
 - Playwright CLI production-build extensionless input smoke: passed on `2026-05-24`; built app loaded an extensionless PNG copy named `icon-large`, output side switched to `WebP`, and `icon-large.webp` blob download was present.
 - Playwright CLI production-build offline shell smoke: passed on `2026-05-24`; after the production app loaded, the browser context was set offline, the app reloaded, and the file input was available from the cached app shell.
@@ -857,7 +857,7 @@ Latest verification run:
 
 Next recommended tasks when work resumes:
 
-1. Start the next Codex session from the real project folder `/Users/tav/Development/Tavlean/Sqush` if possible. Use this document, [Progress dashboard](progress-dashboard.md), [visual dashboard](progress-dashboard.html), [Todo](todo.md), and [Svelte migration context](svelte-migration-context.md) as handoff context.
+1. Start the next Codex session from the real project folder `/Users/tav/Development/Tavlean/Presk` if possible. Use this document, [Progress dashboard](progress-dashboard.md), [visual dashboard](progress-dashboard.html), [Todo](todo.md), and [Svelte migration context](svelte-migration-context.md) as handoff context.
 2. Continue extracting/tested framework-neutral logic from Preact components where it clearly reduces future Svelte migration risk.
 3. Use [Svelte migration context](svelte-migration-context.md) before Svelte-adjacent refactors so new helpers stay aligned with Svelte 5/SvelteKit best practices.
 4. Add browser smoke tests before significant UI or codec-surface changes.
@@ -885,7 +885,7 @@ Quick investigation note:
 - Updated Node type definitions to the newest release compatible with the current TypeScript 4.9 toolchain while moving the runtime baseline to Node 24.
 - Added `npm run format` and `npm run format:check`.
 - Added `npm run smoke:build` to verify generated build output.
-- Expanded `npm run smoke:build` to check generated Sqush metadata and absence of analytics code.
+- Expanded `npm run smoke:build` to check generated Presk metadata and absence of analytics code.
 - Expanded `npm run smoke:build` to verify generated feature metadata and worker entry files exist.
 - Expanded `npm run smoke:build` to guard against accidental external runtime scripts, runtime links, and manifest media.
 - Expanded `npm run smoke:build` to verify service-worker precache assets exist in the production build.

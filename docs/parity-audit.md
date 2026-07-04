@@ -121,7 +121,7 @@ behavior parity is preserved.
    the project's preferred default, since WebP is the default right-side encoder
    and stays sub-second even at method 6.
    `src/features/encoders/webP/shared/meta.ts`. The persisted-settings key was
-   bumped `sqush:settings:v2 → v3` so pre-existing saved side-settings (which
+   bumped `presk:settings:v2 → v3` so pre-existing saved side-settings (which
    would otherwise mask the new default) are discarded and the fresh default
    (left = Original, right = WebP) loads.
 
@@ -162,7 +162,7 @@ behavior parity is preserved.
     (2026-06-28).** Three deliberate departures from upstream Squoosh's resize panel:
     - **Shrink-only presets.** The preset dropdown is now `0.25 / 0.5 / 1`
       (25 / 50 / 100%). Squoosh's `200 / 300 / 400%` enlarge presets and the awkward
-      repeating-decimal `33.33%` were dropped — Sqush is an optimizer, not an
+      repeating-decimal `33.33%` were dropped — Presk is an optimizer, not an
       upscaler (no super-resolution; enlarging only spreads existing pixels). An
       exact larger target, or pixel-art hqx magnification, is still reachable by
       typing Width/Height via Custom. `resize/client/preset-state.ts` (commits
@@ -174,7 +174,7 @@ behavior parity is preserved.
       recipe against the previous pass. `ProcessingBadge.svelte`,
       `editor-session.svelte.ts` (commit `059251c5`).
     - **Resize at 100% is a true no-op.** Squoosh always ran the resampler when
-      resize was enabled. Sqush skips it when the target equals the source size:
+      resize was enabled. Presk skips it when the target equals the source size:
       `processImage` skips the identity resample, and `editor-session` skips the
       whole re-encode when the effective request is unchanged — so enabling Resize
       (or toggling Premultiply/Linear RGB, or switching method, Mitchell included)
@@ -184,7 +184,7 @@ behavior parity is preserved.
 11. **Integer-only Quality + magnetic round-number snapping on wide sliders
     (2026-06-28).** Two deliberate departures from upstream Squoosh's sliders:
     - **Quality is whole numbers.** Squoosh ran the WebP, JXL, and generic
-      fallback Quality sliders at `step=0.1`; Sqush drops them to `step=1` (AVIF
+      fallback Quality sliders at `step=0.1`; Presk drops them to `step=1` (AVIF
       and MozJPEG were already integer, so this also unifies the surface). The
       `0.1` granularity was false precision the encoders don't reward perceptibly.
       JXL's Quality max becomes **99** (was `99.9`, a hack to keep it distinct from
@@ -201,7 +201,7 @@ behavior parity is preserved.
       (89.3→90, 84.7→85, 83.0→83); `svelte-check` 0/0.
 
 12. **Consistent Quality → Effort → Advanced tiering across option panels
-    (2026-06-28).** Squoosh shows every encoder knob at one flat level; Sqush now
+    (2026-06-28).** Squoosh shows every encoder knob at one flat level; Presk now
     leads each panel with its headline controls and folds the expert surface under
     the shared `AdvancedSection`. Ported from the "Modern UI redesign 2" branch
     (`clever-swartz-2b34ed`) idea, but made internally consistent (the branch left
@@ -227,7 +227,7 @@ behavior parity is preserved.
 13. **Resize Method dropdown trimmed to four scalers (2026-06-28).** Upstream
     Squoosh exposes nine resampling methods — five worker filters (Lanczos3,
     Mitchell, Catmull-Rom, Triangle, hqx) plus four browser-canvas scalers
-    (pixelated + low/medium/high) — and Vector for SVG. Sqush deliberately cuts the
+    (pixelated + low/medium/high) — and Vector for SVG. Presk deliberately cuts the
     menu to four distinct jobs: **Lanczos3** (photos), **Mitchell** (graphics /
     less ringing), **hqx** (pixel-art upscale), **Browser pixelated** (nearest
     neighbour), plus **Vector** (auto for SVG). Rationale: `browser-low/medium/high`
@@ -248,7 +248,7 @@ behavior parity is preserved.
       console errors.
 
 14. **Undo/redo + a shared, instant result cache (2026-06-28).** Squoosh has
-    neither; Sqush adds both, as one feature. The editable document
+    neither; Presk adds both, as one feature. The editable document
     (`{ sides, preprocessorState }`) is snapshotted into a signature-deduped
     history (`EditorHistory`, `$state.raw` entries + `$state` index) by a debounced
     `$effect` watcher in `EditorSession`; **Undo/Redo** restore a snapshot and let
@@ -274,7 +274,7 @@ behavior parity is preserved.
 > from one component never reach the other. Cost us a debugging cycle.
 
 15. **Preview smoothing + background grouped into a "View options" popover
-    (2026-06-28).** Squoosh (and Sqush until now) put the two preview-only display
+    (2026-06-28).** Squoosh (and Presk until now) put the two preview-only display
     toggles — smoothing (`image-rendering: pixelated`) and the alternate
     background — as two always-visible buttons on the output control bar. They now
     sit behind a single **View options** affordance (a tune/sliders pill next to
@@ -299,7 +299,7 @@ behavior parity is preserved.
       User-guide + reference reconciled.
 
 16. **Two-up divider keys are scoped to the viewer (2026-07-02).** Upstream
-    Squoosh (and Sqush until now) wired the `1`/`2`/`3` divider shortcuts as a
+    Squoosh (and Presk until now) wired the `1`/`2`/`3` divider shortcuts as a
     window-level keydown guarded only against `<input>` targets, so they fire
     globally — pressing "2" while a toolbar button, a `<select>`, or the zoom
     `<span role="button">` was focused silently recentred the split. The handler
@@ -311,8 +311,8 @@ behavior parity is preserved.
     from unrelated controls`. `npm run check` 0/0; `resize-twoup-footprint`
     e2e green.
 
-17. **Production bulk mode is a deliberate Sqush addition (2026-07-03).**
-    Original Squoosh is a single-image editor; Sqush now opens a batch editor
+17. **Production bulk mode is a deliberate Presk addition (2026-07-03).**
+    Original Squoosh is a single-image editor; Presk now opens a batch editor
     when 2+ supported files are imported, with global WebP settings, per-image
     overrides, folder import, Save all as ZIP, and remove+Undo. This is not a
     parity gap. The single-image editor path is unchanged for one file. Within
@@ -323,7 +323,7 @@ behavior parity is preserved.
 
 18. **Single-image left panel defaults to image info (2026-07-03).** Upstream
     Squoosh always shows two encoder option panels, with the left side set to
-    Original by default. Sqush now uses the left column as contextual image info
+    Original by default. Presk now uses the left column as contextual image info
     first: filename, original format, size, dimensions, and inferred aspect
     ratio. The old live second encoder panel is preserved, but it is opt-in via
     **Compare as…**; choosing **Original Image** or closing compare returns the

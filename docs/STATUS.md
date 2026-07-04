@@ -1,8 +1,8 @@
-# Sqush Status
+# Presk Status
 
 Last updated: 2026-07-03.
 
-Read this first. Sqush is a local-first image optimizer: image work stays in the
+Read this first. Presk is a local-first image optimizer: image work stays in the
 browser, the build is static, and offline reload must work after load.
 
 ## Current State
@@ -201,7 +201,7 @@ browser, the build is static, and offline reload must work after load.
 - **Resize UX cleanup (2026-06-28).** Three small editor changes landed on `main`:
   (1) size presets are now **shrink-only** — `0.25 / 0.5 / 1` (25 / 50 / 100%); the
   enlarge presets (`200 / 300 / 400%`) and the awkward `33.33%` were dropped, since
-  Sqush is an optimizer, not an upscaler (enlarging stays reachable via Custom
+  Presk is an optimizer, not an upscaler (enlarging stays reachable via Custom
   Width/Height). (2) The in-progress pill reads **"Resizing…"** when a real resize
   drives the pass, vs "(Re-)optimizing" otherwise. (3) A resize at **100% is a true
   no-op** — `processImage` skips the identity resample and `encodeSide` skips the
@@ -244,7 +244,7 @@ browser, the build is static, and offline reload must work after load.
 - The original Preact/Rollup app is preserved on the `preact` branch (tag
   `preact-final`) for reference only — it is no longer a fallback for `main`.
   There is a single working tree at the repo root; the `svelte` branch and the
-  `../Sqush-svelte` worktree are gone.
+  `../Presk-svelte` worktree are gone.
 - The current track is **post-migration cleanup and Svelte hardening**: remove
   dead Preact-era code, make ported components fully idiomatic Svelte 5, and fix
   the defects found by the post-migration review. Prioritized backlog:
@@ -356,7 +356,7 @@ browser, the build is static, and offline reload must work after load.
     in the dev server (fast in prod) because `vite dev` injects an ESM
     `/@vite/client` import into the **classic** Emscripten pthread worker
     (`*_mt.worker.js`), breaking the pool. Fixed with a dev-only
-    `sqush-raw-threaded-codec-workers` Vite plugin that serves those workers raw.
+    `presk-raw-threaded-codec-workers` Vite plugin that serves those workers raw.
     NOT a commit regression (dev-vs-prod; the live version under `vite dev` would
     behave the same). Detail: [threading-enablement.md](threading-enablement.md).
   - **Editor preview never goes blank + per-side "Optimising…/Re-optimising…"
@@ -446,11 +446,11 @@ end rather than kept for the now-closed migration parity (see
 - `src/features/**` — codec metadata, client runtimes, and worker runtimes.
 - `src/shared/codec-assets.ts` — build-tool-neutral codec asset records.
 - `scripts/sync-sveltekit-app.mjs` — generates
-  `.svelte-kit/sqush-generated/*`.
+  `.svelte-kit/presk-generated/*`.
 - `scripts/audit-static-output.mjs` — verifies emitted worker/WASM output.
 - `src/service-worker.ts` — SvelteKit service worker.
 
-Generated files live under `.svelte-kit/sqush-generated/` and are not
+Generated files live under `.svelte-kit/presk-generated/` and are not
 committed. Run `npm run sync` or `npm run check` to regenerate them.
 
 ## Commands
@@ -543,7 +543,7 @@ What's next, in short:
 - Multithreading is **done and verified** (Chromium + WebKit, e2e-protected) —
   COOP/COEP isolation + all three threaded codecs engaging multi-core. One
   caveat: under `vite dev` the classic Emscripten pthread workers must be served
-  raw, or they stall (~50× slower). The `sqush-raw-threaded-codec-workers` plugin
+  raw, or they stall (~50× slower). The `presk-raw-threaded-codec-workers` plugin
   in `vite.config.ts` handles this; don't remove it. See
   [threading-enablement.md](threading-enablement.md).
 - Do not touch `codecs/**` without codec provenance, build, service-worker, and

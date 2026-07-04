@@ -1,4 +1,4 @@
-# Sqush Docs — map, registry & work order
+# Presk Docs — map, registry & work order
 
 Last updated: 2026-07-03.
 
@@ -101,7 +101,7 @@ Every project doc: what it holds, when to **read** it, when to **update** it.
 | [specs/2026-07-02-bulk-phase-2-promotion.md](specs/2026-07-02-bulk-phase-2-promotion.md) | The executed bulk Phase-2 promotion spec: stage-by-stage lab→production migration (engine additions, entry routing, Stack-only cleanup, ZIP + size guard, folder import, remove-Undo, e2e, docs sweep) with acceptance criteria and guardrails. | Auditing the shipped bulk Phase 2 work. | The orchestrator flips the spec Status line; update only if the plan record changes. |
 | [specs/2026-07-02-phase-2b-contextual-left-panel.md](specs/2026-07-02-phase-2b-contextual-left-panel.md) | The executed Phase-2b spec: the single editor's left column became the shared image-info panel (extracted from the bulk panel — one component, both editors) + the "Compare as…" opt-in second side. Done 2026-07-03. | Auditing Phase 2b. | The orchestrator flips the spec Status line; update only if the plan record changes. |
 | [issue-list.md](issue-list.md) | Small backlog seed (issues that don't warrant their own plan). | Picking up small fixes. | A small issue is found, fixed, or promoted to a plan. |
-| [upstream-signals.md](upstream-signals.md) | Triage ledger for high-signal issues/PRs from GoogleChromeLabs/squoosh, classified against Sqush's docs and boundaries. | Mining upstream Squoosh, classifying external requests/bugs/PR ideas, or checking whether a signal is already handled locally. | An upstream issue/PR is reviewed, dismissed, promoted to local backlog, implemented, or changes a local assumption. |
+| [upstream-signals.md](upstream-signals.md) | Triage ledger for high-signal issues/PRs from GoogleChromeLabs/squoosh, classified against Presk's docs and boundaries. | Mining upstream Squoosh, classifying external requests/bugs/PR ideas, or checking whether a signal is already handled locally. | An upstream issue/PR is reviewed, dismissed, promoted to local backlog, implemented, or changes a local assumption. |
 | [dependency-modernization.md](dependency-modernization.md) | The dependency-graph modernization state. | Modernizing/bumping deps. | Dependencies are modernized/bumped meaningfully. |
 | [parity-audit.md](parity-audit.md) | Editor feature-parity vs the original Squoosh + the deviation log. | Changing editor features; verifying parity. | A feature changes, parity is verified, or a deviation is added/closed. |
 | [manual-qa.md](manual-qa.md) | The manual QA checklist (pre-release / after risky changes). | Before a release or after build/worker/codec changes. | A new feature/path needs a manual check, or a step changes. |

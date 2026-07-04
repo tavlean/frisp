@@ -178,7 +178,7 @@ can't handle today. Independent of the rebuilds above.
 > *future* codec-update session; adapt the "already done / continue" lines to
 > whatever is then outstanding.**
 >
-> I'm working in the Sqush repo (a browser/WASM image compressor) on the
+> I'm working in the Presk repo (a browser/WASM image compressor) on the
 > `codec-rebuilds` branch. libimagequant and libwebp are already upgraded +
 > verified; continue the remaining codec upgrades.
 >

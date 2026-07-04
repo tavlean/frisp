@@ -1,6 +1,6 @@
 # Upstream PR notes
 
-The original `GoogleChromeLabs/squoosh` repository has many open pull requests. Because Sqush is now a standalone project, these PRs should be treated as reference material, not automatic merge candidates.
+The original `GoogleChromeLabs/squoosh` repository has many open pull requests. Because Presk is now a standalone project, these PRs should be treated as reference material, not automatic merge candidates.
 
 Last full audit: 2026-05-23.
 
@@ -9,14 +9,14 @@ GitHub reported 89 open PRs at audit time. All 89 were inspected through the Git
 ## Highest-value references
 
 1. `GoogleChromeLabs/squoosh#1428`: bulk processing support.
-   - Most relevant reference for Sqush's main product direction.
+   - Most relevant reference for Presk's main product direction.
    - Use it to compare multi-file import, processing order, preview selection, and export behavior.
-   - Do not merge blindly because Sqush already has separate framework-neutral bulk helpers and the bulk UI is on design hold.
+   - Do not merge blindly because Presk already has separate framework-neutral bulk helpers and the bulk UI is on design hold.
 
 2. `GoogleChromeLabs/squoosh#1470`: SVG `viewBox` comma parsing.
    - Small import compatibility fix.
    - Worth cherry-picking manually after testing comma-separated and whitespace-separated `viewBox` values.
-   - Current status: implemented in Sqush with a tested `parseSvgViewBoxSize` helper.
+   - Current status: implemented in Presk with a tested `parseSvgViewBoxSize` helper.
 
 3. `GoogleChromeLabs/squoosh#1339`: copy settings as JSON.
    - Useful concept for presets and sharing compression settings.
@@ -55,13 +55,13 @@ Recommended approach:
 
 |        PR | Title                                  | Category         | Relevance | Suggested action                                    | Risk/conflict                    |
 | --------: | -------------------------------------- | ---------------- | --------- | --------------------------------------------------- | -------------------------------- |
-|      1470 | Fix SVG viewBox parsing                | bugfix           | High      | Done in Sqush                                       | Overlapped current SVG work      |
+|      1470 | Fix SVG viewBox parsing                | bugfix           | High      | Done in Presk                                       | Overlapped current SVG work      |
 |      1469 | Remove bad FAQ link                    | docs             | Low       | Note only                                           | Issue template only              |
 |      1465 | minimatch/serve bump                   | build/dependency | Medium    | Already superseded by fresh audit work              | Major lockfile churn             |
 |      1464 | serialize-js/terser bump               | build/dependency | Medium    | Already superseded by fresh audit work              | Node/toolchain risk              |
 |      1462 | on-headers/serve bump                  | build/dependency | Medium    | Already superseded by fresh audit work              | Lockfile churn                   |
 |      1461 | edit test                              | obsolete/ignore  | Low       | Ignore                                              | Broad unreviewable modernization |
-|      1457 | remove duplicate url-plugin code       | bugfix           | Medium    | Done in Sqush                                       | Low                              |
+|      1457 | remove duplicate url-plugin code       | bugfix           | Medium    | Done in Presk                                       | Low                              |
 |      1455 | js-yaml bump                           | build/dependency | Medium    | Already superseded by fresh audit work              | Lockfile only                    |
 |      1454 | rollup bump                            | build/dependency | Medium    | Investigate later                                   | Bundler behavior                 |
 |      1453 | js-yaml/cssnano bump                   | build/dependency | Medium    | Already superseded by fresh audit work              | CSS minification changes         |
@@ -69,17 +69,17 @@ Recommended approach:
 |      1450 | shell-quote bump                       | build/dependency | Low       | Already superseded by fresh audit work              | Lockfile only                    |
 |      1448 | Electron offline app                   | other            | Low       | Ignore                                              | Product scope shift              |
 |      1433 | npm audit fix force                    | build/dependency | Medium    | Already superseded by fresh audit work              | Forced majors                    |
-|      1430 | Windows scripts                        | build/dependency | Medium    | Partially addressed in Sqush                        | Can break Unix scripts if copied |
-|      1428 | Bulk processing                        | bulk             | High      | Reference only                                      | Sqush already has bulk modules   |
+|      1430 | Windows scripts                        | build/dependency | Medium    | Partially addressed in Presk                        | Can break Unix scripts if copied |
+|      1428 | Bulk processing                        | bulk             | High      | Reference only                                      | Presk already has bulk modules   |
 |      1421 | braces bump                            | build/dependency | Medium    | Already superseded by fresh audit work              | Stale lockfile                   |
 |      1418 | fix dev error                          | bugfix           | Medium    | Investigate later                                   | May be obsolete                  |
 |      1416 | ejs bump                               | build/dependency | Medium    | Already superseded by fresh audit work              | Lockfile only                    |
 |      1413 | zopfli on oxipng                       | codec            | High      | Investigate later                                   | Codec output/perf risk           |
 |      1401 | alpha channel reduction toggle         | codec/UX         | High      | Investigate later                                   | Option/meta conflicts            |
 |      1400 | CI action bumps                        | build/dependency | Low       | Note only                                           | Upstream CI only                 |
-|      1399 | Windows support                        | build/dependency | Medium    | Partially addressed in Sqush                        | Script portability               |
+|      1399 | Windows support                        | build/dependency | Medium    | Partially addressed in Presk                        | Script portability               |
 |      1398 | TIFF decoding                          | codec            | Medium    | Investigate later                                   | New decoder surface              |
-|      1383 | postcss 8 bump                         | build/dependency | Medium    | Already completed in Sqush                          | Plugin compatibility             |
+|      1383 | postcss 8 bump                         | build/dependency | Medium    | Already completed in Presk                          | Plugin compatibility             |
 |      1380 | codec versions README                  | docs             | Low       | Note only                                           | Docs only                        |
 |      1379 | JXL v0.7 failing build                 | codec            | Low       | Ignore                                              | Marked failing                   |
 |      1378 | JXL v0.7                               | codec            | Medium    | Investigate later                                   | Superseded/stale                 |
@@ -111,7 +111,7 @@ Recommended approach:
 |      1114 | Imagepool filename override            | other            | Low       | Note only                                           | libsquoosh API                   |
 |      1096 | size change indicators                 | UX               | Low       | Note only                                           | Prototype                        |
 |      1075 | mozjpeg decode errors                  | codec/bugfix     | Medium    | Investigate later                                   | Changes requested, WASM          |
-|      1072 | charset meta tag                       | bugfix           | Low       | Done in Sqush                                       | Tiny                             |
+|      1072 | charset meta tag                       | bugfix           | Low       | Done in Presk                                       | Tiny                             |
 |      1004 | MozJPEG progressive steps              | codec            | Low       | Ignore                                              | Draft/experimental               |
 |       945 | hide paste if unsupported              | UX/bugfix        | Medium    | Investigate manually                                | Clipboard UI changed             |
 |       944 | paste data URI                         | UX               | Medium    | Investigate later                                   | Input handling/security          |

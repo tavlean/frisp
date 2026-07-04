@@ -14,7 +14,7 @@ Read [STATUS.md](STATUS.md) for live state. This finished a **parked migration
 item**, it is not new greenfield work.
 
 > **ALL LANDED & VERIFIED (now on `main`).** Cross-origin isolation activates
-> (COOP/COEP via the `sqush-cross-origin-isolation` Vite plugin for dev/preview +
+> (COOP/COEP via the `presk-cross-origin-isolation` Vite plugin for dev/preview +
 > `static/_headers` for the host; commits `27ae8b88`, `09f08f22`), and all three
 > threaded codecs engage multi-core: oxipng (wasm-bindgen-rayon, shared-memory
 > build fix) and AVIF + JXL (Emscripten pthreads, `?url`/`mainScriptUrlOrBlob`
@@ -156,7 +156,7 @@ work is:
   pthread-URL resolution below. Still keep single-thread as the automatic fallback.
 - **Emscripten pthread URL resolution under Vite static output** — the empirical
   hard part; expect iteration on the `.worker.js` / wasm URLs.
-- `COEP: require-corp` rejects cross-origin subresources without CORP. Sqush is
+- `COEP: require-corp` rejects cross-origin subresources without CORP. Presk is
   self-contained, so low risk — but audit any external asset before shipping.
 
 ## Effort
@@ -327,7 +327,7 @@ never appeared in the deployed app or CI. (Confirmed against Vite #7019 / #15377
 and Emscripten #22394; the ITK-Wasm and jSquash projects hit the same wall and
 also serve the workers raw.)
 
-**Fix (`vite.config.ts`, plugin `sqush-raw-threaded-codec-workers`).** A dev-only
+**Fix (`vite.config.ts`, plugin `presk-raw-threaded-codec-workers`).** A dev-only
 `configureServer` middleware that serves `/codecs/**/*_mt(_simd)?.worker.js`
 **raw from disk**, bypassing the transform — matching what the production build
 already emits. It deliberately leaves the `?url` / `?worker` *module* forms to

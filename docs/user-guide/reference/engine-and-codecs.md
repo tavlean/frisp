@@ -1,6 +1,6 @@
 # Engine & codecs reference
 
-Code-derived inventory of the Sqush processing engine, processors/preprocessors,
+Code-derived inventory of the Presk processing engine, processors/preprocessors,
 and image codecs. Source of truth: `src/features/**` and `codecs/**`. Versions
 and provenance come from `docs/codec-provenance.md` and the codec build recipes.
 
@@ -11,7 +11,7 @@ and provenance come from `docs/codec-provenance.md` and the codec build recipes.
   SvelteKit worker surface.
 - **Threading is enabled (multi-core), with single-thread fallback.** AVIF,
   JPEG XL, and OxiPNG encode multi-core when the page is cross-origin-isolated
-  (COOP/COEP via the `sqush-cross-origin-isolation` Vite plugin for dev/preview +
+  (COOP/COEP via the `presk-cross-origin-isolation` Vite plugin for dev/preview +
   `static/_headers` on the host), falling back to single-thread when threads /
   `SharedArrayBuffer` are unavailable. WebP runs a SIMD build. The production
   build emits the threaded helper assets, `audit:static-output` asserts them, and
@@ -46,7 +46,7 @@ Shapes: `src/features/processors/resize/shared/meta.ts`,
   input is SVG (`isVector`).
 - **Presets** (`resize/client/preset-state.ts`): `0.25, 0.5, 1`
   (shown as 25% / 50% / 100%), plus `custom`. Shrink-only by design — no enlarge
-  presets (Sqush is an optimizer, not an upscaler); enlarging is reachable only
+  presets (Presk is an optimizer, not an upscaler); enlarging is reachable only
   by typing larger Width/Height values via `custom`.
 - **Identity resize is skipped.** `processImage` only calls the resampler when the
   target dims differ from the (preprocessed) source — at 100% the default
@@ -116,10 +116,10 @@ removed (encoder + decoder); its `codecs/wp2/` tree and all wiring are gone.
 ## Offline / Service Worker
 
 - **Service worker** (`src/service-worker.ts`): SvelteKit-native. Cache name
-  `sqush-${version}`. On `install` it precaches `build + files + prerendered +
+  `presk-${version}`. On `install` it precaches `build + files + prerendered +
 serviceWorkerCodecAssetUrls` (codec WASM/JS via
   `src/lib/service-worker-codec-assets.ts`, merged from generated
-  `sqush-generated/service-worker/cache-plan` + local probe workers). Strategy:
+  `presk-generated/service-worker/cache-plan` + local probe workers). Strategy:
   **cache-first for known asset pathnames, network-first (with cache fallback)**
   for everything else. On `activate` it deletes stale caches and claims clients.
   Result: offline reload on the deployed origin once cached.
@@ -129,6 +129,6 @@ serviceWorkerCodecAssetUrls` (codec WASM/JS via
   **unregisters** any leftover worker and clears Cache Storage, then skips
   registration. This stops a stale cache-first worker from hijacking another app
   that reuses the same localhost port. Opt back in for local offline QA with
-  `?sw` (persisted via `localStorage` key `sqush:force-localhost-sw`; `?sw=0`
+  `?sw` (persisted via `localStorage` key `presk:force-localhost-sw`; `?sw=0`
   disables). Loopback detection covers `localhost`, `*.localhost`, `127.0.0.0/8`,
   `::1`, `0.0.0.0`.

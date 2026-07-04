@@ -14,7 +14,7 @@ branches. It does not replace the detailed file inventory in
 
 ## Current answer
 
-SvelteKit static output still looks viable for Sqush's local-first optimizer,
+SvelteKit static output still looks viable for Presk's local-first optimizer,
 provided the migration remains seam-first rather than a direct app-shell
 rewrite. The current branch now proves enough reusable seams for a future
 minimal SvelteKit single-image slice to start after focused codec asset and

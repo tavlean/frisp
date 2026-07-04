@@ -46,7 +46,7 @@ This list is ordered by priority. Do the high-priority items before building new
 ## Priority 2: project clarity and maintainability
 
 9. Completed: update the root README for this fork.
-   - The README now explains Sqush, links the docs, and documents the baseline commands.
+   - The README now explains Presk, links the docs, and documents the baseline commands.
 
 10. Completed: keep generated feature files untracked and verify generation remains reliable.
     - `src/client/lazy-app/feature-meta/index.ts`

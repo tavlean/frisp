@@ -4,7 +4,7 @@
 
 ## Overview / When to use it
 
-**JPEG** is the workhorse format for photographs and other rich, continuous-tone images (sunsets, portraits, textures). Sqush encodes it with **MozJPEG**. It produces ordinary `.jpg` files that open everywhere, but uses a more careful (Mozilla-built) encoder that typically beats a regular JPEG at the same visible quality. Reach for it whenever you have a photo and don't need transparency. (JPEG has no transparency — if your image has see-through areas, use PNG, WebP, or AVIF instead.) For most people the only control that matters is the **Quality** slider; everything else lives under **Advanced settings** and can be safely ignored unless you're chasing the last few percent.
+**JPEG** is the workhorse format for photographs and other rich, continuous-tone images (sunsets, portraits, textures). Presk encodes it with **MozJPEG**. It produces ordinary `.jpg` files that open everywhere, but uses a more careful (Mozilla-built) encoder that typically beats a regular JPEG at the same visible quality. Reach for it whenever you have a photo and don't need transparency. (JPEG has no transparency — if your image has see-through areas, use PNG, WebP, or AVIF instead.) For most people the only control that matters is the **Quality** slider; everything else lives under **Advanced settings** and can be safely ignored unless you're chasing the last few percent.
 
 ## Controls / Settings
 
@@ -131,7 +131,7 @@
 
 ## Recommended settings & community tips
 
-> The settings below are **community recommendations** from web.dev/images.guide and the MozJPEG project, mapped onto Sqush's controls. They are advice, not new defaults; the factual ranges and defaults above are unchanged. Sources are listed at the end.
+> The settings below are **community recommendations** from web.dev/images.guide and the MozJPEG project, mapped onto Presk's controls. They are advice, not new defaults; the factual ranges and defaults above are unchanged. Sources are listed at the end.
 
 | Use case                                  | Suggested settings                                                                        | Why                                                                                                                                |
 | ----------------------------------------- | ----------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |

@@ -2,7 +2,7 @@
 
 This document records what the current repository contains. It is not a guarantee that every codec output is reproducible today.
 
-The original Squoosh project committed generated JavaScript and WebAssembly outputs under `codecs/`. Sqush still relies on those committed outputs during the Rollup build.
+The original Squoosh project committed generated JavaScript and WebAssembly outputs under `codecs/`. Presk still relies on those committed outputs during the Rollup build.
 
 Current inventory note: `codecs/` contains 80 committed JavaScript/WebAssembly codec artifacts, including browser builds, Node-targeted builds, threaded builds, SIMD builds, and worker companions. That means codec cleanup can reduce repository weight, but it also has a high breakage risk.
 

@@ -96,13 +96,13 @@ the app cannot handle today, and it needs no codec toolchain.
 - **What it adds:** Recompresses a `.jpg` into a `.jxl` ~20% smaller,
   **bit-for-bit reversible** (the `cjxl` default behavior for JPEG input).
 - **WASM feasibility:** Not possible with the current code. True transcoding
-  needs the JPEG DCT bitstream path (`JxlEncoderAddJPEGFrame`), but Sqush's
+  needs the JPEG DCT bitstream path (`JxlEncoderAddJPEGFrame`), but Presk's
   `jxl_enc.cpp` takes **pixels** and `jxl_dec.cpp` outputs **pixels**. jSquash's
   `lossless: true` is a pixel re-encode, not a transcode, so it does not give the
   reversible ~20% either.
 - **Effort:** High. New C++ plus a libjxl recompile — impossible here (no emcc).
 - **Maturity:** The libjxl transcode path is mature upstream, but it is **not
-  surfaced** in Sqush or in jSquash.
+  surfaced** in Presk or in jSquash.
 - **Recommendation:** SKIP; it is recompile-gated and JXL browser reach is weak
   (~12% of browsers).
 - **Sources:**

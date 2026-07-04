@@ -1,7 +1,7 @@
 # Formats & encoder options reference
 
 Code-derived inventory of every output format and every encoder option exposed
-in the Sqush editor. Sources:
+in the Presk editor. Sources:
 
 - `src/lib/compress.ts` — `OUTPUT_FORMATS` and the `identity`/"Original" pseudo-format.
 - `src/lib/editor/OptionsPanel.svelte` — per-format panel dispatch + the generic

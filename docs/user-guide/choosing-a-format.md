@@ -1,10 +1,10 @@
 # Choosing a format
 
-> A plain-language guide to picking the right output format in Sqush — when to use the modern formats (WebP, AVIF, JPEG XL), when to stick with the universal ones (JPEG, PNG), and when to leave the image untouched.
+> A plain-language guide to picking the right output format in Presk — when to use the modern formats (WebP, AVIF, JPEG XL), when to stick with the universal ones (JPEG, PNG), and when to leave the image untouched.
 
 ## Overview / When to use it
 
-Sqush lets you re-encode an image into a different format to make it smaller, sharper, or more widely compatible. The format you pick is the single biggest factor in the size-versus-quality trade-off. This page is a decision guide: it explains the difference between _lossy_ and _lossless_ compression, matches formats to the kind of image you have (a photo, a flat-color graphic, a screenshot, something with transparency), and tells you which formats are safe to put on the public web today. None of this changes where your image goes — everything is processed on your own device and nothing is uploaded.
+Presk lets you re-encode an image into a different format to make it smaller, sharper, or more widely compatible. The format you pick is the single biggest factor in the size-versus-quality trade-off. This page is a decision guide: it explains the difference between _lossy_ and _lossless_ compression, matches formats to the kind of image you have (a photo, a flat-color graphic, a screenshot, something with transparency), and tells you which formats are safe to put on the public web today. None of this changes where your image goes — everything is processed on your own device and nothing is uploaded.
 
 First, two words you'll see everywhere:
 
@@ -23,7 +23,7 @@ First, two words you'll see everywhere:
 | You're already happy with the file                 | **Original Image**                                     | No re-encoding; downloads the file unchanged                           |
 | You want the absolute smallest, support be damned  | **AVIF** or **JPEG XL**                                | Best compression, but check browser support before shipping            |
 
-A note on animation: Sqush has **no animation export**. Every output format here writes a single still frame — there is no animated GIF / WebP / AVIF encoder. If you load an animated source, you'll be compressing one frame of it.
+A note on animation: Presk has **no animation export**. Every output format here writes a single still frame — there is no animated GIF / WebP / AVIF encoder. If you load an animated source, you'll be compressing one frame of it.
 
 ## Controls / Settings
 
@@ -33,7 +33,7 @@ The format chooser is the dropdown at the top of each side's **Compress** panel.
 
 - **What it does:** Leaves the image completely untouched — no re-encoding. Both the before and after previews show the same (rotated, if you rotated it) source pixels, and the download is the original file byte-for-byte.
 - **Range & default:** It is the special `identity` pseudo-format, not a real encoder. It is always the first entry in the dropdown, shown as "Original Image". It has no Compress options, and the Resize / Reduce-palette ("Edit") controls are hidden for this side.
-- **How to choose:** Use it as the baseline on one side so you can compare a re-encoded version against the real original. Choose it as your final output when the file is already as good as you want and you only opened Sqush to inspect or rotate.
+- **How to choose:** Use it as the baseline on one side so you can compare a re-encoded version against the real original. Choose it as your final output when the file is already as good as you want and you only opened Presk to inspect or rotate.
 - **Recommended starting point:** **Keep one side on Original** while you tune the other side — it's the honest yardstick. Deviate when you actually want a smaller or different-format file.
 
 ### WebP
@@ -73,7 +73,7 @@ The format chooser is the dropdown at the top of each side's **Compress** panel.
 
 ## What about importing other formats?
 
-The format picker above is for **output** — what Sqush writes. The set of formats it can **read** is broader and separate: see [Engine & codecs → Input formats](./engine-and-codecs.md#input-formats-what-you-can-open). In short, you can open JPEG, PNG, GIF, BMP, SVG, WebP, AVIF, JPEG XL, and QOI even though several of those aren't output options. (HEIC is not supported.)
+The format picker above is for **output** — what Presk writes. The set of formats it can **read** is broader and separate: see [Engine & codecs → Input formats](./engine-and-codecs.md#input-formats-what-you-can-open). In short, you can open JPEG, PNG, GIF, BMP, SVG, WebP, AVIF, JPEG XL, and QOI even though several of those aren't output options. (HEIC is not supported.)
 
 ## Tips & pitfalls
 
@@ -88,4 +88,4 @@ The format picker above is for **output** — what Sqush writes. The set of form
 
 ## Under the hood
 
-Every output format (WebP, AVIF, JPEG XL, MozJPEG, OxiPNG) runs as a WebAssembly codec inside a worker (`src/lib/compress.ts`). "Original" is the `identity` pseudo-encoder: it skips encoding entirely, hands back the source file unchanged, and reports 0% change. When you pick a real encoder, Sqush also decodes the result back to pixels so the "after" preview shows the true codec output — compression artifacts and all — rather than an idealized version.
+Every output format (WebP, AVIF, JPEG XL, MozJPEG, OxiPNG) runs as a WebAssembly codec inside a worker (`src/lib/compress.ts`). "Original" is the `identity` pseudo-encoder: it skips encoding entirely, hands back the source file unchanged, and reports 0% change. When you pick a real encoder, Presk also decodes the result back to pixels so the "after" preview shows the true codec output — compression artifacts and all — rather than an idealized version.

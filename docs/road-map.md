@@ -1,4 +1,4 @@
-# Sqush Product Roadmap
+# Presk Product Roadmap
 
 Last updated: 2026-07-03.
 
@@ -19,7 +19,7 @@ migration record.
 > [threading-enablement.md](threading-enablement.md), and
 > [codec-surface-cleanup.md](codec-surface-cleanup.md).
 
-Sqush remains local-first: no uploads, no server processing, and dependable
+Presk remains local-first: no uploads, no server processing, and dependable
 browser/offline behavior after the app loads. New features must protect the
 single-image optimizer before expanding the surface area.
 

@@ -27,7 +27,7 @@ day. Round 1:
 options written. Round 2 (same day):
 maintainer confirmed **no separate `/bulk` route (A2 out)**, **ZIP in v1**,
 and the **size-increase guardrail in v1**; concept images generated to
-`~/Downloads/sqush-ui-concepts/`; §10–§12 added (A1↔A3 horizons, save
+`~/Downloads/presk-ui-concepts/`; §10–§12 added (A1↔A3 horizons, save
 destination + settings panel, crop + export renditions). Round 3 (same day,
 after reviewing the images): **layout goes to a two-variant lab** (grid home
 vs focus-first home — §3); **left side becomes a dynamic contextual panel
@@ -356,7 +356,7 @@ toggle (default on). "Never ship a bigger file."
 - **Multi-Format Compare** stays a separate feature; the bulk worker pool is
   the same substrate it needs, so bulk-first builds its foundation.
 - Later ideas kept on the list: folder import (+ preserved paths), PWA share
-  target ("send 20 photos to Sqush"), presets (save globals as named preset),
+  target ("send 20 photos to Presk"), presets (save globals as named preset),
   batch summary/CSV report, list-density toggle, target-file-size mode.
 
 ## 8. Recommended roadmap (phases)
@@ -459,7 +459,7 @@ written to disk without an explicit user grant. But the **File System Access
 API** (Chromium — Chrome/Edge; not Safari/Firefox) makes two flows real:
 
 - **Open folder → save back.** `showDirectoryPicker({mode: 'readwrite'})`
-  lets the user hand Sqush a folder once; the app reads the images from it
+  lets the user hand Presk a folder once; the app reads the images from it
   AND writes the optimized outputs back next to them (or into an `optimized/`
   subfolder). A *dropped folder* also yields a writable directory handle via
   `getAsFileSystemHandle()`. This is exactly the "working in a folder"

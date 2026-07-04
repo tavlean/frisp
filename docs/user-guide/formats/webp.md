@@ -35,7 +35,7 @@ The panel changes shape depending on the **Lossless** toggle. Two controls are a
 
 - **What it does:** Controls how hard the encoder works. Higher effort searches more compression options for a smaller and/or better-looking file, but takes longer to encode.
 - **Range & default:** 0–6, step 1, default **6** — the highest effort, for the best compression (`method`). The slider label reads "Effort:".
-- **How to choose:** Raising it makes files a little smaller or better at the cost of encoding time; lowering it is faster but slightly worse. Since Sqush runs in your browser, very high effort on large images can feel slow — but WebP stays quick even at 6 for typical web images.
+- **How to choose:** Raising it makes files a little smaller or better at the cost of encoding time; lowering it is faster but slightly worse. Since Presk runs in your browser, very high effort on large images can feel slow — but WebP stays quick even at 6 for typical web images.
 - **Recommended starting point:** **6** (the default — maximum compression). Lower it only if you're compressing very large images and want a faster encode.
 
 #### Quality
@@ -118,7 +118,7 @@ These live behind the **Advanced settings** expander, which only appears in loss
 
 ### Filter sharpness
 
-- **What it does:** Adjusts how sharply the deblocking filter is applied. Note the underlying scale is inverted — in the codec, 0 is the sharpest and 7 the least sharp — and Sqush flips the slider so that a higher slider number means more filtering/softer result (src: developers.google.com/speed/webp/docs/cwebp).
+- **What it does:** Adjusts how sharply the deblocking filter is applied. Note the underlying scale is inverted — in the codec, 0 is the sharpest and 7 the least sharp — and Presk flips the slider so that a higher slider number means more filtering/softer result (src: developers.google.com/speed/webp/docs/cwebp).
 - **Range & default:** 0–7, step 1 (`filter_sharpness`, shown inverted as `7 − value`); the codec default of 0 shows as **7** on the slider.
 - **How to choose:** Leave it at the default. Lower the slider only if filtering is softening detail too much and you want a crisper result.
 - **Recommended starting point:** Default (slider shows **7**).
@@ -167,7 +167,7 @@ These live behind the **Advanced settings** expander, which only appears in loss
 
 ## Recommended settings & community tips
 
-> The settings below are **community recommendations**, gathered from Google's own `cwebp` guidance and widely-shared web-developer practice. They are advice, not new defaults — the factual ranges and defaults above come straight from the Sqush source and are unchanged. Sources are listed at the end of this section.
+> The settings below are **community recommendations**, gathered from Google's own `cwebp` guidance and widely-shared web-developer practice. They are advice, not new defaults — the factual ranges and defaults above come straight from the Presk source and are unchanged. Sources are listed at the end of this section.
 
 | Use case                                    | Suggested settings                                                   | Why                                                                                                                                                                 |
 | ------------------------------------------- | -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -199,4 +199,4 @@ _Sources: [cwebp docs](https://developers.google.com/speed/webp/docs/cwebp); [li
 
 ## Under the hood
 
-Sqush encodes WebP entirely in your browser using a WebAssembly build of Google's official `libwebp` library; no image data leaves your device. Most control names map directly onto `cwebp`'s command-line options — for example Effort is `-m` (method), Spatial noise shaping is `-sns`, Filter strength is `-f`, Segments is `-segments`, and Sharp RGB→YUV conversion is `-sharp_yuv` — so the libwebp documentation applies if you want to dig deeper (src: developers.google.com/speed/webp/docs/cwebp). A few raw codec options (such as a target file size or target PSNR) exist in the format but are deliberately not surfaced in the Sqush UI.
+Presk encodes WebP entirely in your browser using a WebAssembly build of Google's official `libwebp` library; no image data leaves your device. Most control names map directly onto `cwebp`'s command-line options — for example Effort is `-m` (method), Spatial noise shaping is `-sns`, Filter strength is `-f`, Segments is `-segments`, and Sharp RGB→YUV conversion is `-sharp_yuv` — so the libwebp documentation applies if you want to dig deeper (src: developers.google.com/speed/webp/docs/cwebp). A few raw codec options (such as a target file size or target PSNR) exist in the format but are deliberately not surfaced in the Presk UI.

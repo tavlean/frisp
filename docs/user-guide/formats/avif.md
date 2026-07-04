@@ -98,7 +98,7 @@ These live under the **Advanced settings** expander. The defaults are sensible f
 
 ## Recommended settings & community tips
 
-> The settings below are **community recommendations** drawn from web.dev's AVIF guide and encoder-community practice, translated into Sqush's UI terms (its Quality slider is 0–99 and its Effort slider is 0–10, where higher Effort = slower/smaller). They are advice, not new defaults; the factual ranges and defaults above are unchanged. Sources are listed at the end.
+> The settings below are **community recommendations** drawn from web.dev's AVIF guide and encoder-community practice, translated into Presk's UI terms (its Quality slider is 0–99 and its Effort slider is 0–10, where higher Effort = slower/smaller). They are advice, not new defaults; the factual ranges and defaults above are unchanged. Sources are listed at the end.
 
 | Use case                                | Suggested settings                                                                    | Why                                                                                                                            |
 | --------------------------------------- | ------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
@@ -129,4 +129,4 @@ _Sources: [web.dev: compress images with AVIF](https://web.dev/articles/compress
 
 ## Under the hood
 
-AVIF wraps a single still frame encoded by the AV1 video codec (via the libavif/aom encoder, compiled to WebAssembly and run entirely in your browser) inside an image container. That is why its controls — quality, `speed`/effort, YUV subsampling, tiling, film-grain–style denoising, and PSNR/SSIM tuning — mirror video-encoder settings. The panel exposes effort as a friendly 0–10 slider that it inverts into the codec's 0–10 `speed` value, so that higher Effort means slower, smaller encoding. (Conceptual guidance drawn from web.dev's AVIF article and the libavif/avifenc documentation; all option ranges and defaults above come from the Sqush source.)
+AVIF wraps a single still frame encoded by the AV1 video codec (via the libavif/aom encoder, compiled to WebAssembly and run entirely in your browser) inside an image container. That is why its controls — quality, `speed`/effort, YUV subsampling, tiling, film-grain–style denoising, and PSNR/SSIM tuning — mirror video-encoder settings. The panel exposes effort as a friendly 0–10 slider that it inverts into the codec's 0–10 `speed` value, so that higher Effort means slower, smaller encoding. (Conceptual guidance drawn from web.dev's AVIF article and the libavif/avifenc documentation; all option ranges and defaults above come from the Presk source.)

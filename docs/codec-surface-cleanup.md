@@ -41,7 +41,7 @@ hide-then-delete originally sketched here). What went:
 
 **Verified:** `npm run check` passes (format:check, sync, svelte-kit sync,
 svelte-check 0/0, vite build, audit:static-output). The regenerated
-`.svelte-kit/sqush-generated/**` contains no wp2 references.
+`.svelte-kit/presk-generated/**` contains no wp2 references.
 
 ## 2. Delete the dead `codecs/png/` directory — DONE
 

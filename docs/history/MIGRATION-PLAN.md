@@ -1,4 +1,4 @@
-# Sqush SvelteKit Migration Plan
+# Presk SvelteKit Migration Plan
 
 Last updated: 2026-06-01.
 
@@ -13,7 +13,7 @@ New product features, including bulk UI, live in [road-map.md](../road-map.md).
 
 ## Decision
 
-Sqush is moving from the inherited Preact/Rollup app to a SvelteKit 2 /
+Presk is moving from the inherited Preact/Rollup app to a SvelteKit 2 /
 Svelte 5 static SPA. The user-facing single-image optimizer must remain
 functionally equivalent while the build/runtime foundation moves to Vite,
 SvelteKit workers, generated codec metadata, and a SvelteKit-native service
@@ -47,7 +47,7 @@ Out of scope:
 ## Completed Phases
 
 1. **Codec asset strategy**: `scripts/sync-sveltekit-app.mjs` generates
-   `.svelte-kit/sqush-generated/*`, including codec URL manifests, patched
+   `.svelte-kit/presk-generated/*`, including codec URL manifests, patched
    wrapper copies, worker metadata, and service-worker cache records.
 2. **Worker bridge parity**: the SvelteKit worker surface covers all active
    launch formats, including WebP 2.
@@ -109,7 +109,7 @@ None — the migration is closed. Post-migration cleanup is tracked in
 
 - The app is no longer a disposable prototype. Do not put new app code under
   `prototypes/`.
-- Generated SvelteKit files belong under `.svelte-kit/sqush-generated/`; do not
+- Generated SvelteKit files belong under `.svelte-kit/presk-generated/`; do not
   commit them.
 - Use Svelte MCP/docs and the Svelte autofixer for Svelte changes.
 - Keep `File`, `Blob`, `ImageData`, workers, WASM modules, and object URLs out

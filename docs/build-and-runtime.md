@@ -31,12 +31,12 @@ been removed from the `svelte` branch.
   can handle dev cleanup and production registration explicitly.
 - `vite.config.ts` and `svelte.config.js` define aliases for `client`,
   `features`, `shared`, `sw`, `codecs`, `worker-shared`, and generated
-  `sqush-generated` modules.
+  `presk-generated` modules.
 
 ## Generated Runtime Files
 
 `scripts/sync-sveltekit-app.mjs` writes generated files under
-`.svelte-kit/sqush-generated/`. The important generated groups are:
+`.svelte-kit/presk-generated/`. The important generated groups are:
 
 - `feature-meta/`: encoder/processor/preprocessor metadata.
 - `features-worker/webp.ts`: generated Comlink worker entry covering active
@@ -77,7 +77,7 @@ Behavior (variant-aware precache, 2026-06-10 — first-visit payload
   Chromium gets `avif_enc_mt` + `jxl_enc_mt_simd` + `webp_enc_simd` +
   oxipng-MT and skips the single-thread/baseline builds and the natively
   decodable AVIF/WebP WASM decoders);
-- activate: delete old Sqush caches and claim clients;
+- activate: delete old Presk caches and claim clients;
 - fetch: serve known assets cache-first (runtime-caching misses, so a
   non-precached variant still ends up cached after first use — a
   mis-detection costs one online network trip, never a broken codec),
@@ -96,7 +96,7 @@ control indefinitely):
   whether it installs during this visit (`updatefound` → `installed`) or was
   already waiting from a previous visit (`registration.waiting`) — and fires
   `onUpdateReady`. `+page.svelte` surfaces it as a persistent (`timeout: null`)
-  snackbar: "A new version of Sqush is available — Refresh".
+  snackbar: "A new version of Presk is available — Refresh".
 - Clicking **Refresh** calls `applyServiceWorkerUpdate()`, which posts
   `SKIP_WAITING` to the waiting worker. It activates, `clients.claim()` swaps
   the controller, and a one-time `controllerchange` listener reloads the tab
@@ -148,7 +148,7 @@ multi-core, with single-thread fallback intact. The data contract
 (`src/shared/codec-assets.ts`) carries the `multi-thread` / `worker-helper` /
 `threaded-only` records, and `audit:static-output` asserts the threaded helper
 assets are now present. Cross-origin isolation (COOP/COEP) — required for
-`SharedArrayBuffer` — is set via the `sqush-cross-origin-isolation` Vite plugin in
+`SharedArrayBuffer` — is set via the `presk-cross-origin-isolation` Vite plugin in
 `vite.config.ts` (dev + preview) and `static/_headers` (host). Full record:
 [threading-enablement.md](threading-enablement.md).
 
@@ -157,7 +157,7 @@ assets are now present. Cross-origin isolation (COOP/COEP) — required for
 dev transform otherwise injects an ESM `/@vite/client` import into them (illegal in
 a classic worker), so the thread pool never engages and threaded encodes stall
 (~50× slower) — dev-only, since a `vite build` emits them as raw hashed assets. The
-`sqush-raw-threaded-codec-workers` plugin in `vite.config.ts` serves
+`presk-raw-threaded-codec-workers` plugin in `vite.config.ts` serves
 `codecs/**/*_mt(_simd)?.worker.js` raw in dev to fix this (`configureServer`-only;
 prod build unaffected). Details in
 [threading-enablement.md](threading-enablement.md).

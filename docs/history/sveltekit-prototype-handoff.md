@@ -8,7 +8,7 @@ Last updated: 2026-05-26.
 
 ## Purpose
 
-Create a small, disposable technical prototype that answers whether Sqush can
+Create a small, disposable technical prototype that answers whether Presk can
 move from the current Rollup/Preact stack toward SvelteKit without weakening the
 core product promise:
 
@@ -252,7 +252,7 @@ rotate WASM after first use.
 
 Status: ready for a platform decision.
 
-Verdict: SvelteKit static output can safely carry Sqush's local-first
+Verdict: SvelteKit static output can safely carry Presk's local-first
 single-image optimizer architecture if the migration is done as a build/runtime
 port with explicit seams, not as a direct app-shell import. The prototype proves
 the important platform pieces: static output, Svelte 5 state, shared bulk/session
@@ -316,7 +316,7 @@ Migration-seams progress on `code/sveltekit-migration-seams`:
   needs runtime encoder client entries such as `featureTest`.
 - The SvelteKit prototype generator now mirrors that path shape by emitting
   `feature-meta/shared.ts` and `feature-meta/index.ts` files under
-  `.svelte-kit/sqush-generated/`. The current SvelteKit branch includes the
+  `.svelte-kit/presk-generated/`. The current SvelteKit branch includes the
   inherited single-image codec surface, with WebP 2 kept as experimental parity
   rather than a primary product promise.
 - The production rotate preprocessor worker now has a reusable runtime factory
@@ -342,7 +342,7 @@ Migration-seams progress on `code/sveltekit-migration-seams`:
   boundary against `features-worker/active` and the active cache planner. It is
   not wired to the current service worker.
 - The SvelteKit prototype generator now emits
-  `.svelte-kit/sqush-generated/service-worker/cache-plan.ts`, which mirrors the
+  `.svelte-kit/presk-generated/service-worker/cache-plan.ts`, which mirrors the
   same `{ main, deps }` shape with Vite worker URLs and generated WebP WASM URL
   deps. The prototype service-worker asset list consumes that generated plan,
   proving the first replacement shape for production `entry-data:` cache
@@ -408,12 +408,12 @@ Worker-bridge seam progress:
   This proves the workflow orchestration seam is usable outside the Preact
   component shell.
 - The SvelteKit prototype sync step now emits
-  `.svelte-kit/sqush-generated/codec-assets/webp.ts` as the canonical WebP
+  `.svelte-kit/presk-generated/codec-assets/webp.ts` as the canonical WebP
   encoder WASM URL manifest. The service-worker asset list and
   `SvelteKitWorkerBridge` both consume those generated URLs, so the app, worker
   bridge, and cache manifest agree on the top-level WebP WASM asset URLs.
 - The prototype sync step now emits
-  `.svelte-kit/sqush-generated/codec-assets/manifest.ts` as the logical asset
+  `.svelte-kit/presk-generated/codec-assets/manifest.ts` as the logical asset
   record manifest for all active generated codec WASM URLs. App code,
   `SvelteKitWorkerBridge`, and generated service-worker cache entries derive
   URL lists from that manifest, proving the next canonical asset-manifest shape
@@ -421,7 +421,7 @@ Worker-bridge seam progress:
   imports a generated precache-only manifest, so runtime-only records such as
   rotate do not get inlined into the service-worker install cache.
 - The SvelteKit prototype sync step now emits
-  `.svelte-kit/sqush-generated/worker-surface/ready.ts`. The generated worker
+  `.svelte-kit/presk-generated/worker-surface/ready.ts`. The generated worker
   bridge metadata imports its ready method-name list, and the same file records
   blocked worker methods with their current codec asset, thread-support, or type
   blockers.
@@ -449,7 +449,7 @@ Worker-bridge seam progress:
   audits service-worker cache coverage for the decoder WASM asset.
 - `qoiEncode` and `qoiDecode` have moved from blocked to ready in that generated
   worker-surface manifest. The prototype now generates
-  `.svelte-kit/sqush-generated/codec-assets/qoi.ts`, passes the QOI encoder and
+  `.svelte-kit/presk-generated/codec-assets/qoi.ts`, passes the QOI encoder and
   decoder WASM URLs through the SvelteKit worker bridge, verifies a `qoif`
   output plus 3x3 QOI decode round trip in the runtime pipeline probe, and
   audits service-worker cache coverage for both QOI WASM assets. The QOI
@@ -470,7 +470,7 @@ Worker-bridge seam progress:
   proof.
 - `mozjpegEncode` has moved from blocked to ready in the generated
   worker-surface manifest. The prototype now generates
-  `.svelte-kit/sqush-generated/codec-assets/mozjpeg.ts`, passes the MozJPEG
+  `.svelte-kit/presk-generated/codec-assets/mozjpeg.ts`, passes the MozJPEG
   encoder WASM URL through the SvelteKit worker bridge, verifies JPEG
   `ff d8 ff` output in the runtime pipeline probe, and audits service-worker
   cache coverage for the MozJPEG WASM asset. The MozJPEG encoder now uses an
@@ -481,7 +481,7 @@ Worker-bridge seam progress:
   runtime value.
 - `quantize` has moved from blocked to ready in the generated worker-surface
   manifest. The prototype now generates
-  `.svelte-kit/sqush-generated/codec-assets/imagequant.ts`, passes the
+  `.svelte-kit/presk-generated/codec-assets/imagequant.ts`, passes the
   ImageQuant WASM URL through the SvelteKit worker bridge, verifies a
   reduced-color ImageData result in the runtime pipeline probe, and audits
   service-worker cache coverage for the ImageQuant WASM asset. The quantize
@@ -492,7 +492,7 @@ Worker-bridge seam progress:
   TypeScript settings.
 - Worker `resize` has moved from blocked to ready in the generated
   worker-surface manifest. The prototype now generates
-  `.svelte-kit/sqush-generated/codec-assets/resize.ts`, passes resize and HQX
+  `.svelte-kit/presk-generated/codec-assets/resize.ts`, passes resize and HQX
   WASM URLs through the SvelteKit worker bridge, verifies a 2x2 ImageData result
   in the runtime pipeline probe, and audits service-worker cache coverage for
   both wasm-bindgen assets. The production resize worker keeps its default
@@ -504,7 +504,7 @@ Worker-bridge seam progress:
 - `oxipngEncode` has moved from blocked to ready for the single-thread runtime
   path in the generated worker-surface manifest. The prototype now resolves the
   `worker-shared` alias through SvelteKit, generates
-  `.svelte-kit/sqush-generated/codec-assets/oxipng.ts`, passes the OxiPNG WASM
+  `.svelte-kit/presk-generated/codec-assets/oxipng.ts`, passes the OxiPNG WASM
   URL through the SvelteKit worker bridge, verifies PNG `89 50 4e 47` output in
   the runtime pipeline probe, and audits service-worker cache coverage for the
   single-thread OxiPNG WASM asset. The production OxiPNG worker now keeps its
@@ -658,8 +658,8 @@ compact so it fits Codex Desktop's goal length limit; the detailed context lives
 in the files it tells the new agent to read.
 
 ```text
-Continue Sqush's SvelteKit 2 / Svelte 5 technical prototype until it can give a
-clear migration-readiness answer for Sqush's local-first single-image optimizer.
+Continue Presk's SvelteKit 2 / Svelte 5 technical prototype until it can give a
+clear migration-readiness answer for Presk's local-first single-image optimizer.
 
 Use Codex Desktop New Worktree from branch `code/sveltekit-prototype`.
 
@@ -678,7 +678,7 @@ Read first:
 Prototype lives in `prototypes/sveltekit/`.
 
 Constraints:
-- Keep Sqush local/offline/serverless; no uploads or server image processing.
+- Keep Presk local/offline/serverless; no uploads or server image processing.
 - Keep SvelteKit static output as the target unless there is a concrete blocker
   documented with a minimal reproduction.
 - Do not implement production bulk UI.

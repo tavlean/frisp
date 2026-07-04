@@ -274,10 +274,10 @@ the reference):
   multiple>` whose change handler forwards to `bulkStore` import (same code
   path as the page router's add-to-batch branch).
 - Props: `{ onExit: () => void }`.
-- Token scoping: the editor theme tokens are scoped to `.sqush-editor`
+- Token scoping: the editor theme tokens are scoped to `.presk-editor`
   (`theme.css`), and `FocusView`'s root already carries that class — but the
   Back/Add cluster sits outside it. Put the cluster inside a
-  `.sqush-editor`-classed wrapper (or give BulkMode's root that class) so
+  `.presk-editor`-classed wrapper (or give BulkMode's root that class) so
   `var(--…)` tokens resolve without the lab's hardcoded fallbacks.
 
 **C2. Rewire `src/routes/+page.svelte`** — the boundary router.
@@ -766,7 +766,7 @@ suggestions as pass, hard issues as fail.
 
 - Do NOT touch `codecs/**`, `src/features/**` codec meta, the service worker,
   `scripts/sync-sveltekit-app.mjs`, or `vite.config.ts` (the
-  `sqush-raw-threaded-codec-workers` plugin must stay).
+  `presk-raw-threaded-codec-workers` plugin must stay).
 - Do NOT modify `EditorSession` beyond (optionally) relaxing `pickFiles`'
   param type to `ArrayLike<File>`. Its `list[0]` reduction stays.
 - Do NOT add runtime `dependencies` — `client-zip` goes in `devDependencies`
@@ -817,7 +817,7 @@ suggestions as pass, hard issues as fail.
     muscle memory) — the move happened; check `git status` paths before
     committing.
 12. **Skipping `npm run sync`/generated files confusion** — if imports from
-    `.svelte-kit/sqush-generated` fail, run `npm run check` (it syncs);
+    `.svelte-kit/presk-generated` fail, run `npm run check` (it syncs);
     never hand-edit generated files.
 13. **Playwright: `setInputFiles` with an array fails** if Stage C's
     `multiple` attribute regressed — that's the test doing its job; fix the
@@ -837,7 +837,7 @@ suggestions as pass, hard issues as fail.
 | Symptom | Likely cause | Look first |
 |---|---|---|
 | Bulk encodes never start / hang at "queued" | Runtime drain loop not re-triggered after import; or bridges disposed by a stale exit effect | `store.importFiles` → `runtime.run(this)`; the exit/route-state effect from C2 |
-| Encodes 50× slower in dev only | The raw-threaded-worker dev plugin was touched | `vite.config.ts` (`sqush-raw-threaded-codec-workers`) — restore it |
+| Encodes 50× slower in dev only | The raw-threaded-worker dev plugin was touched | `vite.config.ts` (`presk-raw-threaded-codec-workers`) — restore it |
 | Thumbnails blank after Undo | URLs were revoked before the snackbar settled | Stage G deferred-revocation holder |
 | Focus view re-encodes on every click | The hydrate-from-batch-output path broke in the move | `hydrateFocusFromBulkOutput` in BulkMode; design rule: never re-encode on inspect |
 | `npm run check` fails on `webkitdirectory`/`webkitRelativePath` types | Nonstandard attr/prop typing | F4 note — attribute spread or a `.d.ts` addition |

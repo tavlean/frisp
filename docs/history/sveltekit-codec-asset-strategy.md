@@ -10,7 +10,7 @@ not permission to rebuild, delete, or hand-edit codec artifacts.
 Use generated logical codec asset records as the canonical source of runtime
 URLs. Keep committed `codecs/**` artifacts untouched. When a codec wrapper still
 contains bundler-visible fallback `new URL('*.wasm', import.meta.url)` logic,
-generate a patched wrapper copy under `.svelte-kit/sqush-generated/codecs/*`
+generate a patched wrapper copy under `.svelte-kit/presk-generated/codecs/*`
 instead of editing the committed wrapper.
 
 The generator is `scripts/sync-sveltekit-app.mjs`.

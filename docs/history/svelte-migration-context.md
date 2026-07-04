@@ -1,6 +1,6 @@
 # Svelte migration context
 
-This document records the SvelteKit migration guidance for Sqush. It is based on
+This document records the SvelteKit migration guidance for Presk. It is based on
 Svelte MCP documentation passes on 2026-05-24 and 2026-05-25.
 
 Use this as Svelte/SvelteKit guidance, not as the live scope tracker. The
@@ -12,7 +12,7 @@ migration is now **concluded** (`main` is the production app); live state is in
 
 ## Main principle
 
-Do not migrate the UI just to migrate it. Sqush is valuable because local image optimization works reliably: import, decode, process, encode, preview, export, and offline use must remain dependable.
+Do not migrate the UI just to migrate it. Presk is valuable because local image optimization works reliably: import, decode, process, encode, preview, export, and offline use must remain dependable.
 
 The Svelte migration should make the app easier to maintain and extend without
 weakening the proven single-image optimizer. Bulk image optimization is a
@@ -34,7 +34,7 @@ SvelteKit is still a good candidate because it supports:
 - a documented offline app path;
 - built-in project structure, testing, and deployment conventions.
 
-For Sqush, any SvelteKit setup must stay browser-first and static. Image processing should continue to happen locally in the browser through workers and WASM, not through a server route.
+For Presk, any SvelteKit setup must stay browser-first and static. Image processing should continue to happen locally in the browser through workers and WASM, not through a server route.
 
 ## Migration shape
 

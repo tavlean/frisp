@@ -1,6 +1,6 @@
 # JPEG XL
 
-> A modern image format with excellent quality-per-byte and a true lossless mode — Sqush exposes a full set of controls, from a simple Quality slider to advanced tuning like edge filtering and synthetic film grain. Encoded with **libjxl** (shown as **JPEG XL** in the menu; the encoder name appears as a hover tooltip).
+> A modern image format with excellent quality-per-byte and a true lossless mode — Presk exposes a full set of controls, from a simple Quality slider to advanced tuning like edge filtering and synthetic film grain. Encoded with **libjxl** (shown as **JPEG XL** in the menu; the encoder name appears as a hover tooltip).
 
 ## Overview / When to use it
 
@@ -98,7 +98,7 @@ _(Only shown when Lossless is off.)_
 
 ## Recommended settings & community tips
 
-> The settings below are **community recommendations** from the libjxl docs and Cloudinary's Pareto-front analysis. JPEG XL's native quality knob on the command line is `--distance` (0 = lossless, ~1.0 = visually lossless); Sqush exposes the friendlier 0–99 **Quality** slider instead, where **~90 ≈ distance 1.0**. These are advice, not new defaults; the factual ranges above are unchanged. Sources are listed at the end.
+> The settings below are **community recommendations** from the libjxl docs and Cloudinary's Pareto-front analysis. JPEG XL's native quality knob on the command line is `--distance` (0 = lossless, ~1.0 = visually lossless); Presk exposes the friendlier 0–99 **Quality** slider instead, where **~90 ≈ distance 1.0**. These are advice, not new defaults; the factual ranges above are unchanged. Sources are listed at the end.
 
 | Use case                              | Suggested settings                                                     | Why                                                                                                                                        |
 | ------------------------------------- | ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -111,7 +111,7 @@ _(Only shown when Lossless is off.)_
 **Community tips**
 
 - **Effort 7 ("squirrel") is the sweet spot.** It sits on the Pareto front; Effort 8–9 give tiny extra savings for a large time cost. Don't waste minutes at 9 for a marginal gain.
-- **JXL's killer feature is lossless JPEG transcoding.** On the command line, feeding `cjxl` a `.jpg` losslessly re-packs it ~20% smaller, reversibly, with zero quality change. Sqush re-encodes from decoded pixels rather than doing this bit-exact transcode, so to mimic it, keep an existing JPEG at high quality and compare.
+- **JXL's killer feature is lossless JPEG transcoding.** On the command line, feeding `cjxl` a `.jpg` losslessly re-packs it ~20% smaller, reversibly, with zero quality change. Presk re-encodes from decoded pixels rather than doing this bit-exact transcode, so to mimic it, keep an existing JPEG at high quality and compare.
 - **Browser support is the catch.** Native only in Safari 17+; Chrome/Firefox keep it behind a flag or removed it. Great for archiving, Safari-targeted, or controlled pipelines; not general web delivery yet.
 - **Quality numbers aren't comparable across formats.** A JXL "75" is not a WebP "75". Judge by the preview.
 - **JXL shines at high quality, not extreme size reduction.** For the very smallest flat-graphic files at the lowest bitrates, AVIF can edge it out; JXL's strength is photographic and high-fidelity/archival work.
@@ -130,7 +130,7 @@ _Sources: [cjxl man page](https://manpages.debian.org/unstable/libjxl-tools/cjxl
 
 ## Browser support reality
 
-This is the single most important thing to know before you ship JPEG XL. Sqush _encodes_ `.jxl` entirely in your browser (via WebAssembly), so creating the files works anywhere Sqush runs. _Displaying_ them is the problem:
+This is the single most important thing to know before you ship JPEG XL. Presk _encodes_ `.jxl` entirely in your browser (via WebAssembly), so creating the files works anywhere Presk runs. _Displaying_ them is the problem:
 
 - **Safari 17+** (macOS Sonoma / iOS 17, 2023) can show `.jxl` natively.
 - **Chrome / Edge** removed their experimental JPEG XL support in Chrome 110 (early 2023); it is **not** available by default.
@@ -142,4 +142,4 @@ In practice, if you put a `.jxl` on a public website, most visitors won't see it
 
 ## Under the hood
 
-Sqush's JPEG XL support is built on the libjxl reference encoder compiled to WebAssembly, so all compression happens on your device — no image is uploaded. The "Effort" levels map onto libjxl's named speed tiers (7 = "squirrel", the default; higher = "kitten"/"tortoise", slower but smaller), and the alternative lossy engine is libjxl's _modular_ mode, which suits non-photographic images. Several of these controls (decoding-speed tier, photon-noise synthesis, edge-preserving filter) are advanced libjxl features that most users can safely leave at their defaults.
+Presk's JPEG XL support is built on the libjxl reference encoder compiled to WebAssembly, so all compression happens on your device — no image is uploaded. The "Effort" levels map onto libjxl's named speed tiers (7 = "squirrel", the default; higher = "kitten"/"tortoise", slower but smaller), and the alternative lossy engine is libjxl's _modular_ mode, which suits non-photographic images. Several of these controls (decoding-speed tier, photon-noise synthesis, edge-preserving filter) are advanced libjxl features that most users can safely leave at their defaults.
