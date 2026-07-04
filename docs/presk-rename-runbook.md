@@ -1,6 +1,6 @@
 # Presk rename runbook (Sqush → Presk)
 
-> **Status:** Phase A ✅ complete & signed on `main` (unpushed, 4 commits). Awaiting GitHub repo rename → then push + Phase C. Phase D (folder rename) DEFERRED by choice. Redirects: keep both.
+> **Status:** GitHub repo renamed ✅ · Phase A ✅ pushed to `tavlean/presk` · Phase C tavlean.com ✅ pushed (Cloudflare deploying). Remaining: Cloudflare custom domain + DNS + `sqush.app` redirect (user), brand-art re-export (user), Phase B codec-`squoosh` (deferred), Phase D folder rename (deferred).
 > **This file intentionally contains the old name "sqush" as rename targets — EXCLUDE it from any automated `sqush→presk` replace.**
 
 Renaming the project from **Sqush** to **Presk**.
@@ -54,12 +54,12 @@ Each numbered group = one checkpoint commit.
 
 > Pulse matches repos by GitHub `origin` remote (case-insensitive) — do this in lockstep with the GitHub rename or Pulse loses Sqush's history. Generator: `scripts/build-pulse.mjs`. ⚠ An unrelated dirty file exists (`projects/(_)/rankedagi-raycast/logo.svg`) — stage only Presk files.
 
-- [ ] `scripts/projects-registry.mjs` entry (currently `{ slug:'sqush', name:'Sqush', repo:'Tavlean/Sqush', github:'tavlean/sqush' }`): set `name Presk`, `slug presk`, `github tavlean/presk`. **Keep `repo:'Tavlean/Sqush'`** for now (folder rename deferred) — flip to `Tavlean/Presk` when Phase D happens.
-- [ ] `git mv` route folder `projects/(_)/sqush/ → …/presk/` (holds +page.svelte/.ts/+layout.server.ts + logo.webp). URL becomes `/projects/presk`.
-- [ ] **Redirect `/projects/sqush → /projects/presk`** (decision: KEEP). Leave a stub at the old path (`sqush/+page.ts` → `redirect(308, '/projects/presk')`) or a reroute hook.
-- [ ] Rebuild Pulse (`node scripts/build-pulse.mjs`) to regenerate `pulse-data.json` / `pulse-summaries.json` — don't hand-edit.
-- [ ] `docs/project-registry.md`, `docs/assets.md`: update name/slug references.
-- [ ] Build/check, commit (signed, Presk files only), deploy.
+- [x] `scripts/projects-registry.mjs` entry: `name Presk`, `slug presk`, `github tavlean/presk`; **kept `repo:'Tavlean/Sqush'`** (folder deferred → flip to `Tavlean/Presk` at Phase D).
+- [x] `git mv` route folder `projects/(_)/sqush/ → …/presk/`; content updated (name, `presk.app`, github URL, `/projects/presk`, `requireProjectWithTabs('presk')`); fork-of-Squoosh attribution kept.
+- [x] **Redirect `/projects/sqush → /projects/presk`** via `static/_redirects` (308). ⚠ Learning: a route stub broke prerender (projects are globbed by `_meta` and sorted), and `hooks.server.ts` is dead on `adapter-static` — `_redirects` is the Cloudflare Pages mechanism.
+- [x] Rebuilt Pulse (`npm run sync:pulse`) → `pulse-data.json` regenerated (77 sqush hrefs → presk); one historical day-summary name fixed too.
+- [x] `docs/project-registry.md` updated (`assets.md` had no `sqush`).
+- [x] Build green; 2 signed commits (`8a9760b`, `ffa9020`) pushed → Cloudflare auto-deploys. Unrelated `rankedagi-raycast/logo.svg` left untouched.
 
 ## Phase D — Folder rename (DEFERRED by choice — app never references the folder name, so nothing breaks)
 
