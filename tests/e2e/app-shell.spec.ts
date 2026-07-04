@@ -13,7 +13,7 @@ test.describe('app shell', () => {
     page.on('pageerror', (e) => errors.push(String(e)));
 
     await page.goto('/');
-    await expect(page.getByRole('heading', { name: 'Sqush' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Presk' })).toBeVisible();
 
     // The whole point of the threading work: the page must be cross-origin
     // isolated so SharedArrayBuffer (and therefore WASM threads) is available.

@@ -70,7 +70,7 @@ async function saveAllZip(page: Page): Promise<{
   const downloadPromise = page.waitForEvent('download');
   await saveAll.click();
   const download = await downloadPromise;
-  const dir = await mkdtemp(join(tmpdir(), 'sqush-bulk-'));
+  const dir = await mkdtemp(join(tmpdir(), 'presk-bulk-'));
   const path = join(dir, download.suggestedFilename());
   await download.saveAs(path);
   return {

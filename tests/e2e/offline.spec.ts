@@ -20,7 +20,7 @@ test('reloads offline after the service worker installs', async ({
   // it never pollutes a dev origin by accident. Production hosts register it
   // unconditionally; here we opt in so the offline path is exercised.
   await page.goto('/?sw=1');
-  await expect(page.getByRole('heading', { name: 'Sqush' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Presk' })).toBeVisible();
 
   // Wait for the service worker to take control.
   await page.waitForFunction(
@@ -31,6 +31,6 @@ test('reloads offline after the service worker installs', async ({
 
   await context.setOffline(true);
   await page.reload();
-  await expect(page.getByRole('heading', { name: 'Sqush' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Presk' })).toBeVisible();
   await context.setOffline(false);
 });

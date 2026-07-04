@@ -11,7 +11,7 @@ import type { ProcessorState } from 'client/lazy-app/feature-meta';
  * timers and snackbar UX stay in EditorSession.
  *
  * HARD RULE: the wire formats here are FROZEN. The storage keys
- * (`sqush:settings:v3`, `sqush:side-settings:left/right`) and the stored payload
+ * (`presk:settings:v3`, `presk:side-settings:left/right`) and the stored payload
  * shapes are byte-identical to what shipped; changing any of them is a schema
  * change that needs a migration plan, not a refactor.
  */
@@ -29,11 +29,11 @@ type SideIndex = 0 | 1;
 // and to discard pre-existing persisted side settings that would otherwise mask
 // the new defaults (e.g. a stale AVIF-on-both-sides config). Old keys are simply
 // ignored; a fresh default (left = Original, right = WebP) loads instead.
-const STORAGE_KEY = 'sqush:settings:v3';
+const STORAGE_KEY = 'presk:settings:v3';
 const SAVE_VERSION = 1;
 
 const sideSaveKey = (index: SideIndex) =>
-  `sqush:side-settings:${index === 0 ? 'left' : 'right'}`;
+  `presk:side-settings:${index === 0 ? 'left' : 'right'}`;
 
 function canUseLocalStorage(): boolean {
   return typeof localStorage !== 'undefined';

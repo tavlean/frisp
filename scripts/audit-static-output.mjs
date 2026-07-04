@@ -77,11 +77,11 @@ const serviceWorker = await readFile(
   'utf8',
 );
 const generatedCodecAssetManifest = await readFile(
-  join(root, '.svelte-kit', 'sqush-generated', 'codec-assets', 'manifest.ts'),
+  join(root, '.svelte-kit', 'presk-generated', 'codec-assets', 'manifest.ts'),
   'utf8',
 );
 const generatedCodecAssetPrecacheManifest = await readFile(
-  join(root, '.svelte-kit', 'sqush-generated', 'codec-assets', 'precache.ts'),
+  join(root, '.svelte-kit', 'presk-generated', 'codec-assets', 'precache.ts'),
   'utf8',
 );
 

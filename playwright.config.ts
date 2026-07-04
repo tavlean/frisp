@@ -3,7 +3,7 @@ import { defineConfig, devices } from '@playwright/test';
 // E2E regression suite. Runs against the PRODUCTION static build served by
 // `vite preview`, so it exercises the real emitted codec assets, the generated
 // service worker, and the COOP/COEP cross-origin-isolation headers (which the
-// `sqush-cross-origin-isolation` plugin injects into preview too). This is the
+// `presk-cross-origin-isolation` plugin injects into preview too). This is the
 // automated safety net for codec changes — run it after any codec/build change.
 const PORT = 4317;
 

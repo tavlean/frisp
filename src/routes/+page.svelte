@@ -5,7 +5,7 @@
   import { resolve } from '$app/paths';
   import { page } from '$app/state';
   import {
-    registerSqushServiceWorker,
+    registerPreskServiceWorker,
     applyServiceWorkerUpdate,
   } from '$lib/service-worker-registration';
   import Output from '$lib/editor/output/Output.svelte';
@@ -38,10 +38,10 @@
     // When a new build is downloaded and waiting, offer a non-intrusive
     // "refresh now" prompt rather than reloading mid-task. Clicking Refresh
     // activates the waiting worker, which reloads the page onto the new build.
-    registerSqushServiceWorker({
+    registerPreskServiceWorker({
       onUpdateReady: () => {
         void snackbar
-          .show('A new version of Sqush is available.', {
+          .show('A new version of Presk is available.', {
             actions: ['Refresh'],
             timeout: null,
           })
@@ -165,7 +165,7 @@
   {#if bulkStore.hasJobs}
     <BulkMode onExit={exitBulk} />
   {:else if session.file}
-    <div class="compress sqush-editor">
+    <div class="compress presk-editor">
       <Output
         leftImage={session.runtime[0].result?.outputImageData}
         rightImage={session.runtime[1].result?.outputImageData}
@@ -528,11 +528,11 @@
       --fit-inset-right: 0px;
     }
 
-    :global(.sqush-editor .output) {
+    :global(.presk-editor .output) {
       bottom: calc(var(--mobile-options-height) + var(--panel-inset));
     }
 
-    :global(.sqush-editor .controls) {
+    :global(.presk-editor .controls) {
       bottom: calc(var(--mobile-options-height) + var(--panel-inset) + 8px);
       padding: 0 56px;
       box-sizing: border-box;
@@ -592,7 +592,7 @@
       --mobile-options-height: 48dvh;
     }
 
-    :global(.sqush-editor .controls) {
+    :global(.presk-editor .controls) {
       bottom: calc(var(--mobile-options-height) + var(--panel-inset) + 6px);
       padding: 0 48px;
     }

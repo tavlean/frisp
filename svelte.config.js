@@ -6,12 +6,12 @@ const config = {
   kit: {
     alias: {
       'client/lazy-app/feature-meta/shared':
-        './.svelte-kit/sqush-generated/feature-meta/shared.ts',
+        './.svelte-kit/presk-generated/feature-meta/shared.ts',
       'client/lazy-app/feature-meta/encoders':
-        './.svelte-kit/sqush-generated/feature-meta/encoders.ts',
+        './.svelte-kit/presk-generated/feature-meta/encoders.ts',
       'client/lazy-app/feature-meta':
-        './.svelte-kit/sqush-generated/feature-meta/index.ts',
-      'sqush-generated': './.svelte-kit/sqush-generated',
+        './.svelte-kit/presk-generated/feature-meta/index.ts',
+      'presk-generated': './.svelte-kit/presk-generated',
       client: './src/client',
       codecs: './codecs',
       features: './src/features',

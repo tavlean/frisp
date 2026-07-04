@@ -1,56 +1,56 @@
 import codecAssetProbeWorkerUrl from './codec-asset-probe.worker.ts?worker&url';
 import webpEncodeProbeWorkerUrl from './webp-encode-probe.worker.ts?worker&url';
-import svelteKitFeaturesWorkerUrl from 'sqush-generated/features-worker/webp.ts?worker&url';
+import svelteKitFeaturesWorkerUrl from 'presk-generated/features-worker/webp.ts?worker&url';
 import {
   avifCodecAssetUrls,
   avifDecoderWasmUrl,
   avifEncoderWasmUrl,
-} from 'sqush-generated/codec-assets/avif';
+} from 'presk-generated/codec-assets/avif';
 import {
   webpCodecAssetUrls,
   webpDecoderWasmUrl,
   webpEncoderSimdWasmUrl,
   webpEncoderWasmUrl,
-} from 'sqush-generated/codec-assets/webp';
+} from 'presk-generated/codec-assets/webp';
 import {
   rotateCodecAssetUrls,
   rotateWasmUrl,
-} from 'sqush-generated/codec-assets/rotate';
+} from 'presk-generated/codec-assets/rotate';
 import {
   qoiCodecAssetUrls,
   qoiDecoderWasmUrl,
   qoiEncoderWasmUrl,
-} from 'sqush-generated/codec-assets/qoi';
+} from 'presk-generated/codec-assets/qoi';
 import {
   jxlCodecAssetUrls,
   jxlDecoderWasmUrl,
   jxlEncoderWasmUrl,
-} from 'sqush-generated/codec-assets/jxl';
+} from 'presk-generated/codec-assets/jxl';
 import {
   mozjpegCodecAssetUrls,
   mozjpegEncoderWasmUrl,
-} from 'sqush-generated/codec-assets/mozjpeg';
+} from 'presk-generated/codec-assets/mozjpeg';
 import {
   oxipngCodecAssetUrls,
   oxipngWasmUrl,
-} from 'sqush-generated/codec-assets/oxipng';
+} from 'presk-generated/codec-assets/oxipng';
 import {
   imagequantCodecAssetUrls,
   imagequantWasmUrl,
-} from 'sqush-generated/codec-assets/imagequant';
+} from 'presk-generated/codec-assets/imagequant';
 import {
   hqxWasmUrl,
   resizeCodecAssetUrls,
   resizeWasmUrl,
-} from 'sqush-generated/codec-assets/resize';
+} from 'presk-generated/codec-assets/resize';
 import {
   svelteKitCodecAssetRecords,
   type CodecAssetRecord,
-} from 'sqush-generated/codec-assets/manifest';
+} from 'presk-generated/codec-assets/manifest';
 import {
   precacheCodecAssetRecords,
   precacheCodecAssetUrls,
-} from 'sqush-generated/codec-assets/precache';
+} from 'presk-generated/codec-assets/precache';
 
 export {
   avifCodecAssetUrls,

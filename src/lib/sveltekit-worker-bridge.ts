@@ -9,7 +9,7 @@ import type { EncodeOptions as OxipngEncodeOptions } from 'features/encoders/oxi
 import type { Options as QuantizeOptions } from 'features/processors/quantize/shared/meta';
 import type { WorkerResizeOptions } from 'features/processors/resize/shared/meta';
 import type { Options as RotateOptions } from 'features/preprocessors/rotate/shared/meta';
-import { methodNames } from 'sqush-generated/worker-bridge/meta';
+import { methodNames } from 'presk-generated/worker-bridge/meta';
 import type {
   AvifWasmUrls,
   ImagequantWasmUrls,
@@ -20,7 +20,7 @@ import type {
   ResizeWasmUrls,
   RotateWasmUrls,
   WebpWasmUrls,
-} from 'sqush-generated/features-worker/webp';
+} from 'presk-generated/features-worker/webp';
 import {
   svelteKitFeaturesWorkerUrl,
   svelteKitCodecAssetRecords,

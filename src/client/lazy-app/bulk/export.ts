@@ -202,7 +202,7 @@ export function getBulkOutputSummary(session: BulkSession): BulkOutputSummary {
 }
 
 export function getBulkExportName(session: BulkSession): string {
-  const safeSessionName = getSafeFileNameBase(session.id, 'sqush-bulk');
+  const safeSessionName = getSafeFileNameBase(session.id, 'presk-bulk');
   return `${safeSessionName}-optimized`;
 }
 

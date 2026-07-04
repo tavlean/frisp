@@ -129,7 +129,7 @@
         height="128"
         fetchpriority="high"
       />
-      <img class="wordmark" src={asset('/sqush-wordmark.svg')} alt="Sqush" />
+      <img class="wordmark" src={asset('/presk-wordmark.svg')} alt="Presk" />
     </h1>
 
     <p class="headline reveal" style="--reveal-order: 1">

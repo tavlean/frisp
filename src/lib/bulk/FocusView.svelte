@@ -296,7 +296,7 @@
   bind:innerHeight={viewportHeight}
 />
 
-<div class="compress sqush-editor" style="--strip-height: {stripHeight}px;">
+<div class="compress presk-editor" style="--strip-height: {stripHeight}px;">
   <div
     class="stage-region"
     class:alt-background={showStack && stackAltBackground}

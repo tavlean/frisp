@@ -10,14 +10,14 @@ declare global {
     }
   }
 
-  var __squshEmscriptenLocateFile:
+  var __preskEmscriptenLocateFile:
     | ((path: string, prefix?: string) => string)
     | undefined;
 
   // The URL of a threaded (pthread) Emscripten codec's main glue, handed to the
   // pthread workers so they re-import the right module (see initEmscriptenModule
   // + the generated locateCodecWasm). Undefined for single-thread builds.
-  var __squshEmscriptenMainScriptUrlOrBlob: string | undefined;
+  var __preskEmscriptenMainScriptUrlOrBlob: string | undefined;
 }
 
 export {};

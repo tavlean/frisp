@@ -578,7 +578,7 @@
   }
 </script>
 
-<div class="bulk-mode sqush-editor">
+<div class="bulk-mode presk-editor">
   <div class="bulk-controls" aria-label="Bulk controls">
     <button class="back" onclick={onExit} title="Back" aria-label="Back">
       <svg viewBox="0 0 24 24" aria-hidden="true">
