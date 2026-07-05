@@ -58,3 +58,23 @@ lowercase `frisp` in UI/wordmark, "Frisp" in prose.
   the adapter's `200.html` ships unused.
 - Workers Builds CI not yet connected (manual `wrangler deploy` until the
   user finishes the dashboard connect step).
+
+## 2026-07-05 (later) — E2E CI flakiness hardening
+
+Two-layer fix after the rename push surfaced flaky e2e failures on GitHub
+runners (all passed locally):
+- **Systemic net** (`playwright.config.ts`): `retries: 2` on CI (0 locally, so
+  real flakes still surface in dev); per-test `timeout` 90s→120s on CI for
+  webkit WASM codec cold-starts.
+- **Root-cause fix** (`bulk.spec.ts:166`): the "per-image override" test raced
+  the options-panel re-render — selecting a cell flips the scope tab's
+  aria-selected BEFORE the panel rebinds the Quality input to per-image scope,
+  so a setQuality() fired in that window drops its `input` event on a
+  being-replaced node (override never registers → override-dot never appears →
+  full-timeout failure). Wrapped set+assert in `expect(...).toPass()` so the
+  idempotent quality change re-fires once the panel settles. Verified: 12
+  consecutive passes with retries OFF (was flaking ~every CI run).
+
+Not touched: the ~15 other sub-20s per-assertion timeouts in the suite — most
+are intentional stability checks (assert a value did NOT change), and retries
+covers any genuine environmental flake. Don't lengthen them.

@@ -174,11 +174,20 @@ test('per-image quality change marks the selected strip cell as overridden', asy
     page.locator('.scope-tabs .tab-image[aria-selected="true"]'),
   ).toHaveText('This image');
 
-  await setQuality(page, '55');
-  // Inherit the global expect timeout (20s) rather than a tight 5s override —
-  // the override-dot appears only after the quality change re-encodes, which is
-  // slow under CI load.
-  await expect(secondCell.locator('.override-dot')).toBeVisible();
+  // Selecting the cell switches scope to "This image", which re-renders the
+  // options panel. The scope TAB flips its aria-selected before the panel
+  // finishes rebinding the Quality input to per-image scope, so a setQuality()
+  // fired in that window lands an `input` event on a node being replaced and is
+  // silently dropped — no override registers and the dot never appears (the old
+  // flake: a full-timeout failure, not a slow one). Retry set+assert as a unit
+  // so the change re-fires once the panel has settled. Idempotent: value 55 is
+  // the same each attempt, and once the dot is up toPass returns immediately.
+  await expect(async () => {
+    await setQuality(page, '55');
+    await expect(secondCell.locator('.override-dot')).toBeVisible({
+      timeout: 2000,
+    });
+  }).toPass({ timeout: 20_000 });
 });
 
 test('save all exports a zip with one entry per ready image', async ({
