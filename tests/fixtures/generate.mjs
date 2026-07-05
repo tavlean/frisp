@@ -307,7 +307,7 @@ const gradientRgb = (x, y) => {
   // Title bar
   rect(buf, SW, 0, 0, SW, 56, [255, 255, 255, 255]);
   hrule(0, SW, 56, line);
-  text('PRESK DASHBOARD', 24, 22, 2, ink);
+  text('APP DASHBOARD', 24, 22, 2, ink);
   text('FILE  EDIT  VIEW  HELP', 520, 24, 1, muted);
 
   // Left sidebar panel

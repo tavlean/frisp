@@ -7,6 +7,6 @@
 import {
   serviceWorkerCodecAssetRecords,
   type CodecAssetRecord,
-} from 'presk-generated/codec-assets/service-worker';
+} from 'app-generated/codec-assets/service-worker';
 
 export { serviceWorkerCodecAssetRecords, type CodecAssetRecord };

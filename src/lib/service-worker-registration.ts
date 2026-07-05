@@ -8,7 +8,7 @@ import { browser, dev } from '$app/environment';
 export { applyServiceWorkerUpdate };
 
 /** localStorage flag set by the `?sw` opt-in (see `localhostSwForced`). */
-const FORCE_LOCALHOST_SW_KEY = 'presk:force-localhost-sw';
+const FORCE_LOCALHOST_SW_KEY = 'app:force-localhost-sw';
 
 /**
  * Loopback / localhost-style origins. A registered service worker lives in the
@@ -73,7 +73,7 @@ async function teardownServiceWorkers(): Promise<void> {
  * previously-polluted localhost origin on the next load. Use `?sw` to opt back
  * in for deliberate local SW/offline testing.
  */
-export async function registerPreskServiceWorker({
+export async function registerServiceWorker({
   onUpdateReady,
 }: { onUpdateReady?: () => void } = {}): Promise<
   ServiceWorkerRegistration | undefined

@@ -1,5 +1,5 @@
 /*
- * Presk editor design tokens — the "studio" theme.
+ * Editor design tokens — the "studio" theme.
  *
  * A refined dark interface: floating glass panels over the canvas, with one
  * warm accent per comparison side (coral = the brand squeeze-orange for the
@@ -8,9 +8,9 @@
  * `--main-theme-color` / `--hot-theme-color` / `--header-text-color` resolve
  * per side via .options-1 / .options-2, and every dimension stays rem-based
  * against the 12px root set in +layout.svelte.
- * Scoped to .presk-editor so diagnostics and any later pages are unaffected.
+ * Scoped to .editor-root so diagnostics and any later pages are unaffected.
  */
-.presk-editor {
+.editor-root {
   /* Neutrals */
   --bg-0: #0c0c0f;
   --bg-1: #131318;
@@ -75,7 +75,7 @@
  * the accent hue differs (left = coral, right = azure), which colours the
  * sliders, toggles, headers' tick, the delta badge and the download button.
  */
-.presk-editor .options-1 {
+.editor-root .options-1 {
   --main-theme-color: var(--accent-1);
   --hot-theme-color: var(--accent-1-hot);
   --main-theme-glow: var(--accent-1-glow);
@@ -84,7 +84,7 @@
   --rotate-copyoverbutton-angle: 0deg; /* point right, towards the other side */
 }
 
-.presk-editor .options-2 {
+.editor-root .options-2 {
   --main-theme-color: var(--accent-2);
   --hot-theme-color: var(--accent-2-hot);
   --main-theme-glow: var(--accent-2-glow);
@@ -95,16 +95,16 @@
 
 /*
  * Option-panel layout classes shared by every per-encoder panel; scoped under
- * .presk-editor so they don't leak to other pages. The panels themselves are
+ * .editor-root so they don't leak to other pages. The panels themselves are
  * glass cards (see +page.svelte); these rows sit transparent on top with
  * hairline separators.
  */
-.presk-editor .options-section {
+.editor-root .options-section {
   background: transparent;
   color: var(--text-1);
 }
 
-.presk-editor .option-toggle {
+.editor-root .option-toggle {
   cursor: pointer;
   display: grid;
   align-items: center;
@@ -115,17 +115,17 @@
   transition: color 150ms ease;
 }
 
-.presk-editor .option-toggle:hover {
+.editor-root .option-toggle:hover {
   color: var(--text-1);
 }
 
-.presk-editor .option-one-cell {
+.editor-root .option-one-cell {
   display: grid;
   grid-template-columns: 1fr;
   padding: 10px var(--horizontal-padding);
 }
 
-.presk-editor .option-text-first {
+.editor-root .option-text-first {
   display: grid;
   align-items: center;
   grid-template-columns: 87px 1fr;
@@ -134,7 +134,7 @@
   color: var(--text-2);
 }
 
-.presk-editor .option-reveal {
+.editor-root .option-reveal {
   cursor: pointer;
   display: grid;
   align-items: center;
@@ -149,14 +149,14 @@
     color 200ms ease;
 }
 
-.presk-editor .option-reveal:focus-within,
-.presk-editor .option-reveal:hover {
+.editor-root .option-reveal:focus-within,
+.editor-root .option-reveal:hover {
   background-color: var(--surface-raise);
   color: var(--text-1);
 }
 
 /* The Resize / Reduce-palette enabler rows: softly raised chips. */
-.presk-editor .section-enabler {
+.editor-root .section-enabler {
   background: var(--surface-raise);
   border: 1px solid var(--border);
   border-radius: var(--control-radius);
@@ -169,12 +169,12 @@
     color 150ms ease;
 }
 
-.presk-editor .section-enabler:hover {
+.editor-root .section-enabler:hover {
   background: var(--surface-raise-2);
   border-color: var(--border-strong);
 }
 
-.presk-editor .text-field {
+.editor-root .text-field {
   background-color: rgba(0, 0, 0, 0.4);
   color: var(--text-1);
   font: inherit;
@@ -186,14 +186,14 @@
   transition: border-color 150ms ease;
 }
 
-.presk-editor .text-field:focus {
+.editor-root .text-field:focus {
   outline: none;
   border-color: var(--main-theme-color);
 }
 
 @media (dynamic-range: high) {
   @supports (color: oklch(0% 0 0)) {
-    .presk-editor {
+    .editor-root {
       --accent-1: oklch(76% 0.19 41);
       --accent-1-hot: oklch(70% 0.21 38);
       --accent-2: oklch(75% 0.17 250);
@@ -203,24 +203,24 @@
 }
 
 @media (max-width: 760px) {
-  .presk-editor {
+  .editor-root {
     --horizontal-padding: 12px;
     --options-radius: 14px;
   }
 
-  .presk-editor .option-toggle,
-  .presk-editor .option-one-cell,
-  .presk-editor .option-text-first,
-  .presk-editor .option-reveal {
+  .editor-root .option-toggle,
+  .editor-root .option-one-cell,
+  .editor-root .option-text-first,
+  .editor-root .option-reveal {
     padding: 8px var(--horizontal-padding);
   }
 
-  .presk-editor .section-enabler {
+  .editor-root .section-enabler {
     margin: 4px 8px;
     padding: 8px 10px;
   }
 
-  .presk-editor .option-text-first {
+  .editor-root .option-text-first {
     grid-template-columns: 1fr;
     gap: 6px;
   }

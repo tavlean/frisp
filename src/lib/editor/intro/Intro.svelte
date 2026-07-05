@@ -8,6 +8,7 @@
   import type { Attachment } from 'svelte/attachments';
   import { asset } from '$app/paths';
   import { fromFileList, type ImportedFile } from '$lib/bulk/import-sources';
+  import { APP_NAME } from 'shared/brand';
   import { startBlobAnim } from './blob-anim';
 
   interface Props {
@@ -129,7 +130,7 @@
         height="128"
         fetchpriority="high"
       />
-      <img class="wordmark" src={asset('/presk-wordmark.svg')} alt="Presk" />
+      <img class="wordmark" src={asset('/wordmark.svg')} alt={APP_NAME} />
     </h1>
 
     <p class="headline reveal" style="--reveal-order: 1">

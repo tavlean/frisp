@@ -1,5 +1,5 @@
 /**
- * Copyright 2026 Presk Contributors.
+ * Copyright 2026 App Contributors.
  * Licensed under the Apache License, Version 2.0.
  */
 

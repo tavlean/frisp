@@ -13,6 +13,7 @@ import type { ResizeOptionsState } from './options/processor-types';
 import { EditorHistory } from './editor-history.svelte';
 import { snackbar } from './snackbar-store.svelte';
 import { isAbortError } from 'client/lazy-app/abort';
+import { APP_NAME } from 'shared/brand';
 import {
   defaultPreprocessorState,
   defaultProcessorState,
@@ -282,7 +283,7 @@ export class EditorSession {
   docTitle = $derived(
     (this.runtime.some((r) => r.status === 'working') ? '⏳ ' : '') +
       (this.file ? `${this.file.name} - ` : '') +
-      'Presk — Compress an image',
+      `${APP_NAME} — Compress an image`,
   );
 
   constructor() {

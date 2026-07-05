@@ -1,4 +1,4 @@
-// Shrink-only presets. Presk is an optimizer, not an upscaler — it has no
+// Shrink-only presets. This app is an optimizer, not an upscaler — it has no
 // super-resolution, so enlarging just spreads existing pixels (blurry, more
 // bytes, no real detail). Anyone who genuinely needs a larger output (e.g.
 // hitting an exact dimension, or hqx pixel-art magnification) can still type

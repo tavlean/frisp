@@ -1,7 +1,7 @@
 import { createWebpEncoderRuntime } from 'features/encoders/webP/worker/runtime';
 import { defaultOptions } from 'features/encoders/webP/shared/meta';
-import webpEncoder from 'presk-generated/codecs/webp/enc/webp_enc';
-import webpEncoderSimd from 'presk-generated/codecs/webp/enc/webp_enc_simd';
+import webpEncoder from 'app-generated/codecs/webp/enc/webp_enc';
+import webpEncoderSimd from 'app-generated/codecs/webp/enc/webp_enc_simd';
 
 interface WebpEncodeProbeRequest {
   type: 'encode';
@@ -53,7 +53,7 @@ self.addEventListener(
   (event: MessageEvent<WebpEncodeProbeRequest>) => {
     if (event.data.type !== 'encode') return;
 
-    globalThis.__preskEmscriptenLocateFile = (path) => {
+    globalThis.__appEmscriptenLocateFile = (path) => {
       if (path === 'webp_enc.wasm') return event.data.wasmUrls.baseline;
       if (path === 'webp_enc_simd.wasm') return event.data.wasmUrls.simd;
       return path;

@@ -5,7 +5,7 @@
   import { resolve } from '$app/paths';
   import { page } from '$app/state';
   import {
-    registerPreskServiceWorker,
+    registerServiceWorker,
     applyServiceWorkerUpdate,
   } from '$lib/service-worker-registration';
   import Output from '$lib/editor/output/Output.svelte';
@@ -21,6 +21,7 @@
   import { EditorSession } from '$lib/editor/editor-session.svelte';
   import { IDENTITY } from '$lib/compress';
   import { isSupportedBulkImage } from 'client/lazy-app/bulk';
+  import { APP_NAME } from 'shared/brand';
   import '$lib/editor/theme.css';
 
   const session = new EditorSession();
@@ -38,10 +39,10 @@
     // When a new build is downloaded and waiting, offer a non-intrusive
     // "refresh now" prompt rather than reloading mid-task. Clicking Refresh
     // activates the waiting worker, which reloads the page onto the new build.
-    registerPreskServiceWorker({
+    registerServiceWorker({
       onUpdateReady: () => {
         void snackbar
-          .show('A new version of Presk is available.', {
+          .show(`A new version of ${APP_NAME} is available.`, {
             actions: ['Refresh'],
             timeout: null,
           })
@@ -165,7 +166,7 @@
   {#if bulkStore.hasJobs}
     <BulkMode onExit={exitBulk} />
   {:else if session.file}
-    <div class="compress presk-editor">
+    <div class="compress editor-root">
       <Output
         leftImage={session.runtime[0].result?.outputImageData}
         rightImage={session.runtime[1].result?.outputImageData}
@@ -528,11 +529,11 @@
       --fit-inset-right: 0px;
     }
 
-    :global(.presk-editor .output) {
+    :global(.editor-root .output) {
       bottom: calc(var(--mobile-options-height) + var(--panel-inset));
     }
 
-    :global(.presk-editor .controls) {
+    :global(.editor-root .controls) {
       bottom: calc(var(--mobile-options-height) + var(--panel-inset) + 8px);
       padding: 0 56px;
       box-sizing: border-box;
@@ -592,7 +593,7 @@
       --mobile-options-height: 48dvh;
     }
 
-    :global(.presk-editor .controls) {
+    :global(.editor-root .controls) {
       bottom: calc(var(--mobile-options-height) + var(--panel-inset) + 6px);
       padding: 0 48px;
     }

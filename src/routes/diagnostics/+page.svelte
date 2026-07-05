@@ -12,7 +12,8 @@
     runWebpPipelineProbe,
     type WebpPipelineProbeResult,
   } from '$lib/webp-pipeline-probe';
-  import { registerPreskServiceWorker } from '$lib/service-worker-registration';
+  import { registerServiceWorker } from '$lib/service-worker-registration';
+  import { APP_NAME } from 'shared/brand';
 
   const model = createDiagnosticsModel();
 
@@ -42,7 +43,7 @@
   const exportSummary = model.summary.export;
 
   onMount(() => {
-    registerPreskServiceWorker().catch((error: unknown) => {
+    registerServiceWorker().catch((error: unknown) => {
       console.error('SvelteKit service-worker registration failed', error);
     });
   });
@@ -112,16 +113,16 @@
 </script>
 
 <svelte:head>
-  <title>Presk Diagnostics</title>
+  <title>{APP_NAME} Diagnostics</title>
 </svelte:head>
 
 <main>
   <header>
     <p class="eyebrow">Runtime diagnostics</p>
-    <h1>Presk SvelteKit app</h1>
+    <h1>{APP_NAME} SvelteKit app</h1>
     <p>
-      This page checks whether existing local-first Presk helpers can be
-      consumed from the root SvelteKit app. The user-facing compressor lives at
+      This page checks whether existing local-first app helpers can be consumed
+      from the root SvelteKit app. The user-facing compressor lives at
       <a href={resolve('/')}>the home page</a>.
     </p>
   </header>

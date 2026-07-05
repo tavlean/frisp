@@ -33,7 +33,7 @@ const setIsolationHeaders = (
 };
 
 const crossOriginIsolation: Plugin = {
-  name: 'presk-cross-origin-isolation',
+  name: 'app-cross-origin-isolation',
   configureServer(server) {
     server.middlewares.use(setIsolationHeaders);
   },
@@ -82,7 +82,7 @@ const serveRawCodecWorker = (
 };
 
 const rawThreadedCodecWorkers: Plugin = {
-  name: 'presk-raw-threaded-codec-workers',
+  name: 'app-raw-threaded-codec-workers',
   // Registered in the configureServer body (not a returned post-hook) so it runs
   // BEFORE Vite's internal transform middleware and can short-circuit the request.
   configureServer(server) {
@@ -116,24 +116,24 @@ export default defineConfig({
     alias: {
       'client/lazy-app/feature-meta/shared': fileURLToPath(
         new URL(
-          './.svelte-kit/presk-generated/feature-meta/shared.ts',
+          './.svelte-kit/app-generated/feature-meta/shared.ts',
           import.meta.url,
         ),
       ),
       'client/lazy-app/feature-meta/encoders': fileURLToPath(
         new URL(
-          './.svelte-kit/presk-generated/feature-meta/encoders.ts',
+          './.svelte-kit/app-generated/feature-meta/encoders.ts',
           import.meta.url,
         ),
       ),
       'client/lazy-app/feature-meta': fileURLToPath(
         new URL(
-          './.svelte-kit/presk-generated/feature-meta/index.ts',
+          './.svelte-kit/app-generated/feature-meta/index.ts',
           import.meta.url,
         ),
       ),
-      'presk-generated': fileURLToPath(
-        new URL('./.svelte-kit/presk-generated', import.meta.url),
+      'app-generated': fileURLToPath(
+        new URL('./.svelte-kit/app-generated', import.meta.url),
       ),
       codecs: fileURLToPath(new URL('./codecs', import.meta.url)),
       client: fileURLToPath(new URL('./src/client', import.meta.url)),

@@ -13,7 +13,7 @@ import {
 } from 'sw/cache-plan';
 
 const worker = self as unknown as ServiceWorkerGlobalScope;
-const cacheName = `presk-${version}`;
+const cacheName = `app-${version}`;
 
 const codecAssetUrls = dedupeUrls(
   serviceWorkerCodecAssetRecords.map((record) => record.url),

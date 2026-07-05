@@ -10,10 +10,11 @@ import type { ProcessorState } from 'client/lazy-app/feature-meta';
  * state, no Svelte runes (this is a plain `.ts` module by design). The debounce
  * timers and snackbar UX stay in EditorSession.
  *
- * HARD RULE: the wire formats here are FROZEN. The storage keys
- * (`presk:settings:v3`, `presk:side-settings:left/right`) and the stored payload
- * shapes are byte-identical to what shipped; changing any of them is a schema
- * change that needs a migration plan, not a refactor.
+ * HARD RULE: these keys are deliberately brand-free namespace strings. They are
+ * storage schema, not branding, and never follow a rebrand; frozen from here on.
+ * Renamed one final time 2026-07-05, days after the production domain cutover,
+ * while the origin change had already reset all client storage (user base ≈
+ * zero), so nothing was lost. No migration shim wanted.
  */
 
 // A side of the auto-saved settings payload (STORAGE_KEY). The `sides` array
@@ -29,11 +30,11 @@ type SideIndex = 0 | 1;
 // and to discard pre-existing persisted side settings that would otherwise mask
 // the new defaults (e.g. a stale AVIF-on-both-sides config). Old keys are simply
 // ignored; a fresh default (left = Original, right = WebP) loads instead.
-const STORAGE_KEY = 'presk:settings:v3';
+const STORAGE_KEY = 'app:settings:v3';
 const SAVE_VERSION = 1;
 
 const sideSaveKey = (index: SideIndex) =>
-  `presk:side-settings:${index === 0 ? 'left' : 'right'}`;
+  `app:side-settings:${index === 0 ? 'left' : 'right'}`;
 
 function canUseLocalStorage(): boolean {
   return typeof localStorage !== 'undefined';

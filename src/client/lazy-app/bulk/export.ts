@@ -1,4 +1,5 @@
 import { getFileNameParts, getSafeFileNameBase } from '../output-filename';
+import { APP_NAME } from 'shared/brand';
 import {
   isJobCurrentExport,
   isJobOutputStale,
@@ -202,8 +203,8 @@ export function getBulkOutputSummary(session: BulkSession): BulkOutputSummary {
 }
 
 export function getBulkExportName(session: BulkSession): string {
-  const safeSessionName = getSafeFileNameBase(session.id, 'presk-bulk');
-  return `${safeSessionName}-optimized`;
+  const safeSessionName = getSafeFileNameBase(session.id, 'bulk');
+  return `${APP_NAME.toLowerCase()}-${safeSessionName}-optimized`;
 }
 
 export function getBulkOutputFileName(job: ImageJob): string {

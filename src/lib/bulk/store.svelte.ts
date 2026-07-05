@@ -222,7 +222,7 @@ function sideFromSettings(settings: BulkImageSettings): SideState {
 function emptySession(): BulkSession {
   sessionCounter += 1;
   return createBulkSessionFromImport(
-    `presk-bulk-${sessionCounter}`,
+    `bulk-${sessionCounter}`,
     defaultGlobalSettings(),
     createImageJobs([]),
   );

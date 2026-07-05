@@ -259,7 +259,7 @@ export async function runWebpPipelineProbe(
       workerBridge: pipelineWorkerBridge,
       signal,
       preprocessorState: pipelinePreprocessorState,
-      createDownloadUrl: (file) => `presk-diagnostics://${file.name}`,
+      createDownloadUrl: (file) => `diagnostics://${file.name}`,
     });
   } finally {
     workerBridge.dispose();
