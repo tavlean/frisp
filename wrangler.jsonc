@@ -1,0 +1,17 @@
+// Cloudflare Worker (static assets only — no Worker script).
+// Deployed by Workers Builds: `npm run build` → `npx wrangler deploy` (main)
+// / `npx wrangler versions upload` (preview branches).
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "frisp",
+  "compatibility_date": "2026-07-05",
+  "assets": {
+    "directory": "./build",
+    // Serves /index.html (a client-router shell; ssr=false) for unknown paths.
+    // Workers assets cannot use the adapter's 200.html fallback file — it ships
+    // as a plain asset and is simply unused on this host.
+    "not_found_handling": "single-page-application"
+  }
+  // Custom domains (frisp.app) are attached at rename cutover via
+  // routes: [{ "pattern": "frisp.app", "custom_domain": true }] — not before.
+}
