@@ -1,14 +1,14 @@
-# Presk
+# Frisp
 
 Optimize images inside your browser. Resize and compress them on your own machine, and export. Nothing is uploaded, and it works offline after the first load.
 
-It is a modern fork of the amazing [Squoosh app], which has gone quiet over the last few years. Presk is carrying it forward on a modern stack, current codebase, with the codecs rebuilt and the app being actively maintained.
+It is a modern fork of the amazing [Squoosh app], which has gone quiet over the last few years. Frisp is carrying it forward on a modern stack, current codebase, with the codecs rebuilt and the app being actively maintained.
 
-[Try it at presk.app](https://presk.app)
+[Try it at frisp.app](https://frisp.app)
 
 <!-- screenshot -->
 
-## Why Presk
+## Why Frisp
 
 The codecs are built from current sources. That closed 14 known CVEs, one of them critical (CVSS 9.8), and made a few of them smaller or faster. Where a fix was security only, the output is identical to before, byte for byte.
 
@@ -56,7 +56,7 @@ npm test         # check plus Playwright
 
 ## Thanks
 
-Presk exists because of [Squoosh] from GoogleChromeLabs. They worked out how to do all this in the browser with no server and made it look easy. It continues from there under the same Apache 2.0 license.
+Frisp exists because of [Squoosh] from GoogleChromeLabs. They worked out how to do all this in the browser with no server and made it look easy. It continues from there under the same Apache 2.0 license.
 
 [squoosh]: https://github.com/GoogleChromeLabs/squoosh
 

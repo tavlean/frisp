@@ -1,6 +1,6 @@
 # Bulk image architecture
 
-This document defines the first bulk image optimization design for Presk. Bulk
+This document defines the first bulk image optimization design for Frisp. Bulk
 optimization is post-migration roadmap work, not part of the Svelte migration
 closeout. The goal is to keep the processing model independent from the UI
 framework.

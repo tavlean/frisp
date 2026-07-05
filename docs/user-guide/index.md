@@ -1,6 +1,6 @@
-# Presk user guide
+# Frisp user guide
 
-**Presk is a free, local-first image compressor that runs entirely in your web browser.** You drop in a picture, pick an output format, tweak a few settings, and watch the file shrink — all on your own device. Nothing is ever uploaded: every step (decoding, resizing, and compressing) happens locally, so your images never leave your computer.
+**Frisp is a free, local-first image compressor that runs entirely in your web browser.** You drop in a picture, pick an output format, tweak a few settings, and watch the file shrink — all on your own device. Nothing is ever uploaded: every step (decoding, resizing, and compressing) happens locally, so your images never leave your computer.
 
 This guide explains what each option does, in plain language, and points you to deeper notes when you want them.
 
@@ -10,7 +10,7 @@ This guide explains what each option does, in plain language, and points you to 
 
 New to image compression? Follow this short path:
 
-1. **[Overview](./overview.md)** — what Presk is, what "compression" means, and the before/after compare view.
+1. **[Overview](./overview.md)** — what Frisp is, what "compression" means, and the before/after compare view.
 2. **[Editor features](./editor-features.md)** — how to load an image, use the two-up slider, zoom/rotate, and download your result.
 3. **[Choosing a format](./choosing-a-format.md)** — a quick decision guide: which format to pick for photos, graphics, transparency, or maximum compatibility.
 
@@ -22,11 +22,11 @@ Once you've picked a format, jump to that format's page below to understand its 
 
 | Page                                        | What it covers                                                                                                                                                     |
 | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| [Overview](./overview.md)                   | What Presk is, the local-first promise, and the basic compress-and-compare workflow.                                                                               |
+| [Overview](./overview.md)                   | What Frisp is, the local-first promise, and the basic compress-and-compare workflow.                                                                               |
 | [Editor features](./editor-features.md)     | Loading and replacing images, the two-up before/after compare, zoom/pan/rotate, smoothing and background toggles, copy/save/import side settings, and downloading. |
 | [Bulk optimization](./bulk-optimization.md) | Importing several images or a folder, batch settings, per-image tweaks, strip sizes, Save all as ZIP, keep-originals, and remove+Undo.                              |
 | [Choosing a format](./choosing-a-format.md) | How to decide between formats for photos, illustrations, transparency, animation, and browser support.                                                             |
-| [Recommended settings](./recommended-settings.md) | A per-codec cheat sheet of community best-practice settings (in Presk's controls), with notes on which could become app defaults or presets later.                  |
+| [Recommended settings](./recommended-settings.md) | A per-codec cheat sheet of community best-practice settings (in Frisp's controls), with notes on which could become app defaults or presets later.                  |
 
 ## Formats
 
@@ -53,7 +53,7 @@ Adjustments you can apply to either side _before_ compression (shown in the "Edi
 
 | Page                                      | What it covers                                                                                                        |
 | ----------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| [Engine & codecs](./engine-and-codecs.md) | How Presk runs local WebAssembly/worker processing, the codecs it uses, and how service-worker offline support works. |
+| [Engine & codecs](./engine-and-codecs.md) | How Frisp runs local WebAssembly/worker processing, the codecs it uses, and how service-worker offline support works. |
 
 ---
 

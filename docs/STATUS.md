@@ -1,8 +1,8 @@
-# Presk Status
+# Frisp Status
 
 Last updated: 2026-07-05.
 
-Read this first. Presk is a local-first image optimizer: image work stays in the
+Read this first. Frisp is a local-first image optimizer: image work stays in the
 browser, the build is static, and offline reload must work after load.
 
 ## Current State
@@ -212,7 +212,7 @@ browser, the build is static, and offline reload must work after load.
 - **Resize UX cleanup (2026-06-28).** Three small editor changes landed on `main`:
   (1) size presets are now **shrink-only** — `0.25 / 0.5 / 1` (25 / 50 / 100%); the
   enlarge presets (`200 / 300 / 400%`) and the awkward `33.33%` were dropped, since
-  Presk is an optimizer, not an upscaler (enlarging stays reachable via Custom
+  Frisp is an optimizer, not an upscaler (enlarging stays reachable via Custom
   Width/Height). (2) The in-progress pill reads **"Resizing…"** when a real resize
   drives the pass, vs "(Re-)optimizing" otherwise. (3) A resize at **100% is a true
   no-op** — `processImage` skips the identity resample and `encodeSide` skips the
@@ -255,7 +255,7 @@ browser, the build is static, and offline reload must work after load.
 - The original Preact/Rollup app is preserved on the `preact` branch (tag
   `preact-final`) for reference only — it is no longer a fallback for `main`.
   There is a single working tree at the repo root; the `svelte` branch and the
-  `../Presk-svelte` worktree are gone.
+  `../Frisp-svelte` worktree are gone.
 - The current track is **post-migration cleanup and Svelte hardening**: remove
   dead Preact-era code, make ported components fully idiomatic Svelte 5, and fix
   the defects found by the post-migration review. Prioritized backlog:

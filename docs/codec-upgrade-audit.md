@@ -6,7 +6,7 @@ version numbers and CVE IDs against the linked pages before acting, since web re
 Re-run: Workflow({ scriptPath: ".../workflows/scripts/codec-upgrade-audit-wf_851e63fd-b32.js" }).
 -->
 
-# Presk Codec-Upgrade Audit
+# Frisp Codec-Upgrade Audit
 
 > ## ✅ COMPLETED 2026-06-02 — all do-now AND gradual upgrades landed
 >
@@ -36,11 +36,11 @@ Re-run: Workflow({ scriptPath: ".../workflows/scripts/codec-upgrade-audit-wf_851
 > [codec-build-notes.md](codec-build-notes.md). Still deferred: wiring the
 > multi-threaded (`_mt`) runtime — see [threading-enablement.md](threading-enablement.md).
 
-A decision-oriented review of every codec Presk ships, plus new-codec, WebP2, and SVG questions. Written for a solo dev: every row tells you whether to act now, later, investigate, or skip — and why. Where a gain is marginal, it says so.
+A decision-oriented review of every codec Frisp ships, plus new-codec, WebP2, and SVG questions. Written for a solo dev: every row tells you whether to act now, later, investigate, or skip — and why. Where a gain is marginal, it says so.
 
 > **Spun-off plans from this audit:** [threading-enablement.md](threading-enablement.md) (enable the already-built multithreading) and [codec-surface-cleanup.md](codec-surface-cleanup.md) (remove WebP 2; the dead `codecs/png/` deletion is already done). Docs map: [README.md](README.md).
 
-The single most important framing fact: **Presk runs as WASM in the browser.** Two consequences shape every recommendation below:
+The single most important framing fact: **Frisp runs as WASM in the browser.** Two consequences shape every recommendation below:
 
 1. **Native CPU assembly doesn't apply.** WASM uses portable 128-bit SIMD (which the browser maps to NEON on Apple Silicon / AVX on x86 automatically) — it cannot run a library's hand-written AVX2/AVX-512/NEON assembly. So "X% faster on AVX2/NEON" desktop benchmarks usually mean **nothing** for your build. The real wins here are CVE fixes, compression-ratio improvements, and WASM-specific speedups.
 2. **Threading is ON (done 2026-06-03).** *(This item originally said threading was OFF — that highest-leverage perf change has since landed and is merged into `main`.)* The app ships multithreaded codec variants — AVIF, JXL and OxiPNG (WP2 was removed) each detect thread support and load `_mt` / `pkg-parallel` builds. WASM threads require `SharedArrayBuffer` (and so a **cross-origin-isolated** page via COOP + COEP), which is now set in dev/preview (Vite plugin) and prod (`static/_headers`); all three codecs engage multi-core, verified Chromium + WebKit. SVT-AV1's multithreading still wouldn't apply (its asm can't compile to WASM), but libaom/JXL/OxiPNG threading is now live. Full record: [threading-enablement.md](threading-enablement.md).
@@ -78,7 +78,7 @@ Three "do now" items (libwebp, AVIF, JXL) are driven by genuine security exposur
   - **Reliability (the headline):** **CVE-2023-4863**, the critical OOB write in the lossless decoder `BuildHuffmanTable` — the same bug that hit Chrome globally in 2023, fixed in v1.3.2. Your build exposes it to any dropped file. Plus further Huffman OOB fixes in v1.3.1/v1.4.0. ([libwebp v1.3.2](https://chromium.googlesource.com/webm/libwebp/+/refs/tags/v1.3.2))
   - **Speed (WASM-relevant, unusually):** v1.6.0 explicitly enables `VP8L_USE_FAST_LOAD` + 64-bit BITS caching **for the WASM target** — a real lossless-decode speedup for your build, not a desktop-only SIMD claim. ([v1.6.0](https://chromium.googlesource.com/webm/libwebp/+/refs/tags/v1.6.0))
   - **Compression:** incremental lossless gains (palette sorting v1.3.1, histogram/predictor work v1.5.0).
-- **Effort/risk:** Medium. One coupling to watch — Presk uses libwebp as the **libsharpyuv** source for AVIF; v1.3.0 promoted libsharpyuv to its own CMake target, so the AVIF build path may need its libsharpyuv reference adjusted. Otherwise mechanical. ([NEWS](https://chromium.googlesource.com/webm/libwebp/+/refs/heads/main/NEWS))
+- **Effort/risk:** Medium. One coupling to watch — Frisp uses libwebp as the **libsharpyuv** source for AVIF; v1.3.0 promoted libsharpyuv to its own CMake target, so the AVIF build path may need its libsharpyuv reference adjusted. Otherwise mechanical. ([NEWS](https://chromium.googlesource.com/webm/libwebp/+/refs/heads/main/NEWS))
 
 ### libavif + libaom (AVIF) — Do now
 - **Current → latest:** libavif **v1.0.1** + libaom **v3.7.0** (Aug 2023) → **v1.4.2** + **v3.14.1** (May 2026).
@@ -105,7 +105,7 @@ Three "do now" items (libwebp, AVIF, JXL) are driven by genuine security exposur
 
 ### OxiPNG — Do later
 - **Current → latest:** **9.0.0** (Oct 2023) → **10.1.1** (Apr 2025). 9 releases.
-- **Why it matters:** 10.1.1's Bigrams improvement gives **notably faster results at the lower optimization levels Presk exposes** (the levels users actually hit), better ICC profile recompression, and a fast-mode correctness fix for small indexed images. Compression gains are modest but real. ([v10.1.1](https://github.com/shssoichiro/oxipng/releases/tag/v10.1.1))
+- **Why it matters:** 10.1.1's Bigrams improvement gives **notably faster results at the lower optimization levels Frisp exposes** (the levels users actually hit), better ICC profile recompression, and a fast-mode correctness fix for small indexed images. Compression gains are modest but real. ([v10.1.1](https://github.com/shssoichiro/oxipng/releases/tag/v10.1.1))
 - **Effort/risk:** Medium — the v10.0.0 **breaking Rust API** touches your 27-line `codecs/oxipng/src/lib.rs`: `Options.interlace` becomes `Option<bool>`, `filter`→`filters` (typed differently), `deflate`→`deflater`, and `optimize()` returns `(usize, usize)`. MSRV → 1.85.1; check `wasm-bindgen` pins after. ~30 min of mechanical edits plus a test cycle. jSquash already ships this (`@jsquash/oxipng 2.3.0`) as a reference.
 
 ### mozjpeg — Do later
@@ -186,9 +186,9 @@ Three "do now" items (libwebp, AVIF, JXL) are driven by genuine security exposur
 
 ## 6. The Squoosh / jSquash anchor
 
-When in doubt, match **jSquash** first — it's actively maintained (last commit Jan 2026, vs Squoosh's dev branch hibernating since Aug 2024) and ships browser/worker-verified npm packages, so its pins are *proven-WASM-buildable* targets. Both projects share identical codec Makefiles for the overlap. Where Presk sits vs these anchors:
+When in doubt, match **jSquash** first — it's actively maintained (last commit Jan 2026, vs Squoosh's dev branch hibernating since Aug 2024) and ships browser/worker-verified npm packages, so its pins are *proven-WASM-buildable* targets. Both projects share identical codec Makefiles for the overlap. Where Frisp sits vs these anchors:
 
-| Codec | Squoosh / jSquash pin | Presk vs anchor | Safest known-good target |
+| Codec | Squoosh / jSquash pin | Frisp vs anchor | Safest known-good target |
 |---|---|---|---|
 | mozjpeg | **v3.3.1** (both) | Same — both also badly stale | Beyond anchor: v4.1.5 (jSquash/`mozjpeg-wasm` have the CMake build) |
 | libwebp | `d2e245ea` (both) | Same | Beyond anchor: v1.6.0 |

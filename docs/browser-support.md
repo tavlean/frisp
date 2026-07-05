@@ -2,7 +2,7 @@
 
 Last reviewed: 2026-05-24.
 
-Presk should target modern browsers that can run the optimizer locally. The product promise is not just that the page renders; the browser must be able to decode inputs, run WebAssembly codecs in workers, preview results, download outputs, and support the service-worker path for offline use.
+Frisp should target modern browsers that can run the optimizer locally. The product promise is not just that the page renders; the browser must be able to decode inputs, run WebAssembly codecs in workers, preview results, download outputs, and support the service-worker path for offline use.
 
 ## Supported baseline
 
@@ -19,7 +19,7 @@ These are support targets, not artificial blockers. The app can still run in new
 
 ## Required browser capabilities
 
-Presk depends on these capabilities:
+Frisp depends on these capabilities:
 
 - WebAssembly for codecs and processors;
 - Web Workers for keeping heavy optimization work off the UI thread;
@@ -33,13 +33,13 @@ WebAssembly SIMD and threads are optimization paths, not the minimum product con
 
 ## Codec support notes
 
-Browser image support and bundled WASM codec support are separate concerns. A browser may run Presk but still lack native preview or decode support for some formats.
+Browser image support and bundled WASM codec support are separate concerns. A browser may run Frisp but still lack native preview or decode support for some formats.
 
 Product priority:
 
 - WebP is the safest first-class output. MDN lists WebP as supported in Chrome, Edge, Firefox, Opera, and Safari.
 - AVIF is first-class, but should be tested carefully because encoding can be slower and browser history is shorter. MDN lists AVIF support in Chrome, Edge, Firefox, Opera, and Safari, with version floors including Chrome 85, Edge 121, Firefox 93, and Safari 16.1.
-- JPEG XL should stay advanced or experimental until default browser support and preview behavior are proven. Presk can keep its bundled WASM codec path for local conversion, but public delivery guidance should still prefer AVIF/WebP fallbacks.
+- JPEG XL should stay advanced or experimental until default browser support and preview behavior are proven. Frisp can keep its bundled WASM codec path for local conversion, but public delivery guidance should still prefer AVIF/WebP fallbacks.
 - WebP 2 was removed entirely on 2026-06-02 (no browser can decode it; see [codec-surface-cleanup.md](codec-surface-cleanup.md)).
 
 MDN also lists BMP as broadly browser-supported and TIFF as Safari-only, which is why extension acceptance and actual decode success must remain separate.

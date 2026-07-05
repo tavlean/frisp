@@ -1,6 +1,6 @@
 # Engine & codecs reference
 
-Code-derived inventory of the Presk processing engine, processors/preprocessors,
+Code-derived inventory of the Frisp processing engine, processors/preprocessors,
 and image codecs. Source of truth: `src/features/**` and `codecs/**`. Versions
 and provenance come from `docs/codec-provenance.md` and the codec build recipes.
 
@@ -46,7 +46,7 @@ Shapes: `src/features/processors/resize/shared/meta.ts`,
   input is SVG (`isVector`).
 - **Presets** (`resize/client/preset-state.ts`): `0.25, 0.5, 1`
   (shown as 25% / 50% / 100%), plus `custom`. Shrink-only by design — no enlarge
-  presets (Presk is an optimizer, not an upscaler); enlarging is reachable only
+  presets (Frisp is an optimizer, not an upscaler); enlarging is reachable only
   by typing larger Width/Height values via `custom`.
 - **Identity resize is skipped.** `processImage` only calls the resampler when the
   target dims differ from the (preprocessed) source — at 100% the default

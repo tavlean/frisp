@@ -1,5 +1,5 @@
-// Sunset Worker for the old sqush.app domain (app renamed to Presk / presk.app
-// on 2026-07-05).
+// Sunset Worker for the old sqush.app AND presk.app domains (app renamed to
+// Frisp / frisp.app on 2026-07-05; both former zones route here).
 //
 // Two jobs:
 // 1. `/service-worker.js` → a self-destructing service worker. The old app was
@@ -11,14 +11,14 @@
 //    navigation, so serving a byte-different worker here is the one doorway
 //    left. It installs, deletes all caches, unregisters, and re-navigates open
 //    tabs — which then hit the network and follow the redirect below.
-// 2. Every other request → 301 to the same path + query on presk.app.
+// 2. Every other request → 301 to the same path + query on frisp.app.
 //
 // Requires the zone's Single Redirect Rule to be OFF (redirect rules run
 // before Workers in Cloudflare's traffic sequence, so while the rule is on
 // this Worker never sees a request). Keep this Worker deployed for at least a
 // year; after that, remaining old installs are a lost cause anyway.
 
-const KILL_SWITCH_SW = `// The app moved to https://presk.app — this worker dismantles the old one.
+const KILL_SWITCH_SW = `// The app moved to https://frisp.app — this worker dismantles the old one.
 self.addEventListener('install', () => {
   self.skipWaiting();
 });
@@ -31,7 +31,7 @@ self.addEventListener('activate', (event) => {
       const clients = await self.clients.matchAll({ type: 'window' });
       for (const client of clients) {
         // Re-navigating releases the page from this registration; the request
-        // then reaches the network and the 301 carries it to presk.app.
+        // then reaches the network and the 301 carries it to frisp.app.
         client.navigate(client.url).catch(() => {});
       }
     })(),
@@ -52,7 +52,7 @@ export default {
         },
       });
     }
-    const target = new URL(url.pathname + url.search, 'https://presk.app');
+    const target = new URL(url.pathname + url.search, 'https://frisp.app');
     return Response.redirect(target.toString(), 301);
   },
 };

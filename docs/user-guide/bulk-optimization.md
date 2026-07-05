@@ -9,7 +9,7 @@ Use bulk optimization when you have a group of images that should get the same
 basic treatment: a website gallery, screenshots for a post, product photos, or
 a folder of assets that all need to be smaller.
 
-Bulk mode keeps the same local-first promise as the single-image editor. Presk
+Bulk mode keeps the same local-first promise as the single-image editor. Frisp
 reads, previews, compresses, and zips the images on your own device. Nothing is
 uploaded.
 
@@ -17,12 +17,12 @@ uploaded.
 
 There are three common ways to start:
 
-- Drag several image files onto Presk.
+- Drag several image files onto Frisp.
 - Click the big select button in the middle and pick more than one image.
 - Click **Choose folder** to import a folder.
 
-If you import **2 or more supported images**, Presk opens the batch view. If you
-import **1 image**, Presk opens the normal single-image editor exactly as before.
+If you import **2 or more supported images**, Frisp opens the batch view. If you
+import **1 image**, Frisp opens the normal single-image editor exactly as before.
 While a batch is already open, dropping or choosing more images appends them to
 the same batch.
 
@@ -81,14 +81,14 @@ names — two images that would produce the same output name get a numbered
 suffix.
 
 The **Keep originals when larger** toggle is on by default. With it on, if an
-image's optimized version would be bigger than the original, Presk puts the
+image's optimized version would be bigger than the original, Frisp puts the
 original file in the ZIP instead. That keeps the batch from accidentally shipping
 a larger file for that image. Turn it off only if you want the chosen format and
 settings to be used even when the result grows.
 
 ## Remove and Undo
 
-Use the remove button on an image to take it out of the batch. Presk shows a
+Use the remove button on an image to take it out of the batch. Frisp shows a
 short message with **Undo**; click it to restore the removed image before the
 message disappears.
 
@@ -102,5 +102,5 @@ message disappears.
 - **Keep originals when larger protects the ZIP, not the preview.** You may
   still see that an optimized result is larger; the toggle decides what gets put
   into the ZIP.
-- **Folder import is for reading, not saving back.** Presk downloads a ZIP; it
+- **Folder import is for reading, not saving back.** Frisp downloads a ZIP; it
   does not overwrite files in the folder you imported.

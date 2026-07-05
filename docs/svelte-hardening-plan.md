@@ -1,4 +1,4 @@
-# Presk Post-Migration Cleanup & Svelte Hardening Plan
+# Frisp Post-Migration Cleanup & Svelte Hardening Plan
 
 Last updated: 2026-06-28.
 

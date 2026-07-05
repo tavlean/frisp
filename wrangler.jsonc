@@ -11,7 +11,7 @@
     // Workers assets cannot use the adapter's 200.html fallback file — it ships
     // as a plain asset and is simply unused on this host.
     "not_found_handling": "single-page-application"
-  }
-  // Custom domains (frisp.app) are attached at rename cutover via
-  // routes: [{ "pattern": "frisp.app", "custom_domain": true }] — not before.
+  },
+  // Apex only, matching the previous setup (no www record).
+  "routes": [{ "pattern": "frisp.app", "custom_domain": true }]
 }

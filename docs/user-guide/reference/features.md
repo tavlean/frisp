@@ -1,4 +1,4 @@
-# Presk editor — feature reference
+# Frisp editor — feature reference
 
 Exhaustive, code-derived inventory of every feature and user interaction in the
 editor and bulk mode. Each entry lists the source file and one precise sentence
@@ -9,7 +9,7 @@ behaviors" at the end for things not surfaced in the obvious UI.
 
 | Feature                                | File                                                     | What it does                                                                                                                                                                                                       |
 | -------------------------------------- | -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Intro landing screen                   | `src/routes/+page.svelte`                                | Shown while no file is loaded — Presk logo lockup, "Squeeze every byte" headline, a round coral browse button over the blob field with the "Drop, click, or paste" hint, codec chips, and the local-first tagline. |
+| Intro landing screen                   | `src/routes/+page.svelte`                                | Shown while no file is loaded — Frisp logo lockup, "Squeeze every byte" headline, a round coral browse button over the blob field with the "Drop, click, or paste" hint, codec chips, and the local-first tagline. |
 | Select-an-image button                 | `src/routes/+page.svelte`                                | A `<label>`-wrapped hidden `<input type="file" accept="image/*">` whose `onchange` passes the chosen file to `pickFiles`.                                                                                          |
 | Drag-and-drop to load/replace          | `src/lib/editor/file-drop.ts`, `src/routes/+page.svelte` | The whole `.app-root` is a drop target (via the `fileDrop` attachment); dropping an image anywhere — intro or over the open editor — loads or replaces the current file instead of letting the browser open it.    |
 | Drag-over visual feedback              | `src/lib/editor/file-drop.ts`, `src/routes/+page.svelte` | While a file-bearing drag is over the app, a `drop-valid` class is toggled, fading in a coral dashed full-viewport overlay; an enter/leave depth counter prevents flicker over nested children.                    |
@@ -20,7 +20,7 @@ behaviors" at the end for things not surfaced in the obvious UI.
 | Back button                            | `src/routes/+page.svelte` (`back`)                       | The round glass "X" button top-left calls `history.back()` (falling back to `clearFile()` if no history), unwinding the pushed editor state.                                                                       |
 | Undo / Redo buttons                    | `src/routes/+page.svelte`, `editor-session.svelte.ts` (`undo`/`redo`) | Two glass buttons right of Back step the editor document backward/forward through its history; each is `disabled` via `history.canUndo` / `history.canRedo`. Tooltips show ⌘ vs Ctrl by platform.    |
 | Undo / Redo keyboard shortcuts         | `src/routes/+page.svelte` (`onKeydown` on `<svelte:window>`) | `⌘/Ctrl+Z` undoes, `⇧⌘Z` / `Ctrl+Shift+Z` / `Ctrl+Y` redoes. Suppressed when a typeable field (text/number input, textarea, contenteditable) is focused so native text-undo still works; range/checkbox inputs fall through to editor undo. |
-| Document title                         | `editor-session.svelte.ts` (`docTitle`)                  | The tab title is `"<filename> - Presk — Compress an image"`, prefixed with an ⏳ hourglass while either side is encoding.                                                                                          |
+| Document title                         | `editor-session.svelte.ts` (`docTitle`)                  | The tab title is `"<filename> - Frisp — Compress an image"`, prefixed with an ⏳ hourglass while either side is encoding.                                                                                          |
 | Dev-only diagnostics link              | `src/routes/+page.svelte`                                | In dev builds only, a "Pipeline diagnostics →" link to `/diagnostics` appears on the intro screen.                                                                                                                 |
 
 ## Bulk optimization

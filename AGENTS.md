@@ -1,6 +1,6 @@
 # Agent guide
 
-Presk is a local-first image optimizer. Its core promise is reliable
+Frisp is a local-first image optimizer. Its core promise is reliable
 single-image optimization in the browser: no uploads, no server processing, and
 dependable offline behavior after load. Any cleanup, migration, or feature work
 must protect import, decode, process, encode, preview, export, and
@@ -12,7 +12,7 @@ The SvelteKit 2 / Svelte 5 migration is **concluded**. `main` is the production
 app, living at the repo root as a static SPA. The retired Preact/Rollup app is
 preserved on the `preact` branch (tag `preact-final`) for reference only — it is
 no longer a fallback for `main`. There is a single working tree at the repo
-root; the old `../Presk-svelte` worktree and the `svelte` branch are gone.
+root; the old `../Frisp-svelte` worktree and the `svelte` branch are gone.
 
 Recent focus (2026-06): all 7 WASM codecs were rebuilt from source natively
 (no Docker), WebP 2 was removed, and the multi-threaded (MT) codec runtime

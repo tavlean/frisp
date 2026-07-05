@@ -1,6 +1,6 @@
-# Presk Project Overview
+# Frisp Project Overview
 
-Presk is a browser-local image optimizer. Users pick or drop an image, the app
+Frisp is a browser-local image optimizer. Users pick or drop an image, the app
 decodes it in the browser, lets the user compare output settings, and downloads
 the optimized file from an object URL. There is no backend image-processing
 service.

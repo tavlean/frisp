@@ -59,7 +59,7 @@ The Method dropdown (and its Premultiply / Linear RGB companions) lives under th
 ### Preset
 
 - **What it does:** A quick way to set width and height as a percentage of the original size, instead of typing exact numbers.
-- **Range & default:** Dropdown of fixed **shrink** percentages — **25%, 50%, 100%** — plus **Custom** (option keys: `width` / `height`; preset multipliers `0.25, 0.5, 1`). The presets stop at 100% on purpose: Presk is an optimizer, not an upscaler, so it deliberately doesn't offer one-click _enlarge_ percentages (enlarging just spreads existing pixels — blurrier and bigger, with no real detail gained). There is no single "default" preset; the dropdown shows whichever percentage currently matches your width/height, or **Custom** if it matches none (for example after you type your own numbers, or set any size in between the presets).
+- **Range & default:** Dropdown of fixed **shrink** percentages — **25%, 50%, 100%** — plus **Custom** (option keys: `width` / `height`; preset multipliers `0.25, 0.5, 1`). The presets stop at 100% on purpose: Frisp is an optimizer, not an upscaler, so it deliberately doesn't offer one-click _enlarge_ percentages (enlarging just spreads existing pixels — blurrier and bigger, with no real detail gained). There is no single "default" preset; the dropdown shows whichever percentage currently matches your width/height, or **Custom** if it matches none (for example after you type your own numbers, or set any size in between the presets).
 - **How to choose:** Pick a percentage to scale both dimensions down at once. 50% halves the size; 25% quarters it. Selecting a preset overwrites the Width and Height fields; typing your own values flips the dropdown to Custom — use it for any in-between amount (e.g. a one-third reduction) as well as for a _larger_ output (an exact target dimension, or pixel-art magnification with **hqx**).
 - **Recommended starting point:** **50%** is a common, safe first step for oversized photos — preview it, and adjust from there.
 
@@ -109,7 +109,7 @@ The Method dropdown (and its Premultiply / Linear RGB companions) lives under th
 
 ## Recommended settings & community tips
 
-> The settings below are **community recommendations** from encoding/resampling guides. They are advice, not new defaults; Presk's actual defaults (Lanczos3 + Premultiply alpha + Linear RGB, all on) already match best practice for photographic downscaling. Sources are listed at the end.
+> The settings below are **community recommendations** from encoding/resampling guides. They are advice, not new defaults; Frisp's actual defaults (Lanczos3 + Premultiply alpha + Linear RGB, all on) already match best practice for photographic downscaling. Sources are listed at the end.
 
 | Use case                                      | Suggested method                                         | Why                                                                                                                                                                                     |
 | --------------------------------------------- | -------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -120,10 +120,10 @@ The Method dropdown (and its Premultiply / Linear RGB companions) lives under th
 
 **Community tips**
 
-- **Keep Linear RGB on.** Resizing in gamma (non-linear) space darkens fine detail and thin bright features. Presk defaults it on; turning it off makes downscales subtly muddier.
+- **Keep Linear RGB on.** Resizing in gamma (non-linear) space darkens fine detail and thin bright features. Frisp defaults it on; turning it off makes downscales subtly muddier.
 - **Keep Premultiply alpha on** for anything transparent. Forgetting it produces dark fringes around transparent edges after a resize.
 - **Lanczos ringing = halos.** If you see light/dark echoes near high-contrast edges (especially on flat graphics), switch to Mitchell — the #1 reason to leave Lanczos for non-photographic content.
-- **Downscaling softens; sharpen _after_.** The standard fix for the inherent softening of downscaling is a light unsharp/sharpen pass at the _final_ size. Presk doesn't expose a post-resize sharpen today, so if you need crispness back, do it in another tool after exporting.
+- **Downscaling softens; sharpen _after_.** The standard fix for the inherent softening of downscaling is a light unsharp/sharpen pass at the _final_ size. Frisp doesn't expose a post-resize sharpen today, so if you need crispness back, do it in another tool after exporting.
 
 _Sources: [encoding/resampling guide](https://guideencodemoe-mkdocs.readthedocs.io/encoding/resampling/); [image-scaling algorithms comparison](https://grokipedia.com/page/Comparison_gallery_of_image_scaling_algorithms); [PixInsight interpolation algorithms](https://pixinsight.com/doc/docs/InterpolationAlgorithms/InterpolationAlgorithms.html)._
 
@@ -131,7 +131,7 @@ _Sources: [encoding/resampling guide](https://guideencodemoe-mkdocs.readthedocs.
 
 - **Resize first, then compress.** Shrinking to the display size is the highest-impact thing you can do for file size — often bigger than any quality-slider change in the format panel.
 - **Enlarging never adds detail.** Scaling above 100% just spreads existing pixels over a bigger area; it can't recover detail that isn't there. That's why the presets only go down to 100% — to enlarge at all you have to type larger Width/Height values yourself. For pixel art you want to blow up, use **hqx** or **Browser pixelated** instead of a photo filter.
-- **At 100% there's nothing to do.** With Resize enabled but left at the source's own size (100%), the default scaler is an identity pass, so Presk skips it entirely — no re-encode and no "Resizing" pill. You only get a resize once you set a size that's actually different.
+- **At 100% there's nothing to do.** With Resize enabled but left at the source's own size (100%), the default scaler is an identity pass, so Frisp skips it entirely — no re-encode and no "Resizing" pill. You only get a resize once you set a size that's actually different.
 - **Method, Premultiply, and Linear RGB are under Advanced settings.** Open the **Advanced settings** expander to reach them; the panel leads with Preset/Width/Height because the default Lanczos3 is right for almost everything.
 - **The Premultiply and Linear RGB toggles only show up for the worker methods.** Switch the Method to Lanczos3/Mitchell/hqx and they appear; pick Browser pixelated or Vector and they're hidden (those paths don't use them). They also only _do_ anything while you're actually scaling — they correct the color math during pixel blending, so at 100% (no blending) toggling them changes nothing.
 - **Ringing vs blur is a real trade-off.** If Lanczos3 gives you faint halos around sharp edges, switch to **Mitchell** — softer, with much less ringing. If Mitchell looks too soft, step back up to Lanczos3 for maximum detail.
@@ -140,4 +140,4 @@ _Sources: [encoding/resampling guide](https://guideencodemoe-mkdocs.readthedocs.
 
 ## Under the hood
 
-The worker methods run in WebAssembly: Mitchell and Lanczos3 use the Rust `resize` crate (via the `squoosh-resize` wrapper), while **hqx** uses the Rust `hqx` crate (`squooshhqx`). hqx enlarges only by integer factors of 2x-4x and then finishes the resize to your exact dimensions using Catmull-Rom — one of two extra filters (with Triangle/bilinear) that the `resize` crate still provides but that Presk no longer offers as its own menu entry. **Browser pixelated** is the lone browser scaler kept: it calls the canvas API with smoothing turned off (nearest-neighbor); the smooth `imageSmoothingQuality` low/medium/high levels were removed because the worker filters are higher quality and consistent across machines. The Vector method rasterizes the SVG by drawing it onto a canvas at the target size. The **Contain** fit method center-crops the source (via `getContainOffsets`) before scaling, so you get a proportional fill rather than a stretched one.
+The worker methods run in WebAssembly: Mitchell and Lanczos3 use the Rust `resize` crate (via the `squoosh-resize` wrapper), while **hqx** uses the Rust `hqx` crate (`squooshhqx`). hqx enlarges only by integer factors of 2x-4x and then finishes the resize to your exact dimensions using Catmull-Rom — one of two extra filters (with Triangle/bilinear) that the `resize` crate still provides but that Frisp no longer offers as its own menu entry. **Browser pixelated** is the lone browser scaler kept: it calls the canvas API with smoothing turned off (nearest-neighbor); the smooth `imageSmoothingQuality` low/medium/high levels were removed because the worker filters are higher quality and consistent across machines. The Vector method rasterizes the SVG by drawing it onto a canvas at the target size. The **Contain** fit method center-crops the source (via `getContainOffsets`) before scaling, so you get a proportional fill rather than a stretched one.

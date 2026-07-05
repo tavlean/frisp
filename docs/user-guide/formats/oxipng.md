@@ -40,7 +40,7 @@ A practical recipe: enable **Reduce palette**, then lower **Colors** as far as y
 
 ## Recommended settings & community tips
 
-> The settings below are **community recommendations** from the OxiPNG project README and related docs, mapped onto Presk's 0–6 Effort slider (which corresponds to OxiPNG's `-o` levels). They are advice, not new defaults; the factual ranges and defaults above are unchanged. Sources are listed at the end.
+> The settings below are **community recommendations** from the OxiPNG project README and related docs, mapped onto Frisp's 0–6 Effort slider (which corresponds to OxiPNG's `-o` levels). They are advice, not new defaults; the factual ranges and defaults above are unchanged. Sources are listed at the end.
 
 | Use case                                           | Suggested settings                            | Why                                                                                                                       |
 | -------------------------------------------------- | --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |

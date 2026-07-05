@@ -156,7 +156,7 @@ work is:
   pthread-URL resolution below. Still keep single-thread as the automatic fallback.
 - **Emscripten pthread URL resolution under Vite static output** — the empirical
   hard part; expect iteration on the `.worker.js` / wasm URLs.
-- `COEP: require-corp` rejects cross-origin subresources without CORP. Presk is
+- `COEP: require-corp` rejects cross-origin subresources without CORP. Frisp is
   self-contained, so low risk — but audit any external asset before shipping.
 
 ## Effort

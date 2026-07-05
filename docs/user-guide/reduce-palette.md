@@ -4,7 +4,7 @@
 
 ## Overview / When to use it
 
-"Reduce palette" performs **color quantization**: it takes an image that may contain thousands or millions of distinct colors and squeezes it down to a fixed, smaller number of colors (a "palette"). Fewer unique colors means the file compresses more tightly, so this is one of the biggest space-savers for **flat-color content** — logos, icons, illustrations, UI screenshots, charts, and simple diagrams — particularly right before you export as **PNG** (which Presk optimizes with OxiPNG). It is usually a poor fit for **photographs**: real photos rely on subtle, smooth color transitions, and forcing them into a tiny palette tends to look blotchy or like a bad photocopy (src: en.wikipedia.org/wiki/Color_quantization). Reduce palette is a preprocessing step — it changes the pixels before whatever encoder you pick runs, so it stacks with your chosen output format.
+"Reduce palette" performs **color quantization**: it takes an image that may contain thousands or millions of distinct colors and squeezes it down to a fixed, smaller number of colors (a "palette"). Fewer unique colors means the file compresses more tightly, so this is one of the biggest space-savers for **flat-color content** — logos, icons, illustrations, UI screenshots, charts, and simple diagrams — particularly right before you export as **PNG** (which Frisp optimizes with OxiPNG). It is usually a poor fit for **photographs**: real photos rely on subtle, smooth color transitions, and forcing them into a tiny palette tends to look blotchy or like a bad photocopy (src: en.wikipedia.org/wiki/Color_quantization). Reduce palette is a preprocessing step — it changes the pixels before whatever encoder you pick runs, so it stacks with your chosen output format.
 
 ## Controls / Settings
 
@@ -46,7 +46,7 @@ _Sources: [pngquant / libimagequant](https://pngquant.org/lib/); [ImageOptim/lib
 ## Tips & pitfalls
 
 - **Photos: usually skip this panel.** Palette reduction is built for flat-color graphics. For photographs, lean on a lossy format's own quality slider (WebP, AVIF, JPEG XL, JPEG) instead — they handle smooth color far better than a 256-color palette.
-- **Order matters: pair it with PNG.** Reduce palette pays off most when the output is **PNG**, which can store an indexed palette efficiently and which Presk further squeezes with OxiPNG. Re-quantizing before a lossy photo codec gives little benefit and can even hurt.
+- **Order matters: pair it with PNG.** Reduce palette pays off most when the output is **PNG**, which can store an indexed palette efficiently and which Frisp further squeezes with OxiPNG. Re-quantizing before a lossy photo codec gives little benefit and can even hurt.
 - **The two sliders push against each other.** Fewer colors _plus_ heavy dithering can paradoxically grow the file, because dithering replaces clean regions with hard-to-compress noise. If a low color count with dithering on isn't shrinking the file, turn dithering down.
 - **Watch the preview and the size number, not just the slider.** The "right" settings depend entirely on the image. Drag, look, compare — the live preview is the fastest way to find the lowest colors / lowest dithering you can tolerate.
 - **Banding vs. noise is the core trade-off.** Too few colors with no dithering = visible bands. Too much dithering = grainy speckle and a bigger file. Aim for the gentlest dithering that hides the banding you actually see.

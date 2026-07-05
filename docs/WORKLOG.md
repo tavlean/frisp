@@ -21,7 +21,7 @@ not a project. Also fixed the zombie-service-worker trap on the old domain.
   still branded, derived from `APP_NAME`. Full details: runbook Phase E.
 - **`infra/sqush-sunset/`**: Cloudflare Worker for the sqush.app zone — serves
   a self-destructing service worker at `/service-worker.js` and 301s all else
-  to presk.app. NOT yet deployed (needs user: deploy + disable the zone's
+  to frisp.app. NOT yet deployed (needs user: deploy + disable the zone's
   Single Redirect Rule — redirect rules run before Workers, so the rule must go
   for the Worker to see traffic). Steps: runbook Phase F.
 - Living docs re-pointed at the new identifiers; `project-identity.md` now

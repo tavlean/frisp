@@ -77,7 +77,7 @@ Behavior (variant-aware precache, 2026-06-10 — first-visit payload
   Chromium gets `avif_enc_mt` + `jxl_enc_mt_simd` + `webp_enc_simd` +
   oxipng-MT and skips the single-thread/baseline builds and the natively
   decodable AVIF/WebP WASM decoders);
-- activate: delete old Presk caches and claim clients;
+- activate: delete old Frisp caches and claim clients;
 - fetch: serve known assets cache-first (runtime-caching misses, so a
   non-precached variant still ends up cached after first use — a
   mis-detection costs one online network trip, never a broken codec),
@@ -96,7 +96,7 @@ control indefinitely):
   whether it installs during this visit (`updatefound` → `installed`) or was
   already waiting from a previous visit (`registration.waiting`) — and fires
   `onUpdateReady`. `+page.svelte` surfaces it as a persistent (`timeout: null`)
-  snackbar: "A new version of Presk is available — Refresh".
+  snackbar: "A new version of Frisp is available — Refresh".
 - Clicking **Refresh** calls `applyServiceWorkerUpdate()`, which posts
   `SKIP_WAITING` to the waiting worker. It activates, `clients.claim()` swaps
   the controller, and a one-time `controllerchange` listener reloads the tab

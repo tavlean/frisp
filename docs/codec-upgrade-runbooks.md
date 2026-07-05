@@ -89,7 +89,7 @@ needs no edits.
 
 ```sh
 # emsdk 2.0.34 via codecs/cpp.Dockerfile
-cd /Users/tav/Development/Tavlean/Presk/codecs/imagequant
+cd /Users/tav/Development/Tavlean/Frisp/codecs/imagequant
 rm -rf node_modules            # purge old 2.12.1 source + build
 ../build-cpp.sh                 # docker build squoosh-cpp + emmake make -j$(nproc)
 # Regenerates imagequant.js+.wasm and imagequant_node.js+.wasm.
@@ -149,7 +149,7 @@ is valid. The decoder wrapper `webp/dec/webp_dec.cpp` is also public-API only. N
 
 ```sh
 # emsdk 2.0.34 via codecs/cpp.Dockerfile
-cd /Users/tav/Development/Tavlean/Presk/codecs/webp
+cd /Users/tav/Development/Tavlean/Frisp/codecs/webp
 rm -rf node_modules            # purge old vendored libwebp source + build dirs
 ../build-cpp.sh                 # docker build squoosh-cpp + emmake make -j$(nproc)
 # Regenerates enc/webp_enc.js+.wasm, enc/webp_enc_simd.js+.wasm,
@@ -171,7 +171,7 @@ rm -rf node_modules            # purge old vendored libwebp source + build dirs
 5. Security regression: optionally decode a known-malformed lossless WebP fuzz
    sample to confirm no crash (CVE-2023-4863).
 
-**Risks:** Low-to-medium, mostly indirect. (1) **Coupling:** Presk builds
+**Risks:** Low-to-medium, mostly indirect. (1) **Coupling:** Frisp builds
 libsharpyuv for AVIF from a *separate* libwebp checkout (`codecs/avif` Makefile,
 `LIBWEBP_URL_WITH_SHARPYUV` pinned to commit `e2c85878`). That is independent of
 this `webp/` dir, so this upgrade alone does **not** touch AVIF — but bump it in
@@ -226,7 +226,7 @@ it will be on a codec-specific-option key name, not the core API.
 
 ```sh
 # emsdk 2.0.34 via codecs/cpp.Dockerfile
-cd /Users/tav/Development/Tavlean/Presk/codecs/avif
+cd /Users/tav/Development/Tavlean/Frisp/codecs/avif
 rm -rf node_modules            # purge old libavif, libaom, libwebp ext, node_modules/build
 ../build-cpp.sh                 # docker build squoosh-cpp + emmake make -j$(nproc)
 # Build order is enforced by the Makefile:
@@ -276,7 +276,7 @@ change that. (5) Regenerated `.wasm` sizes change; re-check the audit budget.
   - **Path B (full target, requires a wrapper rewrite): v0.11.2.**
 
 > **ISOLATE this upgrade in its own branch/session.** Both Squoosh and jSquash are
-> STILL stuck on Presk's exact pin — strong evidence of WASM build friction. Do
+> STILL stuck on Frisp's exact pin — strong evidence of WASM build friction. Do
 > not batch with the other three.
 
 **Build-file change.** In `codecs/jxl/Makefile` line 2, change `CODEC_VERSION`
@@ -329,7 +329,7 @@ v0.9.0, v0.9.2, v0.10.3, and v0.11.2** (replaced by a refactored
 ```sh
 # emsdk 2.0.34 via codecs/cpp.Dockerfile. JXL pulls submodules
 # (brotli, highway, skcms) at the pinned tag.
-cd /Users/tav/Development/Tavlean/Presk/codecs/jxl
+cd /Users/tav/Development/Tavlean/Frisp/codecs/jxl
 rm -rf node_modules            # purge old jxl checkout + build/{mt,mt-simd}
 ../build-cpp.sh                 # docker build squoosh-cpp + emmake make -j$(nproc)
 # Regenerates enc/jxl_enc.js, enc/jxl_enc_mt.js, enc/jxl_enc_mt_simd.js
@@ -418,7 +418,7 @@ with the one-line bool form.
 ```sh
 # Rust nightly (>=1.85.1) + wasm-pack 0.12.1, via codecs/rust.Dockerfile
 # (or local emsdk-less wasm-pack).
-cd /Users/tav/Development/Tavlean/Presk/codecs/oxipng
+cd /Users/tav/Development/Tavlean/Frisp/codecs/oxipng
 rm -rf pkg pkg-parallel target
 ./build.sh
 #   wasm-pack build -t web
@@ -436,7 +436,7 @@ rm -rf pkg pkg-parallel target
    (`squoosh_oxipng_bg.wasm` + JS glue in both).
 3. `npm run check` — OxiPNG loads `pkg` (ST) or `pkg-parallel` (`_mt`) by thread
    detection; both are `?url`-referenced. Confirm both variants resolve.
-4. Functional: optimize PNGs at the levels Presk exposes, with interlace toggled
+4. Functional: optimize PNGs at the levels Frisp exposes, with interlace toggled
    both ways; compare size/correctness to pre-upgrade. v10.1.1's Bigrams change
    should be notably faster at low presets, with a fast-mode correctness fix for
    small indexed images.
@@ -513,7 +513,7 @@ manually with emcc into objects and add them to the link line (the Makefile
 
 ```sh
 # emsdk 2.0.34 via codecs/cpp.Dockerfile. v4 needs cmake (bundled in emsdk).
-cd /Users/tav/Development/Tavlean/Presk/codecs/mozjpeg
+cd /Users/tav/Development/Tavlean/Frisp/codecs/mozjpeg
 rm -rf node_modules
 ../build-cpp.sh   # AFTER the Makefile is converted to emcmake
 # Regenerates enc/mozjpeg_enc.js+.wasm, enc/mozjpeg_node_enc.js+.wasm,
@@ -610,7 +610,7 @@ against resize 0.8.9 source via the GitHub API:
 # Rust (>=1.85, edition 2024) + wasm-pack, via codecs/rust.Dockerfile.
 # NOTE the repo's rust.Dockerfile default is rust:1.47 (ARG RUST_IMG) which is
 # FAR too old for resize 0.8.9 (needs 1.85). Pass a newer RUST_IMG.
-cd /Users/tav/Development/Tavlean/Presk/codecs/resize
+cd /Users/tav/Development/Tavlean/Frisp/codecs/resize
 rm -rf pkg target Cargo.lock
 RUST_IMG=rust:1.85 ../build-rust.sh
 #   builds squoosh-rust-1.85 image then

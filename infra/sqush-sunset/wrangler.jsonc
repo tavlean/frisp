@@ -4,6 +4,10 @@
   "compatibility_date": "2026-07-05",
   "account_id": "d0d792d2b7b36fdf7473b53d48613065",
   "workers_dev": false,
-  // Apex only — the zone has no www DNS record.
-  "routes": [{ "pattern": "sqush.app/*", "zone_name": "sqush.app" }]
+  // Apex only — neither zone has a www DNS record. One Worker sunsets both
+  // former domains (sqush.app, then presk.app after the same-day Frisp rename).
+  "routes": [
+    { "pattern": "sqush.app/*", "zone_name": "sqush.app" },
+    { "pattern": "presk.app/*", "zone_name": "presk.app" }
+  ]
 }

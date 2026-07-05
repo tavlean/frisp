@@ -4,4 +4,4 @@
  * nothing else. Internal identifiers (CSS classes, cache names, storage keys,
  * aliases) are deliberately brand-free and must stay that way.
  */
-export const APP_NAME = 'Presk';
+export const APP_NAME = 'frisp';

@@ -356,7 +356,7 @@ toggle (default on). "Never ship a bigger file."
 - **Multi-Format Compare** stays a separate feature; the bulk worker pool is
   the same substrate it needs, so bulk-first builds its foundation.
 - Later ideas kept on the list: folder import (+ preserved paths), PWA share
-  target ("send 20 photos to Presk"), presets (save globals as named preset),
+  target ("send 20 photos to Frisp"), presets (save globals as named preset),
   batch summary/CSV report, list-density toggle, target-file-size mode.
 
 ## 8. Recommended roadmap (phases)
@@ -459,7 +459,7 @@ written to disk without an explicit user grant. But the **File System Access
 API** (Chromium — Chrome/Edge; not Safari/Firefox) makes two flows real:
 
 - **Open folder → save back.** `showDirectoryPicker({mode: 'readwrite'})`
-  lets the user hand Presk a folder once; the app reads the images from it
+  lets the user hand Frisp a folder once; the app reads the images from it
   AND writes the optimized outputs back next to them (or into an `optimized/`
   subfolder). A *dropped folder* also yields a writable directory handle via
   `getAsFileSystemHandle()`. This is exactly the "working in a folder"

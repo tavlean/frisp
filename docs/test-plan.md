@@ -2,7 +2,7 @@
 
 **Status: in progress. Last updated: 2026-07-03.**
 
-A prioritized plan to give Presk a test safety net that protects the working
+A prioritized plan to give Frisp a test safety net that protects the working
 app while we add **bulk processing, crop, vector optimization, and new codecs**.
 The goal is confidence that new work didn't break old work — without adding tests
 nobody benefits from.

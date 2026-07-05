@@ -2,15 +2,16 @@
 
 Last updated: 2026-07-05.
 
-Presk is the current project name.
+Frisp is the current project name.
 
 ## Current identity
 
-- App name: Presk — in code, defined ONCE in `src/shared/brand.ts` (`APP_NAME`)
-- Package name: `presk`
-- GitHub repo: `tavlean/presk`
+- App name: frisp — lowercase in the UI; use "Frisp" in prose. In code, defined
+  ONCE in `src/shared/brand.ts` (`APP_NAME`).
+- Package name: `frisp`
+- GitHub repo: `tavlean/frisp`
 - Default branch: `main`
-- Homepage metadata: `https://presk.app`
+- Homepage metadata: `https://frisp.app`
 
 ## Renaming the app (should it ever happen again)
 
@@ -35,14 +36,16 @@ storage schema (see the HARD RULE in `src/lib/editor/settings-storage.ts`).
 
 - `tavlean/SquooshPlus` — the original fork name (historical only).
 - **Sqush** (`tavlean/sqush`, sqush.app) — the working name up to 2026-07-05.
-- **Presk** (`tavlean/presk`, presk.app) — current, renamed 2026-07-05
+- **Presk** (`tavlean/presk`, presk.app) — historical, renamed 2026-07-05 and
+  dropped the same day for Plesk confusion.
+- **Frisp** (`tavlean/frisp`, frisp.app) — current, renamed 2026-07-05
   (`docs/presk-rename-runbook.md` is the migration record).
 
 ## Historical identity
 
-Presk is derived from GoogleChromeLabs' Squoosh project. Keep that history clear in docs, credits, license notes, and architecture explanations. Do not rename every historical `Squoosh` reference to `Presk`; many of those references explain upstream behavior or provenance.
+Frisp is derived from GoogleChromeLabs' Squoosh project. Keep that history clear in docs, credits, license notes, and architecture explanations. Do not rename every historical `Squoosh` reference to `Frisp`; many of those references explain upstream behavior or provenance.
 
 ## Local folder note
 
-The local checkout lives at `/Users/tav/Development/Tavlean/Presk` (renamed
+The local checkout lives at `/Users/tav/Development/Tavlean/Frisp` (renamed
 from `…/Tavlean/Sqush` on 2026-07-05, runbook Phase D).
