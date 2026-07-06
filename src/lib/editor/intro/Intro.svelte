@@ -600,5 +600,20 @@
     .load-btn:focus-visible {
       outline-color: #18181b;
     }
+
+    /* On the pale canvas the saturated disc reads as loud, so soften it: a
+       gentler, less-saturated coral and a lighter shadow to match the soft
+       blobs. */
+    .load-btn {
+      background: linear-gradient(150deg, hsl(20, 88%, 71%), hsl(9, 80%, 63%));
+      box-shadow:
+        0 10px 28px rgba(255, 125, 85, 0.22),
+        inset 0 1.5px 0 rgba(255, 255, 255, 0.45);
+    }
+    .load-btn:hover {
+      box-shadow:
+        0 14px 36px rgba(255, 125, 85, 0.3),
+        inset 0 1.5px 0 rgba(255, 255, 255, 0.45);
+    }
   }
 </style>
