@@ -1,11 +1,39 @@
 # Frisp Status
 
-Last updated: 2026-07-05.
+Last updated: 2026-07-07.
 
 Read this first. Frisp is a local-first image optimizer: image work stays in the
 browser, the build is static, and offline reload must work after load.
 
 ## Current State
+
+- **First-principles review executed (2026-07-07).** A whole-app review
+  ([docs/first-principles-review.md](first-principles-review.md), P1–P10) was
+  turned into an execution plan
+  ([docs/specs/2026-07-07-first-principles-execution.md](specs/2026-07-07-first-principles-execution.md)
+  — **execution state lives there**) and 7 of 8 day-one workstreams LANDED,
+  each gated by check + unit + full e2e:
+  - **Decoded-source cache** (`3a44a63d`): the editor decodes/rotates a photo
+    ONCE per file; option tweaks no longer re-decode on the main thread.
+  - **Bulk per-slot drain** (`116928aa`): a slow image no longer blocks the
+    other worker slot.
+  - **Codegen retired** (`2eefc99e`): `scripts/sync-sveltekit-app.mjs` deleted
+    (net −2,357 lines); generated modules are committed source; the codec
+    worker is `src/worker/codec-worker.ts`; ONE JSON record manifest
+    (`src/shared/codec-asset-records.json`) feeds app + audit; `npm run sync`
+    now only patches Emscripten wrappers.
+  - **Dead code removed** (`85944296`), **utilities deduped** (`67b99863`),
+    **tooling/CI fixed** (`5eca4145`: `typecheck` script, unit tests in CI and
+    `npm test`, verbatimModuleSyntax), **Svelte idioms** (`e120b55b`:
+    reactivity/window, MediaQuery, shared lightDismiss attachment).
+  - **Regression found & fixed** (`db0a696a`): vitest resolved no aliases —
+    10 tests silently dropped since 2026-07-05, hiding an accidental
+    `frisp-` prefix on bulk ZIP names (contract restored).
+  - In flight: WS-D(a) worker→main Comlink transfers (bench-gated).
+    Fully specced for later cheap sessions: D(b) composite worker op, D(c)
+    worker-side decode, WS-G options-slice implementation (control tables in
+    specs/2026-07-07-ws-g-control-inventory.md), WS-H `src/engine` rename
+    (inventory in specs/2026-07-07-ws-h-rename-inventory.md — do LAST).
 
 - **Rename-proofing landed (2026-07-05).** The brand now lives ONLY in
   `src/shared/brand.ts` (`APP_NAME`); every internal identifier is brand-free

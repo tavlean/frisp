@@ -93,3 +93,26 @@ sync-sveltekit-app.mjs generates ~480 lines of static TS and can mostly retire
 (P3); bulk options seam is WebP-typed, endorsing the codec-options-model
 sequencing (P4); 12 orphaned worker wrappers + 5 stale d.ts shims (P5); unit
 tests don't run in CI (P7). No code changed — review only.
+
+## 2026-07-07 — First-principles execution day (orchestrated)
+
+The P1–P10 review became specs (WS-A…H in
+docs/specs/2026-07-07-first-principles-execution.md) and 7 of 8 day-one
+workstreams landed same-day, Codex-executed under Fable review, every one
+gated by check + unit + full e2e (Chromium+WebKit):
+dead code `85944296` · dedup `67b99863` · tooling/CI `5eca4145` ·
+decoded-source cache `3a44a63d` · bulk drain `116928aa` · codegen retirement
+`2eefc99e` (−2,357 lines net) · Svelte idioms `e120b55b` (worktree, merged
+`7fd0b3d5`). Bonus regression fix `db0a696a` (vitest aliases; ZIP name).
+
+Gotchas for future sessions:
+- `codex exec` in a compound background command MUST end with `</dev/null`
+  (stdin never closes → hangs at "Reading additional input from stdin...";
+  cost us ~30 min even though the memory had it).
+- vitest.config.ts does NOT inherit vite.config aliases — it imports the
+  exported `appAliases`; keep them in sync via that export only.
+- Playwright local build reuse is opt-in via PLAYWRIGHT_SKIP_BUILD=1 (`npm
+  test` sets it); never make it inferred — stale build/ would test old code.
+- The bench's photo-large fixture is 1 cold run — regression signal only.
+- WS-H rename must go LAST (conflicts with everything); its inventory doc has
+  a delta header to apply first.
