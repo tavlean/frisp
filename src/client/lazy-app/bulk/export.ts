@@ -203,8 +203,15 @@ export function getBulkOutputSummary(session: BulkSession): BulkOutputSummary {
 }
 
 export function getBulkExportName(session: BulkSession): string {
-  const safeSessionName = getSafeFileNameBase(session.id, 'bulk');
-  return `${APP_NAME.toLowerCase()}-${safeSessionName}-optimized`;
+  // Brand appears only in the FALLBACK base (session id unusable), matching
+  // the pre-rename contract: a named batch downloads as `<name>-optimized`,
+  // not `<brand>-<name>-optimized`. The 2026-07-05 rename-proofing refactor
+  // accidentally prefixed every archive; tests/unit/export.test.ts pins this.
+  const safeSessionName = getSafeFileNameBase(
+    session.id,
+    `${APP_NAME.toLowerCase()}-bulk`,
+  );
+  return `${safeSessionName}-optimized`;
 }
 
 export function getBulkOutputFileName(job: ImageJob): string {
