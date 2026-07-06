@@ -5,12 +5,6 @@ const config = {
   preprocess: vitePreprocess(),
   kit: {
     alias: {
-      'client/lazy-app/feature-meta/shared':
-        './.svelte-kit/app-generated/feature-meta/shared.ts',
-      'client/lazy-app/feature-meta/encoders':
-        './.svelte-kit/app-generated/feature-meta/encoders.ts',
-      'client/lazy-app/feature-meta':
-        './.svelte-kit/app-generated/feature-meta/index.ts',
       'app-generated': './.svelte-kit/app-generated',
       client: './src/client',
       codecs: './codecs',

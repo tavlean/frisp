@@ -1,56 +1,56 @@
 import codecAssetProbeWorkerUrl from './codec-asset-probe.worker.ts?worker&url';
 import webpEncodeProbeWorkerUrl from './webp-encode-probe.worker.ts?worker&url';
-import svelteKitFeaturesWorkerUrl from 'app-generated/features-worker/webp.ts?worker&url';
+import svelteKitFeaturesWorkerUrl from '../worker/codec-worker.ts?worker&url';
 import {
   avifCodecAssetUrls,
   avifDecoderWasmUrl,
   avifEncoderWasmUrl,
-} from 'app-generated/codec-assets/avif';
+} from 'shared/codec-assets/avif';
 import {
   webpCodecAssetUrls,
   webpDecoderWasmUrl,
   webpEncoderSimdWasmUrl,
   webpEncoderWasmUrl,
-} from 'app-generated/codec-assets/webp';
+} from 'shared/codec-assets/webp';
 import {
   rotateCodecAssetUrls,
   rotateWasmUrl,
-} from 'app-generated/codec-assets/rotate';
+} from 'shared/codec-assets/rotate';
 import {
   qoiCodecAssetUrls,
   qoiDecoderWasmUrl,
   qoiEncoderWasmUrl,
-} from 'app-generated/codec-assets/qoi';
+} from 'shared/codec-assets/qoi';
 import {
   jxlCodecAssetUrls,
   jxlDecoderWasmUrl,
   jxlEncoderWasmUrl,
-} from 'app-generated/codec-assets/jxl';
+} from 'shared/codec-assets/jxl';
 import {
   mozjpegCodecAssetUrls,
   mozjpegEncoderWasmUrl,
-} from 'app-generated/codec-assets/mozjpeg';
+} from 'shared/codec-assets/mozjpeg';
 import {
   oxipngCodecAssetUrls,
   oxipngWasmUrl,
-} from 'app-generated/codec-assets/oxipng';
+} from 'shared/codec-assets/oxipng';
 import {
   imagequantCodecAssetUrls,
   imagequantWasmUrl,
-} from 'app-generated/codec-assets/imagequant';
+} from 'shared/codec-assets/imagequant';
 import {
   hqxWasmUrl,
   resizeCodecAssetUrls,
   resizeWasmUrl,
-} from 'app-generated/codec-assets/resize';
+} from 'shared/codec-assets/resize';
 import {
   svelteKitCodecAssetRecords,
   type CodecAssetRecord,
-} from 'app-generated/codec-assets/manifest';
+} from 'shared/codec-assets/manifest';
 import {
   precacheCodecAssetRecords,
   precacheCodecAssetUrls,
-} from 'app-generated/codec-assets/precache';
+} from 'shared/codec-assets/precache';
 
 export {
   avifCodecAssetUrls,

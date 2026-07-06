@@ -136,7 +136,7 @@ or timestamped logging removed before commit).
 
 ## WS-C Codegen retirement (P3) — target shape fixed, Codex executes
 
-**Status: queued (after WS-B; independent of it, but one writer at a time).**
+**Status: ✅ DONE (2026-07-07; no commit per workstream instruction).**
 
 Target shape (decided):
 

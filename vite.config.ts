@@ -95,24 +95,6 @@ const rawThreadedCodecWorkers: Plugin = {
 // these an aliased import inside any transitively-loaded source module makes
 // that whole test file fail at collection).
 export const appAliases = {
-  'client/lazy-app/feature-meta/shared': fileURLToPath(
-    new URL(
-      './.svelte-kit/app-generated/feature-meta/shared.ts',
-      import.meta.url,
-    ),
-  ),
-  'client/lazy-app/feature-meta/encoders': fileURLToPath(
-    new URL(
-      './.svelte-kit/app-generated/feature-meta/encoders.ts',
-      import.meta.url,
-    ),
-  ),
-  'client/lazy-app/feature-meta': fileURLToPath(
-    new URL(
-      './.svelte-kit/app-generated/feature-meta/index.ts',
-      import.meta.url,
-    ),
-  ),
   'app-generated': fileURLToPath(
     new URL('./.svelte-kit/app-generated', import.meta.url),
   ),

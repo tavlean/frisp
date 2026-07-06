@@ -1,0 +1,202 @@
+[
+  {
+    "logicalKey": "avif:decoder:default",
+    "codec": "avif",
+    "role": "decoder",
+    "variant": "default",
+    "path": "codecs/avif/dec/avif_dec.wasm",
+    "cache": "precache"
+  },
+  {
+    "logicalKey": "avif:encoder:single-thread",
+    "codec": "avif",
+    "role": "encoder",
+    "variant": "single-thread",
+    "path": "codecs/avif/enc/avif_enc.wasm",
+    "cache": "precache"
+  },
+  {
+    "logicalKey": "avif:encoder:multi-thread",
+    "codec": "avif",
+    "role": "encoder",
+    "variant": "multi-thread",
+    "path": "codecs/avif/enc/avif_enc_mt.wasm",
+    "cache": "threaded-only"
+  },
+  {
+    "logicalKey": "avif:encoder:multi-thread-worker",
+    "codec": "avif",
+    "role": "worker-helper",
+    "variant": "multi-thread",
+    "path": "codecs/avif/enc/avif_enc_mt.worker.js",
+    "cache": "threaded-only"
+  },
+  {
+    "logicalKey": "avif:encoder:multi-thread-script",
+    "codec": "avif",
+    "role": "worker-helper",
+    "variant": "multi-thread",
+    "path": "codecs/avif/enc/avif_enc_mt.js",
+    "cache": "threaded-only"
+  },
+  {
+    "logicalKey": "webp:decoder:default",
+    "codec": "webp",
+    "role": "decoder",
+    "variant": "default",
+    "path": "codecs/webp/dec/webp_dec.wasm",
+    "cache": "precache"
+  },
+  {
+    "logicalKey": "webp:encoder:baseline",
+    "codec": "webp",
+    "role": "encoder",
+    "variant": "baseline",
+    "path": "codecs/webp/enc/webp_enc.wasm",
+    "cache": "precache"
+  },
+  {
+    "logicalKey": "webp:encoder:simd",
+    "codec": "webp",
+    "role": "encoder",
+    "variant": "simd",
+    "path": "codecs/webp/enc/webp_enc_simd.wasm",
+    "cache": "precache"
+  },
+  {
+    "logicalKey": "qoi:decoder:default",
+    "codec": "qoi",
+    "role": "decoder",
+    "variant": "default",
+    "path": "codecs/qoi/dec/qoi_dec.wasm",
+    "cache": "precache"
+  },
+  {
+    "logicalKey": "qoi:encoder:default",
+    "codec": "qoi",
+    "role": "encoder",
+    "variant": "default",
+    "path": "codecs/qoi/enc/qoi_enc.wasm",
+    "cache": "precache"
+  },
+  {
+    "logicalKey": "jxl:decoder:default",
+    "codec": "jxl",
+    "role": "decoder",
+    "variant": "default",
+    "path": "codecs/jxl/dec/jxl_dec.wasm",
+    "cache": "precache"
+  },
+  {
+    "logicalKey": "jxl:encoder:single-thread",
+    "codec": "jxl",
+    "role": "encoder",
+    "variant": "single-thread",
+    "path": "codecs/jxl/enc/jxl_enc.wasm",
+    "cache": "precache"
+  },
+  {
+    "logicalKey": "jxl:encoder:multi-thread",
+    "codec": "jxl",
+    "role": "encoder",
+    "variant": "multi-thread",
+    "path": "codecs/jxl/enc/jxl_enc_mt.wasm",
+    "cache": "threaded-only"
+  },
+  {
+    "logicalKey": "jxl:encoder:multi-thread-worker",
+    "codec": "jxl",
+    "role": "worker-helper",
+    "variant": "multi-thread",
+    "path": "codecs/jxl/enc/jxl_enc_mt.worker.js",
+    "cache": "threaded-only"
+  },
+  {
+    "logicalKey": "jxl:encoder:multi-thread-script",
+    "codec": "jxl",
+    "role": "worker-helper",
+    "variant": "multi-thread",
+    "path": "codecs/jxl/enc/jxl_enc_mt.js",
+    "cache": "threaded-only"
+  },
+  {
+    "logicalKey": "jxl:encoder:multi-thread-simd",
+    "codec": "jxl",
+    "role": "encoder",
+    "variant": "multi-thread",
+    "path": "codecs/jxl/enc/jxl_enc_mt_simd.wasm",
+    "cache": "threaded-only"
+  },
+  {
+    "logicalKey": "jxl:encoder:multi-thread-simd-worker",
+    "codec": "jxl",
+    "role": "worker-helper",
+    "variant": "multi-thread",
+    "path": "codecs/jxl/enc/jxl_enc_mt_simd.worker.js",
+    "cache": "threaded-only"
+  },
+  {
+    "logicalKey": "jxl:encoder:multi-thread-simd-script",
+    "codec": "jxl",
+    "role": "worker-helper",
+    "variant": "multi-thread",
+    "path": "codecs/jxl/enc/jxl_enc_mt_simd.js",
+    "cache": "threaded-only"
+  },
+  {
+    "logicalKey": "mozjpeg:encoder:default",
+    "codec": "mozjpeg",
+    "role": "encoder",
+    "variant": "default",
+    "path": "codecs/mozjpeg/enc/mozjpeg_enc.wasm",
+    "cache": "precache"
+  },
+  {
+    "logicalKey": "oxipng:encoder:single-thread",
+    "codec": "oxipng",
+    "role": "encoder",
+    "variant": "single-thread",
+    "path": "codecs/oxipng/pkg/squoosh_oxipng_bg.wasm",
+    "cache": "precache"
+  },
+  {
+    "logicalKey": "oxipng:encoder:multi-thread",
+    "codec": "oxipng",
+    "role": "encoder",
+    "variant": "multi-thread",
+    "path": "codecs/oxipng/pkg-parallel/squoosh_oxipng_bg.wasm",
+    "cache": "threaded-only"
+  },
+  {
+    "logicalKey": "imagequant:processor:default",
+    "codec": "imagequant",
+    "role": "processor",
+    "variant": "default",
+    "path": "codecs/imagequant/imagequant.wasm",
+    "cache": "precache"
+  },
+  {
+    "logicalKey": "resize:processor:default",
+    "codec": "resize",
+    "role": "processor",
+    "variant": "default",
+    "path": "codecs/resize/pkg/squoosh_resize_bg.wasm",
+    "cache": "precache"
+  },
+  {
+    "logicalKey": "hqx:processor:hqx",
+    "codec": "hqx",
+    "role": "processor",
+    "variant": "hqx",
+    "path": "codecs/hqx/pkg/squooshhqx_bg.wasm",
+    "cache": "precache"
+  },
+  {
+    "logicalKey": "rotate:preprocessor:default",
+    "codec": "rotate",
+    "role": "preprocessor",
+    "variant": "default",
+    "path": "codecs/rotate/rotate.wasm",
+    "cache": "runtime"
+  }
+]

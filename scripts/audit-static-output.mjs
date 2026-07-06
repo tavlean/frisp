@@ -37,30 +37,6 @@ function assertDeepEqual(actual, expected, message) {
   }
 }
 
-function parseGeneratedCodecAssetRecords(source, exportName) {
-  const arrayMatch = source.match(
-    new RegExp(
-      `export const ${exportName} = \\[([\\s\\S]*?)\\] satisfies readonly CodecAssetRecord\\[];`,
-    ),
-  );
-  assert(arrayMatch, `Could not find generated ${exportName} records.`);
-
-  const objectMatches = [
-    ...arrayMatch[1].matchAll(
-      /\{\s*logicalKey:\s*'([^']+)',\s*codec:\s*'([^']+)',\s*role:\s*'([^']+)',\s*variant:\s*'([^']+)',\s*url:\s*([A-Za-z0-9_$]+),\s*cache:\s*'([^']+)'\s*\}/g,
-    ),
-  ];
-
-  return objectMatches.map((match) => ({
-    logicalKey: match[1],
-    codec: match[2],
-    role: match[3],
-    variant: match[4],
-    urlBinding: match[5],
-    cache: match[6],
-  }));
-}
-
 function assertUnique(values, label) {
   const duplicates = values.filter(
     (value, index) => values.indexOf(value) !== index,
@@ -71,19 +47,46 @@ function assertUnique(values, label) {
   );
 }
 
+function parseUrlImportPaths(source) {
+  return [...source.matchAll(/from '([^']+)\?url'/g)].map((match) => match[1]);
+}
+
 const files = await listFiles(buildDir);
 const serviceWorker = await readFile(
   join(buildDir, 'service-worker.js'),
   'utf8',
 );
-const generatedCodecAssetManifest = await readFile(
-  join(root, '.svelte-kit', 'app-generated', 'codec-assets', 'manifest.ts'),
+const codecAssetRecordSources = JSON.parse(
+  await readFile(
+    join(root, 'src', 'shared', 'codec-asset-records.json'),
+    'utf8',
+  ),
+);
+const codecAssetManifest = await readFile(
+  join(root, 'src', 'shared', 'codec-assets', 'manifest.ts'),
   'utf8',
 );
-const generatedCodecAssetPrecacheManifest = await readFile(
-  join(root, '.svelte-kit', 'app-generated', 'codec-assets', 'precache.ts'),
+const codecAssetPrecacheManifest = await readFile(
+  join(root, 'src', 'shared', 'codec-assets', 'precache.ts'),
   'utf8',
 );
+const codecAssetUrlImportPaths = (
+  await Promise.all(
+    [
+      'avif.ts',
+      'imagequant.ts',
+      'jxl.ts',
+      'mozjpeg.ts',
+      'oxipng.ts',
+      'qoi.ts',
+      'resize.ts',
+      'rotate.ts',
+      'webp.ts',
+    ].map((file) =>
+      readFile(join(root, 'src', 'shared', 'codec-assets', file), 'utf8'),
+    ),
+  )
+).flatMap(parseUrlImportPaths);
 
 const appEntryAsset = files.find(
   (file) => file.includes('_app/immutable/entry/app.') && file.endsWith('.js'),
@@ -238,186 +241,12 @@ const immutableEncodeWorkerAsset = files.find(
 );
 const immutableFeaturesWorkerAsset = files.find(
   (file) =>
-    /^_app\/immutable\/workers\/webp-[A-Za-z0-9_-]+\.js$/.test(file) &&
+    /^_app\/immutable\/workers\/codec-worker-[A-Za-z0-9_-]+\.js$/.test(file) &&
     file.endsWith('.js'),
 );
-const expectedLogicalAssetRecords = [
-  {
-    logicalKey: 'avif:decoder:default',
-    codec: 'avif',
-    role: 'decoder',
-    variant: 'default',
-    cache: 'precache',
-  },
-  {
-    logicalKey: 'avif:encoder:single-thread',
-    codec: 'avif',
-    role: 'encoder',
-    variant: 'single-thread',
-    cache: 'precache',
-  },
-  {
-    logicalKey: 'avif:encoder:multi-thread',
-    codec: 'avif',
-    role: 'encoder',
-    variant: 'multi-thread',
-    cache: 'threaded-only',
-  },
-  {
-    logicalKey: 'avif:encoder:multi-thread-worker',
-    codec: 'avif',
-    role: 'worker-helper',
-    variant: 'multi-thread',
-    cache: 'threaded-only',
-  },
-  {
-    logicalKey: 'avif:encoder:multi-thread-script',
-    codec: 'avif',
-    role: 'worker-helper',
-    variant: 'multi-thread',
-    cache: 'threaded-only',
-  },
-  {
-    logicalKey: 'webp:decoder:default',
-    codec: 'webp',
-    role: 'decoder',
-    variant: 'default',
-    cache: 'precache',
-  },
-  {
-    logicalKey: 'webp:encoder:baseline',
-    codec: 'webp',
-    role: 'encoder',
-    variant: 'baseline',
-    cache: 'precache',
-  },
-  {
-    logicalKey: 'webp:encoder:simd',
-    codec: 'webp',
-    role: 'encoder',
-    variant: 'simd',
-    cache: 'precache',
-  },
-  {
-    logicalKey: 'qoi:decoder:default',
-    codec: 'qoi',
-    role: 'decoder',
-    variant: 'default',
-    cache: 'precache',
-  },
-  {
-    logicalKey: 'qoi:encoder:default',
-    codec: 'qoi',
-    role: 'encoder',
-    variant: 'default',
-    cache: 'precache',
-  },
-  {
-    logicalKey: 'jxl:decoder:default',
-    codec: 'jxl',
-    role: 'decoder',
-    variant: 'default',
-    cache: 'precache',
-  },
-  {
-    logicalKey: 'jxl:encoder:single-thread',
-    codec: 'jxl',
-    role: 'encoder',
-    variant: 'single-thread',
-    cache: 'precache',
-  },
-  {
-    logicalKey: 'jxl:encoder:multi-thread',
-    codec: 'jxl',
-    role: 'encoder',
-    variant: 'multi-thread',
-    cache: 'threaded-only',
-  },
-  {
-    logicalKey: 'jxl:encoder:multi-thread-worker',
-    codec: 'jxl',
-    role: 'worker-helper',
-    variant: 'multi-thread',
-    cache: 'threaded-only',
-  },
-  {
-    logicalKey: 'jxl:encoder:multi-thread-script',
-    codec: 'jxl',
-    role: 'worker-helper',
-    variant: 'multi-thread',
-    cache: 'threaded-only',
-  },
-  {
-    logicalKey: 'jxl:encoder:multi-thread-simd',
-    codec: 'jxl',
-    role: 'encoder',
-    variant: 'multi-thread',
-    cache: 'threaded-only',
-  },
-  {
-    logicalKey: 'jxl:encoder:multi-thread-simd-worker',
-    codec: 'jxl',
-    role: 'worker-helper',
-    variant: 'multi-thread',
-    cache: 'threaded-only',
-  },
-  {
-    logicalKey: 'jxl:encoder:multi-thread-simd-script',
-    codec: 'jxl',
-    role: 'worker-helper',
-    variant: 'multi-thread',
-    cache: 'threaded-only',
-  },
-  {
-    logicalKey: 'mozjpeg:encoder:default',
-    codec: 'mozjpeg',
-    role: 'encoder',
-    variant: 'default',
-    cache: 'precache',
-  },
-  {
-    logicalKey: 'oxipng:encoder:single-thread',
-    codec: 'oxipng',
-    role: 'encoder',
-    variant: 'single-thread',
-    cache: 'precache',
-  },
-  {
-    logicalKey: 'oxipng:encoder:multi-thread',
-    codec: 'oxipng',
-    role: 'encoder',
-    variant: 'multi-thread',
-    cache: 'threaded-only',
-  },
-  {
-    logicalKey: 'imagequant:processor:default',
-    codec: 'imagequant',
-    role: 'processor',
-    variant: 'default',
-    cache: 'precache',
-  },
-  {
-    logicalKey: 'resize:processor:default',
-    codec: 'resize',
-    role: 'processor',
-    variant: 'default',
-    cache: 'precache',
-  },
-  {
-    logicalKey: 'hqx:processor:hqx',
-    codec: 'hqx',
-    role: 'processor',
-    variant: 'hqx',
-    cache: 'precache',
-  },
-  {
-    logicalKey: 'rotate:preprocessor:default',
-    codec: 'rotate',
-    role: 'preprocessor',
-    variant: 'default',
-    cache: 'runtime',
-  },
-];
+const expectedLogicalAssetRecords = codecAssetRecordSources.map(
+  ({ path: _path, ...record }) => record,
+);
 const expectedLogicalAssetKeys = expectedLogicalAssetRecords.map(
   (record) => record.logicalKey,
 );
@@ -562,88 +391,57 @@ assert(
 );
 assert(
   immutableFeaturesWorkerAsset,
-  'Missing app-emitted immutable generated WebP features-worker asset.',
+  'Missing app-emitted immutable codec worker asset.',
 );
 assert(
-  generatedCodecAssetManifest.includes('svelteKitCodecAssetRecords'),
-  'Generated codec asset manifest does not expose logical asset records.',
+  codecAssetManifest.includes('codec-asset-records.json'),
+  'Codec asset manifest does not derive records from the JSON source.',
 );
 assert(
-  generatedCodecAssetManifest.includes("from 'shared/codec-assets'"),
-  'Generated codec asset manifest does not consume the shared codec asset contract.',
+  codecAssetManifest.includes("from 'shared/codec-assets'"),
+  'Codec asset manifest does not consume the shared codec asset contract.',
 );
 assert(
-  generatedCodecAssetManifest.includes('getPrecacheCodecAssetRecords'),
-  'Generated codec asset manifest does not use the shared precache record helper.',
+  codecAssetManifest.includes('getPrecacheCodecAssetRecords'),
+  'Codec asset manifest does not use the shared precache record helper.',
 );
 assert(
-  generatedCodecAssetManifest.includes('precacheCodecAssetUrls'),
-  'Generated codec asset manifest does not expose derived precache URLs.',
+  codecAssetManifest.includes('precacheCodecAssetUrls'),
+  'Codec asset manifest does not expose derived precache URLs.',
 );
 assert(
-  generatedCodecAssetPrecacheManifest.includes('precacheCodecAssetUrls'),
-  'Generated codec asset precache manifest does not expose precache URLs.',
+  codecAssetPrecacheManifest.includes('precacheCodecAssetUrls'),
+  'Codec asset precache manifest does not expose precache URLs.',
 );
 assert(
-  generatedCodecAssetPrecacheManifest.includes("from 'shared/codec-assets'"),
-  'Generated codec asset precache manifest does not consume the shared codec asset contract.',
-);
-assert(
-  !generatedCodecAssetPrecacheManifest.includes('rotate:preprocessor:default'),
-  'Generated codec asset precache manifest should not import runtime-only rotate WASM.',
-);
-const generatedLogicalAssetRecords = parseGeneratedCodecAssetRecords(
-  generatedCodecAssetManifest,
-  'svelteKitCodecAssetRecords',
-);
-const generatedPrecacheAssetRecords = parseGeneratedCodecAssetRecords(
-  generatedCodecAssetPrecacheManifest,
-  'precacheCodecAssetRecords',
+  !codecAssetPrecacheManifest.includes('rotate:preprocessor:default'),
+  'Codec asset precache manifest should not import runtime-only rotate WASM.',
 );
 assertDeepEqual(
-  generatedLogicalAssetRecords.map((record) => record.logicalKey),
+  expectedLogicalAssetRecords.map((record) => record.logicalKey),
   expectedLogicalAssetKeys,
-  'Generated codec asset manifest has an unexpected logical record order or key set.',
+  'Codec asset JSON has an unexpected logical record order or key set.',
 );
 assertDeepEqual(
-  generatedPrecacheAssetRecords.map((record) => record.logicalKey),
+  expectedLogicalAssetRecords
+    .filter((record) => record.cache === 'precache')
+    .map((record) => record.logicalKey),
   expectedPrecacheLogicalAssetKeys,
-  'Generated codec asset precache manifest has an unexpected logical record order or key set.',
+  'Codec asset JSON has an unexpected precache record order or key set.',
 );
 assertUnique(
-  generatedLogicalAssetRecords.map((record) => record.logicalKey),
+  expectedLogicalAssetRecords.map((record) => record.logicalKey),
   'codec asset logical keys',
 );
 assertUnique(
-  generatedLogicalAssetRecords.map((record) => record.urlBinding),
-  'codec asset URL bindings',
+  codecAssetRecordSources.map((record) => record.path),
+  'codec asset paths',
 );
-for (const expectedRecord of expectedLogicalAssetRecords) {
-  const generatedRecord = generatedLogicalAssetRecords.find(
-    (record) => record.logicalKey === expectedRecord.logicalKey,
-  );
-  assert(
-    generatedRecord,
-    `Generated codec asset manifest is missing ${expectedRecord.logicalKey}.`,
-  );
-  assertDeepEqual(
-    {
-      logicalKey: generatedRecord.logicalKey,
-      codec: generatedRecord.codec,
-      role: generatedRecord.role,
-      variant: generatedRecord.variant,
-      cache: generatedRecord.cache,
-    },
-    expectedRecord,
-    `Generated codec asset manifest has an unexpected record for ${expectedRecord.logicalKey}.`,
-  );
-}
-for (const precacheRecord of generatedPrecacheAssetRecords) {
-  assert(
-    precacheRecord.cache === 'precache',
-    `Generated codec asset precache manifest contains non-precache record ${precacheRecord.logicalKey}.`,
-  );
-}
+assertDeepEqual(
+  [...codecAssetUrlImportPaths].sort(),
+  codecAssetRecordSources.map((record) => record.path).sort(),
+  'Codec asset JSON records and ?url imports must cover the same paths.',
+);
 assert(
   serviceWorker.includes(wasmAsset),
   `Service-worker build manifest does not include ${wasmAsset}.`,
@@ -777,7 +575,7 @@ console.log(
     `ImageQuant WASM asset: ${imagequantWasmAsset}`,
     `Resize WASM asset: ${resizeWasmAsset}`,
     `HQX WASM asset: ${hqxWasmAsset}`,
-    `Generated logical codec asset records: ${expectedLogicalAssetKeys.length}`,
+    `Codec asset JSON records: ${expectedLogicalAssetKeys.length}`,
     `Physical WASM groups: ${physicalWasmGroups
       .map(([logicalKey, assets]) => `${logicalKey}=${assets.length}`)
       .join(', ')}`,
@@ -819,6 +617,6 @@ console.log(
     ...workerHelperAssets.map((asset) => `  - ${asset}`),
     `App worker asset: ${immutableWorkerAsset}`,
     `App encode worker asset: ${immutableEncodeWorkerAsset}`,
-    `App generated WebP features-worker asset: ${immutableFeaturesWorkerAsset}`,
+    `App codec worker asset: ${immutableFeaturesWorkerAsset}`,
   ].join('\n'),
 );

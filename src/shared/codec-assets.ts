@@ -41,6 +41,15 @@ export interface CodecAssetRecord {
   cache: CodecAssetCache;
 }
 
+export interface CodecAssetRecordSource {
+  logicalKey: string;
+  codec: CodecAssetCodec;
+  role: CodecAssetRole;
+  variant: CodecAssetVariant;
+  path: string;
+  cache: CodecAssetCache;
+}
+
 export function getPrecacheCodecAssetRecords<
   RecordType extends CodecAssetRecord,
 >(records: readonly RecordType[]): RecordType[] {

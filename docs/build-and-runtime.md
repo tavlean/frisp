@@ -27,40 +27,39 @@ been removed from the `svelte` branch.
 - Service-worker auto-registration is disabled so `src/lib/service-worker-registration.ts`
   can handle dev cleanup and production registration explicitly.
 - `vite.config.ts` and `svelte.config.js` define aliases for `client`,
-  `features`, `shared`, `sw`, `codecs`, `worker-shared`, and generated
-  `app-generated` modules.
+  `features`, `shared`, `sw`, `codecs`, `worker-shared`, and `app-generated`
+  (now only patched codec wrappers).
 
-## Generated Runtime Files
+## Runtime Source And Patched Wrappers
 
-`scripts/sync-sveltekit-app.mjs` writes generated files under
-`.svelte-kit/app-generated/`. The important generated groups are:
+Former generated runtime modules are committed source now:
 
-- `feature-meta/`: encoder/processor/preprocessor metadata.
-- `features-worker/webp.ts`: generated Comlink worker entry covering active
-  codecs and processors.
-- `worker-bridge/meta.ts`: method names and worker API type.
-- `worker-surface/ready.ts`: ready and intentionally blocked worker methods.
-- `codec-assets/`: Vite URL imports and logical codec asset manifests,
-  including `codec-assets/service-worker.ts` — the curated record list the
-  service worker variant-selects from. It deliberately excludes `?worker`
-  imports (they would make the SW build re-emit duplicate worker chunks) and
-  sub-inline-limit assets like the rotate WASM and the `*_mt.worker.js`
-  pthread stubs (the SW build ignores the app's `assetsInlineLimit` and would
-  inline them as unusable `data:` URLs; they precache with the app shell via
-  `$service-worker`'s `build` list instead).
-- `codecs/`: patched wrapper copies that avoid duplicate WASM emissions.
+- `src/client/lazy-app/feature-meta/`: encoder/processor/preprocessor
+  metadata.
+- `src/worker/codec-worker.ts`: Comlink worker entry covering active codecs and
+  processors.
+- `src/lib/sveltekit-worker-bridge.ts`: method names and worker API typing.
+- `src/shared/codec-asset-records.json`: the logical codec-asset record source
+  of truth (logical key, codec, role, variant, relative path, cache class).
+- `src/shared/codec-assets/`: Vite `?url` imports plus app, precache, and
+  service-worker record selections derived from the JSON records. The
+  service-worker module remains curated so it avoids `?worker` imports and
+  sub-inline-limit assets like rotate WASM and `*_mt.worker.js` pthread stubs.
 
-(The old `service-worker/cache-plan.ts` generated module is gone — replaced by
-`codec-assets/service-worker.ts` above; `npm run sync` removes stale copies.)
+`npm run sync` now runs `scripts/patch-codec-wrappers.mjs` only. It writes
+patched Emscripten/wasm-bindgen wrapper copies under
+`.svelte-kit/app-generated/codecs/**` so Vite does not emit duplicate
+worker-local WASM assets. The `app-generated` alias points at that wrapper tree.
 
-Generated files are ignored and can be deleted; `npm run sync` recreates them.
+The patched wrapper files are ignored and can be deleted; `npm run sync`
+recreates them. The committed runtime modules above are ordinary source files.
 
 ## Service Worker
 
 `src/service-worker.ts` imports `{ build, files, prerendered, version }` from
 `$service-worker` plus the curated codec-asset records from
-`src/lib/service-worker-codec-assets.ts` (a re-export of the generated
-`codec-assets/service-worker.ts`).
+`src/lib/service-worker-codec-assets.ts` (a re-export of
+`src/shared/codec-assets/service-worker.ts`).
 
 Behavior (variant-aware precache, 2026-06-10 — first-visit payload
 14.3 MB → ~6.8 MB):
@@ -128,9 +127,9 @@ restart the preview server or new hashed filenames 404.
 ## Codec Assets
 
 Codec JS/WASM artifacts are committed under `codecs/`. Do not edit or delete
-them during ordinary migration cleanup. The SvelteKit generator imports these
-assets through Vite `?url` modules and passes explicit URLs into worker runtimes
-or Emscripten `locateFile`.
+them during ordinary migration cleanup. The committed codec-asset source modules
+import these assets through Vite `?url` modules and pass explicit URLs into
+worker runtimes or Emscripten `locateFile`.
 
 `npm run audit:static-output` verifies the build emits one physical WASM copy
 per logical asset, that the service worker references the expected assets and
@@ -138,10 +137,10 @@ carries the variant-aware precache machinery, and that the service-worker
 build emits **no** duplicate worker chunks of its own (top-level
 `assets/*.js`).
 
-**Multithreading is enabled** (2026-06-03): the generator
-(`sync-sveltekit-app.mjs`) emits the threaded variants and real thread detection,
-so AVIF / JXL (Emscripten pthreads) and oxipng (wasm-bindgen-rayon) engage
-multi-core, with single-thread fallback intact. The data contract
+**Multithreading is enabled** (2026-06-03): the committed worker and codec-asset
+modules wire the threaded variants and real thread detection, so AVIF / JXL
+(Emscripten pthreads) and oxipng (wasm-bindgen-rayon) engage multi-core, with
+single-thread fallback intact. The data contract
 (`src/shared/codec-assets.ts`) carries the `multi-thread` / `worker-helper` /
 `threaded-only` records, and `audit:static-output` asserts the threaded helper
 assets are now present. Cross-origin isolation (COOP/COEP) — required for

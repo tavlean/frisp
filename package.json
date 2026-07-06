@@ -20,7 +20,7 @@
     "format:check": "prettier --check \"**/*.{js,css,json,ts,tsx,svelte}\"",
     "prepare": "node scripts/install-git-hooks.mjs",
     "preview": "vite preview",
-    "sync": "node scripts/sync-sveltekit-app.mjs",
+    "sync": "node scripts/patch-codec-wrappers.mjs",
     "test": "npm run check && npm run test:unit && PLAYWRIGHT_SKIP_BUILD=1 npm run test:e2e",
     "test:unit": "vitest run",
     "test:e2e": "playwright test",

@@ -9,12 +9,12 @@ The key difference between preprocessors and processors is each 'side' in the ed
 
 # Adding code to the worker
 
-Worker methods are enumerated explicitly in `scripts/sync-sveltekit-app.mjs`.
-During `npm run sync`, the generated worker imports each listed feature's
+Worker methods are enumerated explicitly in `src/worker/codec-worker.ts` and
+`src/lib/sveltekit-worker-bridge.ts`. The worker imports each listed feature's
 `worker/runtime.ts` factory directly and wires it into the Comlink bridge. Adding
-a method means adding it to the sync script's worker-method list and providing
-the corresponding runtime factory; arbitrary `worker/*.ts` default exports are
-not auto-exposed by filename.
+a method means adding it to that worker surface and providing the corresponding
+runtime factory; arbitrary `worker/*.ts` default exports are not auto-exposed by
+filename.
 
 # Folders
 
