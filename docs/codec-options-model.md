@@ -1,10 +1,15 @@
 # Codec Options Model (design proposal)
 
-Status: **Proposed — not started.** This is a standalone project to be picked up
-fresh _after_ the post-migration cleanup ([svelte-hardening-plan.md](svelte-hardening-plan.md))
-is finished. It supersedes the deferred "collapse AVIF/JXL mirror-state" (Wave 3)
-and "data-driven codec panels" items by treating them as one coherent piece of
-work.
+Last updated: 2026-07-07.
+
+Status: **Minimal slice started.** The full model remains a standalone project
+to pick up after the post-migration cleanup
+([svelte-hardening-plan.md](svelte-hardening-plan.md)) is finished, but the
+bulk-unblocking engine half of the minimal slice started on 2026-07-07 in
+`ws-g-engine`: registry + sparse engine merge are implemented; Phase-3 UI
+dots/resets and the full single-image panel refactor remain future work. It
+supersedes the deferred "collapse AVIF/JXL mirror-state" (Wave 3) and
+"data-driven codec panels" items by treating them as one coherent piece of work.
 
 Goal: not just parity — make the codec UI a foundation that new features can be
 built on cheaply, while genuinely simplifying the code. High one-time cost is

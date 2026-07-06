@@ -1,6 +1,6 @@
 # Frisp Docs — map, registry & work order
 
-Last updated: 2026-07-05.
+Last updated: 2026-07-07.
 
 The single hub for all project docs: the **work priority order** plus the
 **registry** of every doc with explicit "read when" / "update when" triggers.
@@ -68,7 +68,7 @@ Every project doc: what it holds, when to **read** it, when to **update** it.
 | [codec-upgrade-audit.md](codec-upgrade-audit.md) | The version + CVE + landscape audit (the "why upgrade"). Now ✅ done. | Planning codec currency/CVE work. | A new audit runs, a new CVE appears, or upgrade outcomes change. |
 | [codec-upgrade-handoff.md](codec-upgrade-handoff.md) · [codec-upgrade-runbooks.md](codec-upgrade-runbooks.md) | The per-codec upgrade how-to (build+verify+commit loop, exact edits). ✅ 2026-06-02 sweep done; now reference. | Doing a future codec upgrade. | The upgrade *process* changes, or a codec is upgraded (mark it). |
 | [codec-surface-cleanup.md](codec-surface-cleanup.md) | Record of removed codecs (WebP2, dead dirs, browser canvas encoders, QOI-as-output). Done. | Adding/removing a codec from the surface. | The codec surface changes (a codec added or removed). |
-| [codec-options-model.md](codec-options-model.md) | Design proposal for a unified codec-options model. Not started; includes the 2026-07-02 Phase-3 sequencing analysis (minimal slice first). | Working the options-model project or bulk Phase 3. | Progress on that project, or the codec option surface changes. |
+| [codec-options-model.md](codec-options-model.md) | Design proposal for a unified codec-options model. Minimal slice started; includes the 2026-07-02 Phase-3 sequencing analysis (minimal slice first). | Working the options-model project or bulk Phase 3. | Progress on that project, or the codec option surface changes. |
 | [keyboard-control.md](keyboard-control.md) | Design proposal for Figma-style app-wide keyboard control (single-key actions, digit value entry, shortcut overlay). Proposed 2026-07-02; build after bulk Phase 2 + 2b. | Designing or building keyboard shortcuts. | Keymap decisions are made, or any keyboard handler is added/changed. |
 | [new-codec-investigation.md](new-codec-investigation.md) | Researched-but-not-added candidates (SVGO, HEIC, jpegli…). | Investigating or adding a new codec. | A candidate is investigated, decided on, or added. |
 | `benchmarks/README.md` · `tests/fixtures/README.md` | The benchmark harness + the test/bench fixture corpus (incl. the 9 fixtures + provenance). | Adding fixtures, changing the bench, reading benchmark methodology. | A fixture is added/changed, the bench harness/baseline changes. |

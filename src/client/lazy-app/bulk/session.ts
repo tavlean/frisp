@@ -1,6 +1,7 @@
 import {
   getEffectiveSettings,
   hasSettingsOverrides,
+  normalizeImageOverrides,
   settingsHash,
 } from './settings';
 import type {
@@ -333,7 +334,7 @@ export function updateJobOverrides(
   overrides: BulkImageOverrides,
 ): BulkSession {
   const normalizedOverrides = hasSettingsOverrides(overrides)
-    ? overrides
+    ? normalizeImageOverrides(session.globalSettings, overrides)
     : undefined;
 
   return {

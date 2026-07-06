@@ -235,8 +235,13 @@ function omitOverridePath(
   const [head] = segments;
 
   if (head === 'encoderState') {
-    // Format/encoder override is a single leaf; dropping the path drops it.
-    const { encoderState: _dropped, ...rest } = overrides;
+    // Format/encoder override is a single visible leaf in the current UI;
+    // dropping it also drops the sparse engine companion.
+    const {
+      encoderState: _droppedEncoder,
+      encoderControls: _droppedControls,
+      ...rest
+    } = overrides;
     return rest;
   }
 
@@ -527,9 +532,9 @@ export class BulkStore {
   }
 
   /**
-   * Override WebP options for the SELECTED job. The engine merges `encoderState`
-   * WHOLESALE (not deep), so the override must carry the FULL option object:
-   * we start from the job's effective options and layer the changed keys on top.
+   * Override WebP options for the SELECTED job. The UI still writes the legacy
+   * full option object; the engine reducer records the sparse control companion.
+   * Start from the job's effective options and layer the changed keys on top.
    * Requeues the job if its output went stale, then kicks a run.
    */
   overrideSelected(partial: Partial<WebpEncodeOptions>): void {
@@ -555,11 +560,10 @@ export class BulkStore {
 
   /**
    * Clear ONE overridden leaf on a job (the per-control reset affordance). For
-   * the WebP option leaves (quality/method) there is no granular engine path —
-   * `getSettingsOverridePaths` reports the whole `encoderState` — so resetting
-   * one option means recomputing the encoder override from the global with only
-   * the OTHER overridden options kept, and dropping it entirely if that leaves
-   * nothing deviating from the global.
+   * the WebP option leaves (quality/method) still use the current UI path, so
+   * resetting one option means recomputing the encoder override from the global
+   * with only the OTHER overridden options kept, and dropping it entirely if
+   * that leaves nothing deviating from the global.
    */
   resetOverridePath(id: string, path: string): void {
     const job = this.session.jobs.find((item) => item.id === id);
@@ -973,8 +977,8 @@ export class BulkStore {
 
   /**
    * Whether a specific WebP option leaf deviates from the global for a job.
-   * Encoder overrides are stored wholesale, so `getSettingsOverridePaths` can't
-   * answer this per-leaf; compare the effective value against the global.
+   * The Phase-3 UI wiring is not consuming control ids yet, so compare the
+   * effective value against the global.
    */
   isPathOverridden(
     jobId: string | undefined,
