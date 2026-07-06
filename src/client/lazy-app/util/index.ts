@@ -10,17 +10,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export { abortable, assertSignal, isAbortError } from '../abort';
-export {
-  blobToArrayBuffer,
-  blobToImg,
-  blobToText,
-  builtinDecode,
-  canDecodeImageType,
-  sniffMimeType,
-} from '../image-decode';
-export type { ImageMimeTypes } from '../image-decode';
-
 /** If render engine is Safari */
 export const isSafari =
   /Safari\//.test(navigator.userAgent) &&
@@ -53,11 +42,4 @@ export function konami(): Promise<void> {
 
     window.addEventListener('keydown', listener);
   });
-}
-
-/**
- * Simple event listener that prevents the default.
- */
-export function preventDefault(event: Event) {
-  event.preventDefault();
 }

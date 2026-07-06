@@ -9,17 +9,12 @@ The key difference between preprocessors and processors is each 'side' in the ed
 
 # Adding code to the worker
 
-Any feature can have a `worker` folder. Any script in that folder will have its default export bundled into the worker, using the name of the file.
-
-So, `processors/shout/worker/shout.ts`:
-
-```ts
-export default function () {
-  console.log('OI YOU');
-}
-```
-
-…will be bundled into the worker and exposed via comlink as `shout()`.
+Worker methods are enumerated explicitly in `scripts/sync-sveltekit-app.mjs`.
+During `npm run sync`, the generated worker imports each listed feature's
+`worker/runtime.ts` factory directly and wires it into the Comlink bridge. Adding
+a method means adding it to the sync script's worker-method list and providing
+the corresponding runtime factory; arbitrary `worker/*.ts` default exports are
+not auto-exposed by filename.
 
 # Folders
 

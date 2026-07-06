@@ -351,19 +351,19 @@ const appEncoderNames = [
 const svelteKitReadyWorkerMethods = [
   {
     name: 'avifDecode',
-    source: 'features/decoders/avif/worker/avifDecode',
+    source: 'features/decoders/avif/worker/runtime',
     reason:
       'AVIF decode runs with generated Vite worker and generated AVIF decoder WASM URL injection.',
   },
   {
     name: 'avifEncode',
-    source: 'features/encoders/avif/worker/avifEncode',
+    source: 'features/encoders/avif/worker/runtime',
     reason:
       'AVIF single-thread encode runs with generated Vite worker and generated AVIF encoder WASM URL injection.',
   },
   {
     name: 'webpEncode',
-    source: 'features/encoders/webP/worker/webpEncode',
+    source: 'features/encoders/webP/worker/runtime',
     reason:
       'WebP encode runs with generated Vite worker and generated WebP WASM URL injection.',
   },
@@ -375,55 +375,55 @@ const svelteKitReadyWorkerMethods = [
   },
   {
     name: 'qoiDecode',
-    source: 'features/decoders/qoi/worker/qoiDecode',
+    source: 'features/decoders/qoi/worker/runtime',
     reason:
       'QOI decode runs with generated Vite worker and generated QOI WASM URL injection.',
   },
   {
     name: 'jxlDecode',
-    source: 'features/decoders/jxl/worker/jxlDecode',
+    source: 'features/decoders/jxl/worker/runtime',
     reason:
       'JPEG XL decode runs with generated Vite worker and generated JXL decoder WASM URL injection.',
   },
   {
     name: 'webpDecode',
-    source: 'features/decoders/webp/worker/webpDecode',
+    source: 'features/decoders/webp/worker/runtime',
     reason:
       'WebP decode runs with generated Vite worker and generated WebP decoder WASM URL injection.',
   },
   {
     name: 'qoiEncode',
-    source: 'features/encoders/qoi/worker/qoiEncode',
+    source: 'features/encoders/qoi/worker/runtime',
     reason:
       'QOI encode runs with generated Vite worker and generated QOI WASM URL injection.',
   },
   {
     name: 'jxlEncode',
-    source: 'features/encoders/jxl/worker/jxlEncode',
+    source: 'features/encoders/jxl/worker/runtime',
     reason:
       'JPEG XL single-thread encode runs with generated Vite worker and generated JXL encoder WASM URL injection.',
   },
   {
     name: 'mozjpegEncode',
-    source: 'features/encoders/mozJPEG/worker/mozjpegEncode',
+    source: 'features/encoders/mozJPEG/worker/runtime',
     reason:
       'MozJPEG encode runs with generated Vite worker and generated MozJPEG WASM URL injection.',
   },
   {
     name: 'quantize',
-    source: 'features/processors/quantize/worker/quantize',
+    source: 'features/processors/quantize/worker/runtime',
     reason:
       'Quantize runs with generated Vite worker and generated ImageQuant WASM URL injection.',
   },
   {
     name: 'resize',
-    source: 'features/processors/resize/worker/resize',
+    source: 'features/processors/resize/worker/runtime',
     reason:
       'Resize runs with generated Vite worker and generated resize/HQX WASM URL injection.',
   },
   {
     name: 'oxipngEncode',
-    source: 'features/encoders/oxiPNG/worker/oxipngEncode',
+    source: 'features/encoders/oxiPNG/worker/runtime',
     reason:
       'OxiPNG single-thread encode runs with generated Vite worker, generated WASM URL injection, and worker-shared alias resolution.',
   },
