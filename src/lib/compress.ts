@@ -13,6 +13,7 @@ import {
   preprocessImage,
   processImage,
   type ImagePipelineWorkerBridge,
+  type SourceImage,
 } from 'client/lazy-app/image-pipeline';
 import { getPercentChange } from 'client/lazy-app/bulk/size';
 import {
@@ -144,7 +145,8 @@ function buildEncoderState(request: CompressRequest): EncoderState {
 }
 
 /**
- * Compress one file. Caller owns `outputUrl` and must revoke it when done.
+ * Compress an already-decoded/preprocessed source. Caller owns `outputUrl` and
+ * must revoke it when done.
  *
  * The caller also owns `bridge` and its lifecycle. The bridge runtime is built
  * to be long-lived — lazy worker start, idle-timeout reclaim, terminate-on-abort
@@ -152,20 +154,14 @@ function buildEncoderState(request: CompressRequest): EncoderState {
  * passes reuse a warm worker (WASM already instantiated, pthread pool already
  * spawned) instead of paying full startup on every debounced option tweak.
  */
-export async function compressFile(
-  file: File,
+export async function compressPreprocessed(
+  source: SourceImage,
   request: CompressRequest,
   signal: AbortSignal,
   bridge: SvelteKitWorkerBridge,
 ): Promise<CompressOutcome> {
   const pipelineBridge = bridge as unknown as ImagePipelineWorkerBridge;
-  const decodedSource = await decodeSourceImage(signal, file, pipelineBridge);
-  const preprocessed = await preprocessImage(
-    signal,
-    decodedSource.decoded,
-    request.preprocessorState,
-    pipelineBridge,
-  );
+  const { file, preprocessed } = source;
 
   // Original/identity side: no processing or encoding. Show the preprocessed
   // source on both before/after, and download the original file as-is.
@@ -187,7 +183,7 @@ export async function compressFile(
 
   const processed = await processImage(
     signal,
-    { ...decodedSource, preprocessed },
+    source,
     request.processorState,
     pipelineBridge,
   );
@@ -218,4 +214,36 @@ export async function compressFile(
     preprocessedWidth: preprocessed.width,
     preprocessedHeight: preprocessed.height,
   };
+}
+
+/**
+ * Compress one file. Caller owns `outputUrl` and must revoke it when done.
+ *
+ * The caller also owns `bridge` and its lifecycle. The bridge runtime is built
+ * to be long-lived — lazy worker start, idle-timeout reclaim, terminate-on-abort
+ * with lazy restart — so passing a persistent per-side bridge means consecutive
+ * passes reuse a warm worker (WASM already instantiated, pthread pool already
+ * spawned) instead of paying full startup on every debounced option tweak.
+ */
+export async function compressFile(
+  file: File,
+  request: CompressRequest,
+  signal: AbortSignal,
+  bridge: SvelteKitWorkerBridge,
+): Promise<CompressOutcome> {
+  const pipelineBridge = bridge as unknown as ImagePipelineWorkerBridge;
+  const decodedSource = await decodeSourceImage(signal, file, pipelineBridge);
+  const preprocessed = await preprocessImage(
+    signal,
+    decodedSource.decoded,
+    request.preprocessorState,
+    pipelineBridge,
+  );
+
+  return compressPreprocessed(
+    { ...decodedSource, preprocessed },
+    request,
+    signal,
+    bridge,
+  );
 }

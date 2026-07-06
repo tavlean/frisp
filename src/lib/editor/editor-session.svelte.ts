@@ -1,6 +1,6 @@
 import { untrack } from 'svelte';
 import {
-  compressFile,
+  compressPreprocessed,
   getDefaultOptions,
   IDENTITY,
   OUTPUT_FORMATS,
@@ -12,9 +12,15 @@ import SvelteKitWorkerBridge from '$lib/sveltekit-worker-bridge';
 import type { ResizeOptionsState } from './options/processor-types';
 import { EditorHistory } from './editor-history.svelte';
 import { snackbar } from './snackbar-store.svelte';
-import { isAbortError } from 'client/lazy-app/abort';
+import { abortable, isAbortError } from 'client/lazy-app/abort';
 import { APP_NAME } from 'shared/brand';
 import { stableStringify } from 'shared/stable-stringify';
+import {
+  decodeSourceImage,
+  preprocessImage,
+  type DecodedSourceImage,
+  type SourceImage,
+} from 'client/lazy-app/image-pipeline';
 import {
   defaultPreprocessorState,
   defaultProcessorState,
@@ -213,6 +219,17 @@ export class EditorSession {
   // across" makes this a one-click situation). Not reactive; cleared with the
   // cache on a new file (the signature doesn't include file identity).
   private inflight = new Map<string, Promise<CompressOutcome>>();
+  // Session-level source prep shared by both sides and by successive passes for
+  // the same open file. Pass aborts are wrapped around the await, not wired into
+  // this controller, so a debounced option change never poisons the shared decode.
+  #sourceAbort: AbortController | null = null;
+  #decodedPromise: Promise<DecodedSourceImage> | null = null;
+  #decodedLoadId = -1;
+  // One rotated frame is cached alongside the decoded frame. Rotation 0 reuses
+  // decoded pixels exactly like preprocessImage does today (no copy).
+  #preprocessedPromise: Promise<ImageData> | null = null;
+  #preprocessedLoadId = -1;
+  #preprocessedRotate: 0 | 90 | 180 | 270 = 0;
   // Debounced commit timer for the history watcher (see watchHistory).
   private historyTimer: ReturnType<typeof setTimeout> | null = null;
   // Bookkeeping keyed to `loadId` (bumped on every new file). Comparing against
@@ -372,15 +389,20 @@ export class EditorSession {
     runtime.error = '';
 
     const controller = new AbortController();
+    const bridge = this.bridgeFor(index);
 
     // A pass this side OWNS: runs the pipeline on this side's bridge and
     // publishes itself in `inflight` so the other side can piggyback.
     const startOwnPass = () => {
-      const pass = compressFile(
-        current,
-        request,
+      const pass = abortable(
         controller.signal,
-        this.bridgeFor(index),
+        // The pass's OWN preprocessor snapshot decides the prepared frame —
+        // never a live re-read after the decode await, which could disagree
+        // with `request` in the abort window and cache a result under the
+        // wrong signature.
+        this.#preparedSource(bridge, request.preprocessorState),
+      ).then((prepared) =>
+        compressPreprocessed(prepared, request, controller.signal, bridge),
       );
       this.inflight.set(cacheKey, pass);
       const settle = () => {
@@ -461,6 +483,81 @@ export class EditorSession {
   /** The side's persistent bridge, created on first use (see `bridges`). */
   private bridgeFor(index: SideIndex): SvelteKitWorkerBridge {
     return (this.bridges[index] ??= new SvelteKitWorkerBridge());
+  }
+
+  #clearPreparedSource(): void {
+    this.#sourceAbort?.abort();
+    this.#sourceAbort = null;
+    this.#decodedPromise = null;
+    this.#decodedLoadId = -1;
+    this.#preprocessedPromise = null;
+    this.#preprocessedLoadId = -1;
+    this.#preprocessedRotate = 0;
+  }
+
+  async #preparedSource(
+    bridge: SvelteKitWorkerBridge,
+    preprocessorState: PreprocessorState,
+  ): Promise<SourceImage> {
+    const file = this.file;
+    if (!file) throw Error('No image loaded');
+    const loadId = this.loadId;
+
+    if (this.#decodedLoadId !== loadId || !this.#decodedPromise) {
+      this.#sourceAbort?.abort();
+      const sourceAbort = new AbortController();
+      this.#sourceAbort = sourceAbort;
+      this.#decodedLoadId = loadId;
+      this.#preprocessedPromise = null;
+      this.#preprocessedLoadId = -1;
+
+      let decodedPromise!: Promise<DecodedSourceImage>;
+      decodedPromise = decodeSourceImage(
+        sourceAbort.signal,
+        file,
+        bridge,
+      ).catch((error: unknown) => {
+        // A bad source should surface to every current waiter, but the rejected
+        // promise must not become the file's permanent decode cache entry.
+        if (this.#decodedPromise === decodedPromise) {
+          this.#decodedPromise = null;
+          this.#decodedLoadId = -1;
+          this.#preprocessedPromise = null;
+          this.#preprocessedLoadId = -1;
+        }
+        throw error;
+      });
+      this.#decodedPromise = decodedPromise;
+    }
+
+    const decoded = await this.#decodedPromise;
+    const rotate = preprocessorState.rotate.rotate as 0 | 90 | 180 | 270;
+    if (rotate === 0) {
+      this.#preprocessedPromise = null;
+      this.#preprocessedLoadId = loadId;
+      this.#preprocessedRotate = rotate;
+      return { ...decoded, preprocessed: decoded.decoded };
+    }
+
+    if (
+      this.#preprocessedLoadId !== loadId ||
+      this.#preprocessedRotate !== rotate ||
+      !this.#preprocessedPromise
+    ) {
+      if (!this.#sourceAbort)
+        throw new DOMException('AbortError', 'AbortError');
+      this.#preprocessedLoadId = loadId;
+      this.#preprocessedRotate = rotate;
+      this.#preprocessedPromise = preprocessImage(
+        this.#sourceAbort.signal,
+        decoded.decoded,
+        preprocessorState,
+        bridge,
+      );
+    }
+
+    const preprocessed = await this.#preprocessedPromise;
+    return { ...decoded, preprocessed };
   }
 
   /**
@@ -708,6 +805,7 @@ export class EditorSession {
     // via the encode effects' cleanup; their settle() guard tolerates this).
     this.cache.clear();
     this.inflight.clear();
+    this.#clearPreparedSource();
     this.file = next;
     this.loadId += 1;
     // Reset each side's transient runtime (result, status, error, displayedSig,
@@ -752,6 +850,7 @@ export class EditorSession {
     this.preprocessorState = structuredClone(defaultPreprocessorState);
     this.cache.clear();
     this.inflight.clear();
+    this.#clearPreparedSource();
     this.history.clear();
   }
 
@@ -768,6 +867,8 @@ export class EditorSession {
     // drops the user's last edit.
     this.flushSettings();
     this.cache.clear();
+    this.inflight.clear();
+    this.#clearPreparedSource();
     for (const bridge of this.bridges) bridge?.dispose();
     this.bridges = [null, null];
   }
