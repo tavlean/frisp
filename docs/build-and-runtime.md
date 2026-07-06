@@ -14,12 +14,9 @@ been removed from the `svelte` branch.
 
 `npm run check` runs:
 
-1. `prettier --check`
-2. `npm run sync`
-3. `svelte-kit sync`
-4. `svelte-check --tsconfig ./tsconfig.json`
-5. `npm run build`
-6. `npm run audit:static-output`
+1. `npm run typecheck` (`npm run sync`, `svelte-kit sync`, `svelte-check --tsconfig ./tsconfig.json`)
+2. `vite build`
+3. `npm run audit:static-output`
 
 `npm run preview` serves the generated `build/` folder with Vite preview.
 

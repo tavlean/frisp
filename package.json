@@ -12,7 +12,8 @@
   "scripts": {
     "audit:static-output": "node scripts/audit-static-output.mjs",
     "build": "npm run sync && vite build",
-    "check": "npm run sync && svelte-kit sync && svelte-check --tsconfig ./tsconfig.json && npm run build && npm run audit:static-output",
+    "typecheck": "npm run sync && svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+    "check": "npm run typecheck && vite build && npm run audit:static-output",
     "audit": "npm audit --audit-level=low",
     "dev": "vite dev",
     "format": "prettier --write \"**/*.{js,css,json,ts,tsx,svelte}\"",
@@ -20,7 +21,7 @@
     "prepare": "node scripts/install-git-hooks.mjs",
     "preview": "vite preview",
     "sync": "node scripts/sync-sveltekit-app.mjs",
-    "test": "npm run check && npm run test:e2e",
+    "test": "npm run check && npm run test:unit && PLAYWRIGHT_SKIP_BUILD=1 npm run test:e2e",
     "test:unit": "vitest run",
     "test:e2e": "playwright test",
     "bench": "playwright test --config benchmarks/playwright.config.ts",

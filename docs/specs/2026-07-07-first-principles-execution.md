@@ -24,7 +24,7 @@ need visual/UX taste (none below should).
 
 ## WS-A Quick wins (P5 dead code · P6 dedup · P7 tooling) — Codex, 3 batches
 
-**Status: A1 ✅ DONE (`85944296`) · A2 ✅ DONE · A3 queued.**
+**Status: A1 ✅ DONE (`85944296`) · A2 ✅ DONE · A3 ✅ DONE.**
 A1 outcomes vs spec: pointer-tracker.d.ts KEPT (verified still required by
 `npm run check`); canvasEncode KEPT (webp-pipeline-probe imports it),
 canvasEncodeTest deleted; no committed .DS_Store existed. **Bonus find

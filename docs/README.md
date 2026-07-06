@@ -129,11 +129,11 @@ Every project doc: what it holds, when to **read** it, when to **update** it.
 
 - **Unit tests:** `npm run test:unit` (Vitest, `tests/unit/`) — pure
   bulk-engine/helper coverage; does not build or boot the browser app.
-- **Static gate:** `npm run check` (format, svelte-check, build, asset audit).
+- **Static gate:** `npm run check` (sync, svelte-check, build, asset audit).
 - **Browser regression:** `npm run test:e2e` (Playwright, `tests/e2e/`) — boots
   the production preview cross-origin-isolated and encodes through every codec,
   asserting valid output bytes; plus offline reload. **Run after any codec/build
-  change.** `npm test` runs both.
+  change.** `npm test` runs check, unit, and e2e.
 - **Codec benchmark:** `npm run bench` + `npm run bench:compare` (`benchmarks/`) —
   measures each WASM codec's output size + encode time + reliability and diffs
   before/after a codec upgrade (regression gate + article numbers). See

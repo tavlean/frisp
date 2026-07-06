@@ -6,6 +6,14 @@ import { defineConfig, devices } from '@playwright/test';
 // `presk-cross-origin-isolation` plugin injects into preview too). This is the
 // automated safety net for codec changes — run it after any codec/build change.
 const PORT = 4317;
+// PLAYWRIGHT_SKIP_BUILD=1 serves the existing build/ without rebuilding. Set
+// it ONLY when a fresh build is guaranteed — `npm test` sets it because
+// `check` just built. Never inferred from build/ merely existing: a stale dir
+// would silently test old code.
+const webServerCommand =
+  process.env.PLAYWRIGHT_SKIP_BUILD === '1' && !process.env.CI
+    ? `npm run preview -- --port ${PORT} --strictPort`
+    : `npm run build && npm run preview -- --port ${PORT} --strictPort`;
 
 export default defineConfig({
   testDir: 'tests/e2e',
@@ -48,7 +56,7 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: `npm run build && npm run preview -- --port ${PORT} --strictPort`,
+    command: webServerCommand,
     url: `http://localhost:${PORT}`,
     reuseExistingServer: !process.env.CI,
     timeout: 240_000,

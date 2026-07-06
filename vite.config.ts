@@ -66,11 +66,11 @@ const serveRawCodecWorker = (
   const pathname = url.split('?')[0];
   const hasModuleQuery = /[?&](url|import|worker|raw)\b/.test(url);
   if (hasModuleQuery || !RAW_CODEC_WORKER_RE.test(pathname)) return next();
-  const filePath = join(repoRoot, decodeURIComponent(pathname));
-  // Path-traversal guard: only ever serve real files inside codecs/.
-  if (!filePath.startsWith(codecsRoot)) return next();
   let body: Buffer;
   try {
+    const filePath = join(repoRoot, decodeURIComponent(pathname));
+    // Path-traversal guard: only ever serve real files inside codecs/.
+    if (!filePath.startsWith(codecsRoot)) return next();
     body = readFileSync(filePath);
   } catch {
     return next();

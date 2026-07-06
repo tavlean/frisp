@@ -10,7 +10,7 @@
     "skipLibCheck": true,
     "sourceMap": true,
     "strict": true,
-    "verbatimModuleSyntax": false
+    "verbatimModuleSyntax": true
   },
   "//": "We can't simply inherit the generated .svelte-kit/tsconfig.json `include` (which would pull in vite.config.ts and crash svelte-check with 'forEachResolvedModule is not a function'). So we curate `include` — but crucially we add the generated SvelteKit `ambient.d.ts`/`non-ambient.d.ts`/`$types`, which carry `/// <reference types=\"@sveltejs/kit\" />` and thus the REAL $app/* + $env/* + route types (no hand-written shim needed).",
   "include": [

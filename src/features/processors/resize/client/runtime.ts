@@ -1,17 +1,17 @@
 import {
   builtinResize,
-  BuiltinResizeMethod,
   drawableToImageData,
 } from 'client/lazy-app/util/canvas';
-import {
-  BrowserResizeOptions,
-  VectorResizeOptions,
-  WorkerResizeOptions,
-  Options as ResizeOptions,
-  workerResizeMethods,
-} from '../shared/meta';
+import { workerResizeMethods } from '../shared/meta';
 import { getContainOffsets } from '../shared/util';
 import type { SourceImage } from 'client/lazy-app/image-pipeline-shared';
+import type { BuiltinResizeMethod } from 'client/lazy-app/util/canvas';
+import type {
+  BrowserResizeOptions,
+  Options as ResizeOptions,
+  VectorResizeOptions,
+  WorkerResizeOptions,
+} from '../shared/meta';
 
 export interface ResizeWorkerBridge {
   resize(

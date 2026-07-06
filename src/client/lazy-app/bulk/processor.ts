@@ -1,5 +1,5 @@
-import { imagePipeline, SourceImage } from '../image-pipeline';
-import type { ImagePipelineWorkerBridge } from '../image-pipeline';
+import { imagePipeline } from '../image-pipeline';
+import type { ImagePipelineWorkerBridge, SourceImage } from '../image-pipeline';
 import { defaultPreprocessorState } from 'client/lazy-app/feature-meta/shared';
 import type { PreprocessorState } from 'client/lazy-app/feature-meta/shared';
 import {
