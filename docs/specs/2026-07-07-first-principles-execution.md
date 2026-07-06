@@ -243,14 +243,15 @@ Gates: `npm run test:unit` + bulk e2e specs.
 
 ## WS-F Svelte idioms (P8) — Codex + Svelte MCP autofixer
 
-**Status: queued.** Item list = review §P8 (window reactivity, MediaQuery in
-`ProcessingBadge`, shared light-dismiss `{@attach}` factory used by
-`ImageInfoPanel`/`Output`/`FocusView`, `{#key}` for StackStage resets — the
-last one only if it genuinely removes both guard fields; otherwise skip).
-Each edited `.svelte` file must pass the Svelte MCP autofixer. Gates:
-`npm run check` + e2e. Also append these to
-[svelte-hardening-plan.md](../svelte-hardening-plan.md) as a done wave when
-landed.
+**Status: ✅ DONE (2026-07-07, uncommitted per executor instructions).** Done:
+window reactivity switched to `svelte/reactivity/window` in `FocusView`,
+`StackStage`, and `Output`; `ProcessingBadge` now uses `MediaQuery`; shared
+`lightDismiss` `{@attach}` factory is used by `ImageInfoPanel`/`Output`/
+`FocusView`. `{#key}` for `StackStage` was skipped because it would not remove
+both script-level guard fields without a larger component extraction. Svelte
+MCP/autofixer was not available in this run. Gates: `npm run check` ✅,
+`npm run test:unit` ✅, `npm run test:e2e` ✅ (61 passed / 1 known WebKit
+offline skip).
 
 ## WS-G Options-model minimal slice (P4) — decisions made; spec here, build next session
 

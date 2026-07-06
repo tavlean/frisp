@@ -173,6 +173,11 @@ From the legacy sweep (verified against the generated worker's real imports):
 
 ## P8 — Svelte idioms (fold into [svelte-hardening-plan.md](svelte-hardening-plan.md))
 
+**Status: done via WS-F (2026-07-07).** Window reactivity, `MediaQuery`, and
+shared light-dismiss attachment landed. The `StackStage` `{#key}` idea was
+skipped because it would not remove both guard fields without a larger
+component extraction.
+
 The sweep verified against current Svelte docs; the codebase is already
 rune-native with no Svelte-4 residue. Remaining polish:
 

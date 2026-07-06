@@ -13,6 +13,8 @@
   import { isSafari } from 'client/lazy-app/util';
   import { retargetViewEvents } from './retarget-events';
   import ProcessingBadge from './ProcessingBadge.svelte';
+  import { innerHeight, innerWidth } from 'svelte/reactivity/window';
+  import { lightDismiss } from '$lib/editor/light-dismiss';
 
   interface Props {
     /** Pixels drawn on the left ("before") side — side 0's output. */
@@ -88,8 +90,8 @@
   let canvasLeft = $state<HTMLCanvasElement>();
   let canvasRight = $state<HTMLCanvasElement>();
 
-  let viewportWidth = $state(1024);
-  let viewportHeight = $state(768);
+  const viewportWidth = $derived(innerWidth.current ?? 1024);
+  const viewportHeight = $derived(innerHeight.current ?? 768);
   let scale = $state(1);
   let editingScale = $state(false);
   let pixelated = $state(false);
@@ -104,35 +106,15 @@
   // the smoothing toggle is omitted on Safari (image-rendering:pixelated is a
   // no-op there), so on Safari the popover simply shows one item.
   let viewOptionsOpen = $state(false);
-  let viewOptionsEl = $state<HTMLDivElement>();
   let viewOptionsBtn = $state<HTMLButtonElement>();
   // Either toggle in its non-default state. Drives a dot on the trigger so a
   // changed setting stays discoverable while the popover is closed.
   const viewOptionsDirty = $derived(pixelated || altBackground);
 
-  // Light-dismiss while open: a pointerdown outside the group or the Escape key
-  // closes it (Escape restores focus to the trigger). Capture phase so an
-  // outside press closes before it lands on whatever it hit. Listeners are
-  // registered only while open and torn down on close.
-  $effect(() => {
-    if (!viewOptionsOpen) return;
-    const onPointerDown = (event: PointerEvent) => {
-      if (viewOptionsEl && !viewOptionsEl.contains(event.target as Node)) {
-        viewOptionsOpen = false;
-      }
-    };
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        viewOptionsOpen = false;
-        viewOptionsBtn?.focus();
-      }
-    };
-    window.addEventListener('pointerdown', onPointerDown, true);
-    window.addEventListener('keydown', onKeyDown);
-    return () => {
-      window.removeEventListener('pointerdown', onPointerDown, true);
-      window.removeEventListener('keydown', onKeyDown);
-    };
+  const viewOptionsLightDismiss = lightDismiss({
+    isOpen: () => viewOptionsOpen,
+    close: () => (viewOptionsOpen = false),
+    focusOnEscape: () => viewOptionsBtn,
   });
 
   // --- RESET-VIEW DIRTY TRACKING -------------------------------------------
@@ -313,11 +295,6 @@
   }
 </script>
 
-<svelte:window
-  bind:innerWidth={viewportWidth}
-  bind:innerHeight={viewportHeight}
-/>
-
 <div class="output" class:alt-background={altBackground}>
   <two-up
     class="two-up"
@@ -452,7 +429,7 @@
        Rotate stays out (it edits the actual image, not just the view). The
        popover opens upward from the trigger; light-dismiss + the dirty dot are
        wired in the script. -->
-  <div class="button-group" bind:this={viewOptionsEl}>
+  <div class="button-group" {@attach viewOptionsLightDismiss}>
     <button
       class="button first-button"
       onclick={() => onRotate?.()}

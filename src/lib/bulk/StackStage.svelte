@@ -18,6 +18,7 @@
   // change); ←/→ cycle the top card. Cards whose job is mid-encode wear a
   // delayed shimmer so a global change visibly ripples through the fan.
   import { SvelteSet } from 'svelte/reactivity';
+  import { innerHeight, innerWidth } from 'svelte/reactivity/window';
   import type { BulkStripItem } from 'client/lazy-app/bulk';
   import { bulkStore } from './store.svelte';
   import DeltaPill from './DeltaPill.svelte';
@@ -34,8 +35,8 @@
 
   // Track viewport width so the top card can stay in the usable centre corridor
   // while the peeks fan out toward the real stage edges.
-  let viewportWidth = $state(1280);
-  let viewportHeight = $state(800);
+  const viewportWidth = $derived(innerWidth.current ?? 1280);
+  const viewportHeight = $derived(innerHeight.current ?? 800);
   let stageWidth = $state(1280);
   const DESKTOP_PANEL_CORRIDOR = 680;
   const MAX_CARD_WIDTH = 680;
@@ -383,11 +384,7 @@
   }
 </script>
 
-<svelte:window
-  onkeydown={onKeydown}
-  bind:innerWidth={viewportWidth}
-  bind:innerHeight={viewportHeight}
-/>
+<svelte:window onkeydown={onKeydown} />
 
 {#if topItem}
   <div

@@ -8,6 +8,7 @@
   import { fade } from 'svelte/transition';
   import { cubicOut } from 'svelte/easing';
   import { onDestroy, untrack } from 'svelte';
+  import { MediaQuery } from 'svelte/reactivity';
 
   interface Props {
     /** 500ms-gated "this side is encoding" flag (the editor's `showSpinner`). */
@@ -82,20 +83,13 @@
   // laggy. The CSS transitions are shortened via the media query below; the
   // JS-driven fades read the same preference here. (The continuous spin is left
   // at its normal pace — speeding a rotation up would be MORE motion, not less.)
-  let reduceMotion = $state(false);
-  $effect(() => {
-    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
-    reduceMotion = mq.matches;
-    const onChange = (e: MediaQueryListEvent) => (reduceMotion = e.matches);
-    mq.addEventListener('change', onChange);
-    return () => mq.removeEventListener('change', onChange);
-  });
+  const reduceMotion = new MediaQuery('(prefers-reduced-motion: reduce)');
   const fadeIn = $derived({
-    duration: reduceMotion ? 90 : 200,
+    duration: reduceMotion.current ? 90 : 200,
     easing: cubicOut,
   });
   const fadeOut = $derived({
-    duration: reduceMotion ? 120 : 300,
+    duration: reduceMotion.current ? 120 : 300,
     easing: cubicOut,
   });
 

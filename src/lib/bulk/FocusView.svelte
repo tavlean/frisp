@@ -1,10 +1,12 @@
 <script lang="ts">
   import { onMount, type Snippet } from 'svelte';
+  import { innerHeight, innerWidth } from 'svelte/reactivity/window';
   import Output from '$lib/editor/output/Output.svelte';
   import OptionsPanel from '$lib/editor/OptionsPanel.svelte';
   import type { EditorSession } from '$lib/editor/editor-session.svelte';
   import type { SideFormat } from '$lib/compress';
   import { prettySize } from '$lib/editor/pretty-size';
+  import { lightDismiss } from '$lib/editor/light-dismiss';
   import { bulkStore } from './store.svelte';
   import BatchInfoPanel from './BatchInfoPanel.svelte';
   import FilmStrip from './FilmStrip.svelte';
@@ -37,8 +39,8 @@
   }: Props = $props();
 
   let isMac = $state(false);
-  let viewportWidth = $state(1024);
-  let viewportHeight = $state(768);
+  const viewportWidth = $derived(innerWidth.current ?? 1024);
+  const viewportHeight = $derived(innerHeight.current ?? 768);
   let isSafari = $state(false);
 
   // ── Stack stage view controls ─────────────────────────────────────────────
@@ -55,7 +57,6 @@
   let stackAltBackground = $state(false);
   let stackPixelated = $state(false);
   let stackViewOptionsOpen = $state(false);
-  let stackViewOptionsEl = $state<HTMLDivElement>();
   let stackViewOptionsBtn = $state<HTMLButtonElement>();
   const stackViewOptionsDirty = $derived(stackPixelated || stackAltBackground);
   const stackZoomPercent = $derived(Math.round(stackZoom * 100));
@@ -68,30 +69,10 @@
     stackZoom = 1;
   }
 
-  // Light-dismiss the stack view-options popover while it's open (pointerdown
-  // outside or Escape), mirroring the production Output popover behaviour.
-  $effect(() => {
-    if (!stackViewOptionsOpen) return;
-    const onPointerDown = (event: PointerEvent) => {
-      if (
-        stackViewOptionsEl &&
-        !stackViewOptionsEl.contains(event.target as Node)
-      ) {
-        stackViewOptionsOpen = false;
-      }
-    };
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        stackViewOptionsOpen = false;
-        stackViewOptionsBtn?.focus();
-      }
-    };
-    window.addEventListener('pointerdown', onPointerDown, true);
-    window.addEventListener('keydown', onKeyDown);
-    return () => {
-      window.removeEventListener('pointerdown', onPointerDown, true);
-      window.removeEventListener('keydown', onKeyDown);
-    };
+  const stackViewOptionsLightDismiss = lightDismiss({
+    isOpen: () => stackViewOptionsOpen,
+    close: () => (stackViewOptionsOpen = false),
+    focusOnEscape: () => stackViewOptionsBtn,
   });
 
   // ── Phone layout state ────────────────────────────────────────────────────
@@ -282,11 +263,7 @@
   }
 </script>
 
-<svelte:window
-  onkeydown={onKeydown}
-  bind:innerWidth={viewportWidth}
-  bind:innerHeight={viewportHeight}
-/>
+<svelte:window onkeydown={onKeydown} />
 
 <div class="compress editor-root" style="--strip-height: {stripHeight}px;">
   <div
@@ -604,7 +581,7 @@
           </button>
         </div>
 
-        <div class="button-group" bind:this={stackViewOptionsEl}>
+        <div class="button-group" {@attach stackViewOptionsLightDismiss}>
           <button
             class="button first-button last-button view-options-trigger"
             class:active={stackViewOptionsOpen}

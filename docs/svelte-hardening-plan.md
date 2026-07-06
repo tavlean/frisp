@@ -1,6 +1,6 @@
 # Frisp Post-Migration Cleanup & Svelte Hardening Plan
 
-Last updated: 2026-06-28.
+Last updated: 2026-07-07.
 
 Read [STATUS.md](STATUS.md) first for live state. The SvelteKit 2 / Svelte 5
 migration is **concluded** — `main` is the production app and the retired
@@ -239,6 +239,27 @@ Highest leverage — one change at the primitives ripples through every panel.
       layout owns `body { margin: 0; font-family: … }`; each page keeps its own
       background/color and the editor its full-height sizing. Browser-verified on
       both routes.
+
+## Wave 7 — First-principles Svelte idiom polish
+
+> **Done 2026-07-07** (WS-F in
+> [specs/2026-07-07-first-principles-execution.md](specs/2026-07-07-first-principles-execution.md)).
+> Gate green: `npm run check`, `npm run test:unit`, and full `npm run test:e2e`
+> (61 passed / 1 known WebKit offline skip). Svelte MCP/autofixer was requested
+> by the spec but no Svelte-specific MCP/autofixer tool was available in this
+> session.
+
+- [x] Replace local viewport `$state` plus `<svelte:window
+      bind:innerWidth/bind:innerHeight>` with `svelte/reactivity/window` in
+      `FocusView`, `StackStage`, and `Output`.
+- [x] Replace the manual `matchMedia('(prefers-reduced-motion: reduce)')`
+      listener in `ProcessingBadge` with `new MediaQuery(...)`.
+- [x] Extract one shared `lightDismiss` `{@attach}` factory for the three
+      popovers in `ImageInfoPanel`, `Output`, and `FocusView`, preserving
+      pointerdown capture dismissal and Escape focus return.
+- [x] Evaluate the `StackStage` `{#key}` reset idea. Skipped by design: keying
+      markup would not remove both script-level guards (`lastSignature`,
+      `lastSplitTopId`) without extracting more component state.
 
 ## Deferred — bigger / design-dependent (do after the waves above)
 

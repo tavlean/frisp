@@ -1,6 +1,7 @@
 <script lang="ts">
   import ImageInfoRows from './ImageInfoRows.svelte';
   import { OUTPUT_FORMATS, type OutputFormat } from '$lib/compress';
+  import { lightDismiss } from './light-dismiss';
 
   interface Props {
     file: File;
@@ -12,28 +13,12 @@
   let { file, width, height, onCompareAs }: Props = $props();
 
   let compareOpen = $state(false);
-  let compareEl = $state<HTMLDivElement>();
   let compareBtn = $state<HTMLButtonElement>();
 
-  $effect(() => {
-    if (!compareOpen) return;
-    const onPointerDown = (event: PointerEvent) => {
-      if (compareEl && !compareEl.contains(event.target as Node)) {
-        compareOpen = false;
-      }
-    };
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        compareOpen = false;
-        compareBtn?.focus();
-      }
-    };
-    window.addEventListener('pointerdown', onPointerDown, true);
-    window.addEventListener('keydown', onKeyDown);
-    return () => {
-      window.removeEventListener('pointerdown', onPointerDown, true);
-      window.removeEventListener('keydown', onKeyDown);
-    };
+  const compareLightDismiss = lightDismiss({
+    isOpen: () => compareOpen,
+    close: () => (compareOpen = false),
+    focusOnEscape: () => compareBtn,
   });
 
   function chooseFormat(format: OutputFormat) {
@@ -53,7 +38,7 @@
       <ImageInfoRows {file} {width} {height} />
 
       <section class="compare-section" aria-label="Compare as">
-        <div class="compare-wrap" bind:this={compareEl}>
+        <div class="compare-wrap" {@attach compareLightDismiss}>
           <button
             type="button"
             class="compare-trigger"
