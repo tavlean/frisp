@@ -308,7 +308,10 @@
 
   .logo-container {
     position: relative;
-    margin: 0 0 0.5rem;
+    /* Extra space below lifts the lockup and opens up breathing room over the
+       blob field (which is centred on the load target just below). Desktop
+       gets much more (see the min-width block). */
+    margin: 0 0 3rem;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -453,7 +456,8 @@
     justify-content: center;
     gap: 7px;
     list-style: none;
-    margin: 1.6rem 0 0;
+    /* Breathing room below the blob field before the badges. */
+    margin: 2.75rem 0 0;
     padding: 0;
   }
   .format-chip {
@@ -488,6 +492,14 @@
     }
     .load-img-content {
       --size: 45rem;
+    }
+    /* Much more air around the lockup and above the badges on the roomier
+       desktop canvas. */
+    .logo-container {
+      margin-bottom: 6rem;
+    }
+    .formats {
+      margin-top: 4rem;
     }
   }
 
@@ -546,7 +558,7 @@
 
     .tagline,
     .lock {
-      color: rgba(24, 24, 27, 0.5);
+      color: rgba(24, 24, 27, 0.62);
     }
 
     /* The white focus ring vanishes on a light background. */
