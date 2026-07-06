@@ -156,6 +156,17 @@
 
     <div class="load-img" {@attach captureBlobTarget}>
       <div class="load-img-content reveal" style="--reveal-order: 1">
+        <!-- A click anywhere on the blob opens the picker. The disc below stays
+             the labelled, keyboard-focusable control; this one is skipped in the
+             tab order. The paste/folder links sit above and handle their own
+             clicks (see the pointer-events rules). -->
+        <button
+          class="load-hit"
+          type="button"
+          onclick={onOpenClick}
+          aria-label="Select images"
+          tabindex="-1"
+        ></button>
         <button
           class="load-btn"
           type="button"
@@ -359,8 +370,26 @@
     gap: 1.1rem;
   }
 
+  /* Transparent full-area hit target: a click anywhere on the blob opens the
+     picker. It sits behind the disc + text (which are lifted above via
+     z-index); the text layer passes clicks through to it (pointer-events:
+     none) except the real paste/folder links. */
+  .load-hit {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    border-radius: 50%;
+    cursor: pointer;
+  }
+
   /* The browse button: a coral-gradient disc that invites a squeeze. */
   .load-btn {
+    position: relative;
+    z-index: 1;
     --size: 7.2rem;
     width: var(--size);
     height: var(--size);
@@ -401,6 +430,10 @@
   }
 
   .load-text {
+    position: relative;
+    z-index: 1;
+    /* Let clicks fall through to the hit target; the links below re-enable. */
+    pointer-events: none;
     font-weight: 500;
     color: rgba(255, 255, 255, 0.85);
     text-shadow: 0 1px 6px rgba(0, 0, 0, 0.25);
@@ -434,6 +467,8 @@
   }
 
   .paste-btn {
+    /* Re-enable clicks the .load-text layer disabled. */
+    pointer-events: auto;
     background: none;
     border: 0;
     padding: 0;
