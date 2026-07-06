@@ -306,9 +306,15 @@ MCP/autofixer was not available in this run. Gates: `npm run check` ✅,
 `npm run test:unit` ✅, `npm run test:e2e` ✅ (61 passed / 1 known WebKit
 offline skip).
 
-## WS-G Options-model minimal slice (P4) — decisions made; spec here, build next session
+## WS-G Options-model minimal slice (P4) — decisions made; engine half in progress
 
-**Status: specced — decisions recorded; implementation follows Phase-3 kickoff.**
+**Status: engine half implemented in `ws-g-engine` (2026-07-07), not yet
+landed/reviewed.** Items (1) registry and (2) sparse engine merge are done in
+the worktree; item (3) bulk UI dots/resets wiring remains Phase-3 UI work and
+was explicitly out of scope. Gates so far: `npm run check` ✅, `npm run
+test:unit` ✅ (91 tests), `npm run test:e2e` ✅ (61 passed / 1 known WebKit
+offline skip). An earlier Chromium OxiPNG encode run hit a transient
+`RuntimeError: memory access out of bounds`, but the final full e2e run passed.
 
 The two pending maintainer decisions in
 [codec-options-model.md](../codec-options-model.md) §Sequencing are resolved

@@ -1,12 +1,17 @@
 import { describe, expect, it } from 'vitest';
 import {
+  createBulkSession,
+  updateJobOverrides,
+} from '../../src/client/lazy-app/bulk/session';
+import type { BulkImageSettings } from '../../src/client/lazy-app/bulk/settings';
+import {
   getEffectiveSettings,
   getSettingsOverridePaths,
   hasSettingsOverrides,
   resolveSettingsForSource,
   settingsHash,
 } from '../../src/client/lazy-app/bulk/settings';
-import { settings } from './fixtures';
+import { job as settingsJob, settings } from './fixtures';
 
 describe('bulk settings helpers', () => {
   it('deep-merges sparse processor overrides without mutating global settings', () => {
@@ -38,6 +43,77 @@ describe('bulk settings helpers', () => {
     });
 
     expect(effective.encoderState?.type).toBe('qoi');
+  });
+
+  it('keeps same-format encoder overrides sparse by control after globals change', () => {
+    const globalSettings = settings();
+    const session = createBulkSession('bulk', globalSettings, [settingsJob()]);
+    const withOverride = updateJobOverrides(session, 'job-1', {
+      encoderState: {
+        type: 'webP',
+        options: {
+          ...globalSettings.encoderState?.options,
+          quality: 60,
+        },
+      } as NonNullable<BulkImageSettings['encoderState']>,
+    });
+
+    const changedGlobal = settings({
+      encoderState: {
+        type: 'webP',
+        options: {
+          ...globalSettings.encoderState?.options,
+          method: 6,
+        },
+      } as NonNullable<BulkImageSettings['encoderState']>,
+    });
+    const effective = getEffectiveSettings(
+      changedGlobal,
+      withOverride.jobs[0].overrides,
+    );
+
+    expect(withOverride.jobs[0].overrides?.encoderControls?.controlIds).toEqual(
+      ['webp.quality'],
+    );
+    expect(effective.encoderState).toMatchObject({
+      type: 'webP',
+      options: {
+        quality: 60,
+        method: 6,
+      },
+    });
+  });
+
+  it('recomputes sparse controls when a legacy encoder override is rewritten', () => {
+    const globalSettings = settings();
+    const session = createBulkSession('bulk', globalSettings, [settingsJob()]);
+    const withQualityOverride = updateJobOverrides(session, 'job-1', {
+      encoderState: {
+        type: 'webP',
+        options: {
+          ...globalSettings.encoderState?.options,
+          quality: 60,
+        },
+      } as NonNullable<BulkImageSettings['encoderState']>,
+    });
+    const withMethodOverride = updateJobOverrides(
+      withQualityOverride,
+      'job-1',
+      {
+        ...withQualityOverride.jobs[0].overrides,
+        encoderState: {
+          type: 'webP',
+          options: {
+            ...globalSettings.encoderState?.options,
+            method: 2,
+          },
+        } as NonNullable<BulkImageSettings['encoderState']>,
+      },
+    );
+
+    expect(
+      withMethodOverride.jobs[0].overrides?.encoderControls?.controlIds,
+    ).toEqual(['webp.effort']);
   });
 
   it('keeps settings hashes stable regardless of object key insertion order', () => {

@@ -29,9 +29,12 @@ browser, the build is static, and offline reload must work after load.
   - **Regression found & fixed** (`db0a696a`): vitest resolved no aliases —
     10 tests silently dropped since 2026-07-05, hiding an accidental
     `frisp-` prefix on bulk ZIP names (contract restored).
-  - In flight: WS-D(a) worker→main Comlink transfers (bench-gated).
-    Fully specced for later cheap sessions: D(b) composite worker op, D(c)
-    worker-side decode, WS-G options-slice implementation (control tables in
+  - In flight: WS-D(a) worker→main Comlink transfers (bench-gated). WS-G
+    options-slice engine half is implemented in `ws-g-engine` but not landed:
+    registry + sparse merge are done, Phase-3 UI wiring is still out of scope,
+    and check + unit + full e2e are green in that worktree. Fully specced for
+    later cheap sessions: D(b) composite worker op, D(c) worker-side decode,
+    WS-G UI item (bulk dots/resets wiring; control tables in
     specs/2026-07-07-ws-g-control-inventory.md), WS-H `src/engine` rename
     (inventory in specs/2026-07-07-ws-h-rename-inventory.md — do LAST).
 
