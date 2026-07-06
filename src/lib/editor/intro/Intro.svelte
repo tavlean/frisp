@@ -210,14 +210,17 @@
     place-items: center;
     overflow: hidden;
     color: var(--white, #fff);
-    /* A faint warm glow rising behind the hero. */
+    /* A faint warm glow rising behind the hero. The intro paints its own base
+       colour (rather than leaning on the shared body background) so it can flip
+       to light on its own — see the prefers-color-scheme block below — without
+       touching the editor, which keeps the dark body background for now. */
     background:
       radial-gradient(
         ellipse 70% 55% at 50% 38%,
         rgba(255, 122, 80, 0.07),
         transparent 70%
       ),
-      transparent;
+      #0c0c0f;
   }
 
   .hide {
@@ -432,6 +435,59 @@
     }
     .load-img-content {
       --size: 45rem;
+    }
+  }
+
+  /*
+   * Light mode — driven purely by the user's OS/browser theme setting (no
+   * toggle yet), and scoped to the intro screen only. We flip four things:
+   * the base background, the wordmark SVG (recoloured via filter since it's an
+   * <img> with a baked-in off-white fill), the load-target copy, and the
+   * format chips + privacy tagline. The blobs are left alone on purpose — they
+   * paint the coral accent at low opacity, so they read correctly over either
+   * background without a colour change.
+   */
+  @media (prefers-color-scheme: light) {
+    .intro {
+      color: #18181b;
+      background:
+        radial-gradient(
+          ellipse 70% 55% at 50% 38%,
+          rgba(255, 122, 80, 0.1),
+          transparent 70%
+        ),
+        #fafafa;
+    }
+
+    /* Off-white wordmark (#F4F4F5) → near-black ink to match the body text.
+       brightness(0.1) scales the flat fill down to ~#181818 while preserving
+       the anti-aliased edges. */
+    .wordmark {
+      filter: brightness(0.1);
+    }
+
+    .load-text {
+      color: rgba(24, 24, 27, 0.85);
+      text-shadow: none;
+    }
+    .paste-btn:hover {
+      color: hsl(14, 85%, 46%);
+    }
+
+    .format-chip {
+      border-color: rgba(24, 24, 27, 0.14);
+      background: rgba(24, 24, 27, 0.03);
+      color: rgba(24, 24, 27, 0.62);
+    }
+
+    .tagline,
+    .lock {
+      color: rgba(24, 24, 27, 0.5);
+    }
+
+    /* The white focus ring vanishes on a light background. */
+    .load-btn:focus-visible {
+      outline-color: #18181b;
     }
   }
 </style>
