@@ -172,3 +172,37 @@ modes; check clean. Decision still PENDING (start at /lab; recommendation:
 hybrid). Verification gotcha: getComputedStyle sweeps right after a
 color-scheme flip or HMR reload can return stale values — re-query after
 settling before trusting a dark-background audit.
+
+## 2026-07-07 (later) — porcelain lab: full Pixelmator-style CROP TOOL
+
+Maintainer-requested crop tool, built in `/lab/porcelain` (dev-only; zero
+production changes). Spec + coordinate model + API contract:
+`docs/specs/2026-07-07-porcelain-crop-tool.md` (registry row added). Commits
+`46cc7e27` (core) + `3c7c97b9` (panel + wiring). What shipped: crop rect
+with 8 handles; rotate by dragging OUTSIDE the corners (custom cursor, 0.25°
+snap, shift=15°, sticky 0); straighten slider ±45° that folds into 90°
+orientation steps; rotate-90/flip buttons; move/out-of-canvas crop
+(unclamped by design); Constrain menu (free, custom ratio w/ editable
+fields, Original, 13 ratio presets, 2 size presets — ratio switch is
+area-preserving); W/H px fields; empty-area fill (transparent default,
+white/gray/black, any-color picker, sample-from-image click); 7 guide
+overlays × auto/always/never (rotating auto-shows Grid); Reset/Cancel/Apply,
+Esc/Enter, arrow-key nudge. Architecture: crop is a LAB-PAGE-LEVEL source
+transform upstream of EditorSession — Apply renders a PNG (alpha kept) and
+feeds `session.pickFiles`, so WebP/AVIF/PNG outputs keep transparency and
+encoder recipes survive; NON-destructive: the page keeps `original` +
+`CropSnapshot`, re-opening restores the crop over the original pixels.
+Key invariants (tested, 19 new unit tests): world = R(θ)·F·(p−center),
+rect axis-aligned in world AND on screen (the IMAGE rotates); rotation
+pivots on the crop center (c′=R(Δ)c); apply-time pixel snap at angle 0 keeps
+pure crops resample-free; `CropTool.transformEpoch` lets the stage keep the
+crop center screen-anchored across rotation/flip remaps (without it the
+composition jumps — see spec "If things break"). Deferred (discuss):
+Perspective sliders (needs homography resampling), Auto Crop, Auto
+Straighten; slider granularity is 0.5° while gesture rotation is 0.25°.
+Delegation notes: Codex built overlays + geometry tests (one stdin stall —
+relaunch with `< /dev/null`; it also correctly REJECTED a wrong test
+assertion I suggested, matching the documented model instead); Opus built
+CropPanel to the spec contract with zero API mismatches. Verified live in
+preview: gestures, out-of-canvas + fills, 16:9 refit, apply→re-encode,
+re-edit restore, light+dark. Gates: check 0 errors, 110 unit tests green.

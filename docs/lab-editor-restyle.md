@@ -124,6 +124,14 @@ raised/inset depth. Its own signatures beyond the parents:
   1440×900, both modes, real encode flows. `npm run check` clean throughout
   (corner-shape lint warnings only, `@supports`-gated).
 
+- 2026-07-07 round 3 (maintainer request): PORCELAIN gained a full
+  Pixelmator-style **crop tool** (`46cc7e27` + `3c7c97b9`; spec + model:
+  [specs/2026-07-07-porcelain-crop-tool.md](specs/2026-07-07-porcelain-crop-tool.md)).
+  It lives in `src/lib/lab/crop/` and is deliberately CHROME-AGNOSTIC (a
+  CropTool state class + stage + panel over the `--pc-*` tokens) — if the
+  decision below lands on hybrid, the crop tool ports with a restyle of
+  CropPanel only; the geometry/stage/tool layers carry over unchanged.
+
 ## Decision
 
 PENDING — maintainer to compare `/lab/porcelain`, `/lab/darkroom` and
