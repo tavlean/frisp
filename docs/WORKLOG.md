@@ -127,3 +127,27 @@ tests. D(b)/D(c) got FULL designs in the spec (`0d687b97`) — every remaining
 review item is now zero-judgment executable: D(b), D(c), WS-G UI wiring,
 WS-H rename (LAST). Deploy note: nothing deployed today; `main` is ahead of
 production — `wrangler deploy` when ready.
+
+## 2026-07-07 (later) — editor re-style lab: porcelain + darkroom experiments
+
+Two dev-only lab routes exploring a full editor re-skin from two maintainer-
+supplied reference screenshots; both are REAL editors (production
+EditorSession + Output + option components under new chrome), zero
+production-file changes, dev-gated like the old bulk lab. `/lab/porcelain`
+(`4e0cff81`): light/airy squircle style — floating top toolbar, Image|Compare
++ Edit|Compress segmented tabs, Variations-style format grid, custom format
+dropdown, `corner-shape: squircle` progressive enhancement. `/lab/darkroom`
+(`7827b86f`): dense pro-tool IA — top nav bar, left icon rail opening
+flyouts, inspector with eye-icon-as-enable sections (Resize/Reduce palette),
+chip dropdowns, and a real session FILMSTRIP (multi-image gallery, click to
+switch) previewing the bulk direction. Both theme-dynamic via
+`color-scheme: light dark` + `light-dark()` tokens over the existing
+`.editor-root` var contract (manual force switch included) — the blueprint
+for app-wide light mode. Design doc + harvested feature ideas + pending
+decision: `docs/lab-editor-restyle.md` (registry row added, `791104cd`).
+Gotchas: both labs override COMPILED component class selectors under their
+root class (`.controls .button`, `.results .download`, `.option-text-first`…)
+— refactors of those components can silently drift the labs; check the labs
+after touching editor components while the experiments live. Decision is
+PENDING (maintainer to pick a direction/hybrid); losing lab code should be
+deleted on promotion.

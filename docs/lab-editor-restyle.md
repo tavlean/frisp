@@ -76,9 +76,15 @@ Feature mapping (reference → Frisp):
 
 ## Status
 
-- 2026-07-07: both experiments speced by the top-tier session and built by
-  Opus subagents in parallel worktrees; merged, verified in both modes, and
-  committed (see WORKLOG for the session entry and commits).
+- 2026-07-07: both experiments speced by the top-tier session, built by Opus
+  subagents in parallel worktrees, merged, and verified in the dev preview at
+  1440×900 in BOTH modes (real encodes, compare flow, dropdowns, filmstrip
+  switching, eye-enable, flyouts). Commits: doc `791104cd`, porcelain
+  `4e0cff81`, darkroom `7827b86f`. `npm run check` clean after each merge
+  (porcelain adds 14 benign `corner-shape` CSS-lint warnings, gated behind
+  `@supports`). One live fix during verification: porcelain's theme pill
+  moved bottom-left → top-right (it collided with the left panel's results
+  footer).
 
 ## Decision
 
