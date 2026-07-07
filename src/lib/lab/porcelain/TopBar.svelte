@@ -9,9 +9,12 @@
   interface Props {
     session: EditorSession;
     isMac: boolean;
+    /** Enter crop mode (lab crop tool). Absent → no crop button. */
+    oncrop?: () => void;
+    cropDisabled?: boolean;
   }
 
-  let { session, isMac }: Props = $props();
+  let { session, isMac, oncrop, cropDisabled = false }: Props = $props();
 
   const undoKbd = $derived(isMac ? '⌘Z' : 'Ctrl+Z');
   const redoKbd = $derived(isMac ? '⇧⌘Z' : 'Ctrl+Shift+Z');
@@ -100,6 +103,34 @@
         >
       </span>
     </div>
+
+    {#if oncrop}
+      <span class="divider" aria-hidden="true"></span>
+
+      <div class="tip-wrap">
+        <button
+          type="button"
+          class="icon-btn"
+          onclick={() => oncrop()}
+          disabled={cropDisabled}
+          aria-label="Crop"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path
+              d="M7 3v14h14M3 7h14v14"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.7"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </button>
+        <span class="tooltip" role="tooltip"
+          ><span class="tip-label">Crop</span></span
+        >
+      </div>
+    {/if}
   </div>
 
   <div class="pill export-pill">
