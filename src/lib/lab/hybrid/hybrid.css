@@ -1,0 +1,630 @@
+/*
+ * hybrid — a dev-only LAB re-skin of the single-image editor.
+ *
+ * The maintainer-requested fusion of the two lab experiments: darkroom's
+ * INFORMATION ARCHITECTURE (top bar + left icon rail + flyouts + right
+ * inspector + a single bottom bar with the session strip AND the docked canvas
+ * zoom cluster) wearing porcelain's SKIN (light, airy, warm-porcelain surfaces,
+ * squircle corners, hairline borders, very diffuse shadows, tooltip pills that
+ * stay near-black in both modes). Its signature divergence from the two donors:
+ * the inspector drops darkroom's Adjust/Compress TABS in favour of stacked
+ * collapsible sections (Resize / Reduce palette / Compress).
+ *
+ * Duplication is intentional — this is one of three throwaway lab experiments;
+ * keeping each self-contained means deleting a loser is one `rm -rf`. The
+ * porcelain palette is copied here (verbatim `--pc-*` token names) so the reused
+ * production components re-skin through the SAME contract bridge porcelain used;
+ * only the token VALUES live here, every one a `light-dark(light, dark)`.
+ *
+ * All selectors are scoped under `.hybrid-root`. Component styles compile to
+ * global CSS, so we override their class selectors at higher specificity here.
+ * No production file is touched.
+ */
+
+.hybrid-root {
+  color-scheme: light dark;
+
+  /* ── Private porcelain palette (light-dark) ──────────────────────────── */
+  --pc-page: light-dark(#f2f1ef, #131315);
+  --pc-panel: light-dark(#ffffff, #1c1c1f);
+  --pc-surface: light-dark(#ffffff, #242428);
+  /* Raised control surface. */
+  --pc-raise: light-dark(#ffffff, #242428);
+  /* Inset recessed track — darker than the panel in both modes. */
+  --pc-inset: light-dark(#ecebe8, #151517);
+  --pc-inset-strong: light-dark(#e3e2de, #101012);
+
+  --pc-border: light-dark(rgba(20, 20, 15, 0.08), rgba(255, 255, 255, 0.08));
+  --pc-border-strong: light-dark(
+    rgba(20, 20, 15, 0.14),
+    rgba(255, 255, 255, 0.16)
+  );
+
+  --pc-text-1: light-dark(#1b1b1f, #f5f5f7);
+  --pc-text-2: light-dark(rgba(27, 27, 31, 0.6), rgba(245, 245, 247, 0.62));
+  --pc-text-3: light-dark(rgba(27, 27, 31, 0.38), rgba(245, 245, 247, 0.38));
+
+  /* Semantics. */
+  --pc-good: light-dark(#1f8a5d, #3ddc97);
+  --pc-bad: light-dark(#c2334b, #ff7d92);
+
+  /* Side accents (coral / azure), brighter in dark. */
+  --pc-accent-1: light-dark(#e4602f, #ff8a5e);
+  --pc-accent-1-hot: light-dark(#d24e1f, #ff6a3c);
+  --pc-accent-2: light-dark(#2276c9, #53b2ff);
+  --pc-accent-2-hot: light-dark(#1a63ad, #2b95f5);
+
+  --pc-focus: light-dark(#2276c9, #53b2ff);
+
+  /* Tooltips stay near-black in BOTH modes (reference language). */
+  --pc-tooltip-bg: #222226;
+  --pc-tooltip-text: #ffffff;
+  --pc-tooltip-kbd: rgba(255, 255, 255, 0.55);
+
+  /* Spinner (on inset button surfaces). */
+  --pc-spinner-track: light-dark(
+    rgba(20, 20, 15, 0.18),
+    rgba(255, 255, 255, 0.2)
+  );
+  --pc-spinner-head: light-dark(
+    rgba(20, 20, 15, 0.7),
+    rgba(255, 255, 255, 0.85)
+  );
+
+  /* Two-level shadow language. `light-dark()` accepts exactly two comma-
+     separated arguments, and shadow LAYERS are also comma-separated — so a
+     multi-layer shadow can't live inside light-dark(). We instead switch a
+     single alpha channel per mode and compose the (fixed) layer geometry
+     around it, keeping each light-dark() to two argument-safe color values. */
+  --pc-shadow-c1: light-dark(rgba(20, 20, 15, 0.05), rgba(0, 0, 0, 0.5));
+  --pc-shadow-c2: light-dark(rgba(20, 20, 15, 0.05), rgba(0, 0, 0, 0.35));
+  --pc-shadow-control:
+    0 1px 2px var(--pc-shadow-c1), 0 4px 12px var(--pc-shadow-c2);
+
+  --pc-shadow-p1: light-dark(rgba(20, 20, 15, 0.04), rgba(0, 0, 0, 0.5));
+  --pc-shadow-p2: light-dark(rgba(20, 20, 15, 0.1), rgba(0, 0, 0, 0.4));
+  --pc-shadow-panel:
+    0 2px 6px var(--pc-shadow-p1), 0 16px 40px -8px var(--pc-shadow-p2);
+
+  --pc-shadow-pop: light-dark(rgba(20, 20, 15, 0.12), rgba(0, 0, 0, 0.55));
+  --pc-shadow-popover: 0 12px 32px var(--pc-shadow-pop);
+
+  --pc-inset-shadow: inset 0 1px 2px
+    light-dark(rgba(20, 20, 15, 0.05), rgba(0, 0, 0, 0.35));
+
+  /* ── Bridge the EXISTING contract so reused components re-skin ──────────
+     These names are read (with dark fallbacks) throughout the editor
+     components; overriding them here repaints all of them at once. */
+  --bg-0: var(--pc-page);
+  --bg-1: var(--pc-page);
+  /* SOLID surfaces — kill the dark translucency the studio theme used. */
+  --surface: var(--pc-surface);
+  --surface-solid: var(--pc-panel);
+  --surface-raise: var(--pc-inset);
+  --surface-raise-2: var(--pc-inset-strong);
+  --border: var(--pc-border);
+  --border-strong: var(--pc-border-strong);
+  --text-1: var(--pc-text-1);
+  --text-2: var(--pc-text-2);
+  --text-3: var(--pc-text-3);
+  --good: var(--pc-good);
+  --bad: var(--pc-bad);
+
+  --accent-1: var(--pc-accent-1);
+  --accent-1-hot: var(--pc-accent-1-hot);
+  --accent-1-glow: light-dark(rgba(228, 96, 47, 0.22), rgba(255, 122, 80, 0.3));
+  --accent-2: var(--pc-accent-2);
+  --accent-2-hot: var(--pc-accent-2-hot);
+  --accent-2-glow: light-dark(
+    rgba(34, 118, 201, 0.2),
+    rgba(83, 178, 255, 0.32)
+  );
+
+  --options-radius: 20px;
+  --control-radius: 12px;
+  --panel-shadow: var(--pc-shadow-panel);
+
+  /* ── Hybrid layout metrics ────────────────────────────────────────────
+     Region reservations for Output's auto-fit: the left rail, the right
+     inspector, the top bar, and the single bottom bar. Kept as tokens so the
+     media queries below can shrink them in one place. */
+  --hy-margin: 12px;
+  --hy-topbar-h: 56px;
+  --hy-bar-h: 64px; /* the single bottom bar */
+  --hy-rail-w: 52px; /* raised rail panel width */
+  --hy-inspector-w: 296px;
+  /* Inside the bottom bar, the docked zoom cluster occupies the right end; the
+     filmstrip reserves this much trailing room so long thumbnail rows scroll
+     UNDER the cluster instead of colliding with it. */
+  --hy-dock-reserve: 290px;
+
+  background: var(--pc-page);
+  color: var(--pc-text-1);
+  font-size: 1rem;
+}
+
+.hybrid-root.force-light {
+  color-scheme: light;
+}
+.hybrid-root.force-dark {
+  color-scheme: dark;
+}
+
+.hybrid-root.compress {
+  --fit-inset-left: calc(var(--hy-margin) + var(--hy-rail-w) + 20px);
+  --fit-inset-right: calc(var(--hy-margin) + var(--hy-inspector-w) + 12px);
+  --fit-inset-top: calc(var(--hy-margin) + var(--hy-topbar-h) + 8px);
+  --fit-inset-bottom: calc(var(--hy-margin) + var(--hy-bar-h) + 8px);
+}
+
+/* The full-bleed lab root owns its OWN background (we never style body). */
+.hybrid-root.app-root {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  background: var(--pc-page);
+  color: var(--pc-text-1);
+}
+
+/* Drop-valid overlay (fileDrop toggles `.drop-valid` on the root). */
+.hybrid-root::after {
+  content: '';
+  position: fixed;
+  inset: 10px;
+  border: 2px dashed var(--main-theme-color);
+  background-color: color-mix(in srgb, var(--main-theme-color) 6%, transparent);
+  border-radius: 18px;
+  opacity: 0;
+  transform: scale(0.97);
+  transition:
+    opacity 200ms ease,
+    transform 200ms ease;
+  pointer-events: none;
+  z-index: 40;
+}
+.hybrid-root:global(.drop-valid)::after {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   Canvas stage — porcelain treatment (page fill + faint dot grid).
+   ══════════════════════════════════════════════════════════════════════════ */
+.hybrid-root .output::before {
+  background-color: var(--bg-0);
+  background-image:
+    radial-gradient(
+      ellipse 120% 90% at 50% 40%,
+      light-dark(rgba(20, 20, 15, 0.03), rgba(255, 255, 255, 0.04)),
+      transparent 70%
+    ),
+    radial-gradient(
+      light-dark(rgba(20, 20, 15, 0.09), rgba(180, 180, 190, 0.28)) 1px,
+      transparent 1.4px
+    );
+}
+.hybrid-root .output.alt-background::before {
+  background-color: light-dark(#ffffff, #d4d4d8);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   Output bottom controls → DOCKED into the right end of the single bottom bar.
+
+   The bar is `bottom: var(--hy-margin) (12px); height: var(--hy-bar-h) (64px)`.
+   The controls row is 38px tall, so to vertically centre it inside the bar it
+   sits at `bottom: 25px` (12 + (64 − 38) / 2 = 25). We pull the row to the
+   right end (`left: auto; right`) with trailing padding that clears the bar's
+   rounded corner, and re-skin the individual buttons into porcelain INSET chips
+   (transparent resting, inset hover) — they live inside a surface now, not
+   floating on the canvas. The filmstrip reserves `--hy-dock-reserve` of its own
+   trailing room so long thumbnail rows scroll under this cluster.
+   ══════════════════════════════════════════════════════════════════════════ */
+.hybrid-root .controls {
+  left: auto;
+  right: calc(var(--hy-margin) + 12px);
+  bottom: calc(var(--hy-margin) + (var(--hy-bar-h) - 38px) / 2);
+  justify-content: flex-end;
+  flex-wrap: nowrap;
+  gap: 4px;
+  z-index: 23; /* above the bottom bar's own surface */
+}
+
+/* Individual chips inside the bar: transparent resting fill, inset hover — the
+   surrounding bar already provides the raised affordance. */
+.hybrid-root .controls .button,
+.hybrid-root .controls .zoom {
+  background-color: transparent;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  border-color: var(--pc-border);
+  color: var(--pc-text-2);
+  height: 34px;
+}
+.hybrid-root .controls .button:hover {
+  background: var(--pc-inset);
+  color: var(--pc-text-1);
+}
+.hybrid-root .controls .button.active {
+  background: var(--pc-inset-strong);
+  color: var(--pc-text-1);
+}
+.hybrid-root .controls .button:disabled:hover {
+  background-color: transparent;
+  color: var(--pc-text-2);
+}
+.hybrid-root .controls .button-group {
+  border-radius: 10px;
+  box-shadow: var(--pc-shadow-control);
+  overflow: hidden;
+}
+.hybrid-root .controls .zoom-value {
+  color: var(--pc-text-1);
+  border-bottom-color: var(--pc-border-strong);
+}
+.hybrid-root .controls span.zoom {
+  color: var(--pc-text-2);
+}
+.hybrid-root .controls input.zoom {
+  color: var(--pc-text-1);
+}
+
+/* Output's view-options popover (opens UPWARD, so it clears the bar) →
+   porcelain card. */
+.hybrid-root .view-options {
+  background-color: var(--pc-surface);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  border-color: var(--pc-border);
+  border-radius: 14px;
+  box-shadow: var(--pc-shadow-popover);
+}
+.hybrid-root .view-option {
+  color: var(--pc-text-2);
+}
+.hybrid-root .view-option:hover {
+  background: var(--pc-inset);
+  color: var(--pc-text-1);
+}
+.hybrid-root .view-option.active {
+  color: var(--pc-text-1);
+}
+.hybrid-root .view-options-trigger.dirty::after {
+  background: var(--main-theme-color);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   Reused production option components — porcelain type + surfaces.
+   These live in .editor-root scope with hardcoded darks; override them here.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* Options section labels: NO uppercase tracking in porcelain. */
+.hybrid-root .options-title {
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--pc-text-1);
+  background: transparent;
+  padding: 8px var(--horizontal-padding) 6px;
+}
+.hybrid-root .options-title::before {
+  display: none;
+}
+
+/* Section-enabler chips (used by reused ResizeOptions internals). */
+.hybrid-root .section-enabler {
+  background: var(--pc-inset);
+  border: 1px solid var(--pc-border);
+  border-radius: 12px;
+}
+.hybrid-root .section-enabler:hover {
+  background: var(--pc-inset-strong);
+  border-color: var(--pc-border-strong);
+}
+
+/* Reveal rows / advanced sections. */
+.hybrid-root .option-reveal:hover,
+.hybrid-root .option-reveal:focus-within {
+  background-color: var(--pc-inset);
+  color: var(--pc-text-1);
+}
+
+/* Text fields (resize width/height etc.): black bg → inset gray. */
+.hybrid-root .text-field {
+  background-color: var(--pc-inset);
+  border-color: var(--pc-border);
+  color: var(--pc-text-1);
+  border-radius: 9px;
+}
+.hybrid-root .text-field:focus {
+  border-color: var(--pc-focus);
+}
+
+/* Reused Select (inside ResizeOptions): recolor dark hardcoded fills. */
+.hybrid-root .builtin-select {
+  background: var(--pc-inset);
+  border-color: var(--pc-border);
+  color: var(--pc-text-1);
+  border-radius: 10px;
+}
+.hybrid-root .builtin-select:hover {
+  background: var(--pc-inset-strong);
+  border-color: var(--pc-border-strong);
+}
+.hybrid-root .builtin-select.large {
+  background: var(--pc-raise);
+  box-shadow: var(--pc-shadow-control);
+}
+.hybrid-root .arrow {
+  fill: var(--pc-text-3);
+}
+
+/* Reused Toggle switch: neutral near-black ON (near-white in dark). */
+.hybrid-root .checkbox .track {
+  background: var(--pc-inset);
+  box-shadow: var(--pc-inset-shadow);
+}
+.hybrid-root .checkbox .real-checkbox:checked + .track {
+  background: light-dark(#1b1b1f, #f5f5f7);
+  box-shadow: none;
+}
+.hybrid-root .checkbox .thumb {
+  background: light-dark(#ffffff, #ffffff);
+  box-shadow: 0 1px 3px rgba(20, 20, 15, 0.25);
+}
+.hybrid-root .checkbox .real-checkbox:checked + .track .thumb {
+  background: light-dark(#ffffff, #1b1b1f);
+}
+
+/* Reused Range: keep accent fill, neutral inset rail. */
+.hybrid-root .range-input::before {
+  background:
+    linear-gradient(
+        90deg,
+        var(--hot-theme-color, #888),
+        var(--main-theme-color, #aaa)
+      )
+      0 / var(--value-percent, 0%) 100% no-repeat,
+    light-dark(rgba(20, 20, 15, 0.12), rgba(255, 255, 255, 0.16));
+}
+.hybrid-root .range .thumb {
+  border-color: light-dark(#ffffff, #1c1c1f);
+  box-shadow: 0 1px 3px rgba(20, 20, 15, 0.28);
+}
+.hybrid-root .range .value-display {
+  color: light-dark(#ffffff, #16161c);
+}
+.hybrid-root .range .text-input {
+  color: var(--pc-text-1);
+}
+.hybrid-root .range .text-input:focus {
+  background: var(--pc-inset);
+}
+
+/* Reused Results footer: neutral primary Save, colored delta chip. */
+.hybrid-root .results .file-size {
+  color: var(--pc-text-1);
+}
+.hybrid-root .results .unit {
+  color: var(--pc-text-2);
+}
+.hybrid-root .results .download {
+  background: light-dark(#1b1b1f, #f5f5f7);
+  color: light-dark(#ffffff, #16161c);
+  box-shadow: var(--pc-shadow-control);
+  border-radius: 11px;
+}
+.hybrid-root .results .download:hover {
+  filter: none;
+  background: light-dark(#000000, #ffffff);
+}
+.hybrid-root .results .download.ghost {
+  background: var(--pc-raise);
+  color: var(--pc-text-1);
+  border: 1px solid var(--pc-border);
+  box-shadow: var(--pc-shadow-control);
+}
+.hybrid-root .results .download.ghost:hover {
+  background: var(--pc-inset);
+}
+.hybrid-root .results .spinner {
+  border-color: light-dark(rgba(255, 255, 255, 0.35), rgba(20, 20, 15, 0.3));
+  border-top-color: light-dark(#ffffff, #16161c);
+}
+@supports (corner-shape: squircle) {
+  .hybrid-root .results .download {
+    corner-shape: squircle;
+    border-radius: 13px;
+  }
+}
+
+/* ImageInfoRows (used in the Image-info flyout): porcelain list. */
+.hybrid-root .rows dt {
+  color: var(--pc-text-3);
+}
+.hybrid-root .rows dd {
+  color: var(--pc-text-1);
+}
+.hybrid-root .rows .chip {
+  background: var(--pc-inset);
+  border-color: var(--pc-border);
+  color: var(--pc-text-1);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   Light-mode PURITY (maintainer directive) — theme the pieces the donor labs
+   left dark. Tooltips deliberately stay near-black in both modes.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* Two-up divider scrubber: white raised handle w/ hairline border + accent
+   arrows in light; dark glass preserved in dark. */
+.hybrid-root two-up {
+  --track-color: light-dark(rgba(20, 20, 15, 0.28), rgba(135, 135, 150, 0.55));
+  --thumb-background: light-dark(#ffffff, rgba(14, 14, 18, 0.85));
+  --thumb-color: var(--pc-text-1);
+}
+.hybrid-root two-up .scrubber {
+  border-color: light-dark(var(--pc-border-strong), rgba(255, 255, 255, 0.18));
+  box-shadow: light-dark(
+    var(--pc-shadow-control),
+    0 6px 24px rgba(0, 0, 0, 0.5)
+  );
+  -webkit-backdrop-filter: light-dark(none, blur(12px));
+  backdrop-filter: light-dark(none, blur(12px));
+}
+.hybrid-root two-up .arrow-left {
+  fill: var(--pc-accent-1);
+}
+.hybrid-root two-up .arrow-right {
+  fill: var(--pc-accent-2);
+}
+
+/* Snackbar: porcelain surface card (was rgba(24,24,30,.88)). */
+.hybrid-root .snackbar {
+  background: var(--pc-surface);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  border-color: var(--pc-border);
+  color: var(--pc-text-1);
+  box-shadow: var(--pc-shadow-popover);
+}
+.hybrid-root .snackbar .action {
+  color: var(--pc-accent-1);
+}
+
+/* ProcessingBadge: light = white surface chip w/ border; keep success-green
+   morph readable. The component transitions background-color, so set it on both
+   states so the morph animates between two intentional fills. */
+.hybrid-root .badge {
+  background-color: light-dark(#ffffff, rgba(0, 0, 0, 0.72));
+  color: light-dark(var(--pc-text-1), #fff);
+  border: 1px solid light-dark(var(--pc-border), transparent);
+  -webkit-backdrop-filter: light-dark(none, blur(3px));
+  backdrop-filter: light-dark(none, blur(3px));
+  box-shadow: light-dark(
+    var(--pc-shadow-control),
+    0 2px 12px rgba(0, 0, 0, 0.35)
+  );
+}
+.hybrid-root .badge.success {
+  background-color: light-dark(#e6f5ec, rgba(18, 53, 38, 0.92));
+  color: light-dark(#12563a, #fff);
+  border-color: light-dark(rgba(31, 138, 93, 0.3), transparent);
+  box-shadow: light-dark(
+    var(--pc-shadow-control),
+    0 2px 12px rgba(0, 0, 0, 0.35)
+  );
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   Shared porcelain rail-button skin — used by the left rail's icon buttons AND
+   the ThemeToggle rendered inside it. One definition, so both stay identical.
+   36px squircle icon-button: transparent resting, inset-gray hover/active fill,
+   thin-stroke glyph. Its tooltip is a near-black pill to the RIGHT (the rail is
+   on the far left), staying dark in both modes per the reference language.
+   ══════════════════════════════════════════════════════════════════════════ */
+.hybrid-root .hy-rail-btn {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--pc-text-2);
+  cursor: pointer;
+  padding: 0;
+  transition:
+    color 140ms ease,
+    background-color 140ms ease;
+}
+@supports (corner-shape: squircle) {
+  .hybrid-root .hy-rail-btn {
+    corner-shape: squircle;
+    border-radius: 12px;
+  }
+}
+.hybrid-root .hy-rail-btn:hover {
+  background: var(--pc-inset);
+  color: var(--pc-text-1);
+}
+.hybrid-root .hy-rail-btn.active {
+  background: var(--pc-inset-strong);
+  color: var(--pc-text-1);
+}
+.hybrid-root .hy-rail-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+  pointer-events: none;
+}
+.hybrid-root .hy-rail-btn:focus-visible {
+  outline: 2px solid var(--pc-focus);
+  outline-offset: 2px;
+}
+.hybrid-root .hy-rail-btn svg {
+  width: 19px;
+  height: 19px;
+  display: block;
+}
+
+.hybrid-root .hy-rail-btn[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  z-index: 60;
+  left: calc(100% + 12px);
+  top: 50%;
+  transform: translateY(-50%) translateX(-3px);
+  padding: 5px 9px;
+  border-radius: 8px;
+  background: var(--pc-tooltip-bg);
+  color: var(--pc-tooltip-text);
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.28);
+  transition:
+    opacity 130ms ease,
+    transform 130ms ease;
+}
+.hybrid-root .hy-rail-btn[data-tooltip]:hover::after,
+.hybrid-root .hy-rail-btn[data-tooltip]:focus-visible::after {
+  opacity: 1;
+  transform: translateY(-50%) translateX(0);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   Visually-hidden file inputs.
+   ══════════════════════════════════════════════════════════════════════════ */
+.hybrid-root .hy-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   Responsive.
+   ══════════════════════════════════════════════════════════════════════════ */
+@media (max-width: 900px) {
+  .hybrid-root {
+    --hy-inspector-w: min(46vw, 300px);
+    --hy-dock-reserve: 200px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hybrid-root .output::before,
+  .hybrid-root two-up .scrubber,
+  .hybrid-root .hy-rail-btn,
+  .hybrid-root .hy-rail-btn[data-tooltip]::after {
+    transition-duration: 0ms;
+  }
+}
