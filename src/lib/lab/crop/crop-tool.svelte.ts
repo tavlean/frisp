@@ -29,8 +29,11 @@ import { cropToPngFile } from './render-crop';
 
 export class CropTool {
   readonly bitmap: ImageBitmap;
-  readonly imageWidth: number;
-  readonly imageHeight: number;
+  // Declaration-time defaults keep TS happy about the $derived field
+  // initializers below ($derived closures evaluate lazily, after the
+  // constructor has assigned the real values).
+  readonly imageWidth: number = 0;
+  readonly imageHeight: number = 0;
   readonly fileName: string;
 
   state = $state<CropState>() as CropState;

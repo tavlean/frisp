@@ -16,6 +16,10 @@
   import TopBar from '$lib/lab/porcelain/TopBar.svelte';
   import LeftPanel from '$lib/lab/porcelain/LeftPanel.svelte';
   import LabOptionsPanel from '$lib/lab/porcelain/LabOptionsPanel.svelte';
+  import CropStage from '$lib/lab/crop/CropStage.svelte';
+  import CropPanel from '$lib/lab/crop/CropPanel.svelte';
+  import { CropTool } from '$lib/lab/crop/crop-tool.svelte';
+  import type { CropSnapshot } from '$lib/lab/crop/crop-types';
   import ThemeSwitch, {
     type ThemeMode,
   } from '$lib/lab/porcelain/ThemeSwitch.svelte';
@@ -30,12 +34,56 @@
   let theme = $state<ThemeMode>('system');
   let fileInput = $state<HTMLInputElement>();
 
+  // ── Crop mode (lab-level, upstream of the session) ──────────────────────
+  // Crop is NON-DESTRUCTIVE within the session: `original` is the file the
+  // user actually picked, `cropSnapshot` the last applied crop — re-opening
+  // the tool restores the crop over the ORIGINAL pixels. Apply feeds a
+  // rendered PNG through pickFiles, so the whole pipeline sees a plain file.
+  let cropTool = $state<CropTool | null>(null);
+  let cropBusy = $state(false);
+  let original: File | null = null;
+  let cropSnapshot: CropSnapshot | null = null;
+
   onMount(() => {
     isMac = /mac|iphone|ipad/i.test(
       navigator.platform || navigator.userAgent || '',
     );
-    return () => session.dispose();
+    return () => {
+      session.dispose();
+      cropTool?.dispose();
+    };
   });
+
+  async function openCrop() {
+    if (!session.file || session.isVectorSource || cropTool) return;
+    const source = original ?? session.file;
+    try {
+      cropTool = await CropTool.create(source, cropSnapshot);
+    } catch {
+      void snackbar.show("Couldn't decode this image for cropping.");
+    }
+  }
+
+  function closeCrop() {
+    cropTool?.dispose();
+    cropTool = null;
+    cropBusy = false;
+  }
+
+  async function applyCrop() {
+    if (!cropTool || cropBusy) return;
+    cropBusy = true;
+    try {
+      const file = await cropTool.applyToFile();
+      cropSnapshot = cropTool.snapshot();
+      // Internal re-pick: deliberately does NOT touch `original`.
+      session.pickFiles([file], () => {});
+      closeCrop();
+    } catch {
+      cropBusy = false;
+      void snackbar.show('Cropping failed — nothing was changed.');
+    }
+  }
 
   // Mirror the production per-side effects that live OUTSIDE EditorSession.
   // (Route/history/bulk/service-worker effects are intentionally skipped — see
@@ -50,12 +98,16 @@
   }
 
   // All drops route to the single editor: take the first supported image.
+  // A genuinely new image resets the crop lineage (original + snapshot).
   function routeFiles(imported: ImportedFile[]) {
     const first = imported.find((item) => item.file.type.startsWith('image/'));
     if (!first) {
       void snackbar.show('No supported images found.');
       return;
     }
+    closeCrop();
+    original = first.file;
+    cropSnapshot = null;
     pickFiles([first.file]);
   }
 
@@ -65,6 +117,12 @@
 
   function onFileInputChange(event: Event) {
     const input = event.currentTarget as HTMLInputElement;
+    const first = input.files?.[0];
+    if (first) {
+      closeCrop();
+      original = first;
+      cropSnapshot = null;
+    }
     pickFiles(input.files);
     input.value = '';
   }
@@ -73,6 +131,25 @@
   // leave typeable fields alone so native text-undo still works.
   function onKeydown(event: KeyboardEvent) {
     if (!session.file) return;
+
+    // Crop mode owns Esc (disarm sampling, then cancel) and Enter (apply).
+    if (cropTool) {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        if (cropTool.sampling) cropTool.sampling = false;
+        else closeCrop();
+        return;
+      }
+      if (event.key === 'Enter') {
+        const target = event.target as HTMLElement | null;
+        if (target && target.tagName === 'INPUT') return; // field commit
+        event.preventDefault();
+        void applyCrop();
+        return;
+      }
+      return; // no editor shortcuts while cropping
+    }
+
     const mod = event.metaKey || event.ctrlKey;
     if (!mod) return;
 
@@ -111,7 +188,17 @@
     class:force-dark={theme === 'dark'}
     {@attach fileDrop((files) => routeFiles(files))}
   >
-    {#if session.file}
+    {#if session.file && cropTool}
+      <CropStage tool={cropTool} />
+
+      <aside class="panel panel-right options-2 crop-panel-host">
+        <CropPanel
+          tool={cropTool}
+          onapply={() => void applyCrop()}
+          oncancel={closeCrop}
+        />
+      </aside>
+    {:else if session.file}
       <Output
         leftImage={session.runtime[0].result?.outputImageData}
         rightImage={session.runtime[1].result?.outputImageData}
@@ -129,7 +216,12 @@
         onRotate={() => session.rotate()}
       />
 
-      <TopBar {session} {isMac} />
+      <TopBar
+        {session}
+        {isMac}
+        oncrop={() => void openCrop()}
+        cropDisabled={session.isVectorSource}
+      />
 
       {#if session.firstError}
         <p class="error-pill" role="alert">{session.firstError}</p>
