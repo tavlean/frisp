@@ -368,3 +368,81 @@
     transition-duration: 0ms;
   }
 }
+
+/* ── Toolbar-integrated canvas controls ────────────────────────────────────
+   Reference 1 keeps zoom inside the TOP toolbar. Output owns the cluster, so
+   it is repositioned from bottom-centre into the toolbar row: the TopBar
+   pills right-align to the viewport centre and the cluster starts just right
+   of it, reading as one centred toolbar. 23px = toolbar top (16px) +
+   (pill 52px − button 38px) / 2, so pills and buttons share a centreline. */
+.porcelain-root .controls {
+  top: 23px;
+  bottom: auto;
+  left: calc(50% + 4px);
+  right: auto;
+  justify-content: flex-start;
+  z-index: 12;
+}
+/* The popover anchored to the cluster must now open DOWNWARD. */
+.porcelain-root .view-options {
+  top: calc(100% + 8px);
+  bottom: auto;
+}
+@media (max-width: 760px) {
+  /* The compact toolbar leaves no room beside it — the cluster becomes a
+     second centred row beneath it. */
+  .porcelain-root .controls {
+    top: 60px;
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+    justify-content: center;
+  }
+}
+
+/* ── Light-mode purity: pieces that stayed studio-dark ─────────────────────
+   The two-up scrubber, snackbar and processing badge carry hardcoded dark
+   fills from the studio theme; porcelain themes them per scheme. Tooltips
+   stay near-black in both modes by design (reference language). */
+.porcelain-root two-up {
+  --track-color: light-dark(rgba(20, 20, 15, 0.22), rgba(135, 135, 150, 0.55));
+  --thumb-background: light-dark(#ffffff, rgba(28, 28, 32, 0.9));
+}
+.porcelain-root .scrubber {
+  border-color: light-dark(rgba(20, 20, 15, 0.1), rgba(255, 255, 255, 0.18));
+  box-shadow:
+    0 2px 6px light-dark(rgba(20, 20, 15, 0.1), rgba(0, 0, 0, 0.35)),
+    0 10px 28px light-dark(rgba(20, 20, 15, 0.16), rgba(0, 0, 0, 0.45));
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+.porcelain-root .snackbar {
+  background: var(--pc-surface);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border-color: var(--pc-border);
+  color: var(--pc-text-1);
+  box-shadow: var(--pc-shadow-popover);
+}
+.porcelain-root .snackbar .action {
+  color: var(--pc-text-1);
+  text-transform: none;
+  letter-spacing: 0;
+}
+.porcelain-root .snackbar .action:hover {
+  background: var(--pc-inset);
+}
+.porcelain-root .badge {
+  background-color: light-dark(rgba(255, 255, 255, 0.94), rgba(0, 0, 0, 0.72));
+  color: light-dark(#1b1b1f, #ffffff);
+  box-shadow:
+    0 0 0 1px light-dark(rgba(20, 20, 15, 0.08), transparent),
+    0 2px 12px light-dark(rgba(20, 20, 15, 0.14), rgba(0, 0, 0, 0.35));
+}
+.porcelain-root .badge.success {
+  background-color: light-dark(#e4f3ec, rgba(18, 53, 38, 0.92));
+  color: light-dark(#14532d, #ffffff);
+  box-shadow:
+    0 2px 12px light-dark(rgba(20, 20, 15, 0.12), rgba(0, 0, 0, 0.35)),
+    0 0 0 1px rgba(52, 211, 153, 0.3);
+}

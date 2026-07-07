@@ -131,10 +131,12 @@
 
 <style>
   .topbar {
+    /* Right-aligned to the viewport centre: Output's zoom cluster is CSS-docked
+       just right of centre (see porcelain.css), so the two halves read as one
+       centred toolbar — the reference keeps zoom in the top bar. */
     position: absolute;
     top: 16px;
-    left: 50%;
-    transform: translateX(-50%);
+    right: calc(50% + 4px);
     z-index: 12;
     display: flex;
     align-items: center;

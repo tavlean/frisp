@@ -597,9 +597,13 @@
 }
 .darkroom-root .range-input::before {
   height: 3px;
+  /* The filled span must be an IMAGE layer (a flat gradient) — a bare color
+     in a non-final background layer invalidates the whole shorthand at
+     computed-value time and the track vanishes. */
   background:
-    var(--dr-text-1) 0 / var(--value-percent, 0%) 100% no-repeat,
-    var(--dr-inset);
+    linear-gradient(90deg, var(--dr-text-1), var(--dr-text-1)) 0 /
+      var(--value-percent, 0%) 100% no-repeat,
+    light-dark(rgba(23, 23, 26, 0.12), rgba(255, 255, 255, 0.14));
 }
 .darkroom-root .thumb {
   width: 12px;
@@ -775,4 +779,47 @@
     transition-duration: 0ms !important;
     animation-duration: 0ms !important;
   }
+}
+
+/* ── Light-mode purity: pieces that stayed studio-dark ─────────────────────
+   The two-up scrubber, snackbar and processing badge carry hardcoded dark
+   fills from the studio theme; darkroom themes them per scheme. Tooltips
+   stay near-black in both modes by design (reference language). */
+.darkroom-root two-up {
+  --track-color: light-dark(rgba(23, 23, 26, 0.25), rgba(135, 135, 150, 0.55));
+  --thumb-background: light-dark(#ffffff, rgba(17, 17, 19, 0.85));
+}
+.darkroom-root .scrubber {
+  border-color: light-dark(rgba(0, 0, 0, 0.08), rgba(255, 255, 255, 0.14));
+  box-shadow: 0 4px 16px light-dark(rgba(20, 20, 15, 0.18), rgba(0, 0, 0, 0.5));
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+.darkroom-root .snackbar {
+  background: var(--dr-panel);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border-color: var(--dr-border);
+  color: var(--dr-text-1);
+  box-shadow: var(--dr-shadow-pop);
+}
+.darkroom-root .snackbar .action {
+  color: var(--dr-text-1);
+}
+.darkroom-root .snackbar .action:hover {
+  background: var(--dr-inset);
+}
+.darkroom-root .badge {
+  background-color: light-dark(rgba(255, 255, 255, 0.94), rgba(0, 0, 0, 0.72));
+  color: light-dark(#17171a, #ffffff);
+  box-shadow:
+    0 0 0 1px light-dark(rgba(0, 0, 0, 0.07), transparent),
+    0 2px 12px light-dark(rgba(20, 20, 15, 0.14), rgba(0, 0, 0, 0.35));
+}
+.darkroom-root .badge.success {
+  background-color: light-dark(#e4f3ec, rgba(18, 53, 38, 0.92));
+  color: light-dark(#14532d, #ffffff);
+  box-shadow:
+    0 2px 12px light-dark(rgba(20, 20, 15, 0.12), rgba(0, 0, 0, 0.35)),
+    0 0 0 1px rgba(52, 211, 153, 0.3);
 }
