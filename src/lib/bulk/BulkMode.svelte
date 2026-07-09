@@ -1,6 +1,10 @@
 <script lang="ts">
   import { onMount, untrack } from 'svelte';
   import { EditorSession } from '$lib/editor/editor-session.svelte';
+  import {
+    encodeSignature,
+    resizeSignature,
+  } from '$lib/editor/encode-signature';
   import type { CompressOutcome, SideFormat } from '$lib/compress';
   import SvelteKitWorkerBridge from '$lib/sveltekit-worker-bridge';
   import {
@@ -256,7 +260,8 @@
         processedImageData: processed,
         outputImageData,
       });
-    } catch (error) {
+    } catch {
+      // Hydration is an optimization; any failure falls back to a real encode.
       if (signal.aborted) return;
       if (seedId === seedSerial && bulkStore.selectedId === job.id) {
         seedFocusThroughEditor(job);
@@ -301,28 +306,31 @@
     const loadId = focusSession.loadId + 1;
     const preprocessedWidth = images.sourceImageData.width;
     const preprocessedHeight = images.sourceImageData.height;
-    const leftSig = focusEncodeSignature(
+    // Seed each runtime under the exact signature the editor's own encode
+    // effect will recompute for this document, so hydration registers as
+    // "already on screen" instead of triggering a redundant re-encode.
+    const leftSig = encodeSignature(
+      focusSession.preprocessorState,
       'identity',
       {},
       focusSession.sides[0].processorState,
-      focusSession.preprocessorState,
       preprocessedWidth,
       preprocessedHeight,
     );
-    const rightSig = focusEncodeSignature(
+    const rightSig = encodeSignature(
+      focusSession.preprocessorState,
       focusSession.sides[1].format,
       focusSession.sides[1].optionsByFormat[focusSession.sides[1].format] ?? {},
       focusSession.sides[1].processorState,
-      focusSession.preprocessorState,
       preprocessedWidth,
       preprocessedHeight,
     );
-    const leftResizeSig = focusResizeSignature(
+    const leftResizeSig = resizeSignature(
       focusSession.sides[0].processorState,
       preprocessedWidth,
       preprocessedHeight,
     );
-    const rightResizeSig = focusResizeSignature(
+    const rightResizeSig = resizeSignature(
       focusSession.sides[1].processorState,
       preprocessedWidth,
       preprocessedHeight,
@@ -367,105 +375,17 @@
     index: 0 | 1,
     outcome: CompressOutcome,
     signature: string,
-    resizeSignature: string,
+    resizeSig: string,
     loadId: number,
   ): void {
     const runtime = focusSession.runtime[index];
     runtime.result = outcome;
     runtime.displayedSig = signature;
     runtime.encodedLoadId = loadId;
-    runtime.lastResizeSig = resizeSignature;
+    runtime.lastResizeSig = resizeSig;
     runtime.spinnerDelayPassed = false;
     runtime.error = '';
     runtime.status = 'done';
-  }
-
-  function focusEncodeSignature(
-    format: SideFormat,
-    options: Record<string, unknown>,
-    processorState: ProcessorState,
-    preprocessorState: typeof defaultPreprocessorState,
-    preprocessedWidth: number,
-    preprocessedHeight: number,
-  ): string {
-    return stableStringify({
-      preprocessor: preprocessorState,
-      recipe: focusSideRecipe(
-        format,
-        options,
-        processorState,
-        focusResizeIsReal(
-          processorState,
-          preprocessedWidth,
-          preprocessedHeight,
-        ),
-      ),
-    });
-  }
-
-  function focusSideRecipe(
-    format: SideFormat,
-    options: Record<string, unknown>,
-    processorState: ProcessorState,
-    resizeCounts: boolean,
-  ): {
-    format: SideFormat;
-    options: Record<string, unknown>;
-    quantize: ProcessorState['quantize'];
-    resize: ProcessorState['resize'] | null;
-  } {
-    return {
-      format,
-      options: options ?? {},
-      quantize: processorState.quantize,
-      resize: resizeCounts ? processorState.resize : null,
-    };
-  }
-
-  function focusResizeSignature(
-    processorState: ProcessorState,
-    preprocessedWidth: number,
-    preprocessedHeight: number,
-  ): string {
-    return focusResizeIsReal(
-      processorState,
-      preprocessedWidth,
-      preprocessedHeight,
-    )
-      ? stableStringify(processorState.resize)
-      : 'off';
-  }
-
-  function focusResizeIsReal(
-    processorState: ProcessorState,
-    preprocessedWidth: number,
-    preprocessedHeight: number,
-  ): boolean {
-    const resize = processorState.resize;
-    return (
-      resize.enabled &&
-      preprocessedWidth > 0 &&
-      preprocessedHeight > 0 &&
-      (resize.width !== preprocessedWidth ||
-        resize.height !== preprocessedHeight)
-    );
-  }
-
-  function stableStringify(value: unknown): string {
-    if (value === null || typeof value !== 'object')
-      return JSON.stringify(value);
-    if (Array.isArray(value))
-      return '[' + value.map(stableStringify).join(',') + ']';
-
-    const record = value as Record<string, unknown>;
-    return (
-      '{' +
-      Object.keys(record)
-        .sort()
-        .map((key) => JSON.stringify(key) + ':' + stableStringify(record[key]))
-        .join(',') +
-      '}'
-    );
   }
 
   function snapshotFocusSide(): {

@@ -16,6 +16,11 @@ import { abortable, isAbortError } from 'client/lazy-app/abort';
 import { APP_NAME } from 'shared/brand';
 import { stableStringify } from 'shared/stable-stringify';
 import {
+  encodeSignature,
+  resizeSignature,
+  sideRecipe,
+} from './encode-signature';
+import {
   decodeSourceImage,
   preprocessImage,
   type DecodedSourceImage,
@@ -78,30 +83,6 @@ const SETTINGS_PERSIST_DELAY = 200;
 const HISTORY_COMMIT_DELAY = 350;
 
 const sideLabel = (index: SideIndex) => (index === 0 ? 'Left' : 'Right');
-
-/**
- * The canonical OUTPUT-AFFECTING projection of one side's document state: only
- * the active format's options matter (inactive formats can't be edited from
- * the UI), and a resize that doesn't change the output folds to null (disabled
- * resize in the history path; identity resize in the encode path). BOTH the
- * cache/encode signature and the history signature are built from this one
- * projection — that shared origin is what guarantees "undo lands on a cache
- * hit". If the two ever disagreed about what matters, undo would silently
- * degrade into re-encodes; change the projection here and nowhere else.
- */
-function sideRecipe(
-  format: SideFormat,
-  options: unknown,
-  processorState: ProcessorState,
-  resizeCounts: boolean,
-) {
-  return {
-    format,
-    options: options ?? {},
-    quantize: processorState.quantize,
-    resize: resizeCounts ? processorState.resize : null,
-  };
-}
 
 function buildSide(
   saved: SavedSide | undefined,
@@ -312,27 +293,16 @@ export class EditorSession {
     const fileChanged = this.loadId !== runtime.encodedLoadId;
     runtime.encodedLoadId = this.loadId;
 
-    // A resize only counts as a *real* resize when it targets a size different from
-    // the (preprocessed) source. At the source's own dimensions the default
-    // interpolating filters are an identity pass, so "enabled at 100%" changes
-    // nothing — it shouldn't run, nor read as "Resizing". Source dims are read
-    // untracked so this never makes the encode depend on `results`.
-    const resize = request.processorState.resize;
+    // Source dims are read untracked so the resize-is-real fold (see
+    // encode-signature.ts) never makes the encode effect depend on `results`.
     const [srcW, srcH] = untrack(() => [this.naturalWidth, this.naturalHeight]);
-    const resizeIsReal =
-      resize.enabled &&
-      srcW > 0 &&
-      srcH > 0 &&
-      (resize.width !== srcW || resize.height !== srcH);
 
     // Label the badge by WHAT changed this pass: diff the *effective* resize recipe
     // against the previous pass. A real resize-control change → "Resizing"; anything
     // else (quality/format/palette/rotate, or an identity resize) → "Optimizing".
-    // Collapsing "no real resize" to a constant means toggling resize on at 100% —
-    // or flipping Premultiply/Linear RGB, which only matter while actually scaling —
-    // never masquerades as a resize edit. A new file always reads as 'optimize'
-    // (fileChanged short-circuits before the diff can fire).
-    const resizeSig = resizeIsReal ? stableStringify(resize) : 'off';
+    // A new file always reads as 'optimize' (fileChanged short-circuits before
+    // the diff can fire).
+    const resizeSig = resizeSignature(request.processorState, srcW, srcH);
     const prevSig = runtime.lastResizeSig;
     runtime.lastResizeSig = resizeSig;
     runtime.activity =
@@ -345,21 +315,18 @@ export class EditorSession {
       return;
     }
 
-    // The signature of this pass's inputs: the preprocessor plus the canonical
-    // side recipe (the complete input to compressFile, the source file aside —
-    // that's guarded by fileChanged), with the resize folded in only when it
-    // actually changes the image. It both (a) detects a redundant pass and
-    // (b) keys the result cache. Built from the SAME sideRecipe projection as
-    // docSig, so a history restore always recomputes to a cache-hitting key.
-    const encodeSig = stableStringify({
-      preprocessor: request.preprocessorState,
-      recipe: sideRecipe(
-        request.format,
-        request.options,
-        request.processorState,
-        resizeIsReal,
-      ),
-    });
+    // The signature of this pass's inputs (file identity aside — that's guarded
+    // by fileChanged). It both (a) detects a redundant pass and (b) keys the
+    // result cache. Built from the SAME sideRecipe projection as docSig, so a
+    // history restore always recomputes to a cache-hitting key.
+    const encodeSig = encodeSignature(
+      request.preprocessorState,
+      request.format,
+      request.options,
+      request.processorState,
+      srcW,
+      srcH,
+    );
 
     // Already on screen for this side? Re-encoding would reproduce identical
     // bytes, so we don't: no wasted work, no badge flash. This is what makes
