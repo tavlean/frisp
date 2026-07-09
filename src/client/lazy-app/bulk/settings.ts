@@ -54,7 +54,7 @@ function mergeDeep<T>(base: T, override: DeepPartial<T> | undefined | null): T {
   return result as T;
 }
 
-function cloneOrNull<T>(value: T): T {
+function clone<T>(value: T): T {
   return structuredClone(value);
 }
 
@@ -189,10 +189,10 @@ function normalizedProcessorRecipe(
 } {
   return {
     quantize: processorState.quantize.enabled
-      ? cloneOrNull(processorState.quantize)
+      ? clone(processorState.quantize)
       : null,
     resize: resizeCounts(processorState.resize, sourceDimensions)
-      ? cloneOrNull(processorState.resize)
+      ? clone(processorState.resize)
       : null,
   };
 }
@@ -211,7 +211,7 @@ export function normalizedSettingsRecipe(
     encoderState: settings.encoderState
       ? {
           type: settings.encoderState.type,
-          options: cloneOrNull(settings.encoderState.options),
+          options: clone(settings.encoderState.options),
         }
       : null,
     processorState: normalizedProcessorRecipe(
