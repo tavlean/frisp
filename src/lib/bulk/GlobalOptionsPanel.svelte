@@ -55,7 +55,6 @@
     processorState={bulkStore.globalSide.processorState}
     {naturalWidth}
     {naturalHeight}
-    sourceName={bulkStore.selectedFile?.name}
     isVector={bulkStore.selectedFile?.type === 'image/svg+xml'}
     result={null}
     working={false}

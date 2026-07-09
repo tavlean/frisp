@@ -442,7 +442,6 @@
             processorState={focusSession.sides[1].processorState}
             naturalWidth={focusSession.naturalWidth}
             naturalHeight={focusSession.naturalHeight}
-            sourceName={focusSession.file?.name}
             isVector={focusSession.isVectorSource}
             result={focusSession.runtime[1].result}
             working={focusSession.runtime[1].showSpinner}

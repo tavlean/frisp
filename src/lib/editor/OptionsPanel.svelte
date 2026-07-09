@@ -44,8 +44,6 @@
     processorState: ProcessorState;
     naturalWidth: number;
     naturalHeight: number;
-    /** Source filename. Rendered by ImageInfoPanel; kept here for API continuity. */
-    sourceName?: string;
     /** True when the source is a vector (SVG) — enables the Vector resize method. */
     isVector?: boolean;
     result: CompressOutcome | null;
@@ -67,7 +65,6 @@
     processorState,
     naturalWidth,
     naturalHeight,
-    sourceName,
     isVector = false,
     result,
     working,

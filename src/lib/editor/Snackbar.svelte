@@ -1,5 +1,5 @@
 <script lang="ts">
-  // Renders the current snackbar message (see snackbar.svelte.ts). Mirrors
+  // Renders the current snackbar message (see snackbar-store.svelte.ts). Mirrors
   // Squoosh's bottom-centre snack-bar with optional action buttons (e.g. Undo).
   import { fly } from 'svelte/transition';
   // Import via the same $lib specifier as the rest of the app so Vite resolves

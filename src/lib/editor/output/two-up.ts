@@ -1,7 +1,10 @@
 // Ported from src/client/lazy-app/Compress/Output/custom-els/TwoUp/index.ts.
-// Only change from the original: CSS-module class references become literal class
+// Changes from the original: CSS-module class references become literal class
 // names paired with the global two-up.css (Vite doesn't treat plain .css as
-// modules), and the styles import is a normal side-effect import.
+// modules), the styles import is a normal side-effect import, the 1/2/3 divider
+// keys are scoped to viewer-or-body focus with no modifiers (parity-audit
+// §A.16), and a public divider API (centerSplit / splitFraction + a
+// 'splitchange' event) was added for the reset-view control.
 import PointerTracker, { type Pointer } from 'pointer-tracker';
 import './two-up.css';
 

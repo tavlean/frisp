@@ -258,7 +258,6 @@
             processorState={session.sides[0].processorState}
             naturalWidth={session.naturalWidth}
             naturalHeight={session.naturalHeight}
-            sourceName={session.file.name}
             isVector={session.isVectorSource}
             result={session.runtime[0].result}
             working={session.runtime[0].showSpinner}
@@ -283,7 +282,6 @@
           processorState={session.sides[1].processorState}
           naturalWidth={session.naturalWidth}
           naturalHeight={session.naturalHeight}
-          sourceName={session.file.name}
           isVector={session.isVectorSource}
           result={session.runtime[1].result}
           working={session.runtime[1].showSpinner}

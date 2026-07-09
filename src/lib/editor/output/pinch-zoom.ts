@@ -1,6 +1,9 @@
 // Ported from src/client/lazy-app/Compress/Output/custom-els/PinchZoom/index.ts.
 // Changes from the original: the styles import is a normal side-effect import,
-// and the PointerTracker callback params carry explicit types for SvelteKit.
+// the PointerTracker callback params carry explicit types for SvelteKit, smart
+// wheel-zoom anchoring was added (pointer-anchored over the image, centre-
+// anchored over the backdrop — see the 2026-06-28 zoom-scroll work), and
+// customElements.define is guarded against double registration under HMR.
 import PointerTracker, { type Pointer } from 'pointer-tracker';
 import './pinch-zoom.css';
 import { isSafari } from 'client/lazy-app/util';
