@@ -1,6 +1,6 @@
 # Issue List
 
-Last updated: 2026-06-02.
+Last updated: 2026-07-10.
 
 Small backlog seed. The big tracks live in their own plans — see
 [README.md](README.md) for the map. Product work belongs in
@@ -29,6 +29,32 @@ Small backlog seed. The big tracks live in their own plans — see
    will exercise this).
 4. **Turn stable backlog items into GitHub issues** if/when the project moves to
    issue-tracked work.
+5. **Bulk-engine barrel pruning (AFTER Phase-3 UI wiring).** The 2026-07-10
+   quality pass verified a set of `src/client/lazy-app/bulk/*` exports with no
+   consumer anywhere (all re-exported via the barrel): `changes.ts` entirely
+   (`applyGlobalSettings`/`applyJobOverrides`/`applyClearJobOverrides`),
+   `queue.ts` internals (`updateJob`, `setJobStatus`, `getBulkJobCounterDelta`),
+   `export.ts` (`getExportableJobs`, `getSelectedExportableJobs`),
+   `import.ts` (`createImageJobId` + several types), `processor.ts`
+   (`createBulkProcessPlan` + types), `snapshot.ts`
+   (`serializeBulkSessionSnapshot` + interfaces), `strip.ts`
+   (`getSelectedBulkStripItem`), `session.ts` (`getOverriddenJobs`,
+   `getBatchProgress`). Deliberately NOT deleted now: Phase-3 override-UI
+   wiring and the memory-ceiling design may consume some (snapshot
+   serialization is designed API). Once Phase 3 lands, prune what's still
+   unused.
+6. **Drag-teardown micro-gaps (upstream-parity, low impact).** `Range.svelte`
+   pointer-drag installs window `pointerup`/`pointercancel` listeners cleaned
+   only by their own firing; `pinch-zoom.ts`/`two-up.ts` never stop their
+   constructor-local PointerTrackers on disconnect (upstream Squoosh behaves
+   the same). Worst case is one stray callback after a mid-drag unmount. Fix
+   opportunistically if these files are touched for other reasons.
+7. **`session.ts` override paths stay coarse until Phase 3.** Same-format
+   overrides keep the wholesale `encoderState` alongside the sparse
+   `encoderControls` companion, so `getSettingsOverridePaths` reports
+   `encoderState` rather than per-control ids — intentional interim seam (the
+   production UI still writes legacy full option objects); resolves with the
+   WS-G UI half.
 
 ## Pointers (not tracked here)
 

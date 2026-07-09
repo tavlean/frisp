@@ -4,6 +4,45 @@ Short session-by-session build log: what changed, why, and the gotchas a future
 session must know. Newest first. (Live project state stays in
 [STATUS.md](STATUS.md); this is the narrative trail.)
 
+## 2026-07-10 — Whole-project quality pass (fable-pass)
+
+Deep senior pass over the production code (labs excluded by design — decision
+pending, losers get deleted): every file judged against its spec/decision
+docs, most-central first. Headline: the codebase is in strong shape — editor
+core, bulk engine, worker layer, and service worker all read at exemplar
+standard; most areas needed nothing.
+
+**What changed (each commit gated by typecheck + 110 unit tests; full e2e
+61-passed/1-skip both browsers before and after):**
+
+- `c6cfdd86` — **one canonical encode-signature projection.** BulkMode's
+  focus-hydration had reimplemented the editor's encode/resize signature
+  construction (4 helpers + a fourth private `stableStringify`) — the exact
+  drift class the 2026-07-02 hardening batch (`da273584`) eliminated. Now
+  `src/lib/editor/encode-signature.ts` (sideRecipe / resizeIsReal /
+  encodeSignature / resizeSignature) feeds both `EditorSession.encodeSide`
+  and BulkMode.
+- `da58751b` — **fix:** `BulkStore.reset()/dispose()` now clear BOTH debounced
+  apply timers (+ the pending payload); before, a pre-reset global-apply
+  snapshot could re-apply onto the fresh session ~200ms after reset.
+- `5d88754b` / `284871c0` / `9fadb1fb` — craft: `formatLabel` deduped into
+  `src/lib/editor/format-label.ts`; self-only exports un-exported; unused
+  `BulkRuntime.cancel/dispose` aliases deleted; `cloneOrNull`→`clone`;
+  OptionsPanel's dead `sourceName` prop removed from all 4 call sites;
+  pinch-zoom/two-up/Snackbar comment rot fixed (headers now admit the real
+  local features).
+
+**Verified-refuted (no change, worth remembering):** the JXL panel's
+unguarded `lossyModular = quality < 7` under lossless is output-inert —
+`codecs/jxl/enc/jxl_enc.cpp:63` sets `modular_mode = (lossyModular ||
+quality == 100)` and quality 100 forces distance 0. Upstream parity kept;
+the bulk registry's extra guard is equally correct.
+
+**Flagged, not fixed:** engine-barrel pruning, drag-teardown micro-gaps, and
+the intentional coarse override-path seam → [issue-list.md](issue-list.md)
+items 5–7. Both memory-flagged must-dos (two-up divider, host-objects-in-
+$state) were confirmed long since fixed.
+
 ## 2026-07-05 — Rename-proofing + sqush.app sunset Worker
 
 **Why:** the maintainer may rename the app again; a rename must be a small task,
