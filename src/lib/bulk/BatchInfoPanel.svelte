@@ -22,6 +22,7 @@
   // tiny "ALL IMAGES" whisper-caption tops the footer so the info-for-one /
   // action-for-all seam reads intentionally.
   import ImageInfoRows from '$lib/editor/ImageInfoRows.svelte';
+  import { formatLabel } from '$lib/editor/format-label';
   import { prettySize, prettySizeParts } from '$lib/editor/pretty-size';
   import { bulkStore } from './store.svelte';
   import DeltaPill from './DeltaPill.svelte';
@@ -63,32 +64,6 @@
     output.totalOriginalSize - output.totalOutputSize,
   );
   const savedPretty = $derived(prettySize(Math.max(savedBytes, 0)));
-
-  /** A short, uppercase format label from the MIME type or extension. */
-  function formatLabel(source: File): string {
-    const fromMime = source.type.split('/')[1]?.toLowerCase() ?? '';
-    const fromExt = source.name.includes('.')
-      ? source.name.split('.').pop()!.toLowerCase()
-      : '';
-    const raw = fromMime || fromExt;
-    const map: Record<string, string> = {
-      jpeg: 'JPEG',
-      jpg: 'JPEG',
-      jfif: 'JPEG',
-      png: 'PNG',
-      webp: 'WebP',
-      avif: 'AVIF',
-      gif: 'GIF',
-      'svg+xml': 'SVG',
-      svg: 'SVG',
-      jxl: 'JPEG XL',
-      qoi: 'QOI',
-      bmp: 'BMP',
-      tiff: 'TIFF',
-      tif: 'TIFF',
-    };
-    return map[raw] ?? (raw ? raw.toUpperCase() : 'Image');
-  }
 
   // ── Global-face batch facts (computed from the actual source files) ────────
   const jobs = $derived(bulkStore.session.jobs);

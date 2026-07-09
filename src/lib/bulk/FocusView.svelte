@@ -14,7 +14,7 @@
   import StackStage from './StackStage.svelte';
   import ViewModePicker from './ViewModePicker.svelte';
 
-  export const FOCUS_VIEW_LANDSCAPE_OR_SQUARE_RATIO = 0.95;
+  const FOCUS_VIEW_LANDSCAPE_OR_SQUARE_RATIO = 0.95;
 
   interface Props {
     focusSession: EditorSession;

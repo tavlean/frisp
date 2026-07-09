@@ -1,5 +1,6 @@
 <script lang="ts">
   import { inferAspect } from './aspect';
+  import { formatLabel } from './format-label';
   import { prettySize } from './pretty-size';
 
   interface Props {
@@ -11,32 +12,6 @@
   }
 
   let { file, width, height }: Props = $props();
-
-  /** A short, uppercase format label from the MIME type or extension. */
-  function formatLabel(source: File): string {
-    const fromMime = source.type.split('/')[1]?.toLowerCase() ?? '';
-    const fromExt = source.name.includes('.')
-      ? source.name.split('.').pop()!.toLowerCase()
-      : '';
-    const raw = fromMime || fromExt;
-    const map: Record<string, string> = {
-      jpeg: 'JPEG',
-      jpg: 'JPEG',
-      jfif: 'JPEG',
-      png: 'PNG',
-      webp: 'WebP',
-      avif: 'AVIF',
-      gif: 'GIF',
-      'svg+xml': 'SVG',
-      svg: 'SVG',
-      jxl: 'JPEG XL',
-      qoi: 'QOI',
-      bmp: 'BMP',
-      tiff: 'TIFF',
-      tif: 'TIFF',
-    };
-    return map[raw] ?? (raw ? raw.toUpperCase() : 'Image');
-  }
 
   const hasDims = $derived(width > 0 && height > 0);
   const aspect = $derived(hasDims ? inferAspect(width, height) : null);

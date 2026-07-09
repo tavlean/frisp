@@ -148,7 +148,7 @@ export function normalizeProcessorStateForBulkDiff(
   } as BulkImageSettings['processorState'];
 }
 
-export function normalizeBulkSettingsForBulkDiff(
+function normalizeBulkSettingsForBulkDiff(
   settings: BulkImageSettings,
 ): BulkImageSettings {
   return {
@@ -159,7 +159,7 @@ export function normalizeBulkSettingsForBulkDiff(
   };
 }
 
-export function bulkSettingsEqualForBulkDiff(
+function bulkSettingsEqualForBulkDiff(
   left: BulkImageSettings,
   right: BulkImageSettings,
 ): boolean {

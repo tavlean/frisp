@@ -1,4 +1,4 @@
-export const SIZE_UNITS = ['B', 'kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+const SIZE_UNITS = ['B', 'kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
 
 // Decimal (SI, base-1000), 3 significant figures — matches Results.svelte so
 // sizes read identically across the app.

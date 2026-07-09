@@ -117,7 +117,7 @@ describe('bulk runtime', () => {
     const run = runtime.run(host);
     expect(processor.starts).toEqual(['a', 'b']);
 
-    runtime.cancel(host);
+    runtime.cancelProcessing(host);
     await run;
 
     expect(host.session.activeJobs).toBe(0);
