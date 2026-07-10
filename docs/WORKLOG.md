@@ -4,7 +4,7 @@ Short session-by-session build log: what changed, why, and the gotchas a future
 session must know. Newest first. (Live project state stays in
 [STATUS.md](STATUS.md); this is the narrative trail.)
 
-## 2026-07-10 (later) — intro-page lab: four landing variants
+## 2026-07-10 (later) — intro-page lab: five landing variants
 
 Maintainer-requested lab experiment: the landing screen as a minimal
 full-viewport single section (drop area + tiny header/footer, light+dark).
@@ -25,6 +25,18 @@ routes existed — plain `resolve()` literals now; an SVG used as a full-bleed
 frame needs an explicit CSS box (inset alone leaves it at intrinsic 300×150);
 the Nucleo "photos" pinwheel reads as the Apple Photos brand at display sizes
 — use the plain image glyph instead.
+
+Round 2 (same day): maintainer supplied a Vercel-style three-zone reference →
+fifth variant `/lab/intro/prism` (Opus build, orchestrator-reviewed): headline
++ actions left, prismatic-glow drop stage starring the origami bird centre,
+vertical trust column right, format row as footer; real canvas sample via
+"Try a sample". Brand lockup componentized (`Brand.svelte`: /logo.webp coral
+bird — the ONLY logo asset with alpha; logo-light-mode.webp has an opaque
+tile) and adopted by all five headers. Ledger re-composed onto a single
+560px spine (header/column/footer share one left edge; dot accent dropped;
+200px tray). Verification gotcha: Svelte 5 flushes class bindings async —
+a synchronous DOM read right after .click() misses the update and fakes a
+"broken toggle"; wait a tick before asserting.
 
 ## 2026-07-10 — Whole-project quality pass (fable-pass)
 

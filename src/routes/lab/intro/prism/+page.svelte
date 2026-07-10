@@ -7,9 +7,10 @@
   // file is touched; +page.ts opts this subtree out of prerender/SSR and we
   // hard-guard on `dev` below.
   import { dev } from '$app/environment';
-  import { asset } from '$app/paths';
+  import { asset, resolve } from '$app/paths';
   import { APP_NAME } from 'shared/brand';
   import { IntroDropDemo } from '$lib/lab/intro/drop-demo.svelte';
+  import Brand from '$lib/lab/intro/Brand.svelte';
   import Icon from '$lib/lab/intro/Icon.svelte';
   import ThemeToggle, {
     type ThemeMode,
@@ -90,15 +91,8 @@
     />
 
     <header class="masthead">
-      <a class="brand" href="/" aria-label={APP_NAME}>
-        <img
-          class="brand-mark"
-          src={asset('/logo.webp')}
-          alt=""
-          width="22"
-          height="22"
-        />
-        <span class="wordmark">{APP_NAME}</span>
+      <a class="brand" href={resolve('/')} aria-label={APP_NAME}>
+        <Brand size={17} />
       </a>
       <div class="masthead-right">
         <span class="tag">open source</span>
@@ -246,19 +240,8 @@
   }
   .brand {
     display: inline-flex;
-    align-items: center;
-    gap: 9px;
     text-decoration: none;
     color: inherit;
-  }
-  .brand-mark {
-    display: block;
-  }
-  .wordmark {
-    font-size: 17px;
-    font-weight: 800;
-    letter-spacing: -0.02em;
-    color: var(--il-text-1);
   }
   .masthead-right {
     display: flex;

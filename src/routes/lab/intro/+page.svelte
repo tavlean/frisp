@@ -27,6 +27,12 @@
       tagline:
         'Hyper-minimal mono-accent — one hairline drop tray and a quiet ledger of what happens to your pixels.',
     },
+    {
+      name: 'prism',
+      href: resolve('/lab/intro/prism'),
+      tagline:
+        'Three-zone hero — headline left, luminous prismatic drop stage around the bird, trust column right.',
+    },
   ] as const;
 </script>
 
