@@ -1,0 +1,71 @@
+/*
+ * intro lab — dev-only experiments re-imagining the LANDING page (the intro
+ * screen with the drop area) as a minimal full-viewport single-section
+ * landing: tiny header, inviting drop surface, tiny footer, light AND dark.
+ *
+ * Four sibling variants live under /lab/intro/<name>; each is one
+ * self-contained +page.svelte (throwaway inside, honest outside — drops and
+ * picks are REAL via IntroDropDemo; only the editor handoff is stubbed).
+ * This sheet holds ONLY the shared token contract, every value a
+ * light-dark() pair per the lab convention (see lab-editor-restyle.md).
+ * Variants may add private tokens in their own <style>, but never redefine
+ * these names.
+ *
+ * Squircle convention (maintainer-confirmed): plain border-radius everywhere,
+ * then inside `@supports (corner-shape: squircle)` re-tune with a LARGER
+ * radius + `corner-shape: squircle`.
+ */
+
+.intro-lab-root {
+  color-scheme: light dark;
+
+  /* Page + surfaces (porcelain-derived neutrals). */
+  --il-page: light-dark(#f4f3f1, #111113);
+  --il-surface: light-dark(#ffffff, #1c1c1f);
+  --il-raise: light-dark(#ffffff, #242428);
+  --il-inset: light-dark(#eceae7, #17171a);
+
+  --il-border: light-dark(rgba(20, 20, 15, 0.09), rgba(255, 255, 255, 0.09));
+  --il-border-strong: light-dark(
+    rgba(20, 20, 15, 0.16),
+    rgba(255, 255, 255, 0.18)
+  );
+
+  --il-text-1: light-dark(#1a1a1e, #f5f5f7);
+  --il-text-2: light-dark(rgba(26, 26, 30, 0.62), rgba(245, 245, 247, 0.64));
+  --il-text-3: light-dark(rgba(26, 26, 30, 0.4), rgba(245, 245, 247, 0.4));
+
+  /* Brand accents — coral is the voice, azure the whisper. */
+  --il-accent: light-dark(#e4602f, #ff8a5e);
+  --il-accent-hot: light-dark(#d24e1f, #ff6a3c);
+  --il-accent-2: light-dark(#2276c9, #53b2ff);
+  --il-good: light-dark(#1f8a5d, #3ddc97);
+
+  --il-focus: light-dark(#2276c9, #53b2ff);
+
+  --il-shadow-card: light-dark(
+    0 18px 50px -18px rgba(30, 25, 20, 0.25),
+    0 18px 50px -18px rgba(0, 0, 0, 0.7)
+  );
+  --il-shadow-control: light-dark(
+    0 1px 2px rgba(30, 25, 20, 0.08),
+    0 1px 2px rgba(0, 0, 0, 0.5)
+  );
+
+  background: var(--il-page);
+  color: var(--il-text-1);
+}
+
+/* The lab theme forcer flips every token at once via color-scheme. */
+.intro-lab-root.force-light {
+  color-scheme: light;
+}
+.intro-lab-root.force-dark {
+  color-scheme: dark;
+}
+
+/* Shared focus convention — variants style :focus-visible with this ring. */
+.intro-lab-root :focus-visible {
+  outline: 2px solid var(--il-focus);
+  outline-offset: 2px;
+}

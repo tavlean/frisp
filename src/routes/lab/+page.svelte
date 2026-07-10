@@ -2,18 +2,10 @@
   import { dev } from '$app/environment';
   import { resolve } from '$app/paths';
 
-  // The experiment subroutes (`porcelain/`, `darkroom/`, `hybrid/`) may not all
-  // be present in the generated route table yet — `hybrid/` lands with a sibling
-  // agent — so `resolve()`'s literal-route type would reject them here. Widen the
-  // argument to its own parameter type: runtime behaviour is unchanged (base path
-  // prepended), only the compile-time route check is relaxed for these paths.
-  const labRoute = (path: string) =>
-    resolve(path as Parameters<typeof resolve>[0]);
-
   const experiments = [
     {
       name: 'porcelain',
-      href: labRoute('/lab/porcelain'),
+      href: resolve('/lab/porcelain'),
       vignette: 'porcelain',
       tag: null,
       tagline:
@@ -23,7 +15,7 @@
     },
     {
       name: 'darkroom',
-      href: labRoute('/lab/darkroom'),
+      href: resolve('/lab/darkroom'),
       vignette: 'darkroom',
       tag: null,
       tagline:
@@ -32,12 +24,21 @@
     },
     {
       name: 'hybrid',
-      href: labRoute('/lab/hybrid'),
+      href: resolve('/lab/hybrid'),
       vignette: 'hybrid',
       tag: 'recommended',
       tagline:
         "Darkroom's architecture in porcelain's skin — one bottom bar, no stray panels.",
       caption: 'Rail + flyouts · Eye sections · Zoom docked in the strip',
+    },
+    {
+      name: 'intro page',
+      href: resolve('/lab/intro'),
+      vignette: 'intro',
+      tag: null,
+      tagline:
+        'Four takes on the landing screen — minimal full-viewport drop area, tiny header + footer.',
+      caption: 'billboard · frame · split · ledger — all light + dark',
     },
   ] as const;
 </script>
@@ -73,6 +74,12 @@
                 <div class="d-strip">
                   <span></span><span></span><span></span>
                 </div>
+              {:else if exp.vignette === 'intro'}
+                <div class="i-header"></div>
+                <div class="i-headline"></div>
+                <div class="i-headline i-headline--short"></div>
+                <div class="i-drop"></div>
+                <div class="i-footer"></div>
               {:else}
                 <div class="h-rail">
                   <span></span><span></span><span></span>
@@ -281,6 +288,54 @@
   .p-panel--right {
     right: 16px;
     width: 40%;
+  }
+
+  /* --- intro vignette: light warm landing mock (headline + drop + chrome) --- */
+  .vignette--intro {
+    background: #f4f3f1;
+  }
+  .i-header {
+    position: absolute;
+    top: 12px;
+    left: 16px;
+    right: 16px;
+    height: 6px;
+    border-radius: 999px;
+    background: rgba(30, 25, 20, 0.14);
+  }
+  .i-headline {
+    position: absolute;
+    top: 34%;
+    left: 22%;
+    right: 22%;
+    height: 12px;
+    border-radius: 999px;
+    background: rgba(30, 25, 20, 0.5);
+  }
+  .i-headline--short {
+    top: 46%;
+    left: 32%;
+    right: 32%;
+    background: #e4602f;
+  }
+  .i-drop {
+    position: absolute;
+    top: 60%;
+    bottom: 20%;
+    left: 30%;
+    right: 30%;
+    border: 1.5px dashed rgba(30, 25, 20, 0.35);
+    border-radius: 10px;
+    background: #ffffff;
+  }
+  .i-footer {
+    position: absolute;
+    bottom: 10px;
+    left: 30%;
+    right: 30%;
+    height: 5px;
+    border-radius: 999px;
+    background: rgba(30, 25, 20, 0.12);
   }
 
   /* --- darkroom vignette: ALWAYS dark (previews its own near-black skin) --- */
