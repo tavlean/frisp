@@ -10,6 +10,7 @@
   import { dev } from '$app/environment';
   import { APP_NAME } from 'shared/brand';
   import { IntroDropDemo } from '$lib/lab/intro/drop-demo.svelte';
+  import Brand from '$lib/lab/intro/Brand.svelte';
   import Icon from '$lib/lab/intro/Icon.svelte';
   import ThemeToggle, {
     type ThemeMode,
@@ -81,7 +82,7 @@
 
     <!-- HUD corners: the chrome, pinned just inside the frame. -->
     <div class="hud hud-tl">
-      <span class="wordmark">{APP_NAME}</span>
+      <Brand size={16} />
     </div>
     <div class="hud hud-tr">
       <ThemeToggle value={theme} onchange={(mode) => (theme = mode)} />
@@ -268,12 +269,6 @@
     right: calc(var(--frame-inset) + var(--hud-pad));
     align-items: flex-end;
     text-align: right;
-  }
-  .wordmark {
-    font-size: 16px;
-    font-weight: 800;
-    letter-spacing: -0.01em;
-    color: var(--il-text-1);
   }
   .hud-line {
     font-size: 11.5px;

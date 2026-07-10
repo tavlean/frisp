@@ -2,6 +2,7 @@
   import { dev } from '$app/environment';
   import { APP_NAME } from 'shared/brand';
   import { IntroDropDemo } from '$lib/lab/intro/drop-demo.svelte';
+  import Brand from '$lib/lab/intro/Brand.svelte';
   import Icon from '$lib/lab/intro/Icon.svelte';
   import ThemeToggle, {
     type ThemeMode,
@@ -42,16 +43,21 @@
       onchange={demo.onPick}
     />
 
+    <!-- Header, column, and footer all share ONE spine (the same centred
+         560px measure), so the wordmark, headline, tray, ledger rows, and
+         footer text align on a single left edge — the editorial move that
+         makes the narrow-column concept read as deliberate. -->
     <header class="ledger-header">
-      <span class="wordmark">{APP_NAME}</span>
-      <ThemeToggle value={theme} onchange={(mode) => (theme = mode)} />
+      <div class="spine header-row">
+        <Brand size={16} />
+        <ThemeToggle value={theme} onchange={(mode) => (theme = mode)} />
+      </div>
     </header>
 
     <section class="ledger-stage">
-      <div class="ledger-column">
+      <div class="spine ledger-column">
         <h1>
-          <span class="headline-dot" aria-hidden="true"></span>{APP_NAME}
-          compresses images without uploading them.
+          {APP_NAME} compresses images without uploading them.
         </h1>
 
         <div class:drag-active={demo.dragActive} class="tray-wrap">
@@ -79,12 +85,14 @@
             {:else}
               <span class="idle-content">
                 <span class="tray-glyph">
-                  <Icon name="drop-tray" size={34} />
+                  <Icon name="drop-tray" size={40} />
                 </span>
                 <span class="tray-copy">
-                  {demo.dragActive ? 'Release to add' : 'Drop images — or '}
-                  {#if !demo.dragActive}<span class="browse">browse</span>{/if}
+                  {demo.dragActive ? 'Release to add' : 'Drop images here'}
                 </span>
+                {#if !demo.dragActive}
+                  <span class="tray-hint">or click to browse</span>
+                {/if}
               </span>
             {/if}
           </button>
@@ -122,7 +130,10 @@
     </section>
 
     <footer class="ledger-footer">
-      {APP_NAME} — images never leave your device · Open source · Works offline
+      <div class="spine footer-row">
+        <span>{APP_NAME} — images never leave your device</span>
+        <span>Open source · Works offline</span>
+      </div>
     </footer>
   </main>
 {:else}
@@ -145,31 +156,41 @@
     clip-path: inset(50%);
   }
 
+  /* The shared measure: everything sits on this one centred column. */
+  .spine {
+    width: min(560px, calc(100vw - 48px));
+    margin: 0 auto;
+  }
+
   .ledger-header {
+    padding: 18px 0;
+  }
+  .header-row {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 18px 26px;
-  }
-
-  .wordmark {
-    color: var(--il-text-1);
-    font-size: 16px;
-    font-weight: 800;
   }
 
   .ledger-stage {
     flex: 1 1 auto;
     display: grid;
     place-items: center;
-    padding: 28px 0;
+    /* Slight bottom bias lifts the column just above optical centre. */
+    padding: 12px 0 40px;
   }
 
   .ledger-column {
-    width: min(560px, calc(100vw - 48px));
     display: flex;
     flex-direction: column;
-    gap: 28px;
+    /* Headline binds tightly to the tray (its answer); the ledger gets more
+       air so it reads as the supporting exhibit, not part of the control. */
+    gap: 0;
+  }
+  .ledger-column h1 {
+    margin-bottom: 22px;
+  }
+  .ledger-column .tray-wrap {
+    margin-bottom: 36px;
   }
 
   h1 {
@@ -182,25 +203,15 @@
     text-wrap: balance;
   }
 
-  .headline-dot {
-    display: inline-block;
-    width: 8px;
-    height: 8px;
-    margin-right: 10px;
-    border-radius: 50%;
-    background: var(--il-accent);
-    vertical-align: middle;
-  }
-
   .tray-wrap {
     position: relative;
     width: 100%;
-    height: 176px;
+    height: 200px;
   }
 
   .tray {
     width: 100%;
-    height: 176px;
+    height: 200px;
     display: grid;
     place-items: center;
     padding: 0;
@@ -227,6 +238,11 @@
     cursor: default;
   }
 
+  .tray:hover:not(.accepted) {
+    border-color: var(--il-border-strong);
+    background: color-mix(in srgb, var(--il-text-1) 2.5%, var(--il-inset));
+  }
+
   .drag-active .tray {
     border-color: var(--il-accent);
     background: color-mix(in srgb, var(--il-accent) 7%, var(--il-inset));
@@ -249,17 +265,16 @@
   }
 
   .tray-copy {
-    color: var(--il-text-2);
-    font-size: clamp(13.5px, 2vw, 15px);
-    font-weight: 600;
-  }
-
-  .drag-active .tray-copy {
     color: var(--il-text-1);
+    font-size: 15px;
     font-weight: 650;
   }
 
-  .browse,
+  .tray-hint {
+    color: var(--il-text-3);
+    font-size: 12.5px;
+  }
+
   .reset-button {
     color: var(--il-accent-2);
     text-decoration: underline;
@@ -334,9 +349,9 @@
 
   .ledger-row {
     display: grid;
-    grid-template-columns: 34px 1fr auto;
+    grid-template-columns: 40px 1fr auto;
     align-items: baseline;
-    padding: 12px 2px;
+    padding: 13px 0;
     border-top: 1px solid var(--il-border);
   }
 
@@ -373,10 +388,16 @@
   }
 
   .ledger-footer {
-    padding: 16px 26px 20px;
+    padding: 16px 0 20px;
     color: var(--il-text-3);
     font-size: 12.5px;
-    text-align: center;
+  }
+  .footer-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
   }
 
   @media (prefers-reduced-motion: reduce) {

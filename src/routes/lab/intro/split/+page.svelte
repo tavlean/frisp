@@ -4,6 +4,7 @@
     type ThemeMode,
   } from '$lib/lab/intro/ThemeToggle.svelte';
   import { IntroDropDemo } from '$lib/lab/intro/drop-demo.svelte';
+  import Brand from '$lib/lab/intro/Brand.svelte';
   import Icon from '$lib/lab/intro/Icon.svelte';
   import { APP_NAME } from 'shared/brand';
   import '$lib/lab/intro/intro-lab.css';
@@ -123,7 +124,7 @@
     {@attach demo.dropTarget()}
   >
     <header class="site-header">
-      <span class="wordmark">{APP_NAME}</span>
+      <Brand size={17} />
       <ThemeToggle value={theme} onchange={(mode) => (theme = mode)} />
     </header>
 
@@ -256,12 +257,6 @@
     align-items: center;
     justify-content: space-between;
     padding: 20px 30px;
-  }
-
-  .wordmark {
-    font-size: 17px;
-    font-weight: 800;
-    letter-spacing: -0.02em;
   }
 
   .hero {

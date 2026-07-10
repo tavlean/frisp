@@ -8,6 +8,7 @@
   import { dev } from '$app/environment';
   import { APP_NAME } from 'shared/brand';
   import { IntroDropDemo } from '$lib/lab/intro/drop-demo.svelte';
+  import Brand from '$lib/lab/intro/Brand.svelte';
   import Icon from '$lib/lab/intro/Icon.svelte';
   import ThemeToggle, {
     type ThemeMode,
@@ -50,7 +51,7 @@
     />
 
     <header class="masthead">
-      <span class="wordmark">{APP_NAME}</span>
+      <Brand size={17} />
       <div class="masthead-right">
         <span class="tag">open source</span>
         <ThemeToggle value={theme} onchange={(mode) => (theme = mode)} />
@@ -169,12 +170,6 @@
     align-items: center;
     justify-content: space-between;
     padding: 20px 28px;
-  }
-  .wordmark {
-    font-size: 17px;
-    font-weight: 800;
-    letter-spacing: -0.01em;
-    color: var(--il-text-1);
   }
   .masthead-right {
     display: flex;
