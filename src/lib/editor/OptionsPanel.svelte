@@ -223,7 +223,10 @@
            so this does not disrupt normal slider dragging. -->
       {#key options}
         {#if format === 'svg'}
-          <SvgOptions options={options as unknown as SvgOptimizeOptions} />
+          <SvgOptions
+            options={options as unknown as SvgOptimizeOptions}
+            winner={result?.svg?.winner}
+          />
         {:else if format === 'webP'}
           <WebpOptions options={options as unknown as WebpEncodeOptions} />
         {:else if format === 'avif'}

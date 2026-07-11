@@ -7,6 +7,7 @@ import { gzipSync, strToU8 } from 'fflate';
 import type { CompressOutcome } from '$lib/compress';
 import { getPercentChange } from 'client/lazy-app/bulk/size';
 import type { SvgOptimizeOptions } from './optimize-options';
+import { autoSearch } from './auto-search';
 import { optimizeSvg } from './optimizer-client';
 import { renderSvgToImageData } from './render';
 import { buildSvgoConfig, type SvgCandidate } from './svgo-config';
@@ -48,40 +49,46 @@ export async function optimizeSvgSide(
     gzipBytes: gzipSync(sourceBytes, { level: 9 }).length,
   };
 
-  const wrappedSignal = AbortSignal.any([signal, AbortSignal.timeout(10_000)]);
-  const addons: SvgCandidate['addons'] = [];
-  if (options.reusePaths) addons.push('reusePaths');
-  if (options.convertStyleToAttrs) addons.push('convertStyleToAttrs');
-  if (options.removeOffCanvasPaths) addons.push('removeOffCanvasPaths');
-  const config = buildSvgoConfig({
-    precision: options.precision,
-    multipass: options.multipass,
-    keepTitleDesc: options.keepTitleDesc,
-    addons,
-    removeDimensions: options.removeDimensions,
-  });
-  // Stage S2 runs auto mode through the same manual path; search lands in S5.
-  const optimized = await optimizeSvg(sourceText, config, wrappedSignal);
-  const final = keepOriginalSvg(source, {
-    text: optimized.svg,
-    rawBytes: optimized.rawBytes,
-    gzipBytes: optimized.gzipBytes,
-  });
-  const [sourceImageData, outputImageData] = await Promise.all([
-    renderSvgToImageData(
+  let winner: string | undefined;
+  let optimized: SvgTextStats;
+  if (options.mode === 'auto') {
+    const searched = await autoSearch(
       sourceText,
+      options,
       naturalWidth,
       naturalHeight,
-      null,
-      wrappedSignal,
-    ),
-    renderSvgToImageData(
-      final.text,
-      naturalWidth,
-      naturalHeight,
-      null,
-      wrappedSignal,
-    ),
+      signal,
+    );
+    optimized = searched;
+    winner = searched.winner;
+  } else {
+    const addons: SvgCandidate['addons'] = [];
+    if (options.reusePaths) addons.push('reusePaths');
+    if (options.convertStyleToAttrs) addons.push('convertStyleToAttrs');
+    if (options.removeOffCanvasPaths) addons.push('removeOffCanvasPaths');
+    const config = buildSvgoConfig({
+      precision: options.precision,
+      multipass: options.multipass,
+      keepTitleDesc: options.keepTitleDesc,
+      addons,
+      removeDimensions: options.removeDimensions,
+    });
+    const result = await optimizeSvg(
+      sourceText,
+      config,
+      AbortSignal.any([signal, AbortSignal.timeout(10_000)]),
+    );
+    optimized = { text: result.svg, ...result };
+  }
+  const final = keepOriginalSvg(source, {
+    ...optimized,
+  });
+  // The badge must describe the file the user gets: when the original wins,
+  // no candidate id applies.
+  if (final.keptOriginal) winner = undefined;
+  const [sourceImageData, outputImageData] = await Promise.all([
+    renderSvgToImageData(sourceText, naturalWidth, naturalHeight, null, signal),
+    renderSvgToImageData(final.text, naturalWidth, naturalHeight, null, signal),
   ]);
   const outputName = fileName.replace(/(?:\.[^.]+)?$/, '.svg');
   const outputFile = new File([final.text], outputName, {
@@ -106,7 +113,7 @@ export async function optimizeSvgSide(
       rawBytes: final.rawBytes,
       gzipBytes: final.gzipBytes,
       originalGzipBytes: source.gzipBytes,
-      winner: undefined,
+      winner,
     },
   };
 }

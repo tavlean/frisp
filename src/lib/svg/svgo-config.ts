@@ -20,6 +20,19 @@ export function buildCandidateId(
   return [`p${precision}`, ...addons].join('+');
 }
 
+export function describeWinner(id: string): string {
+  if (id === 'p3!') return 'precision 3 — verify preview (auto gate failed)';
+  return id
+    .split('+')
+    .map((part) => {
+      if (/^p\d+$/.test(part)) return `precision ${part.slice(1)}`;
+      if (part === 'reusePaths') return 'reused paths';
+      if (part === 'convertStyleToAttrs') return 'styles → attributes';
+      return part;
+    })
+    .join(' · ');
+}
+
 export function buildSvgoConfig(opts: {
   precision: number;
   multipass: boolean;

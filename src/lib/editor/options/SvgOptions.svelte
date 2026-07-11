@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { SvgOptimizeOptions } from '$lib/svg/optimize-options';
+  import { describeWinner } from '$lib/svg/svgo-config';
   import AdvancedSection from './AdvancedSection.svelte';
   import Checkbox from './Checkbox.svelte';
   import OptionRow from './OptionRow.svelte';
@@ -9,9 +10,10 @@
 
   interface Props {
     options: SvgOptimizeOptions;
+    winner?: string;
   }
 
-  let { options }: Props = $props();
+  let { options, winner }: Props = $props();
 </script>
 
 <form class="options-section" onsubmit={(event) => event.preventDefault()}>
@@ -28,7 +30,9 @@
       Tries several settings and keeps the smallest result that renders
       identically.
     </p>
-    <!-- Stage S5 mount point: auto-search winner badge. -->
+    {#if winner}
+      <p class="auto-winner">Auto: {describeWinner(winner)}</p>
+    {/if}
   {:else}
     <OptionRow>
       <Range min={0} max={4} step={1} bind:value={options.precision}
@@ -64,6 +68,13 @@
     margin: 4px var(--horizontal-padding) 10px;
     color: var(--text-3);
     font-size: 0.95rem;
+    line-height: 1.4;
+  }
+
+  .auto-winner {
+    margin: -4px var(--horizontal-padding) 10px;
+    color: var(--text-3);
+    font-size: 0.85rem;
     line-height: 1.4;
   }
 </style>

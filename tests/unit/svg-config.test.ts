@@ -4,6 +4,7 @@ import { DEFAULT_SVG_OPTIONS } from '../../src/lib/svg/optimize-options';
 import {
   buildCandidateId,
   buildSvgoConfig,
+  describeWinner,
   type SvgCandidate,
 } from '../../src/lib/svg/svgo-config';
 
@@ -24,6 +25,15 @@ describe('SVG optimization configuration', () => {
   it('builds stable candidate ids', () => {
     expect(buildCandidateId(2, [])).toBe('p2');
     expect(buildCandidateId(2, ['reusePaths'])).toBe('p2+reusePaths');
+  });
+
+  it('describes auto-search winners', () => {
+    expect(describeWinner('p2+reusePaths+convertStyleToAttrs')).toBe(
+      'precision 2 · reused paths · styles → attributes',
+    );
+    expect(describeWinner('p3!')).toBe(
+      'precision 3 — verify preview (auto gate failed)',
+    );
   });
 
   it('sets precision overrides and preserves metadata when requested', () => {
