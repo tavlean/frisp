@@ -7,6 +7,15 @@ browser, the build is static, and offline reload must work after load.
 
 ## Current State
 
+- **Film grain v1.1 (2026-07-12, later).** Two same-day follow-ups: an
+  **Advanced Size control** (1–4 px; size 2 at Amount 4–6 is the measured
+  byte-efficient debanding recipe — the size experiment lives in the spec) and
+  a **live scrub preview** (dragging Grain controls shows the exact
+  pre-encode frame instantly; the settled encode replaces it; suppressed when
+  resize/quantize would make it misleading). Gotcha that matters beyond
+  grain: requestAnimationFrame never fires in non-compositing contexts —
+  never use it to schedule state work.
+
 - **Film grain SHIPPED (2026-07-12, `3db56a3e`–`7b548dea`).** New processor
   step (resize → **grain** → quantize) with a single calibrated **Amount**
   slider, live in the single editor, bulk global settings, and bulk per-image

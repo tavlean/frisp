@@ -1,7 +1,9 @@
 # Film Grain processor (v1)
 
 Last updated: 2026-07-12.
-Status: done (shipped 2026-07-12, `3db56a3e`–`7b548dea` + e2e/docs follow-ups).
+Status: done (shipped 2026-07-12, `3db56a3e`–`7b548dea` + e2e/docs follow-ups;
+v1.1 same day: Advanced Size control + live scrub preview, see §Size and
+§Live preview).
 
 Maintainer-approved 2026-07-12 (design session; supersedes the road-map.md
 "Film Grain / Debanding" idea sketch). Two use cases, one mechanism: a filmic
@@ -100,6 +102,51 @@ Wiring (mirrors quantize everywhere):
   **"Film grain"** between Resize and Reduce palette (panel order = pipeline
   order), one **Amount** slider 0–100, no advanced section. Shared by single
   editor and bulk (same component).
+
+## Size (v1.1, 2026-07-12)
+
+`size` (1–4, default 1, Advanced reveal) sets grain particle scale. 1 keeps
+the calibrated per-pixel path byte-identical. 2–4 bilinear-interpolate a
+noise lattice with `size`-px spacing; each of the size² fractional phases
+gets an exact `1/√(Σwᵢ²)` variance correction, so Amount means the same σ at
+every size (unit-tested).
+
+Why it exists — the debanding experiment (WebP, banding-prone dark gradient,
+q30/50/75; band-limited noise = bilinear-upsampled gaussian, generated via
+Pillow in the session scratchpad):
+
+| Noise | Debands at q50? | Bytes vs clean |
+|---|---|---|
+| white σ≤2 (Amount ≤ ~4) | no — encoder deletes it | ~1–1.2× |
+| white σ5.3 (Amount 12) | yes | 12.6× |
+| 2px σ2 (Amount ~5) | yes | 2.1× |
+| 4px σ2 | yes | 3.8× |
+
+Lessons: sub-threshold fine noise is deleted by the encoder (pay nothing,
+fix nothing); coarser grain survives quantization at low amplitude. The
+byte-efficient debanding recipe is **Size 2, Amount 4–6**. (Multipliers are
+worst-case: clean gradients compress to almost nothing.) Roughness was
+deliberately NOT added: histogram-shape-only, no size/debanding effect.
+
+## Live preview (v1.1, 2026-07-12)
+
+While a pass is in flight and the side's grain recipe differs from the
+displayed result's (`SideRuntime.displayedGrainSig`), the viewer shows the
+preprocessed frame with the CURRENT grain applied — the same
+`applyGrainToPixels`, same seed, so the scrub frame is the exact encoder
+input. The settled encode replaces it (`grainPreview` cleared when status
+leaves 'working' or recipes match). Honesty guards: engages only when grain
+is the sole step between the preprocessed frame and the encoder — an active
+(real) resize or palette reduction suppresses it.
+
+Mechanics (`EditorSession.updateGrainPreview` / `#drainGrainPreview`):
+latest-wins drain loop per side, full-res main-thread apply, yields between
+renders. **Deliberately not requestAnimationFrame** — rAF stalls completely
+in non-compositing contexts (background tabs, headless/e2e), which was
+observed directly during verification. At rotation 0 the preprocessed frame
+is `#decodedPromise`'s `.decoded` (`#preprocessedPromise` stays null by
+design — see `#preparedSource`). Wired in `+page.svelte` and bulk
+`FocusView.svelte` as `grainPreview ?? result?.outputImageData`.
 
 ## Tests
 

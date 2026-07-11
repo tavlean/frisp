@@ -15,14 +15,21 @@ The honest trade-off: grain is fine detail, and fine detail costs bytes. Turning
 
 ## Controls / Settings
 
-The panel has one slider (`src/lib/editor/options/GrainOptions.svelte`). That's deliberate: the grain's character (particle size, texture) is fixed to carefully calibrated film-like values, so the only decision left is *how much*.
+The panel has one visible slider, plus a Size slider under "Advanced settings" (`src/lib/editor/options/GrainOptions.svelte`). That's deliberate: the grain's *texture* is fixed to carefully calibrated film-like values, so the everyday decision is just *how much* — and Size exists for one specific job (efficient debanding, below).
 
 ### Amount
 
 - **What it does:** Sets the strength of the grain. The grain is monochrome (it brightens/darkens pixels, never shifts their color), strongest in the midtones, and fades to nothing in deep shadows and bright highlights — the way real film behaves.
 - **Range & default:** **0 to 100**, default **12** (option key `amount`).
-- **How to choose:** **10–12** is the sweet spot for making clean images feel photographic without the grain calling attention to itself. **20–30** is a deliberate, visible creative texture. Higher values are stylized effects. For debanding a gradient, start around **8–15** and check whether the stripes dissolve.
-- **Determinism:** The grain pattern is fixed for a given image and amount — re-encoding with the same settings produces byte-identical output, so undo/redo and the instant-result cache behave exactly as they do for every other option.
+- **How to choose:** **10–12** is the sweet spot for making clean images feel photographic without the grain calling attention to itself. **20–30** is a deliberate, visible creative texture. Higher values are stylized effects.
+- **Live preview:** while you drag, the view shows the grain applied instantly (the exact pixels the encoder is about to receive); when you pause, the real compressed result replaces it. If the grain looks softer after it settles, that's the encoder eating fine detail — raise Amount, raise quality, or raise Size.
+- **Determinism:** The grain pattern is fixed for a given image and settings — re-encoding with the same settings produces byte-identical output, so undo/redo and the instant-result cache behave exactly as they do for every other option.
+
+### Size (Advanced)
+
+- **What it does:** Sets the grain particle size in pixels, **1 to 4**, default **1** (option key `size`). 1 is the calibrated fine film look. Larger values make coarser, softer grain — same overall strength.
+- **When to use it — debanding on a budget:** compressors delete fine noise first, so faint 1px grain often vanishes at low quality (and the banding comes back), while strong 1px grain survives but costs a lot of bytes. Coarser grain survives at *low* strength: measured on gradient images, **Size 2 with Amount 4–6** removes banding for roughly **one-sixth the byte cost** of doing it with Size 1. If you want the smallest possible file that still fixes banding, start there.
+- For the film look, leave Size at 1 and ignore this control entirely.
 
 ## Tips
 

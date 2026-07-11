@@ -4,6 +4,31 @@ Short session-by-session build log: what changed, why, and the gotchas a future
 session must know. Newest first. (Live project state stays in
 [STATUS.md](STATUS.md); this is the narrative trail.)
 
+## 2026-07-12 (later) — Grain v1.1: Size control + live scrub preview
+
+Same session, maintainer go on both follow-ups. (1) **Advanced Size (1–4)**:
+band-limited grain via a bilinear noise lattice with exact per-phase variance
+correction (Amount = same σ at every size; unit-tested at 2/3/4). Motivated
+by a measured debanding experiment (results in the spec §Size): the encoder
+DELETES faint fine noise (sub-threshold 1px grain = pay nothing, fix
+nothing), while 2px grain at Amount ~5 debands like 1px at Amount 12 for
+~1/6 the bytes. Roughness deliberately not added. (2) **Live grain preview**:
+while an encode is in flight and the grain recipe differs from what's on
+screen, the viewer shows the preprocessed frame with the CURRENT grain
+applied (same function/seed = exact encoder input); the settled encode
+replaces it. Guards: suppressed when a real resize or quantize is active
+(the frame would mislead). **Gotchas:** (a) do NOT throttle with
+requestAnimationFrame — it never fires in non-compositing contexts
+(headless/e2e, background tabs); a latest-wins drain loop with setTimeout
+yields is used instead (this failure was hit live during verification);
+(b) at rotation 0 `#preprocessedPromise` is deliberately null — the
+preprocessed frame is `#decodedPromise.decoded` (see `#preparedSource`);
+(c) `SideRuntime.displayedGrainSig` records the grain recipe baked into the
+displayed result — bulk focus hydration self-heals it via the encode
+effect's redundant-pass branch. Verified live: preview lands <100ms after a
+scrub while the encode is still in flight, settles to encoded truth; unit
+122, check 0 errors, full e2e green.
+
 ## 2026-07-12 — Film grain shipped (measured model, single slider)
 
 Designed and shipped the film-grain processor in one session, pulled ahead of
