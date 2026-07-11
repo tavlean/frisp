@@ -1,6 +1,6 @@
 # SVG benchmark corpus
 
-This corpus is a deliberately varied set of 200 SVG inputs for measuring Frisp's optimization ratio, robustness, and visual fidelity against external optimizers. It covers stroke and fill icons, multi-color emoji, brand artwork, public-health illustrations, realistic synthetic editor exports, and adversarial SVG features; it is benchmark data rather than application or test-fixture code.
+This corpus is a deliberately varied set of 215 SVG inputs for measuring Frisp's optimization ratio, robustness, and visual fidelity against external optimizers. It covers stroke and fill icons, multi-color emoji, brand artwork, public-health illustrations, realistic synthetic editor exports, large detailed maps and technical diagrams, and adversarial SVG features; it is benchmark data rather than application or test-fixture code.
 
 ## Regeneration
 
@@ -16,6 +16,8 @@ Downloaded files are immutable snapshots from the exact URLs in `corpus/MANIFEST
 | Twemoji 16.0.1 (`jdecked/twemoji`)        | Multi-color icons                    | CC-BY-4.0  |
 | Devicon 2.16.0                            | Complex color logos                  | MIT        |
 | Health Icons (`main`, fetched 2026-07-12) | Flat public-health illustrations     | CC0-1.0    |
+| Wikimedia Commons (fetched 2026-07-12)    | Large detailed maps                  | CC0 / Public domain |
+| libaom 3.12.1                             | Large technical diagrams             | BSD-2-Clause |
 | Frisp synthetic inputs                    | Editor exports and adversarial cases | CC0-1.0    |
 
 Individual provenance, exact source URL, byte count, and digest are recorded in `corpus/MANIFEST.json`. CC-BY attribution for Twemoji: Copyright 2020 Twitter, Inc and other contributors; graphics licensed under CC-BY 4.0.

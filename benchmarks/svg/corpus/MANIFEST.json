@@ -1598,5 +1598,125 @@
     "license": "CC0-1.0",
     "bytes": 909,
     "sha256": "122e0da12525245e3fdf6bd448cadb2f6b6ffea86e8bfa3377cd42a4490d0b2d"
+  },
+  {
+    "path": "large/2020-republican-presidential-primary-map-by-county.svg",
+    "stratum": "large",
+    "source": "https://upload.wikimedia.org/wikipedia/commons/4/45/2020_Republican_Presidential_Primary_Map_by_County.svg",
+    "license": "CC0",
+    "bytes": 689452,
+    "sha256": "ee2d606d825a084906d58bc4f9380dae4c2eb227bfd091e39af4e63a296c992d"
+  },
+  {
+    "path": "large/apollo-11-photo-map-fr.svg",
+    "stratum": "large",
+    "source": "https://upload.wikimedia.org/wikipedia/commons/b/b0/Apollo_11_photo_map-fr.svg",
+    "license": "Public domain",
+    "bytes": 1011215,
+    "sha256": "51fa5a31ea0f2f74479346da5b485a421450bc0a10bf17ec56000e5b3ca7dc50"
+  },
+  {
+    "path": "large/flag-map-of-argentina-patagonia.svg",
+    "stratum": "large",
+    "source": "https://upload.wikimedia.org/wikipedia/commons/4/42/Flag_map_of_Argentina_-_Patagonia.svg",
+    "license": "CC0",
+    "bytes": 432544,
+    "sha256": "e9e6b8e87cd98fc5b33139681518c38f7283b918401e67a90b1d62626a98360a"
+  },
+  {
+    "path": "large/gaza-flotilla-raid-map-ar.svg",
+    "stratum": "large",
+    "source": "https://upload.wikimedia.org/wikipedia/commons/4/40/Gaza_flotilla_raid_map-ar.svg",
+    "license": "Public domain",
+    "bytes": 644449,
+    "sha256": "2645bdb973c8bec1d2d92535bd406264052ec59ea919d81ca378fc7af5bf1048"
+  },
+  {
+    "path": "large/libaom-edge-direction.svg",
+    "stratum": "large",
+    "source": "https://aomedia.googlesource.com/aom/+/refs/tags/v3.12.1/doc/img/edge_direction.svg",
+    "license": "BSD-2-Clause",
+    "bytes": 407232,
+    "sha256": "b3f05a5570d9188572eea9af87f6cd1e3ca1e40f6688a6ec643f69b260b1736f"
+  },
+  {
+    "path": "large/libaom-primary-tap.svg",
+    "stratum": "large",
+    "source": "https://aomedia.googlesource.com/aom/+/refs/tags/v3.12.1/doc/img/primary_tap.svg",
+    "license": "BSD-2-Clause",
+    "bytes": 70304,
+    "sha256": "26c6a908a85f248d45bea69414ab1a0354654bdd81b9872ad494ffe6c248ee0b"
+  },
+  {
+    "path": "large/libaom-quant-ac.svg",
+    "stratum": "large",
+    "source": "https://aomedia.googlesource.com/aom/+/refs/tags/v3.12.1/doc/img/quant_ac.svg",
+    "license": "BSD-2-Clause",
+    "bytes": 136546,
+    "sha256": "41cfe55ebc7d4013b945447de195c0abd172237829039de4b5dbe56e27aa4482"
+  },
+  {
+    "path": "large/libaom-quant-dc.svg",
+    "stratum": "large",
+    "source": "https://aomedia.googlesource.com/aom/+/refs/tags/v3.12.1/doc/img/quant_dc.svg",
+    "license": "BSD-2-Clause",
+    "bytes": 133303,
+    "sha256": "dfec4780232361415fbb0556cba235da3f86f0a499fdf43852adb4786870f566"
+  },
+  {
+    "path": "large/map-of-territorial-growth-1775.svg",
+    "stratum": "large",
+    "source": "https://upload.wikimedia.org/wikipedia/commons/3/38/Map_of_territorial_growth_1775.svg",
+    "license": "Public domain",
+    "bytes": 515966,
+    "sha256": "bad474e0f98f3473ad2d92309e91716f0c246cc375a876650c003d14ca0e4865"
+  },
+  {
+    "path": "large/map-of-wales-ru.svg",
+    "stratum": "large",
+    "source": "https://upload.wikimedia.org/wikipedia/commons/2/20/Map_of_Wales_ru.svg",
+    "license": "Public domain",
+    "bytes": 430042,
+    "sha256": "925ed47355517e95ed7b597facadcc7ae4764e0a2ba4e73f948aead3b408b7ee"
+  },
+  {
+    "path": "large/orthographic-map-of-chinland.svg",
+    "stratum": "large",
+    "source": "https://upload.wikimedia.org/wikipedia/commons/c/c7/Orthographic_map_of_Chinland.svg",
+    "license": "CC0",
+    "bytes": 826065,
+    "sha256": "d68884c9ea6bc1f313eb10762d7a6b2ba75742cc44e1b20befeb5d8a15cd5300"
+  },
+  {
+    "path": "large/south-africa-2011-zulu-speakers-proportion-map.svg",
+    "stratum": "large",
+    "source": "https://upload.wikimedia.org/wikipedia/commons/a/a1/South_Africa_2011_Zulu_speakers_proportion_map.svg",
+    "license": "Public domain",
+    "bytes": 547286,
+    "sha256": "5e1c82876bd1f5165d9fa405e1e83dc7e604f4438566a55b5b8056a361a36018"
+  },
+  {
+    "path": "large/telekom-map.svg",
+    "stratum": "large",
+    "source": "https://upload.wikimedia.org/wikipedia/commons/a/af/Telekom_Map.svg",
+    "license": "CC0",
+    "bytes": 718655,
+    "sha256": "610de4f990a2b64584db54622dfe44a371aa72b16a36fab5106f5affa514d160"
+  },
+  {
+    "path": "large/territorial-map-of-eu-roam-like-at-home.svg",
+    "stratum": "large",
+    "source": "https://upload.wikimedia.org/wikipedia/commons/0/06/Territorial_map_of_EU_Roam_like_at_home.svg",
+    "license": "CC0",
+    "bytes": 722748,
+    "sha256": "901a74c0e4bc51c4d29d6d2a566f741ab0fa8624a9ab00277cb27fb00ce6a4ac"
+  },
+  {
+    "path": "large/ukraine-export-routes-map-02.svg",
+    "stratum": "large",
+    "source": "https://upload.wikimedia.org/wikipedia/commons/9/98/Ukraine_Export_routes_map_02.svg",
+    "license": "Public domain",
+    "bytes": 703349,
+    "sha256": "8399c5b0a1ca8e9e5520dc111ea26fe5dc7d98ae34691381c090da15a7543554"
   }
 ]
