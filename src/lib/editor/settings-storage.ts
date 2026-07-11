@@ -45,7 +45,9 @@ function canUseLocalStorage(): boolean {
 
 function isValidFormat(format: unknown): format is SideFormat {
   return (
-    format === IDENTITY || OUTPUT_FORMATS.some((option) => option.id === format)
+    format === IDENTITY ||
+    format === 'svg' ||
+    OUTPUT_FORMATS.some((option) => option.id === format)
   );
 }
 

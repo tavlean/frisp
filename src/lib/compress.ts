@@ -24,6 +24,7 @@ import {
   type ProcessorState,
 } from 'client/lazy-app/feature-meta';
 import SvelteKitWorkerBridge from './sveltekit-worker-bridge';
+import { DEFAULT_SVG_OPTIONS } from './svg/optimize-options';
 
 /** Any encoder the generated SvelteKit surface supports. */
 export type OutputFormat = EncoderType;
@@ -33,7 +34,7 @@ export type OutputFormat = EncoderType;
  * the side shows the (preprocessed) source pixels unchanged and downloads the
  * original file. Every other value is a real encoder.
  */
-export type SideFormat = OutputFormat | 'identity';
+export type SideFormat = OutputFormat | 'identity' | 'svg';
 
 export const IDENTITY: 'identity' = 'identity';
 
@@ -103,6 +104,11 @@ export interface CompressRequest {
 export function getDefaultOptions(format: SideFormat): Record<string, unknown> {
   // The Original/identity side has no encoder options.
   if (format === IDENTITY) return {};
+  if (format === 'svg')
+    return structuredClone(DEFAULT_SVG_OPTIONS) as unknown as Record<
+      string,
+      unknown
+    >;
   return structuredClone(
     encoderMap[format].meta.defaultOptions as Record<string, unknown>,
   );
@@ -128,6 +134,18 @@ export interface CompressOutcome {
    */
   preprocessedWidth: number;
   preprocessedHeight: number;
+  /** Present only on vector-lane results (format 'svg'): the text +
+   *  transfer-size facts the raster fields can't express. The identity side
+   *  carries no svg field — the UI reads originalGzipBytes from here. */
+  svg?: {
+    optimizedText: string;
+    rawBytes: number;
+    gzipBytes: number;
+    originalGzipBytes: number;
+    /** Auto mode's winning candidate id (e.g. 'p2+reusePaths'); undefined in
+     *  manual mode. */
+    winner?: string;
+  };
 }
 
 /**

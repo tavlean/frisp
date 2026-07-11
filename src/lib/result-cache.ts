@@ -28,7 +28,9 @@ function outcomeBytes(outcome: CompressOutcome): number {
   // and keeps the estimate conservative (we'd rather evict early than OOM).
   return (
     outcome.sourceImageData.data.byteLength +
-    outcome.outputImageData.data.byteLength
+    outcome.outputImageData.data.byteLength +
+    // SVG text is cheap, but count it anyway.
+    (outcome.svg?.optimizedText.length ?? 0)
   );
 }
 

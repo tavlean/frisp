@@ -30,6 +30,18 @@ export function sideRecipe(
   processorState: ProcessorState,
   resizeCounts: boolean,
 ) {
+  // The SVG lane's output depends ONLY on its optimizer options: raster
+  // processors/preprocessors never touch it, so they must not be able to
+  // cause a miss (or a stale-state false edit in history).
+  if (format === 'svg') {
+    return {
+      format,
+      options: options ?? {},
+      grain: null,
+      quantize: null,
+      resize: null,
+    };
+  }
   return {
     format,
     options: options ?? {},

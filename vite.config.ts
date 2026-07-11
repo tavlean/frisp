@@ -95,6 +95,7 @@ const rawThreadedCodecWorkers: Plugin = {
 // these an aliased import inside any transitively-loaded source module makes
 // that whole test file fail at collection).
 export const appAliases = {
+  $lib: fileURLToPath(new URL('./src/lib', import.meta.url)),
   'app-generated': fileURLToPath(
     new URL('./.svelte-kit/app-generated', import.meta.url),
   ),

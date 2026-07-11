@@ -21,6 +21,8 @@ const LABELS: Record<string, string> = {
   tif: 'TIFF',
 };
 
+export const SVG_FORMAT = { label: 'SVG', extension: 'svg' } as const;
+
 export function formatLabel(source: File): string {
   const fromMime = source.type.split('/')[1]?.toLowerCase() ?? '';
   const fromExt = source.name.includes('.')

@@ -10,6 +10,9 @@ import {
 import { ResultCache } from '$lib/result-cache';
 import SvelteKitWorkerBridge from '$lib/sveltekit-worker-bridge';
 import type { ResizeOptionsState } from './options/processor-types';
+import type { SvgOptimizeOptions } from '$lib/svg/optimize-options';
+import { isSvgSource } from '$lib/svg/detect';
+import { SVG_FORMAT } from './format-label';
 import { EditorHistory } from './editor-history.svelte';
 import { snackbar } from './snackbar-store.svelte';
 import { abortable, isAbortError } from 'client/lazy-app/abort';
@@ -93,12 +96,16 @@ function buildSide(
   saved: SavedSide | undefined,
   fallback: SideFormat,
 ): SideState {
+  const formats: SideFormat[] = [
+    ...OUTPUT_FORMATS.map((format) => format.id),
+    'svg',
+  ];
   const optionsByFormat = Object.fromEntries(
-    OUTPUT_FORMATS.map((format) => {
-      const defaults = getDefaultOptions(format.id);
-      const savedForFormat = saved?.optionsByFormat?.[format.id];
+    formats.map((format) => {
+      const defaults = getDefaultOptions(format);
+      const savedForFormat = saved?.optionsByFormat?.[format];
       return [
-        format.id,
+        format,
         savedForFormat
           ? sanitizeSavedOptions(defaults, savedForFormat)
           : defaults,
@@ -221,6 +228,8 @@ export class EditorSession {
   #sourceAbort: AbortController | null = null;
   #decodedPromise: Promise<DecodedSourceImage> | null = null;
   #decodedLoadId = -1;
+  #svgTextPromise: Promise<string> | null = null;
+  #svgTextLoadId = -1;
   // One rotated frame is cached alongside the decoded frame. Rotation 0 reuses
   // decoded pixels exactly like preprocessImage does today (no copy).
   #preprocessedPromise: Promise<ImageData> | null = null;
@@ -263,7 +272,7 @@ export class EditorSession {
       0,
   );
 
-  isVectorSource = $derived(this.file?.type === 'image/svg+xml');
+  isVectorSource = $derived(this.file !== null && isSvgSource(this.file));
 
   // Every encoder is an always-available WASM codec, so the list is static.
   availableFormats = OUTPUT_FORMATS;
@@ -298,9 +307,13 @@ export class EditorSession {
     const current = this.file;
     const side = this.sides[index];
     const runtime = this.runtime[index];
+    const format =
+      side.format === 'svg' && (!current || !isSvgSource(current))
+        ? 'webP'
+        : side.format;
     const request = {
-      format: side.format,
-      options: $state.snapshot(side.optionsByFormat[side.format] ?? {}),
+      format,
+      options: $state.snapshot(side.optionsByFormat[format] ?? {}),
       processorState: snapshotProcessorStateForEncode(side.processorState),
       preprocessorState: $state.snapshot(this.preprocessorState),
     };
@@ -391,11 +404,32 @@ export class EditorSession {
         // The pass's OWN preprocessor snapshot decides the prepared frame —
         // never a live re-read after the decode await, which could disagree
         // with `request` in the abort window and cache a result under the
-        // wrong signature.
+        // wrong signature. The SVG lane shares this decode: rotate is hidden
+        // for SVG sources, so "prepared" is just the rasterized source — it
+        // supplies the natural dimensions the vector lane renders at.
         this.#preparedSource(bridge, request.preprocessorState),
-      ).then((prepared) =>
-        compressPreprocessed(prepared, request, controller.signal, bridge),
-      );
+      ).then(async (prepared) => {
+        if (request.format === 'svg') {
+          const [{ optimizeSvgSide }, sourceText] = await Promise.all([
+            import('$lib/svg/optimize'),
+            this.#svgSourceText(),
+          ]);
+          return optimizeSvgSide(
+            sourceText,
+            current.name,
+            request.options as unknown as SvgOptimizeOptions,
+            prepared.preprocessed.width,
+            prepared.preprocessed.height,
+            controller.signal,
+          );
+        }
+        return compressPreprocessed(
+          prepared,
+          request,
+          controller.signal,
+          bridge,
+        );
+      });
       this.inflight.set(cacheKey, pass);
       const settle = () => {
         if (this.inflight.get(cacheKey) === pass)
@@ -482,9 +516,21 @@ export class EditorSession {
     this.#sourceAbort = null;
     this.#decodedPromise = null;
     this.#decodedLoadId = -1;
+    this.#svgTextPromise = null;
+    this.#svgTextLoadId = -1;
     this.#preprocessedPromise = null;
     this.#preprocessedLoadId = -1;
     this.#preprocessedRotate = 0;
+  }
+
+  #svgSourceText(): Promise<string> {
+    const file = this.file;
+    if (!file || !isSvgSource(file)) throw Error('No SVG loaded');
+    if (this.#svgTextLoadId !== this.loadId || !this.#svgTextPromise) {
+      this.#svgTextLoadId = this.loadId;
+      this.#svgTextPromise = file.text();
+    }
+    return this.#svgTextPromise;
   }
 
   async #preparedSource(
@@ -888,7 +934,7 @@ export class EditorSession {
     const next = list?.[0];
     if (!next) return;
 
-    if (!next.type.startsWith('image/')) {
+    if (!next.type.startsWith('image/') && !isSvgSource(next)) {
       snackbar.show(`"${next.name}" doesn't look like an image.`);
       return;
     }
@@ -903,6 +949,7 @@ export class EditorSession {
     this.#clearPreparedSource();
     this.file = next;
     this.loadId += 1;
+    if (isSvgSource(next)) void this.#svgSourceText();
     // Reset each side's transient runtime (result, status, error, displayedSig,
     // and the spinner delay so the new file re-earns the 500ms grace). loadId
     // (bumped above) re-arms the encode + seed bookkeeping with no manual reset.
@@ -921,7 +968,7 @@ export class EditorSession {
     // replace — don't "restore" that without revisiting this decision.
     this.preprocessorState = structuredClone(defaultPreprocessorState);
 
-    const isVector = next.type === 'image/svg+xml';
+    const isVector = isSvgSource(next);
     for (const side of this.sides) {
       side.processorState = structuredClone(defaultProcessorState);
       // Match the original: vector (SVG) sources default the resize method to
@@ -1062,7 +1109,10 @@ export class EditorSession {
     const side = this.sides[index];
     if (side.format === IDENTITY) return this.file.name;
     const extension =
-      OUTPUT_FORMATS.find((format) => format.id === side.format)?.ext ?? 'bin';
+      side.format === 'svg'
+        ? SVG_FORMAT.extension
+        : (OUTPUT_FORMATS.find((format) => format.id === side.format)?.ext ??
+          'bin');
     return this.file.name.replace(/\.[^.]+$/, '') + '.' + extension;
   }
 
