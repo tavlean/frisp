@@ -289,8 +289,10 @@
     {/if}
     {#if showFocus}
       <Output
-        leftImage={focusSession.runtime[0].result?.outputImageData}
-        rightImage={focusSession.runtime[1].result?.outputImageData}
+        leftImage={focusSession.runtime[0].grainPreview ??
+          focusSession.runtime[0].result?.outputImageData}
+        rightImage={focusSession.runtime[1].grainPreview ??
+          focusSession.runtime[1].result?.outputImageData}
         leftWorking={focusSession.runtime[0].showSpinner}
         rightWorking={focusSession.runtime[1].showSpinner}
         leftDone={focusSession.runtime[0].status === 'done'}

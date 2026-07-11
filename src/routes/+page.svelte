@@ -167,9 +167,13 @@
     <BulkMode onExit={exitBulk} />
   {:else if session.file}
     <div class="compress editor-root">
+      <!-- grainPreview (the live grain scrub frame) outranks the stale result
+           while its encode is in flight; see EditorSession.updateGrainPreview. -->
       <Output
-        leftImage={session.runtime[0].result?.outputImageData}
-        rightImage={session.runtime[1].result?.outputImageData}
+        leftImage={session.runtime[0].grainPreview ??
+          session.runtime[0].result?.outputImageData}
+        rightImage={session.runtime[1].grainPreview ??
+          session.runtime[1].result?.outputImageData}
         leftWorking={session.runtime[0].showSpinner}
         rightWorking={session.runtime[1].showSpinner}
         leftDone={session.runtime[0].status === 'done'}

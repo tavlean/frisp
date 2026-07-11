@@ -17,9 +17,11 @@ import { APP_NAME } from 'shared/brand';
 import { stableStringify } from 'shared/stable-stringify';
 import {
   encodeSignature,
+  resizeIsReal,
   resizeSignature,
   sideRecipe,
 } from './encode-signature';
+import { applyGrainToPixels } from 'features/processors/grain/shared/apply';
 import {
   decodeSourceImage,
   preprocessImage,
@@ -29,6 +31,7 @@ import {
 import {
   defaultPreprocessorState,
   defaultProcessorState,
+  grainIsReal,
 } from 'client/lazy-app/feature-meta';
 import type {
   PreprocessorState,
@@ -62,6 +65,8 @@ export interface SideState {
   optionsByFormat: Record<string, Record<string, unknown>>;
   processorState: ProcessorState;
 }
+
+type GrainState = ProcessorState['grain'];
 
 /**
  * The editor's editable "document": both sides' encoder recipes plus the shared
@@ -153,11 +158,18 @@ export class SideRuntime {
   // Raw: a CompressOutcome holds heavy host objects (File, ImageData, object
   // URL) that must stay out of the reactive graph. Reassign-only.
   result = $state.raw<CompressOutcome | null>(null);
+  // Live grain scrub frame (see updateGrainPreview): the preprocessed source
+  // with the CURRENT grain applied, shown while the true encode is in flight.
+  // Raw for the same reason as `result`. The viewer prefers it over `result`.
+  grainPreview = $state.raw<ImageData | null>(null);
   // The delayed-spinner AND-gate: never shows outside a 'working' spell.
   showSpinner = $derived(this.status === 'working' && this.spinnerDelayPassed);
 
   // Non-reactive bookkeeping (see encodeSide).
   displayedSig: string | null = null;
+  // The grain recipe baked into `result` (null = none) — what the live grain
+  // preview diffs the current grain state against.
+  displayedGrainSig: string | null = null;
   encodedLoadId = -1;
   lastResizeSig: string | null = null;
 
@@ -167,7 +179,9 @@ export class SideRuntime {
     this.error = '';
     this.spinnerDelayPassed = false;
     this.result = null;
+    this.grainPreview = null;
     this.displayedSig = null;
+    this.displayedGrainSig = null;
   }
 }
 
@@ -273,6 +287,7 @@ export class EditorSession {
       for (const index of [0, 1] as const) {
         $effect(() => this.encodeSide(index));
         $effect(() => this.updateSpinner(index));
+        $effect(() => this.updateGrainPreview(index));
       }
       // One watcher commits debounced undo steps as the document changes.
       $effect(() => this.watchHistory());
@@ -293,6 +308,12 @@ export class EditorSession {
     // at, so a fresh image encodes immediately and option tweaks stay debounced.
     const fileChanged = this.loadId !== runtime.encodedLoadId;
     runtime.encodedLoadId = this.loadId;
+
+    // The grain recipe of THIS pass, recorded when its result lands so the
+    // live grain preview knows what's baked into the displayed pixels.
+    const grainSig = grainIsReal(request.processorState.grain)
+      ? stableStringify(request.processorState.grain)
+      : null;
 
     // Source dims are read untracked so the resize-is-real fold (see
     // encode-signature.ts) never makes the encode effect depend on `results`.
@@ -335,6 +356,9 @@ export class EditorSession {
     // no-op. `displayedSig` is set only when a result actually lands, so a prior
     // error or abort still retries.
     if (!fileChanged && runtime.displayedSig === encodeSig) {
+      // Self-heals externally hydrated results (bulk focus view) that didn't
+      // record their grain recipe.
+      runtime.displayedGrainSig = grainSig;
       runtime.status = 'done';
       runtime.error = '';
       return;
@@ -349,7 +373,7 @@ export class EditorSession {
     const cacheKey = encodeSig;
     const cached = this.cache.get(cacheKey);
     if (cached) {
-      this.showResult(index, cached, encodeSig);
+      this.showResult(index, cached, encodeSig, grainSig);
       return;
     }
 
@@ -389,12 +413,12 @@ export class EditorSession {
             // A concurrent identical pass cached this key first; drop ours.
             URL.revokeObjectURL(outcome.outputUrl);
             if (!controller.signal.aborted)
-              this.showResult(index, existing, encodeSig);
+              this.showResult(index, existing, encodeSig, grainSig);
             return;
           }
           this.cache.set(cacheKey, outcome);
           if (!controller.signal.aborted)
-            this.showResult(index, outcome, encodeSig);
+            this.showResult(index, outcome, encodeSig, grainSig);
         })
         .catch((error: unknown) => {
           settle();
@@ -418,7 +442,7 @@ export class EditorSession {
         shared
           .then((outcome) => {
             if (controller.signal.aborted) return;
-            this.showResult(index, outcome, encodeSig);
+            this.showResult(index, outcome, encodeSig, grainSig);
           })
           .catch((error: unknown) => {
             if (controller.signal.aborted) return;
@@ -538,10 +562,12 @@ export class EditorSession {
     index: SideIndex,
     outcome: CompressOutcome,
     sig: string,
+    grainSig: string | null,
   ): void {
     const runtime = this.runtime[index];
     runtime.result = outcome;
     runtime.displayedSig = sig;
+    runtime.displayedGrainSig = grainSig;
     runtime.status = 'done';
     runtime.error = '';
     this.pinDisplayedResults();
@@ -574,6 +600,107 @@ export class EditorSession {
     }, SPINNER_DELAY);
 
     return () => clearTimeout(timer);
+  }
+
+  // ── Live grain preview ─────────────────────────────────────────────────────
+  // While the user scrubs the Grain controls, the true (encoded) result lags a
+  // debounce + an encode behind. Instead of showing the stale result, show the
+  // preprocessed source with the CURRENT grain applied — the exact bytes the
+  // encoder is about to receive (same function, same seed), so the scrub is
+  // pixel-honest; the settled encode then replaces it with the compressed
+  // truth. Engages only while a pass is in flight AND grain is the only step
+  // between the preprocessed frame and the encoder (an active resize or
+  // palette reduction would make the frame misleading).
+
+  // Latest-wins scheduling: slider input outruns what full-res grain
+  // application can render, so a single drain loop per side renders the
+  // newest pending state back-to-back, yielding to the event loop between
+  // renders. Deliberately NOT requestAnimationFrame: rAF stalls entirely in
+  // non-compositing contexts (background tabs, headless runs), which would
+  // freeze the preview exactly when automation or a backgrounded encode
+  // relies on state staying current.
+  #grainPreviewPending: [GrainState | null, GrainState | null] = [null, null];
+  #grainPreviewDraining: [boolean, boolean] = [false, false];
+  #grainPreviewToken: [number, number] = [0, 0];
+
+  updateGrainPreview(index: SideIndex): void {
+    const runtime = this.runtime[index];
+    const side = this.sides[index];
+    const grain = side.processorState.grain;
+    // Tracked reads: status, grain fields, quantize.enabled, file/loadId.
+    const [srcW, srcH] = untrack(() => [this.naturalWidth, this.naturalHeight]);
+    const engaged =
+      this.file !== null &&
+      runtime.status === 'working' &&
+      grainIsReal(grain) &&
+      !side.processorState.quantize.enabled &&
+      !untrack(() => resizeIsReal(side.processorState, srcW, srcH));
+    const grainSig = engaged ? stableStringify($state.snapshot(grain)) : null;
+
+    if (!engaged || grainSig === runtime.displayedGrainSig) {
+      // Nothing to preview (or the displayed result already has this exact
+      // grain — e.g. a quality-only tweak while grain is on).
+      this.#grainPreviewPending[index] = null;
+      runtime.grainPreview = null;
+      return;
+    }
+
+    this.#grainPreviewPending[index] = $state.snapshot(grain);
+    void this.#drainGrainPreview(index);
+  }
+
+  async #drainGrainPreview(index: SideIndex): Promise<void> {
+    if (this.#grainPreviewDraining[index]) return;
+    this.#grainPreviewDraining[index] = true;
+    try {
+      let pending: GrainState | null;
+      while ((pending = this.#grainPreviewPending[index])) {
+        this.#grainPreviewPending[index] = null;
+        await this.#renderGrainPreview(index, pending);
+        // Yield between renders so a fast scrub can't starve the main thread.
+        await new Promise((resolve) => setTimeout(resolve));
+      }
+    } finally {
+      this.#grainPreviewDraining[index] = false;
+    }
+  }
+
+  async #renderGrainPreview(
+    index: SideIndex,
+    grain: GrainState,
+  ): Promise<void> {
+    const token = ++this.#grainPreviewToken[index];
+    const loadId = this.loadId;
+    // Resolve the preprocessed frame the way #preparedSource defines it: at
+    // rotation 0 the decoded frame IS the preprocessed frame (and
+    // #preprocessedPromise stays deliberately null). The encode effect that
+    // engaged the preview has already kicked source prep, so these promises
+    // exist and are usually settled. On a brand-new file with nothing decoded
+    // yet, bail — the encode fallback covers that window.
+    const rotate = this.preprocessorState.rotate.rotate;
+    let data: ImageData;
+    try {
+      if (rotate === 0) {
+        const decoded = this.#decodedPromise;
+        if (!decoded) return;
+        data = (await decoded).decoded;
+      } else {
+        const preprocessed = this.#preprocessedPromise;
+        if (!preprocessed) return;
+        data = await preprocessed;
+      }
+    } catch {
+      return; // decode failures surface through the encode path
+    }
+    if (token !== this.#grainPreviewToken[index] || loadId !== this.loadId)
+      return; // superseded while awaiting
+    const pixels = new Uint8ClampedArray(data.data);
+    applyGrainToPixels(pixels, data.width, grain.amount, grain.size);
+    this.runtime[index].grainPreview = new ImageData(
+      pixels,
+      data.width,
+      data.height,
+    );
   }
 
   // ── Undo / redo ──────────────────────────────────────────────────────────
