@@ -43,7 +43,11 @@ describe('SVG optimization configuration', () => {
             overrides: {
               cleanupNumericValues: { floatPrecision: 2 },
               convertPathData: { floatPrecision: 2, transformPrecision: 4 },
-              convertTransform: { floatPrecision: 2, transformPrecision: 4 },
+              convertTransform: {
+                floatPrecision: 2,
+                transformPrecision: 4,
+                degPrecision: 4,
+              },
               removeDesc: false,
             },
           },
