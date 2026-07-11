@@ -14,10 +14,19 @@ app and CLI share one vocabulary), and agent experience is a v1 requirement
 with a concrete bar (teaching `--help`, fix-stating errors, stable NDJSON,
 determinism, fast `npx` start, `frisp mcp`).
 
-The `frisp` npm name was unclaimed; a placeholder package now lives at
-`packages/cli/` (bin stub + README, deliberately NOT wired as a workspace
-yet). **Publish is pending:** the local npm token is stale (`npm whoami`
-401s) — run `npm login`, then `cd packages/cli && npm publish`.
+The `frisp` npm name looked unclaimed (404) but publishing it is **blocked by
+npm's typosquat filter**: 403 "too similar to existing package fresh". No CLI
+workaround exists; the moniker rule is enforced server-side on PUT. A support
+ticket requesting an exception was submitted 2026-07-11 via npmjs.com/support
+("problem with the npm registry" category, from tav@artusion.com; sent-
+confirmation banner received). The placeholder package (`packages/cli/`, bin
+stub + README, deliberately NOT a workspace yet) stays named `frisp`; publish
+is on hold for npm's reply. Maintainer ruled out `@tavlean/frisp`; `frisp-cli`
+verified unclaimed as the fallback. **Gotchas for the eventual publish:** the
+web-2FA flow needs a TTY (`script -q /dev/null npm publish` from a sandboxed
+shell, then approve the printed npmjs.com/auth/cli URL in the maintainer's
+browser — npm masks the URL in non-TTY error output but prints it plainly
+under a pty).
 
 New idea recorded in the roadmap ("Film Grain / Debanding"): subtle grain to
 mask gradient banding at low quality and to de-plastick AI images. Key

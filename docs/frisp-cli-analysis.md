@@ -2,9 +2,13 @@
 
 Last updated: 2026-07-11 (later). Status: **maintainer agreed with the
 direction 2026-07-11** (scope notes in §3a below); still no spec — the two
-design questions in §5 come first. The npm name is claimed by a placeholder
-package at `packages/cli/` (publish pending a fresh npm login — the local
-token was stale).
+design questions in §5 come first. The npm name: unscoped `frisp` is
+**blocked by npm's typosquat filter** (403 "too similar to existing package
+fresh"); a support ticket requesting an exception was submitted 2026-07-11
+from the maintainer's account (confirmation banner received). The placeholder
+package at `packages/cli/` stays named `frisp`, publish on hold until npm
+replies. Maintainer ruled out `@tavlean/frisp`; fallback if npm declines:
+`frisp-cli` (verified unclaimed 2026-07-11).
 Origin: maintainer question 2026-07-11 ("is there value in a single CLI that
 humans and AI agents use to pick the best format/settings for a task?").
 Related: [specs/2026-07-11-auto-quality-mode.md](specs/2026-07-11-auto-quality-mode.md)
@@ -184,9 +188,14 @@ that bill — which is why sequencing matters.
    starts with `/deep-design` on exactly two questions — the Node decode path
    and the format-race/profile policy — then a handoff spec; the rest is
    execution.
-3. ✅ Placeholder package created at `packages/cli/` (2026-07-11; the name
-   was unclaimed). Publishing needs a fresh `npm login` — the stale local
-   token 401s — then `cd packages/cli && npm publish`.
+3. Placeholder package ready at `packages/cli/` — but unscoped `frisp` is
+   blocked by npm's similarity filter (`fresh`). Support ticket submitted
+   2026-07-11 asking for an exception ("There is a problem with the npm
+   registry" category, from tav@artusion.com). When npm replies: if granted,
+   `cd packages/cli && npm publish` (expect the web-2FA browser approval);
+   if declined, the maintainer picks between `frisp-cli` (unclaimed as of
+   2026-07-11) and living without the unscoped name. `@tavlean/frisp` is
+   ruled out (maintainer, 2026-07-11).
 4. Do NOT restructure the repo preemptively. The workspace split happens in
    the CLI's first PR, not before.
 
