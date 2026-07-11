@@ -63,5 +63,10 @@
     ],
     "singleQuote": true,
     "trailingComma": "all"
+  },
+  "dependencies": {
+    "fflate": "^0.8.3",
+    "pixelmatch": "^7.2.0",
+    "svgo": "^4.0.1"
   }
 }

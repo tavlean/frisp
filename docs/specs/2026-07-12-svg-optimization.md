@@ -119,13 +119,20 @@ export function buildSvgoConfig(opts: {
 Config rules (v4 semantics — verify against svgo.dev during S1):
 
 - Base = `preset-default` with `overrides`:
-  - `cleanupNumericValues: { floatPrecision: precision }`
+  - `cleanupNumericValues: { floatPrecision: precision }` (this plugin has no
+    transform params — verified against v4.0.1 source)
   - `convertPathData: { floatPrecision: precision, transformPrecision: min(precision + 2, 5) }`
-  - `convertTransform: { floatPrecision: precision, transformPrecision: min(precision + 2, 5) }`
+  - `convertTransform: { floatPrecision: precision, transformPrecision: min(precision + 2, 5), degPrecision: min(precision + 2, 5) }`
+    (degPrecision pinned for deterministic output; default is 3)
   - `removeDesc: false` when `keepTitleDesc` (note: `removeTitle` is NOT in
     the v4 preset; `removeDesc` IS — only the latter needs disabling).
 - Addons append the named plugins after the preset. `reusePaths` is followed
-  by `removeXlink` per SVGO docs.
+  by `removeXlink` (correct for modern-browser/SVG-2 output, which is Frisp's
+  target; converts generated `xlink:href` to `href`).
+- API facts verified against v4.0.1 source 2026-07-12: `optimize` +
+  `Config` type both import from `'svgo/browser'`; malformed XML makes
+  `optimize()` THROW (worker must catch); pixelmatch is v7, ESM default
+  export, accepts `ImageData.data` directly, returns mismatch count.
 - `multipass` set at the top level of `Config`.
 - NEVER enable `removeViewBox`.
 
@@ -181,9 +188,9 @@ rotate ever un-hides, revisit.
 - `CompressOutcome` gains an optional field:
 
 ```ts
-/** Present only on vector-lane results (format 'svg') and on the identity
- *  side of an SVG source: the text + transfer-size facts the raster fields
- *  can't express. */
+/** Present only on vector-lane results (format 'svg'): the text +
+ *  transfer-size facts the raster fields can't express. The identity side
+ *  carries no svg field — the UI reads originalGzipBytes from here. */
 svg?: {
   optimizedText: string;
   rawBytes: number;
