@@ -1,0 +1,1602 @@
+[
+  {
+    "path": "adversarial/bom-comments.svg",
+    "stratum": "adversarial",
+    "source": "synthetic",
+    "license": "CC0-1.0",
+    "bytes": 130,
+    "sha256": "42a00265e0f646c2978995a792cd1e7fa1e12212f3addaa23ec6ddd7b3aa9fa7"
+  },
+  {
+    "path": "adversarial/clip-transform.svg",
+    "stratum": "adversarial",
+    "source": "synthetic",
+    "license": "CC0-1.0",
+    "bytes": 208,
+    "sha256": "ac16de1e4606c2d9ccdc49eb194f2e667628a3612b28e842772aa5f984cb2b92"
+  },
+  {
+    "path": "adversarial/compound-evenodd.svg",
+    "stratum": "adversarial",
+    "source": "synthetic",
+    "license": "CC0-1.0",
+    "bytes": 109,
+    "sha256": "8aa9e29800aaa81b6e1fe849d8b3acbc8cd1876a7cd819c9a2da74e32c8f3438"
+  },
+  {
+    "path": "adversarial/compound-nonzero.svg",
+    "stratum": "adversarial",
+    "source": "synthetic",
+    "license": "CC0-1.0",
+    "bytes": 109,
+    "sha256": "da63cac87ba4f24bd6e9610bad3b242b73e0057945e87cce9b339aeed3c02916"
+  },
+  {
+    "path": "adversarial/css-media-query.svg",
+    "stratum": "adversarial",
+    "source": "synthetic",
+    "license": "CC0-1.0",
+    "bytes": 193,
+    "sha256": "6a8f754f9f6775b8a3caf0ee2fc0ae243d602e48a928eab74a5f8379cd69d5d4"
+  },
+  {
+    "path": "adversarial/css-vars-selectors.svg",
+    "stratum": "adversarial",
+    "source": "synthetic",
+    "license": "CC0-1.0",
+    "bytes": 174,
+    "sha256": "c9e72f0fe152e20806b19dfa909f608b9ec470bd4fb704cc4af9c55ea4cc1530"
+  },
+  {
+    "path": "adversarial/embedded-raster.svg",
+    "stratum": "adversarial",
+    "source": "synthetic",
+    "license": "CC0-1.0",
+    "bytes": 218,
+    "sha256": "cf524507af7cd5f2dd252b89f8f632b3f0c79456c19773bf04183979c17d01fc"
+  },
+  {
+    "path": "adversarial/filter-blur.svg",
+    "stratum": "adversarial",
+    "source": "synthetic",
+    "license": "CC0-1.0",
+    "bytes": 153,
+    "sha256": "da3008c55494099288b570aa25418d14cfef6e4d5a640c3d4f65ea133b25031a"
+  },
+  {
+    "path": "adversarial/filter-color-matrix.svg",
+    "stratum": "adversarial",
+    "source": "synthetic",
+    "license": "CC0-1.0",
+    "bytes": 197,
+    "sha256": "b53b1adb9379b020b2181943f3fa5692662c687e0a8a3ee2737a315bf803d9d0"
+  },
+  {
+    "path": "adversarial/foreign-object.svg",
+    "stratum": "adversarial",
+    "source": "synthetic",
+    "license": "CC0-1.0",
+    "bytes": 167,
+    "sha256": "62e542d26908eaaeb2e29712168660a8236bef44121f5b09907399f7e208ce48"
+  },
+  {
+    "path": "adversarial/gradient-reference.svg",
+    "stratum": "adversarial",
+    "source": "synthetic",
+    "license": "CC0-1.0",
+    "bytes": 222,
+    "sha256": "b3ef32cdbc0377cfca1e1bdb8834b09923e6942889102f836ae405e827bd2245"
+  },
+  {
+    "path": "adversarial/hidden-elements.svg",
+    "stratum": "adversarial",
+    "source": "synthetic",
+    "license": "CC0-1.0",
+    "bytes": 153,
+    "sha256": "5d29ab1da48cfd4297080323ca3a7587169d17e9519a516ce6b74fbed40d6c9e"
+  },
+  {
+    "path": "adversarial/huge-coordinates.svg",
+    "stratum": "adversarial",
+    "source": "synthetic",
+    "license": "CC0-1.0",
+    "bytes": 111,
+    "sha256": "6917b87260c6db5e0f70c8c0561a0bb69b9e15d532d70e8c3a1a263631bc2b56"
+  },
+  {
+    "path": "adversarial/mask.svg",
+    "stratum": "adversarial",
+    "source": "synthetic",
+    "license": "CC0-1.0",
+    "bytes": 229,
+    "sha256": "0d7b98be864131a1b2bb7e8d76476ee47feac706232d85bb4dc1e2c53131311a"
+  },
+  {
+    "path": "adversarial/negative-viewbox.svg",
+    "stratum": "adversarial",
+    "source": "synthetic",
+    "license": "CC0-1.0",
+    "bytes": 157,
+    "sha256": "f40b73ec9c05ca69e3be3f5b15b5e3821ad3a546f3ad97c71fbab3f41c5f680e"
+  },
+  {
+    "path": "adversarial/path-command-mix.svg",
+    "stratum": "adversarial",
+    "source": "synthetic",
+    "license": "CC0-1.0",
+    "bytes": 136,
+    "sha256": "c24245092bea790f44524183398c992e9f630c785f8269dd3febb85d9c0290a5"
+  },
+  {
+    "path": "adversarial/physical-units.svg",
+    "stratum": "adversarial",
+    "source": "synthetic",
+    "license": "CC0-1.0",
+    "bytes": 129,
+    "sha256": "53238e49a699648d19c9852d5bb9c3796185573ce4d5f6284bc5b1e65de395bf"
+  },
+  {
+    "path": "adversarial/script-handlers.svg",
+    "stratum": "adversarial",
+    "source": "synthetic",
+    "license": "CC0-1.0",
+    "bytes": 152,
+    "sha256": "86ef71c361ff0e5b1ca2c446f30e747a26826e5eaf4c3ed8549297893a73d2e9"
+  },
+  {
+    "path": "adversarial/smil-animate.svg",
+    "stratum": "adversarial",
+    "source": "synthetic",
+    "license": "CC0-1.0",
+    "bytes": 166,
+    "sha256": "192d8320662ac38071f35a8021441327d92691a921c082f8ae570d715e05c305"
+  },
+  {
+    "path": "adversarial/symbol-use.svg",
+    "stratum": "adversarial",
+    "source": "synthetic",
+    "license": "CC0-1.0",
+    "bytes": 160,
+    "sha256": "78c56c265563e365b66194665a8306fff64b025326fc468ef4368ef457f067d5"
+  },
+  {
+    "path": "adversarial/text-font.svg",
+    "stratum": "adversarial",
+    "source": "synthetic",
+    "license": "CC0-1.0",
+    "bytes": 131,
+    "sha256": "95d531cf08ed6e6856471df10978e3bab2d2af9680f77f0e09d02da9c02704d0"
+  },
+  {
+    "path": "adversarial/tiny-coordinates.svg",
+    "stratum": "adversarial",
+    "source": "synthetic",
+    "license": "CC0-1.0",
+    "bytes": 125,
+    "sha256": "69c21917d5351ab4c01619775d204f76022d168e30e59ccb63e0111933b319ab"
+  },
+  {
+    "path": "adversarial/use-defs-chain.svg",
+    "stratum": "adversarial",
+    "source": "synthetic",
+    "license": "CC0-1.0",
+    "bytes": 179,
+    "sha256": "bf535a22d9272a5c773a7ad8545a087da85ec9943db42577656fb45e1acbec8b"
+  },
+  {
+    "path": "adversarial/viewbox-only.svg",
+    "stratum": "adversarial",
+    "source": "synthetic",
+    "license": "CC0-1.0",
+    "bytes": 103,
+    "sha256": "174535f7b856ffb4ad3794787005ce36b6e4b06d4636d0eeaed492891b1f875c"
+  },
+  {
+    "path": "adversarial/xlink-use.svg",
+    "stratum": "adversarial",
+    "source": "synthetic",
+    "license": "CC0-1.0",
+    "bytes": 162,
+    "sha256": "956527cda7c78fc964e50574aaa7722dc8b43673933f32b44ab85de3c933eb2c"
+  },
+  {
+    "path": "editor-exports/figma-01.svg",
+    "stratum": "editor-exports",
+    "source": "synthetic",
+    "license": "CC0-1.0",
+    "bytes": 930,
+    "sha256": "991535eab55f78bcdb9c9666816214222a38256a4d03c243942e32f83d918533"
+  },
+  {
+    "path": "editor-exports/figma-02.svg",
+    "stratum": "editor-exports",
+    "source": "synthetic",
+    "license": "CC0-1.0",
+    "bytes": 930,
+    "sha256": "aba5cb366ad465807abaed769dcf01135da70a425ba2fc006b5a8b169e3a0851"
+  },
+  {
+    "path": "editor-exports/figma-03.svg",
+    "stratum": "editor-exports",
+    "source": "synthetic",
+    "license": "CC0-1.0",
+    "bytes": 931,
+    "sha256": "133d9c76ee8d32a5df62a6d1cf760567f50d99ee0ea23b58bbbb43a63242beb6"
+  },
+  {
+    "path": "editor-exports/figma-04.svg",
+    "stratum": "editor-exports",
+    "source": "synthetic",
+    "license": "CC0-1.0",
+    "bytes": 931,
+    "sha256": "24249854bffe9fdea33a6738d0d956284b1a854ee3b1e21489b2c1d509acbb2b"
+  },
+  {
+    "path": "editor-exports/figma-05.svg",
+    "stratum": "editor-exports",
+    "source": "synthetic",
+    "license": "CC0-1.0",
+    "bytes": 931,
+    "sha256": "0cda4716af835fecb1583dd3a91e6ff4752c44a50b860be2ae24c2e0848e3e60"
+  },
+  {
+    "path": "editor-exports/figma-06.svg",
+    "stratum": "editor-exports",
+    "source": "synthetic",
+    "license": "CC0-1.0",
+    "bytes": 932,
+    "sha256": "82753ba34d0ee3a0516ab8e00eb8a1729a37da1f2fff58e7e4e0d683416a46fe"
+  },
+  {
+    "path": "editor-exports/figma-07.svg",
+    "stratum": "editor-exports",
+    "source": "synthetic",
+    "license": "CC0-1.0",
+    "bytes": 932,
+    "sha256": "af91cdb789fcb43d7565f66068752dcbb9a12cf5cb1c73485d0bb167e03ffb6c"
+  },
+  {
+    "path": "editor-exports/figma-08.svg",
+    "stratum": "editor-exports",
+    "source": "synthetic",
+    "license": "CC0-1.0",
+    "bytes": 932,
+    "sha256": "c3a14d2cc065b4c83ec33ea77541b58a3b59444cf7603aecaf85b30d19db9796"
+  },
+  {
+    "path": "editor-exports/illustrator-01.svg",
+    "stratum": "editor-exports",
+    "source": "synthetic",
+    "license": "CC0-1.0",
+    "bytes": 525,
+    "sha256": "76677504a1f38d8a2e9e38787e2062c0e64cd2c87b019d112c424d7c7a6175b7"
+  },
+  {
+    "path": "editor-exports/illustrator-02.svg",
+    "stratum": "editor-exports",
+    "source": "synthetic",
+    "license": "CC0-1.0",
+    "bytes": 525,
+    "sha256": "3a3b90b6635b9e3e7fc29faa83895e7ef9f52eb599f6549f24c00f5c64e9986b"
+  },
+  {
+    "path": "editor-exports/illustrator-03.svg",
+    "stratum": "editor-exports",
+    "source": "synthetic",
+    "license": "CC0-1.0",
+    "bytes": 525,
+    "sha256": "d6970bf4d84a4503c9a978d2f598acfb84edee18f315c75acd57030002b4a84f"
+  },
+  {
+    "path": "editor-exports/illustrator-04.svg",
+    "stratum": "editor-exports",
+    "source": "synthetic",
+    "license": "CC0-1.0",
+    "bytes": 526,
+    "sha256": "11f3d21af821f0505ccd57f947f7ada07aa75d8f5063526b28ac897c169d76ea"
+  },
+  {
+    "path": "editor-exports/illustrator-05.svg",
+    "stratum": "editor-exports",
+    "source": "synthetic",
+    "license": "CC0-1.0",
+    "bytes": 526,
+    "sha256": "184fb0d33786bda075caa7920fe45b2504df8223fb3a5fbe6fdae3673d9e54d3"
+  },
+  {
+    "path": "editor-exports/illustrator-06.svg",
+    "stratum": "editor-exports",
+    "source": "synthetic",
+    "license": "CC0-1.0",
+    "bytes": 526,
+    "sha256": "187ff2929d07de6802b60a1011a6c0e849a19d0f04700c18cf67986572610ba9"
+  },
+  {
+    "path": "editor-exports/illustrator-07.svg",
+    "stratum": "editor-exports",
+    "source": "synthetic",
+    "license": "CC0-1.0",
+    "bytes": 526,
+    "sha256": "504a28a72f8a71bc5deca187322a6b4bd138b93ae8f124ecddba4994f31dedc3"
+  },
+  {
+    "path": "editor-exports/illustrator-08.svg",
+    "stratum": "editor-exports",
+    "source": "synthetic",
+    "license": "CC0-1.0",
+    "bytes": 526,
+    "sha256": "be80f456f8a91ba24f43c25e9b5851fb0274fb9da23536d5c0706bdf7c96a9b8"
+  },
+  {
+    "path": "editor-exports/inkscape-01.svg",
+    "stratum": "editor-exports",
+    "source": "synthetic",
+    "license": "CC0-1.0",
+    "bytes": 665,
+    "sha256": "d1ecca9df4bca1bfe6360948a70ba1e04e56f830b936850d582a66f34457aac9"
+  },
+  {
+    "path": "editor-exports/inkscape-02.svg",
+    "stratum": "editor-exports",
+    "source": "synthetic",
+    "license": "CC0-1.0",
+    "bytes": 665,
+    "sha256": "b122702cecc248cbdd0c9f0604b445b22d84e42afbbb95b04b4d2e7c2c7e7934"
+  },
+  {
+    "path": "editor-exports/inkscape-03.svg",
+    "stratum": "editor-exports",
+    "source": "synthetic",
+    "license": "CC0-1.0",
+    "bytes": 665,
+    "sha256": "b521f3c2374989c4fec12e8499f6224bedd7eafd0d5624d4883389a49f9b1e47"
+  },
+  {
+    "path": "editor-exports/inkscape-04.svg",
+    "stratum": "editor-exports",
+    "source": "synthetic",
+    "license": "CC0-1.0",
+    "bytes": 667,
+    "sha256": "3a6f648b0da03c8ee89a3876d5e7228d5b213ed72c5a7d4890cb360c22625694"
+  },
+  {
+    "path": "editor-exports/inkscape-05.svg",
+    "stratum": "editor-exports",
+    "source": "synthetic",
+    "license": "CC0-1.0",
+    "bytes": 667,
+    "sha256": "c40b8974d543a5e4bae24e292ad1b6262be899d6bd72f626628e126e8170b9b8"
+  },
+  {
+    "path": "editor-exports/inkscape-06.svg",
+    "stratum": "editor-exports",
+    "source": "synthetic",
+    "license": "CC0-1.0",
+    "bytes": 667,
+    "sha256": "32e6c906e8d572296f0ed47d42099a5c20276091733d4a8c81ea3eb728c133b0"
+  },
+  {
+    "path": "editor-exports/inkscape-07.svg",
+    "stratum": "editor-exports",
+    "source": "synthetic",
+    "license": "CC0-1.0",
+    "bytes": 667,
+    "sha256": "5258df738e1fd9b5f15f2c9a3bd334a6cfe7252166385fce233a948d28f1608b"
+  },
+  {
+    "path": "editor-exports/inkscape-08.svg",
+    "stratum": "editor-exports",
+    "source": "synthetic",
+    "license": "CC0-1.0",
+    "bytes": 667,
+    "sha256": "a192cc2326323ec02c977df67afbda4bdee15be2c91f1acb34077d371880b536"
+  },
+  {
+    "path": "editor-exports/inkscape-09.svg",
+    "stratum": "editor-exports",
+    "source": "synthetic",
+    "license": "CC0-1.0",
+    "bytes": 667,
+    "sha256": "86d698a2bbb7cef39f846fa377441394093e51d08be4603d1289f58a50ddeae5"
+  },
+  {
+    "path": "icons-color/twemoji-1f308.svg",
+    "stratum": "icons-color",
+    "source": "https://cdn.jsdelivr.net/gh/jdecked/twemoji@v16.0.1/assets/svg/1f308.svg",
+    "license": "CC-BY-4.0",
+    "bytes": 733,
+    "sha256": "555858f907bda45e059201a8a3d8910876ef8d830b9b82cfc0ca9aa55c7b029a"
+  },
+  {
+    "path": "icons-color/twemoji-1f30d.svg",
+    "stratum": "icons-color",
+    "source": "https://cdn.jsdelivr.net/gh/jdecked/twemoji@v16.0.1/assets/svg/1f30d.svg",
+    "license": "CC-BY-4.0",
+    "bytes": 1156,
+    "sha256": "593d59f9f319875b02111ac46a9f70df2c1e0f3a5fd92810c3f5ddbb598ca62c"
+  },
+  {
+    "path": "icons-color/twemoji-1f389.svg",
+    "stratum": "icons-color",
+    "source": "https://cdn.jsdelivr.net/gh/jdecked/twemoji@v16.0.1/assets/svg/1f389.svg",
+    "license": "CC-BY-4.0",
+    "bytes": 3153,
+    "sha256": "194de9942601b9a42cc9ea79663aaca170816cfc07cbe8b2a568852427fa7088"
+  },
+  {
+    "path": "icons-color/twemoji-1f499.svg",
+    "stratum": "icons-color",
+    "source": "https://cdn.jsdelivr.net/gh/jdecked/twemoji@v16.0.1/assets/svg/1f499.svg",
+    "license": "CC-BY-4.0",
+    "bytes": 368,
+    "sha256": "44cb18486c627b7e38f3d6fd9bb5c3609ef8193d66046933230ec104420bf314"
+  },
+  {
+    "path": "icons-color/twemoji-1f4a1.svg",
+    "stratum": "icons-color",
+    "source": "https://cdn.jsdelivr.net/gh/jdecked/twemoji@v16.0.1/assets/svg/1f4a1.svg",
+    "license": "CC-BY-4.0",
+    "bytes": 1078,
+    "sha256": "2cd037cce2c3c16c3d33b1fbe4d9d46206633af2f8b4e082cea209c56a3e8b56"
+  },
+  {
+    "path": "icons-color/twemoji-1f525.svg",
+    "stratum": "icons-color",
+    "source": "https://cdn.jsdelivr.net/gh/jdecked/twemoji@v16.0.1/assets/svg/1f525.svg",
+    "license": "CC-BY-4.0",
+    "bytes": 822,
+    "sha256": "4fa646a4dbc10513ddeb70561789483638faf456e15186f4eb7291c5c455cbb6"
+  },
+  {
+    "path": "icons-color/twemoji-1f600.svg",
+    "stratum": "icons-color",
+    "source": "https://cdn.jsdelivr.net/gh/jdecked/twemoji@v16.0.1/assets/svg/1f600.svg",
+    "license": "CC-BY-4.0",
+    "bytes": 450,
+    "sha256": "41478e547c5b6ad66bfcf91ead5350fa0bc247956c3ff912020327e3e9ad0d2b"
+  },
+  {
+    "path": "icons-color/twemoji-1f601.svg",
+    "stratum": "icons-color",
+    "source": "https://cdn.jsdelivr.net/gh/jdecked/twemoji@v16.0.1/assets/svg/1f601.svg",
+    "license": "CC-BY-4.0",
+    "bytes": 1129,
+    "sha256": "590acfc514de2929a27b078ddb0fbd161f5a172c3d6bf0a9fb527c17de627ffc"
+  },
+  {
+    "path": "icons-color/twemoji-1f602.svg",
+    "stratum": "icons-color",
+    "source": "https://cdn.jsdelivr.net/gh/jdecked/twemoji@v16.0.1/assets/svg/1f602.svg",
+    "license": "CC-BY-4.0",
+    "bytes": 1668,
+    "sha256": "1752c287f6fbbb65e1c982399584bbc9b1e0c46f0dc181cda9b8028dc60c4c01"
+  },
+  {
+    "path": "icons-color/twemoji-1f603.svg",
+    "stratum": "icons-color",
+    "source": "https://cdn.jsdelivr.net/gh/jdecked/twemoji@v16.0.1/assets/svg/1f603.svg",
+    "license": "CC-BY-4.0",
+    "bytes": 526,
+    "sha256": "064de246adc3045a5f072834a0a9c108c890a08eaca2804afd5652fca6c58eea"
+  },
+  {
+    "path": "icons-color/twemoji-1f604.svg",
+    "stratum": "icons-color",
+    "source": "https://cdn.jsdelivr.net/gh/jdecked/twemoji@v16.0.1/assets/svg/1f604.svg",
+    "license": "CC-BY-4.0",
+    "bytes": 920,
+    "sha256": "aa02ba3edc78a206b1d9851b16f2d97eb5943c6405fbec0893d52f3d5144aa2b"
+  },
+  {
+    "path": "icons-color/twemoji-1f605.svg",
+    "stratum": "icons-color",
+    "source": "https://cdn.jsdelivr.net/gh/jdecked/twemoji@v16.0.1/assets/svg/1f605.svg",
+    "license": "CC-BY-4.0",
+    "bytes": 1010,
+    "sha256": "40395bdb81af23f2e14100230843c31cd3169b24ed0ad1a7ee5b726bdb97f41a"
+  },
+  {
+    "path": "icons-color/twemoji-1f606.svg",
+    "stratum": "icons-color",
+    "source": "https://cdn.jsdelivr.net/gh/jdecked/twemoji@v16.0.1/assets/svg/1f606.svg",
+    "license": "CC-BY-4.0",
+    "bytes": 1058,
+    "sha256": "03369a3f14fa25bdc157d4c47b61d644a38f0188dd11ca5aefdbebdcfbd8a0df"
+  },
+  {
+    "path": "icons-color/twemoji-1f609.svg",
+    "stratum": "icons-color",
+    "source": "https://cdn.jsdelivr.net/gh/jdecked/twemoji@v16.0.1/assets/svg/1f609.svg",
+    "license": "CC-BY-4.0",
+    "bytes": 1183,
+    "sha256": "2468609517599c10415c9c9b65024cf697b747dbb837d07d0ea12130f224c65f"
+  },
+  {
+    "path": "icons-color/twemoji-1f60a.svg",
+    "stratum": "icons-color",
+    "source": "https://cdn.jsdelivr.net/gh/jdecked/twemoji@v16.0.1/assets/svg/1f60a.svg",
+    "license": "CC-BY-4.0",
+    "bytes": 1055,
+    "sha256": "bda4e6d76f6b82b87f43755d551b36dd7cfb0d0117fb798435270e7c1127a87e"
+  },
+  {
+    "path": "icons-color/twemoji-1f60d.svg",
+    "stratum": "icons-color",
+    "source": "https://cdn.jsdelivr.net/gh/jdecked/twemoji@v16.0.1/assets/svg/1f60d.svg",
+    "license": "CC-BY-4.0",
+    "bytes": 941,
+    "sha256": "e17d4d0339ce34ba1ee3274fdc98a1bd5ca4a8f309861b63b746970a609d7d63"
+  },
+  {
+    "path": "icons-color/twemoji-1f60e.svg",
+    "stratum": "icons-color",
+    "source": "https://cdn.jsdelivr.net/gh/jdecked/twemoji@v16.0.1/assets/svg/1f60e.svg",
+    "license": "CC-BY-4.0",
+    "bytes": 997,
+    "sha256": "d32bd9f51b2a54f620f9693e833935c5e2cb2304cbf89aab75fd10f054711ce5"
+  },
+  {
+    "path": "icons-color/twemoji-1f618.svg",
+    "stratum": "icons-color",
+    "source": "https://cdn.jsdelivr.net/gh/jdecked/twemoji@v16.0.1/assets/svg/1f618.svg",
+    "license": "CC-BY-4.0",
+    "bytes": 2224,
+    "sha256": "52741c0837915c2af0469345fda5a6e62b31f56c22efda6005cbcd52deb24285"
+  },
+  {
+    "path": "icons-color/twemoji-1f621.svg",
+    "stratum": "icons-color",
+    "source": "https://cdn.jsdelivr.net/gh/jdecked/twemoji@v16.0.1/assets/svg/1f621.svg",
+    "license": "CC-BY-4.0",
+    "bytes": 1070,
+    "sha256": "26ff86c1655b7c86feda5a7ce77d55cbebfd346fcc341e8184f702e49eb36314"
+  },
+  {
+    "path": "icons-color/twemoji-1f62d.svg",
+    "stratum": "icons-color",
+    "source": "https://cdn.jsdelivr.net/gh/jdecked/twemoji@v16.0.1/assets/svg/1f62d.svg",
+    "license": "CC-BY-4.0",
+    "bytes": 1318,
+    "sha256": "d0333b5cb416ad6545055766fc8128566874ab5ead272e5a691a24704048f077"
+  },
+  {
+    "path": "icons-color/twemoji-1f680.svg",
+    "stratum": "icons-color",
+    "source": "https://cdn.jsdelivr.net/gh/jdecked/twemoji@v16.0.1/assets/svg/1f680.svg",
+    "license": "CC-BY-4.0",
+    "bytes": 677,
+    "sha256": "3892ef66f49ce43d49c8719e9277da0e0e821059f0cc239a549f6629cc12b3cf"
+  },
+  {
+    "path": "icons-color/twemoji-1f914.svg",
+    "stratum": "icons-color",
+    "source": "https://cdn.jsdelivr.net/gh/jdecked/twemoji@v16.0.1/assets/svg/1f914.svg",
+    "license": "CC-BY-4.0",
+    "bytes": 1573,
+    "sha256": "3a19c77ff33f8ea325055b8563e7415ffd2ae37f0bb50a12898801613037721e"
+  },
+  {
+    "path": "icons-color/twemoji-1f917.svg",
+    "stratum": "icons-color",
+    "source": "https://cdn.jsdelivr.net/gh/jdecked/twemoji@v16.0.1/assets/svg/1f917.svg",
+    "license": "CC-BY-4.0",
+    "bytes": 2570,
+    "sha256": "b54b9c6db7ef1328acb939f4d5fe03040f6d28fd6a706180278d2a51e9a0435d"
+  },
+  {
+    "path": "icons-color/twemoji-1f923.svg",
+    "stratum": "icons-color",
+    "source": "https://cdn.jsdelivr.net/gh/jdecked/twemoji@v16.0.1/assets/svg/1f923.svg",
+    "license": "CC-BY-4.0",
+    "bytes": 1658,
+    "sha256": "cbd192d59e571778d577df96be003f18e5520c355a0d8d48576aa83a040d3e10"
+  },
+  {
+    "path": "icons-color/twemoji-1f970.svg",
+    "stratum": "icons-color",
+    "source": "https://cdn.jsdelivr.net/gh/jdecked/twemoji@v16.0.1/assets/svg/1f970.svg",
+    "license": "CC-BY-4.0",
+    "bytes": 2384,
+    "sha256": "303d516f1985e3bc62aa92d1a55c2140a14435b255a32b4c3bc776a2395f056d"
+  },
+  {
+    "path": "icons-color/twemoji-1f973.svg",
+    "stratum": "icons-color",
+    "source": "https://cdn.jsdelivr.net/gh/jdecked/twemoji@v16.0.1/assets/svg/1f973.svg",
+    "license": "CC-BY-4.0",
+    "bytes": 2487,
+    "sha256": "5198b19dace96c24b864a00d646ebaf1b666f0e6cc1a7a4f97b84c0eeb159d6d"
+  },
+  {
+    "path": "icons-color/twemoji-1f984.svg",
+    "stratum": "icons-color",
+    "source": "https://cdn.jsdelivr.net/gh/jdecked/twemoji@v16.0.1/assets/svg/1f984.svg",
+    "license": "CC-BY-4.0",
+    "bytes": 2417,
+    "sha256": "6063b1ca7021881784eb5a8110997357026fb7376785e639850335a9c422a639"
+  },
+  {
+    "path": "icons-color/twemoji-1f9e1.svg",
+    "stratum": "icons-color",
+    "source": "https://cdn.jsdelivr.net/gh/jdecked/twemoji@v16.0.1/assets/svg/1f9e1.svg",
+    "license": "CC-BY-4.0",
+    "bytes": 368,
+    "sha256": "fe2e02935144ec1d4768e0322153899587b1e005100a3d455131636efe0e6657"
+  },
+  {
+    "path": "icons-color/twemoji-2764.svg",
+    "stratum": "icons-color",
+    "source": "https://cdn.jsdelivr.net/gh/jdecked/twemoji@v16.0.1/assets/svg/2764.svg",
+    "license": "CC-BY-4.0",
+    "bytes": 368,
+    "sha256": "09a743ee0c32ca57c9be64b13b29c396310d1dd309cb4d7d3be722e47db95f27"
+  },
+  {
+    "path": "icons-color/twemoji-2b50.svg",
+    "stratum": "icons-color",
+    "source": "https://cdn.jsdelivr.net/gh/jdecked/twemoji@v16.0.1/assets/svg/2b50.svg",
+    "license": "CC-BY-4.0",
+    "bytes": 554,
+    "sha256": "2bf5907894a70b877089c24817fcc65db655cfed28840aa16c8f3810cd412620"
+  },
+  {
+    "path": "icons-fill/material-account_circle.svg",
+    "stratum": "icons-fill",
+    "source": "https://unpkg.com/@material-design-icons/svg@0.14.15/filled/account_circle.svg",
+    "license": "Apache-2.0",
+    "bytes": 328,
+    "sha256": "094c179969c2ee9e3238ae422a733425af22fa6dcbfd76ab3c32fce8e185cc74"
+  },
+  {
+    "path": "icons-fill/material-add.svg",
+    "stratum": "icons-fill",
+    "source": "https://unpkg.com/@material-design-icons/svg@0.14.15/filled/add.svg",
+    "license": "Apache-2.0",
+    "bytes": 136,
+    "sha256": "4dc5547840d699651cf7d3059a91d575cddaf80451ab85a7c41ed1d7c7998b24"
+  },
+  {
+    "path": "icons-fill/material-check_circle.svg",
+    "stratum": "icons-fill",
+    "source": "https://unpkg.com/@material-design-icons/svg@0.14.15/filled/check_circle.svg",
+    "license": "Apache-2.0",
+    "bytes": 217,
+    "sha256": "2222ca5b7c5d200f98016bde2f582effa9e90d9d35bb9492db1ee1ce4895c24e"
+  },
+  {
+    "path": "icons-fill/material-close.svg",
+    "stratum": "icons-fill",
+    "source": "https://unpkg.com/@material-design-icons/svg@0.14.15/filled/close.svg",
+    "license": "Apache-2.0",
+    "bytes": 202,
+    "sha256": "1abf0e0aa201160b9c6d6decca211d6b6ae67d73165fc7c57581db42ef274cf9"
+  },
+  {
+    "path": "icons-fill/material-delete.svg",
+    "stratum": "icons-fill",
+    "source": "https://unpkg.com/@material-design-icons/svg@0.14.15/filled/delete.svg",
+    "license": "Apache-2.0",
+    "bytes": 178,
+    "sha256": "40cfa49b563a8051443cd6dd3a0abc7ebb72d9b3edd17a32b4428f9b579146cd"
+  },
+  {
+    "path": "icons-fill/material-favorite.svg",
+    "stratum": "icons-fill",
+    "source": "https://unpkg.com/@material-design-icons/svg@0.14.15/filled/favorite.svg",
+    "license": "Apache-2.0",
+    "bytes": 274,
+    "sha256": "7244c37eb0dc549853f5f94e923aee36e10514f204f2bfce7c9d3a460c3ecc50"
+  },
+  {
+    "path": "icons-fill/material-home.svg",
+    "stratum": "icons-fill",
+    "source": "https://unpkg.com/@material-design-icons/svg@0.14.15/filled/home.svg",
+    "license": "Apache-2.0",
+    "bytes": 136,
+    "sha256": "58f47974b72f8431037cffc73aa575dd8def0fadd76942eb131a7fd2e973d0a8"
+  },
+  {
+    "path": "icons-fill/material-info.svg",
+    "stratum": "icons-fill",
+    "source": "https://unpkg.com/@material-design-icons/svg@0.14.15/filled/info.svg",
+    "license": "Apache-2.0",
+    "bytes": 197,
+    "sha256": "2e1a5c0fc47b41204eccc4b45a4cb73e147d8e6f1c4dbbdebbe675b09a4eb82d"
+  },
+  {
+    "path": "icons-fill/material-lock.svg",
+    "stratum": "icons-fill",
+    "source": "https://unpkg.com/@material-design-icons/svg@0.14.15/filled/lock.svg",
+    "license": "Apache-2.0",
+    "bytes": 326,
+    "sha256": "020a1d8bb2f5067f85f46a1586e83f31d542ea1dceb752c511dda3710c3781ce"
+  },
+  {
+    "path": "icons-fill/material-mail.svg",
+    "stratum": "icons-fill",
+    "source": "https://unpkg.com/@material-design-icons/svg@0.14.15/filled/mail.svg",
+    "license": "Apache-2.0",
+    "bytes": 209,
+    "sha256": "caf72e860efca8bd2f0dce6b23ec3f874b33219103c654b3e9a914063150d70b"
+  },
+  {
+    "path": "icons-fill/material-menu.svg",
+    "stratum": "icons-fill",
+    "source": "https://unpkg.com/@material-design-icons/svg@0.14.15/filled/menu.svg",
+    "license": "Apache-2.0",
+    "bytes": 146,
+    "sha256": "caa8cc99e1be32ab478ebbe12f4515de429a57573bd718a80ffad6d37307368b"
+  },
+  {
+    "path": "icons-fill/material-pause.svg",
+    "stratum": "icons-fill",
+    "source": "https://unpkg.com/@material-design-icons/svg@0.14.15/filled/pause.svg",
+    "license": "Apache-2.0",
+    "bytes": 132,
+    "sha256": "dbd40f5581dcbad635d694bd1885b95aab53d6989827984d7646f5da2d59d367"
+  },
+  {
+    "path": "icons-fill/material-place.svg",
+    "stratum": "icons-fill",
+    "source": "https://unpkg.com/@material-design-icons/svg@0.14.15/filled/place.svg",
+    "license": "Apache-2.0",
+    "bytes": 215,
+    "sha256": "f1ee262577296e3155cd96519886ab85e3a45f538434306376a90b4ed418df8a"
+  },
+  {
+    "path": "icons-fill/material-play_arrow.svg",
+    "stratum": "icons-fill",
+    "source": "https://unpkg.com/@material-design-icons/svg@0.14.15/filled/play_arrow.svg",
+    "license": "Apache-2.0",
+    "bytes": 114,
+    "sha256": "54077d93aca5c4b0dbc80d177dfe003e689ef3e6dfffdf306ee8027b53282c38"
+  },
+  {
+    "path": "icons-fill/material-remove.svg",
+    "stratum": "icons-fill",
+    "source": "https://unpkg.com/@material-design-icons/svg@0.14.15/filled/remove.svg",
+    "license": "Apache-2.0",
+    "bytes": 118,
+    "sha256": "d7b1b4b4e65bc4d62714b3bc9d5183978389e64995ebca75ea6d4773ff6e17ce"
+  },
+  {
+    "path": "icons-fill/material-search.svg",
+    "stratum": "icons-fill",
+    "source": "https://unpkg.com/@material-design-icons/svg@0.14.15/filled/search.svg",
+    "license": "Apache-2.0",
+    "bytes": 303,
+    "sha256": "7101b573628511efa02d6f6fa09d93e49d7b73a6eef29a32bcaa246e60a36522"
+  },
+  {
+    "path": "icons-fill/material-settings.svg",
+    "stratum": "icons-fill",
+    "source": "https://unpkg.com/@material-design-icons/svg@0.14.15/filled/settings.svg",
+    "license": "Apache-2.0",
+    "bytes": 793,
+    "sha256": "d6e369fa0aa9e5dac1e5f6d8ed2e8f39ee26b177fd6bd8260fe26de0e3b0128a"
+  },
+  {
+    "path": "icons-fill/material-star.svg",
+    "stratum": "icons-fill",
+    "source": "https://unpkg.com/@material-design-icons/svg@0.14.15/filled/star.svg",
+    "license": "Apache-2.0",
+    "bytes": 189,
+    "sha256": "0aa8c8432769caf951f47268f515966729e28651c0723261189ae5557cc635fb"
+  },
+  {
+    "path": "icons-fill/material-visibility.svg",
+    "stratum": "icons-fill",
+    "source": "https://unpkg.com/@material-design-icons/svg@0.14.15/filled/visibility.svg",
+    "license": "Apache-2.0",
+    "bytes": 310,
+    "sha256": "5e2fc28ae621a18342caf71644f0b5725d9cbe377932db896a0009fa21250201"
+  },
+  {
+    "path": "icons-fill/material-warning.svg",
+    "stratum": "icons-fill",
+    "source": "https://unpkg.com/@material-design-icons/svg@0.14.15/filled/warning.svg",
+    "license": "Apache-2.0",
+    "bytes": 151,
+    "sha256": "e800748c34aac0e0560a3bc3f98672243a35262ea64818e48832ce7094539eaf"
+  },
+  {
+    "path": "icons-fill/simple-adobeillustrator.svg",
+    "stratum": "icons-fill",
+    "source": "https://unpkg.com/simple-icons@13.21.0/icons/adobeillustrator.svg",
+    "license": "CC0-1.0",
+    "bytes": 1012,
+    "sha256": "f6bfd1f6662f2db4d8047406fd93ffb8d262b20b74ec83999d0d5c64c122177d"
+  },
+  {
+    "path": "icons-fill/simple-apple.svg",
+    "stratum": "icons-fill",
+    "source": "https://unpkg.com/simple-icons@13.21.0/icons/apple.svg",
+    "license": "CC0-1.0",
+    "bytes": 650,
+    "sha256": "2a1509dccd25e6d2bc7a11a8e52941077e1a48555e192ce638699b9f083c2a7c"
+  },
+  {
+    "path": "icons-fill/simple-cloudflare.svg",
+    "stratum": "icons-fill",
+    "source": "https://unpkg.com/simple-icons@13.21.0/icons/cloudflare.svg",
+    "license": "CC0-1.0",
+    "bytes": 1178,
+    "sha256": "408096d99907fd99e0863cb5d73f77a72537c6a85fd8d5e2704178a83a891f08"
+  },
+  {
+    "path": "icons-fill/simple-css3.svg",
+    "stratum": "icons-fill",
+    "source": "https://unpkg.com/simple-icons@13.21.0/icons/css3.svg",
+    "license": "CC0-1.0",
+    "bytes": 328,
+    "sha256": "f73d87c6b7d2a021f486b0d52a59893174ba5e3b7ceb3dcdfab865ea250ba767"
+  },
+  {
+    "path": "icons-fill/simple-docker.svg",
+    "stratum": "icons-fill",
+    "source": "https://unpkg.com/simple-icons@13.21.0/icons/docker.svg",
+    "license": "CC0-1.0",
+    "bytes": 1765,
+    "sha256": "65571291c261ef869c31540a38f3ca0f0ee3bb73f179c172211c8860f19a6359"
+  },
+  {
+    "path": "icons-fill/simple-figma.svg",
+    "stratum": "icons-fill",
+    "source": "https://unpkg.com/simple-icons@13.21.0/icons/figma.svg",
+    "license": "CC0-1.0",
+    "bytes": 1093,
+    "sha256": "2f86fca501dfed321a62f28743f29d9dd738dac91668eac5260ab746d1ef8840"
+  },
+  {
+    "path": "icons-fill/simple-firefox.svg",
+    "stratum": "icons-fill",
+    "source": "https://unpkg.com/simple-icons@13.21.0/icons/firefox.svg",
+    "license": "CC0-1.0",
+    "bytes": 1016,
+    "sha256": "819fc94c6ce1dfa1874f069c88ff9d666fb4ce669e23781ec8dbf163a5a012e2"
+  },
+  {
+    "path": "icons-fill/simple-github.svg",
+    "stratum": "icons-fill",
+    "source": "https://unpkg.com/simple-icons@13.21.0/icons/github.svg",
+    "license": "CC0-1.0",
+    "bytes": 822,
+    "sha256": "3bf8cceead820aec50d4ee825a3fd02c5a1cd6665cc9cf4cbf3d9c8861a204bb"
+  },
+  {
+    "path": "icons-fill/simple-gitlab.svg",
+    "stratum": "icons-fill",
+    "source": "https://unpkg.com/simple-icons@13.21.0/icons/gitlab.svg",
+    "license": "CC0-1.0",
+    "bytes": 573,
+    "sha256": "c7c39058bd1b6f9f40334383bd5136bb8c5ba5e6a24200f2d1f18365e2526e28"
+  },
+  {
+    "path": "icons-fill/simple-googlechrome.svg",
+    "stratum": "icons-fill",
+    "source": "https://unpkg.com/simple-icons@13.21.0/icons/googlechrome.svg",
+    "license": "CC0-1.0",
+    "bytes": 535,
+    "sha256": "ce2ff9d2a010ed24f821ef34e40dc125d2bdf1dd28f42ded7b6017585b73c1dd"
+  },
+  {
+    "path": "icons-fill/simple-html5.svg",
+    "stratum": "icons-fill",
+    "source": "https://unpkg.com/simple-icons@13.21.0/icons/html5.svg",
+    "license": "CC0-1.0",
+    "bytes": 327,
+    "sha256": "dfd65fdd7e4f997c6b163e48793de5ad18c4c99e191807a61752ea702f123d1d"
+  },
+  {
+    "path": "icons-fill/simple-inkscape.svg",
+    "stratum": "icons-fill",
+    "source": "https://unpkg.com/simple-icons@13.21.0/icons/inkscape.svg",
+    "license": "CC0-1.0",
+    "bytes": 1036,
+    "sha256": "7002e24b302671b469203a707631323a6744899af138227190df0bab72f72c11"
+  },
+  {
+    "path": "icons-fill/simple-javascript.svg",
+    "stratum": "icons-fill",
+    "source": "https://unpkg.com/simple-icons@13.21.0/icons/javascript.svg",
+    "license": "CC0-1.0",
+    "bytes": 974,
+    "sha256": "c9be35a7a861ebe80ae4ee706d05004b99ee59fc63db69da6dcc10776718434b"
+  },
+  {
+    "path": "icons-fill/simple-linux.svg",
+    "stratum": "icons-fill",
+    "source": "https://unpkg.com/simple-icons@13.21.0/icons/linux.svg",
+    "license": "CC0-1.0",
+    "bytes": 5463,
+    "sha256": "7e55f2779ae11a83c9dad2d0414a65d8ca7867d0716ce58bfe41ed299ae1447f"
+  },
+  {
+    "path": "icons-fill/simple-npm.svg",
+    "stratum": "icons-fill",
+    "source": "https://unpkg.com/simple-icons@13.21.0/icons/npm.svg",
+    "license": "CC0-1.0",
+    "bytes": 317,
+    "sha256": "00b410dc2c839cfa62910a065eaf28a48cbdb4babe503cf34d475cc94ba03be1"
+  },
+  {
+    "path": "icons-fill/simple-reddit.svg",
+    "stratum": "icons-fill",
+    "source": "https://unpkg.com/simple-icons@13.21.0/icons/reddit.svg",
+    "license": "CC0-1.0",
+    "bytes": 1233,
+    "sha256": "00e5008d56567543cf956561e61d5bf9bf629f520c7488a4d9a00164c29dd8ba"
+  },
+  {
+    "path": "icons-fill/simple-safari.svg",
+    "stratum": "icons-fill",
+    "source": "https://unpkg.com/simple-icons@13.21.0/icons/safari.svg",
+    "license": "CC0-1.0",
+    "bytes": 11844,
+    "sha256": "a982a03a85896238f1a33c9ca19bf46a554fcc80eb21b88091d8f9f49dccfb9e"
+  },
+  {
+    "path": "icons-fill/simple-svelte.svg",
+    "stratum": "icons-fill",
+    "source": "https://unpkg.com/simple-icons@13.21.0/icons/svelte.svg",
+    "license": "CC0-1.0",
+    "bytes": 1496,
+    "sha256": "a38cef0f4fc36bc63519ce34d24a91022f19ec6998ea402c5e155c7479a46f4c"
+  },
+  {
+    "path": "icons-fill/simple-typescript.svg",
+    "stratum": "icons-fill",
+    "source": "https://unpkg.com/simple-icons@13.21.0/icons/typescript.svg",
+    "license": "CC0-1.0",
+    "bytes": 1294,
+    "sha256": "7f023e8d1e767370306ec9437d2de5d5af97491d6208dd7799a3808a7c10a36a"
+  },
+  {
+    "path": "icons-fill/simple-vite.svg",
+    "stratum": "icons-fill",
+    "source": "https://unpkg.com/simple-icons@13.21.0/icons/vite.svg",
+    "license": "CC0-1.0",
+    "bytes": 909,
+    "sha256": "122e0da12525245e3fdf6bd448cadb2f6b6ffea86e8bfa3377cd42a4490d0b2d"
+  },
+  {
+    "path": "icons-stroke/tabler-activity.svg",
+    "stratum": "icons-stroke",
+    "source": "https://unpkg.com/@tabler/icons@3.31.0/icons/outline/activity.svg",
+    "license": "MIT",
+    "bytes": 369,
+    "sha256": "ea277ba356e11175f5928223bff235964a22f9b6ee9b0281acdbadde9bd24b27"
+  },
+  {
+    "path": "icons-stroke/tabler-alarm.svg",
+    "stratum": "icons-stroke",
+    "source": "https://unpkg.com/@tabler/icons@3.31.0/icons/outline/alarm.svg",
+    "license": "MIT",
+    "bytes": 471,
+    "sha256": "0480e45dc357dd5242d283df3c1e89282fe5993aff7dc15d55c095f88c7f92ca"
+  },
+  {
+    "path": "icons-stroke/tabler-anchor.svg",
+    "stratum": "icons-stroke",
+    "source": "https://unpkg.com/@tabler/icons@3.31.0/icons/outline/anchor.svg",
+    "license": "MIT",
+    "bytes": 444,
+    "sha256": "997d38b5da6f5e807c546e71b81db396a7694cc7237c01a9d4c1516f7138e447"
+  },
+  {
+    "path": "icons-stroke/tabler-aperture.svg",
+    "stratum": "icons-stroke",
+    "source": "https://unpkg.com/@tabler/icons@3.31.0/icons/outline/aperture.svg",
+    "license": "MIT",
+    "bytes": 586,
+    "sha256": "fd2639126ffa9b3693915569e12938dc555d117bc85e3c94d65cac974ec33981"
+  },
+  {
+    "path": "icons-stroke/tabler-archive.svg",
+    "stratum": "icons-stroke",
+    "source": "https://unpkg.com/@tabler/icons@3.31.0/icons/outline/archive.svg",
+    "license": "MIT",
+    "bytes": 508,
+    "sha256": "e034249a3d00b0d54bf3943af995a05842bdd5386aab68aeaf91a3083391bd04"
+  },
+  {
+    "path": "icons-stroke/tabler-award.svg",
+    "stratum": "icons-stroke",
+    "source": "https://unpkg.com/@tabler/icons@3.31.0/icons/outline/award.svg",
+    "license": "MIT",
+    "bytes": 521,
+    "sha256": "1eb61670b8c8560dc5e73d06ac086fb84cda530ad94cdbcc5c125657903a8ba3"
+  },
+  {
+    "path": "icons-stroke/tabler-bell.svg",
+    "stratum": "icons-stroke",
+    "source": "https://unpkg.com/@tabler/icons@3.31.0/icons/outline/bell.svg",
+    "license": "MIT",
+    "bytes": 468,
+    "sha256": "baefc2c6ef9042fc85551567bb72ca875a59c1259e902005f58caf37396e9d4e"
+  },
+  {
+    "path": "icons-stroke/tabler-bolt.svg",
+    "stratum": "icons-stroke",
+    "source": "https://unpkg.com/@tabler/icons@3.31.0/icons/outline/bolt.svg",
+    "license": "MIT",
+    "bytes": 377,
+    "sha256": "6a1d4f9acb691efd05aa721684adc014ca07cb124f51b0c7b8e0d058aeeb319f"
+  },
+  {
+    "path": "icons-stroke/tabler-bookmark.svg",
+    "stratum": "icons-stroke",
+    "source": "https://unpkg.com/@tabler/icons@3.31.0/icons/outline/bookmark.svg",
+    "license": "MIT",
+    "bytes": 401,
+    "sha256": "f32f3b6da859cbff57909f0067983e1510b3a3680bdd035e5ad9b437a7c6d240"
+  },
+  {
+    "path": "icons-stroke/tabler-box.svg",
+    "stratum": "icons-stroke",
+    "source": "https://unpkg.com/@tabler/icons@3.31.0/icons/outline/box.svg",
+    "license": "MIT",
+    "bytes": 468,
+    "sha256": "7966224cb60efd55c35b9fd9779dd39de7046ccdb7d254940af8152adacf45bb"
+  },
+  {
+    "path": "icons-stroke/tabler-briefcase.svg",
+    "stratum": "icons-stroke",
+    "source": "https://unpkg.com/@tabler/icons@3.31.0/icons/outline/briefcase.svg",
+    "license": "MIT",
+    "bytes": 547,
+    "sha256": "645f8a8f34ce35285d0b1d161e8a03eae176493873066feed282bd1d66619198"
+  },
+  {
+    "path": "icons-stroke/tabler-calendar.svg",
+    "stratum": "icons-stroke",
+    "source": "https://unpkg.com/@tabler/icons@3.31.0/icons/outline/calendar.svg",
+    "license": "MIT",
+    "bytes": 542,
+    "sha256": "1ebf8228d9987af99ed78c2b1d3f4d529cf8d235d8b16d781e6b78fdc31c6ba1"
+  },
+  {
+    "path": "icons-stroke/tabler-camera.svg",
+    "stratum": "icons-stroke",
+    "source": "https://unpkg.com/@tabler/icons@3.31.0/icons/outline/camera.svg",
+    "license": "MIT",
+    "bytes": 531,
+    "sha256": "c7fdb5aca63dedf3a94bd3c5b252377d5a2da79d7a548f111bfbd9d1f34bf1fd"
+  },
+  {
+    "path": "icons-stroke/tabler-chart-bar.svg",
+    "stratum": "icons-stroke",
+    "source": "https://unpkg.com/@tabler/icons@3.31.0/icons/outline/chart-bar.svg",
+    "license": "MIT",
+    "bytes": 623,
+    "sha256": "1e1c0928a0bb0881f595078eff60892c0c0e102a5a0a671623f601d129b5655f"
+  },
+  {
+    "path": "icons-stroke/tabler-circle.svg",
+    "stratum": "icons-stroke",
+    "source": "https://unpkg.com/@tabler/icons@3.31.0/icons/outline/circle.svg",
+    "license": "MIT",
+    "bytes": 386,
+    "sha256": "bdbb0cce3d4f1b3004367b4732a1422c4937a90382e2b7ed148c644b3930c2c2"
+  },
+  {
+    "path": "icons-stroke/tabler-clock.svg",
+    "stratum": "icons-stroke",
+    "source": "https://unpkg.com/@tabler/icons@3.31.0/icons/outline/clock.svg",
+    "license": "MIT",
+    "bytes": 406,
+    "sha256": "eaa12052f6cdc839b8b27f23558f202866c8751dd04a1481fd30430acc2e6526"
+  },
+  {
+    "path": "icons-stroke/tabler-cloud.svg",
+    "stratum": "icons-stroke",
+    "source": "https://unpkg.com/@tabler/icons@3.31.0/icons/outline/cloud.svg",
+    "license": "MIT",
+    "bytes": 602,
+    "sha256": "86fc1070c015e50090ee3f79b2eb205d827c854bf668c6241903d2bce58f3158"
+  },
+  {
+    "path": "icons-stroke/tabler-code.svg",
+    "stratum": "icons-stroke",
+    "source": "https://unpkg.com/@tabler/icons@3.31.0/icons/outline/code.svg",
+    "license": "MIT",
+    "bytes": 412,
+    "sha256": "cf858dbe4fe07d7f62a0e20c328eb561f1108cfb99cd4d7837c0fe0951af4c11"
+  },
+  {
+    "path": "icons-stroke/tabler-compass.svg",
+    "stratum": "icons-stroke",
+    "source": "https://unpkg.com/@tabler/icons@3.31.0/icons/outline/compass.svg",
+    "license": "MIT",
+    "bytes": 530,
+    "sha256": "984149e44622d237bed96067bfcfaefd900b1b27568bd960d32abc78c94c6965"
+  },
+  {
+    "path": "icons-stroke/tabler-crop.svg",
+    "stratum": "icons-stroke",
+    "source": "https://unpkg.com/@tabler/icons@3.31.0/icons/outline/crop.svg",
+    "license": "MIT",
+    "bytes": 406,
+    "sha256": "9a002ea4bedec06d68306c6c674c4c45d4a68123e2b69f118ebf50f810ec6d94"
+  },
+  {
+    "path": "icons-stroke/tabler-database.svg",
+    "stratum": "icons-stroke",
+    "source": "https://unpkg.com/@tabler/icons@3.31.0/icons/outline/database.svg",
+    "license": "MIT",
+    "bytes": 468,
+    "sha256": "66db91b74bf76624aab59c0d47defd696d7367913ea646dfe4fcecbabdf6bee4"
+  },
+  {
+    "path": "icons-stroke/tabler-device-mobile.svg",
+    "stratum": "icons-stroke",
+    "source": "https://unpkg.com/@tabler/icons@3.31.0/icons/outline/device-mobile.svg",
+    "license": "MIT",
+    "bytes": 477,
+    "sha256": "2d32b5918ccd8d60b0096f7cbb9e66b25847a81860929bfb6f036d04beb9c6d9"
+  },
+  {
+    "path": "icons-stroke/tabler-download.svg",
+    "stratum": "icons-stroke",
+    "source": "https://unpkg.com/@tabler/icons@3.31.0/icons/outline/download.svg",
+    "license": "MIT",
+    "bytes": 444,
+    "sha256": "946da1719daac0cc5243ec8ac4de52ce3d7960b168dc2d17fe11f45e2eeb2de6"
+  },
+  {
+    "path": "icons-stroke/tabler-edit.svg",
+    "stratum": "icons-stroke",
+    "source": "https://unpkg.com/@tabler/icons@3.31.0/icons/outline/edit.svg",
+    "license": "MIT",
+    "bytes": 511,
+    "sha256": "67f2a755b62314667e6feeb78625a3936aa7311f47211fa68a6614540d14fdba"
+  },
+  {
+    "path": "icons-stroke/tabler-eye.svg",
+    "stratum": "icons-stroke",
+    "source": "https://unpkg.com/@tabler/icons@3.31.0/icons/outline/eye.svg",
+    "license": "MIT",
+    "bytes": 473,
+    "sha256": "4a99b60c52f23f25444b0c6dea6094b04703857a36cc3e099a85fda00b77a91a"
+  },
+  {
+    "path": "icons-stroke/tabler-file.svg",
+    "stratum": "icons-stroke",
+    "source": "https://unpkg.com/@tabler/icons@3.31.0/icons/outline/file.svg",
+    "license": "MIT",
+    "bytes": 451,
+    "sha256": "12338a03e435ca634fa653690f2afde83ad7992647fa21aa75e8ef4572888cfc"
+  },
+  {
+    "path": "icons-stroke/tabler-flame.svg",
+    "stratum": "icons-stroke",
+    "source": "https://unpkg.com/@tabler/icons@3.31.0/icons/outline/flame.svg",
+    "license": "MIT",
+    "bytes": 582,
+    "sha256": "a85d3b070d88c3e0fc6b93b7b1f60b484359c5e03d8dc5f7e970ae174ed1fdfc"
+  },
+  {
+    "path": "icons-stroke/tabler-folder.svg",
+    "stratum": "icons-stroke",
+    "source": "https://unpkg.com/@tabler/icons@3.31.0/icons/outline/folder.svg",
+    "license": "MIT",
+    "bytes": 426,
+    "sha256": "648b0bdd1f1856ab5079dd12fd47758f4cbcd9ac49ed052de5058a19988b2032"
+  },
+  {
+    "path": "icons-stroke/tabler-heart.svg",
+    "stratum": "icons-stroke",
+    "source": "https://unpkg.com/@tabler/icons@3.31.0/icons/outline/heart.svg",
+    "license": "MIT",
+    "bytes": 419,
+    "sha256": "bb9a3cee324f2caed9f62ed282605cca71c1d09c2d5acd2de005876ec2cb1a80"
+  },
+  {
+    "path": "icons-stroke/tabler-home.svg",
+    "stratum": "icons-stroke",
+    "source": "https://unpkg.com/@tabler/icons@3.31.0/icons/outline/home.svg",
+    "license": "MIT",
+    "bytes": 481,
+    "sha256": "58adcd92d92dfc71f162e19983bc9d7cf05ed7cbcd81202a3374190157595a09"
+  },
+  {
+    "path": "icons-stroke/tabler-link.svg",
+    "stratum": "icons-stroke",
+    "source": "https://unpkg.com/@tabler/icons@3.31.0/icons/outline/link.svg",
+    "license": "MIT",
+    "bytes": 515,
+    "sha256": "0ac4d84a204e22ea6c9482a02f34575f46a1f19297a8a30f2e96a4b68f0ce6b1"
+  },
+  {
+    "path": "icons-stroke/tabler-lock.svg",
+    "stratum": "icons-stroke",
+    "source": "https://unpkg.com/@tabler/icons@3.31.0/icons/outline/lock.svg",
+    "license": "MIT",
+    "bytes": 511,
+    "sha256": "8b7f084d79ca1c2f7cf8ccacbecaf87013d65ed4abe16a5162b33704417a4d5e"
+  },
+  {
+    "path": "icons-stroke/tabler-map.svg",
+    "stratum": "icons-stroke",
+    "source": "https://unpkg.com/@tabler/icons@3.31.0/icons/outline/map.svg",
+    "license": "MIT",
+    "bytes": 429,
+    "sha256": "5f87c563a70bf698720195e462f9835d2d2e5c8e00fa25cc0bc148a537bfa40b"
+  },
+  {
+    "path": "icons-stroke/tabler-message.svg",
+    "stratum": "icons-stroke",
+    "source": "https://unpkg.com/@tabler/icons@3.31.0/icons/outline/message.svg",
+    "license": "MIT",
+    "bytes": 478,
+    "sha256": "d80f6c36170bfb715d6df0e3636153e2c7ef8e0cfbc6b0846115d042bec12454"
+  },
+  {
+    "path": "icons-stroke/tabler-mountain.svg",
+    "stratum": "icons-stroke",
+    "source": "https://unpkg.com/@tabler/icons@3.31.0/icons/outline/mountain.svg",
+    "license": "MIT",
+    "bytes": 456,
+    "sha256": "1452e89dc5be952f5b7a8e456293ef0051ef22ca25cd6cf78e05748a3aa4b944"
+  },
+  {
+    "path": "icons-stroke/tabler-music.svg",
+    "stratum": "icons-stroke",
+    "source": "https://unpkg.com/@tabler/icons@3.31.0/icons/outline/music.svg",
+    "license": "MIT",
+    "bytes": 482,
+    "sha256": "0dd9bc3bd484c495b48bbaf44e098ea0073d75cf0e7d41d745453add326ec24c"
+  },
+  {
+    "path": "icons-stroke/tabler-palette.svg",
+    "stratum": "icons-stroke",
+    "source": "https://unpkg.com/@tabler/icons@3.31.0/icons/outline/palette.svg",
+    "license": "MIT",
+    "bytes": 677,
+    "sha256": "051d89ac90e92e3369446da56d4e5ffa265bb57ec42132dfd6301692da1d8048"
+  },
+  {
+    "path": "icons-stroke/tabler-photo.svg",
+    "stratum": "icons-stroke",
+    "source": "https://unpkg.com/@tabler/icons@3.31.0/icons/outline/photo.svg",
+    "license": "MIT",
+    "bytes": 562,
+    "sha256": "4c5c53100851d5a29cb313ba44ef5e0c39a3a145d2bb3c42dcae3166ae88c79e"
+  },
+  {
+    "path": "icons-stroke/tabler-player-play.svg",
+    "stratum": "icons-stroke",
+    "source": "https://unpkg.com/@tabler/icons@3.31.0/icons/outline/player-play.svg",
+    "license": "MIT",
+    "bytes": 363,
+    "sha256": "1a3a2b0b8c6e3c70320146f7591d2b3d1402a67af4a05b58c028e8f760e62d36"
+  },
+  {
+    "path": "icons-stroke/tabler-stack.svg",
+    "stratum": "icons-stroke",
+    "source": "https://unpkg.com/@tabler/icons@3.31.0/icons/outline/stack.svg",
+    "license": "MIT",
+    "bytes": 398,
+    "sha256": "2b20dbb811d8feed6879e8d8a805a63c13c7ac5dc92904429ed5ce3a63c1a380"
+  },
+  {
+    "path": "illustrations/healthicons-agriculture-worker.svg",
+    "stratum": "illustrations",
+    "source": "https://raw.githubusercontent.com/resolvetosavelives/healthicons/main/public/icons/svg/filled/people/agriculture-worker.svg",
+    "license": "CC0-1.0",
+    "bytes": 2107,
+    "sha256": "67ca399f07b071d661a6eb452f90f301bd70609890fd84f65fa23fb11287d80f"
+  },
+  {
+    "path": "illustrations/healthicons-ambulance.svg",
+    "stratum": "illustrations",
+    "source": "https://raw.githubusercontent.com/resolvetosavelives/healthicons/main/public/icons/svg/filled/vehicles/ambulance.svg",
+    "license": "CC0-1.0",
+    "bytes": 1665,
+    "sha256": "e4f8a16f9c43ac8cb9011c86e706d8854dd2da07398b9b48ac68abf0daa9212b"
+  },
+  {
+    "path": "illustrations/healthicons-ambulatory-clinic.svg",
+    "stratum": "illustrations",
+    "source": "https://raw.githubusercontent.com/resolvetosavelives/healthicons/main/public/icons/svg/filled/places/ambulatory-clinic.svg",
+    "license": "CC0-1.0",
+    "bytes": 529,
+    "sha256": "a1244cb34e8dbab2c0fc4c27fe05e65cc6508914cbba850b68f8a93d55d94e94"
+  },
+  {
+    "path": "illustrations/healthicons-child-care.svg",
+    "stratum": "illustrations",
+    "source": "https://raw.githubusercontent.com/resolvetosavelives/healthicons/main/public/icons/svg/filled/people/child-care.svg",
+    "license": "CC0-1.0",
+    "bytes": 2247,
+    "sha256": "422016770bdacf12b27aa24417b7dced137170bb468183fa6e22c742d5da9508"
+  },
+  {
+    "path": "illustrations/healthicons-child-cognition.svg",
+    "stratum": "illustrations",
+    "source": "https://raw.githubusercontent.com/resolvetosavelives/healthicons/main/public/icons/svg/filled/people/child-cognition.svg",
+    "license": "CC0-1.0",
+    "bytes": 5037,
+    "sha256": "56faaccbe067db6b54e73018fc3101e5f4974674e558ea9b0cccac676d7b3c49"
+  },
+  {
+    "path": "illustrations/healthicons-child-program.svg",
+    "stratum": "illustrations",
+    "source": "https://raw.githubusercontent.com/resolvetosavelives/healthicons/main/public/icons/svg/filled/people/child-program.svg",
+    "license": "CC0-1.0",
+    "bytes": 4040,
+    "sha256": "86bddfde655e64280de98c673940f06e6957d3f3e32e730ce27a71453f1fda10"
+  },
+  {
+    "path": "illustrations/healthicons-city-worker.svg",
+    "stratum": "illustrations",
+    "source": "https://raw.githubusercontent.com/resolvetosavelives/healthicons/main/public/icons/svg/filled/people/city-worker.svg",
+    "license": "CC0-1.0",
+    "bytes": 1079,
+    "sha256": "503e931aafc0d66fe61694025bcebf6df796c0f574c8c4a1c4b4362a37269ba8"
+  },
+  {
+    "path": "illustrations/healthicons-clean-hands.svg",
+    "stratum": "illustrations",
+    "source": "https://raw.githubusercontent.com/resolvetosavelives/healthicons/main/public/icons/svg/filled/people/clean-hands.svg",
+    "license": "CC0-1.0",
+    "bytes": 1345,
+    "sha256": "d14129356a85457e414397cff57dd1063683bf670e0ec8616f9f681879b096d1"
+  },
+  {
+    "path": "illustrations/healthicons-community-healthworker.svg",
+    "stratum": "illustrations",
+    "source": "https://raw.githubusercontent.com/resolvetosavelives/healthicons/main/public/icons/svg/filled/people/community-healthworker.svg",
+    "license": "CC0-1.0",
+    "bytes": 2470,
+    "sha256": "c87f5cdf96b099d60c8a3fd824a7a9b364e713fe84391d5d2c3b13eef3ae5759"
+  },
+  {
+    "path": "illustrations/healthicons-construction-worker.svg",
+    "stratum": "illustrations",
+    "source": "https://raw.githubusercontent.com/resolvetosavelives/healthicons/main/public/icons/svg/filled/people/construction-worker.svg",
+    "license": "CC0-1.0",
+    "bytes": 2041,
+    "sha256": "c14fc9cc4d1bea5df49b3b3d0ea61f0e0cd5280f8f3027581ffa00ec30fa5b2c"
+  },
+  {
+    "path": "illustrations/healthicons-cpr.svg",
+    "stratum": "illustrations",
+    "source": "https://raw.githubusercontent.com/resolvetosavelives/healthicons/main/public/icons/svg/filled/people/cpr.svg",
+    "license": "CC0-1.0",
+    "bytes": 1206,
+    "sha256": "164c967bc2dd7c856f4c8a7cb38adfd135db4029554f1f2afeb9374c78763e0c"
+  },
+  {
+    "path": "illustrations/healthicons-crisis-response_center_person.svg",
+    "stratum": "illustrations",
+    "source": "https://raw.githubusercontent.com/resolvetosavelives/healthicons/main/public/icons/svg/filled/people/crisis-response_center_person.svg",
+    "license": "CC0-1.0",
+    "bytes": 1807,
+    "sha256": "9ca59684525540e8d2ab5651bbe8bf144c20ad0775553321f883fa8bcd94be6e"
+  },
+  {
+    "path": "illustrations/healthicons-doctor-female.svg",
+    "stratum": "illustrations",
+    "source": "https://raw.githubusercontent.com/resolvetosavelives/healthicons/main/public/icons/svg/filled/people/doctor-female.svg",
+    "license": "CC0-1.0",
+    "bytes": 2656,
+    "sha256": "35cb955ddc1c9457b2c1323ea319a058a3515cb120b4ef5c964f0464899d166d"
+  },
+  {
+    "path": "illustrations/healthicons-doctor-male.svg",
+    "stratum": "illustrations",
+    "source": "https://raw.githubusercontent.com/resolvetosavelives/healthicons/main/public/icons/svg/filled/people/doctor-male.svg",
+    "license": "CC0-1.0",
+    "bytes": 2747,
+    "sha256": "c97f5aa72c5392d114e8826379145220a563b50b04e07093e08999cd35842925"
+  },
+  {
+    "path": "illustrations/healthicons-elderly.svg",
+    "stratum": "illustrations",
+    "source": "https://raw.githubusercontent.com/resolvetosavelives/healthicons/main/public/icons/svg/filled/people/elderly.svg",
+    "license": "CC0-1.0",
+    "bytes": 2808,
+    "sha256": "50584a035a3f00ea9c9d0a1b9ab2135bbaebdefdb1e421025375a1400c5a888a"
+  },
+  {
+    "path": "illustrations/healthicons-family-planning.svg",
+    "stratum": "illustrations",
+    "source": "https://raw.githubusercontent.com/resolvetosavelives/healthicons/main/public/icons/svg/filled/contraceptives/family-planning.svg",
+    "license": "CC0-1.0",
+    "bytes": 2001,
+    "sha256": "d1d431a9c74e0cf33e7ea450258e307e4cd2e693462a9e9e534fc087ffdda31f"
+  },
+  {
+    "path": "illustrations/healthicons-group-discussion_meeting.svg",
+    "stratum": "illustrations",
+    "source": "https://raw.githubusercontent.com/resolvetosavelives/healthicons/main/public/icons/svg/filled/people/group-discussion_meeting.svg",
+    "license": "CC0-1.0",
+    "bytes": 1037,
+    "sha256": "b9b2784aefce782e0f164f41dabfb336c95104e01a2ed6b9902a2466bec6d3be"
+  },
+  {
+    "path": "illustrations/healthicons-health-worker.svg",
+    "stratum": "illustrations",
+    "source": "https://raw.githubusercontent.com/resolvetosavelives/healthicons/main/public/icons/svg/filled/people/health-worker.svg",
+    "license": "CC0-1.0",
+    "bytes": 747,
+    "sha256": "0619c1d0dcea1527251f79b72a06b94d403cc2f10c356521a14c307a8c894203"
+  },
+  {
+    "path": "illustrations/healthicons-i-training_class.svg",
+    "stratum": "illustrations",
+    "source": "https://raw.githubusercontent.com/resolvetosavelives/healthicons/main/public/icons/svg/filled/people/i-training_class.svg",
+    "license": "CC0-1.0",
+    "bytes": 1294,
+    "sha256": "fa37d836e28d27f3948355067f0de13118d75d92d22aa466b187afa4c550d847"
+  },
+  {
+    "path": "illustrations/healthicons-pregnant.svg",
+    "stratum": "illustrations",
+    "source": "https://raw.githubusercontent.com/resolvetosavelives/healthicons/main/public/icons/svg/filled/people/pregnant.svg",
+    "license": "CC0-1.0",
+    "bytes": 5727,
+    "sha256": "f25f231227bb05811c7f7fcf8a4e7a4bf7ac73e6220e9cc01eeaf47c474e51ec"
+  },
+  {
+    "path": "logos/devicon-angularjs-original.svg",
+    "stratum": "logos",
+    "source": "https://raw.githubusercontent.com/devicons/devicon/v2.16.0/icons/angularjs/angularjs-original.svg",
+    "license": "MIT",
+    "bytes": 621,
+    "sha256": "cf86e31141b6a1c2cf40a7eafebed7db0b3843137f7445bb70398f1887cb9641"
+  },
+  {
+    "path": "logos/devicon-chrome-original.svg",
+    "stratum": "logos",
+    "source": "https://raw.githubusercontent.com/devicons/devicon/v2.16.0/icons/chrome/chrome-original.svg",
+    "license": "MIT",
+    "bytes": 3380,
+    "sha256": "29e1a66ae7d2dea3d9c92c64a7b9a78f36cf9aecaf24c790eb5988eafdd6a156"
+  },
+  {
+    "path": "logos/devicon-firefox-original.svg",
+    "stratum": "logos",
+    "source": "https://raw.githubusercontent.com/devicons/devicon/v2.16.0/icons/firefox/firefox-original.svg",
+    "license": "MIT",
+    "bytes": 38092,
+    "sha256": "029a7e6f1163f76de4c5d488216524264c25154bc659d7a7d3ea26e1d5181b1f"
+  },
+  {
+    "path": "logos/devicon-kubernetes-original.svg",
+    "stratum": "logos",
+    "source": "https://raw.githubusercontent.com/devicons/devicon/v2.16.0/icons/kubernetes/kubernetes-original.svg",
+    "license": "MIT",
+    "bytes": 8951,
+    "sha256": "fb31e4163238978201cfde0601728ee5168b74e476c32c37739bed626fa281ae"
+  },
+  {
+    "path": "logos/devicon-react-original.svg",
+    "stratum": "logos",
+    "source": "https://raw.githubusercontent.com/devicons/devicon/v2.16.0/icons/react/react-original.svg",
+    "license": "MIT",
+    "bytes": 2387,
+    "sha256": "5825b649c8c04dec13ecf01d0182401bd0ec71789d2fa06224866d882cd1515f"
+  },
+  {
+    "path": "logos/devicon-safari-original.svg",
+    "stratum": "logos",
+    "source": "https://raw.githubusercontent.com/devicons/devicon/v2.16.0/icons/safari/safari-original.svg",
+    "license": "MIT",
+    "bytes": 3186,
+    "sha256": "6a94552507242b0674d41e31335629aa52775823bf3f7f7aea602960c43566bc"
+  },
+  {
+    "path": "logos/devicon-tensorflow-original.svg",
+    "stratum": "logos",
+    "source": "https://raw.githubusercontent.com/devicons/devicon/v2.16.0/icons/tensorflow/tensorflow-original.svg",
+    "license": "MIT",
+    "bytes": 291,
+    "sha256": "44f2bb3db305bc30f50ec0578f7a4a840c82c3544d36e436ab7d8afee3937b71"
+  },
+  {
+    "path": "logos/devicon-vuejs-original.svg",
+    "stratum": "logos",
+    "source": "https://raw.githubusercontent.com/devicons/devicon/v2.16.0/icons/vuejs/vuejs-original.svg",
+    "license": "MIT",
+    "bytes": 561,
+    "sha256": "4cc1153600c0845c645ac6c718c11d516d6899079a0dc406e3d62f68b1d02c49"
+  },
+  {
+    "path": "logos/simple-apple.svg",
+    "stratum": "logos",
+    "source": "https://unpkg.com/simple-icons@13.21.0/icons/apple.svg",
+    "license": "CC0-1.0",
+    "bytes": 650,
+    "sha256": "2a1509dccd25e6d2bc7a11a8e52941077e1a48555e192ce638699b9f083c2a7c"
+  },
+  {
+    "path": "logos/simple-cloudflare.svg",
+    "stratum": "logos",
+    "source": "https://unpkg.com/simple-icons@13.21.0/icons/cloudflare.svg",
+    "license": "CC0-1.0",
+    "bytes": 1178,
+    "sha256": "408096d99907fd99e0863cb5d73f77a72537c6a85fd8d5e2704178a83a891f08"
+  },
+  {
+    "path": "logos/simple-docker.svg",
+    "stratum": "logos",
+    "source": "https://unpkg.com/simple-icons@13.21.0/icons/docker.svg",
+    "license": "CC0-1.0",
+    "bytes": 1765,
+    "sha256": "65571291c261ef869c31540a38f3ca0f0ee3bb73f179c172211c8860f19a6359"
+  },
+  {
+    "path": "logos/simple-figma.svg",
+    "stratum": "logos",
+    "source": "https://unpkg.com/simple-icons@13.21.0/icons/figma.svg",
+    "license": "CC0-1.0",
+    "bytes": 1093,
+    "sha256": "2f86fca501dfed321a62f28743f29d9dd738dac91668eac5260ab746d1ef8840"
+  },
+  {
+    "path": "logos/simple-github.svg",
+    "stratum": "logos",
+    "source": "https://unpkg.com/simple-icons@13.21.0/icons/github.svg",
+    "license": "CC0-1.0",
+    "bytes": 822,
+    "sha256": "3bf8cceead820aec50d4ee825a3fd02c5a1cd6665cc9cf4cbf3d9c8861a204bb"
+  },
+  {
+    "path": "logos/simple-gitlab.svg",
+    "stratum": "logos",
+    "source": "https://unpkg.com/simple-icons@13.21.0/icons/gitlab.svg",
+    "license": "CC0-1.0",
+    "bytes": 573,
+    "sha256": "c7c39058bd1b6f9f40334383bd5136bb8c5ba5e6a24200f2d1f18365e2526e28"
+  },
+  {
+    "path": "logos/simple-inkscape.svg",
+    "stratum": "logos",
+    "source": "https://unpkg.com/simple-icons@13.21.0/icons/inkscape.svg",
+    "license": "CC0-1.0",
+    "bytes": 1036,
+    "sha256": "7002e24b302671b469203a707631323a6744899af138227190df0bab72f72c11"
+  },
+  {
+    "path": "logos/simple-linux.svg",
+    "stratum": "logos",
+    "source": "https://unpkg.com/simple-icons@13.21.0/icons/linux.svg",
+    "license": "CC0-1.0",
+    "bytes": 5463,
+    "sha256": "7e55f2779ae11a83c9dad2d0414a65d8ca7867d0716ce58bfe41ed299ae1447f"
+  },
+  {
+    "path": "logos/simple-npm.svg",
+    "stratum": "logos",
+    "source": "https://unpkg.com/simple-icons@13.21.0/icons/npm.svg",
+    "license": "CC0-1.0",
+    "bytes": 317,
+    "sha256": "00b410dc2c839cfa62910a065eaf28a48cbdb4babe503cf34d475cc94ba03be1"
+  },
+  {
+    "path": "logos/simple-svelte.svg",
+    "stratum": "logos",
+    "source": "https://unpkg.com/simple-icons@13.21.0/icons/svelte.svg",
+    "license": "CC0-1.0",
+    "bytes": 1496,
+    "sha256": "a38cef0f4fc36bc63519ce34d24a91022f19ec6998ea402c5e155c7479a46f4c"
+  },
+  {
+    "path": "logos/simple-typescript.svg",
+    "stratum": "logos",
+    "source": "https://unpkg.com/simple-icons@13.21.0/icons/typescript.svg",
+    "license": "CC0-1.0",
+    "bytes": 1294,
+    "sha256": "7f023e8d1e767370306ec9437d2de5d5af97491d6208dd7799a3808a7c10a36a"
+  },
+  {
+    "path": "logos/simple-vite.svg",
+    "stratum": "logos",
+    "source": "https://unpkg.com/simple-icons@13.21.0/icons/vite.svg",
+    "license": "CC0-1.0",
+    "bytes": 909,
+    "sha256": "122e0da12525245e3fdf6bd448cadb2f6b6ffea86e8bfa3377cd42a4490d0b2d"
+  }
+]
