@@ -1,5 +1,5 @@
 import { getFileNameParts, getSafeFileNameBase } from '../output-filename';
-import { APP_NAME } from 'shared/brand';
+import { APP_SLUG } from 'shared/brand';
 import {
   isJobCurrentExport,
   isJobOutputStale,
@@ -207,10 +207,7 @@ export function getBulkExportName(session: BulkSession): string {
   // the pre-rename contract: a named batch downloads as `<name>-optimized`,
   // not `<brand>-<name>-optimized`. The 2026-07-05 rename-proofing refactor
   // accidentally prefixed every archive; tests/unit/export.test.ts pins this.
-  const safeSessionName = getSafeFileNameBase(
-    session.id,
-    `${APP_NAME.toLowerCase()}-bulk`,
-  );
+  const safeSessionName = getSafeFileNameBase(session.id, `${APP_SLUG}-bulk`);
   return `${safeSessionName}-optimized`;
 }
 

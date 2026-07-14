@@ -6,8 +6,12 @@ Frisp is the current project name.
 
 ## Current identity
 
-- App name: frisp — lowercase in the UI; use "Frisp" in prose. In code, defined
-  ONCE in `src/shared/brand.ts` (`APP_NAME`).
+- App name: **Frisp** — capitalized everywhere it is *displayed* (UI, prose,
+  titles, wordmarks). The lowercase `frisp` is an *identifier* only: the CLI
+  command, npm package, domain, and machine-facing filenames. Both forms are
+  defined ONCE in `src/shared/brand.ts` — `APP_NAME` (`'Frisp'`, display) and
+  `APP_SLUG` (`'frisp'`, identifier). Rule of thumb: referring to the product →
+  `APP_NAME`; quoting a command/package/filename → `APP_SLUG`.
 - Package name: `frisp`
 - GitHub repo: `tavlean/frisp`
 - Default branch: `main`
@@ -18,7 +22,7 @@ Frisp is the current project name.
 The 2026-07-05 rename-proofing pass (runbook Phase E) isolated the brand. A
 rename now touches ONLY:
 
-1. `src/shared/brand.ts` — `APP_NAME`.
+1. `src/shared/brand.ts` — `APP_NAME` (display) and `APP_SLUG` (identifier).
 2. `package.json` — `name` + `homepage`.
 3. Brand art: `static/wordmark.svg` (+ `static/logo.webp`/favicons if restyled).
 4. Prose docs / README — a grep-replace of the old name (attribution excluded).
