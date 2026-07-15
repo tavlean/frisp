@@ -121,8 +121,10 @@ Suggested future smoke:
 6. Assert an `a[download]` or blob URL exists for the output.
 7. Check console errors.
 
-Prefer a real photo for release QA; `static/logo.webp` is only a lightweight
-smoke asset.
+Prefer a real photo for release QA; `tests/fixtures/photo.jpg` (or
+`photo-large.jpg`) is a good lightweight smoke asset. The static brand SVGs
+(`logo.svg`, `wordmark.svg`, `favicon.svg`) are design assets, not photo test
+inputs.
 
 ## Bulk
 

@@ -147,9 +147,15 @@ From the legacy sweep (verified against the generated worker's real imports):
   `util/canvas.ts` — canvas encoders were removed 2026-06-27
   ([codec-surface-cleanup.md](codec-surface-cleanup.md)), so these may be
   orphans too (its Edge `toDataURL` fallback is dead regardless).
-- **Repo artifacts:** committed `.DS_Store` files (add to `.gitignore`),
-  `static/logo-light-gray.webp` (unreferenced), `static/wordmark.svg`
-  (inlined in `Intro.svelte` — keep only if wanted as brand art).
+- **Repo artifacts: RESOLVED (2026-07-15).** `.DS_Store` is now gitignored
+  (`.gitignore`) and guarded by the static-output audit
+  (`scripts/audit-static-output.mjs` fails the build if a `.DS_Store` reaches the
+  output). `static/logo-light-gray.webp` does not exist in the tree. The
+  `static/wordmark.svg` note was wrong: the current production `Intro.svelte`
+  renders `{APP_NAME}` as text and inlines `src/lib/brand/logomark.svg`, not the
+  wordmark, so `wordmark.svg` is not inlined. It stays as a design source and the
+  rename procedure's brand-art anchor (see `docs/project-identity.md`), so it is a
+  deliberate keep, not a stale artifact.
 
 ## P6 — Duplicated utilities (small, consolidate opportunistically)
 

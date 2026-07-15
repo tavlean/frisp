@@ -33,30 +33,37 @@ prism.
   editor handoff stubbed with an explicit "Lab stub" line), `ThemeToggle`
   (System→Light→Dark forcer), `Icon.svelte` + `icons/` (Nucleo duotone set
   exported as currentColor SVGs: sun/moon/auto, image, photos, inbox tray),
-  `Brand.svelte` (origami-bird + wordmark lockup used by every header —
-  since round 3 the GRAPHITE bird `/logo-dark-mode.webp` in both modes, with a
-  light-mode brightness filter via `--il-bird-brightness`; maintainer doctrine:
-  graphite is the main identity, coral/azure only as rare moments — permanent
-  coral was demoted to grey in billboard/split; ledger's "never" and the
-  drag-over ignitions remain the accents. Asset notes: `/logo.webp` = the
-  coral bird (accent tier, real alpha); `/logo-light-mode.webp` has an opaque
-  near-white tile baked in — never use it on the lab's warm background).
+  `Brand.svelte` (the header lockup used by every variant. The shared
+  `Logomark` component in `src/lib/lab/Logomark.svelte` renders the canonical
+  logomark `src/lib/brand/logomark.svg`, imported with `?raw`, as a single
+  currentColor SVG set beside the `APP_NAME` wordmark. Both ride `color` via
+  `--il-text-1`, so the lockup themes with the page, graphite on light and
+  near-white on dark, with no per-mode asset or brightness filter. The old
+  origami-bird `.webp` brand assets `static/logo.webp`,
+  `static/logo-light-mode.webp`, `static/logomark.svg` and
+  `static/logomark-white.svg` were all deleted. Maintainer doctrine still holds:
+  graphite is the main identity, coral/azure only as rare moments; permanent
+  coral was demoted to grey in billboard/split, and ledger's "never" plus the
+  drag-over ignitions remain the accents).
 - Each variant is ONE self-contained `+page.svelte` (lab convention:
   deleting a loser is one `rm -rf` + a gallery-card removal).
 - States: idle / drag-over (signature surface ignites, copy flips to
   "Release to add") / accepted (summary + ≤4 names + Start over + stub) /
   keyboard-reachable browse. `prefers-reduced-motion` respected.
 
-## Promotion notes (whichever wins)
+## Promotion notes (the plan behind the pick)
 
 - Replace the stubbed accept with the production route logic
   (`routeFiles` in `src/routes/+page.svelte`: 1 file → single editor,
   2+ → bulk) and delete `drop-demo.svelte.ts`'s stub surface.
-- The production intro (`src/lib/editor/intro/Intro.svelte`, blob
-  animation) is untouched; promotion replaces it wholesale.
-- Decide whether the theme toggle ships (production is dark-only today;
-  the `light-dark()` token bridge from the re-style lab is the app-wide
-  light-mode path — see [lab-editor-restyle.md](lab-editor-restyle.md)).
+- Promotion replaces the production intro (`src/lib/editor/intro/Intro.svelte`)
+  wholesale, which is what the `frame` promotion did on 2026-07-15. The blob
+  animation that intro used to hold now lives only in the `aurora` lab exhibit
+  (see the next section).
+- The lab theme toggle did not ship: the promoted intro follows the OS theme
+  via the `light-dark()` token bridge from the re-style lab instead (see
+  [lab-editor-restyle.md](lab-editor-restyle.md)). The editor is still
+  dark-only for now.
 
 ## What actually shipped (`frame`, 2026-07-15)
 

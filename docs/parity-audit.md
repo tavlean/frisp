@@ -142,6 +142,13 @@ behavior parity is preserved.
    `--main-theme-color`/`--hot-theme-color` per-side variable contract remain
    (only the resolved values changed). `npm run check` green; verified in the
    browser at desktop + mobile widths.
+   **Landing superseded 2026-07-15.** The landing described here (gradient
+   headline, coral browse disc, codec chips, staggered entrance reveals) was
+   retired. The live landing is now the "frame" viewfinder design in
+   `src/lib/editor/intro/Intro.svelte`, and the app was rebranded: a new
+   currentColor logomark (`src/lib/brand/logomark.svg`), a wordmark, and a
+   theme-aware SVG favicon. The studio editor theme itself (panels, per-side
+   accents, typography) is unchanged.
 
 9. **In-place file replace resets per-image state but keeps the encoder
    (2026-06-28).** Dropping a new image over the open editor (or opening a fresh

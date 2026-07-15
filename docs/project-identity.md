@@ -24,7 +24,9 @@ rename now touches ONLY:
 
 1. `src/shared/brand.ts` — `APP_NAME` (display) and `APP_SLUG` (identifier).
 2. `package.json` — `name` + `homepage`.
-3. Brand art: `static/wordmark.svg` (+ `static/logo.webp`/favicons if restyled).
+3. Brand art: `static/wordmark.svg`, `static/logo.svg`, `static/favicon.svg`,
+   `src/lib/brand/logomark.svg` (+ the `static/favicon.png` /
+   `static/apple-touch-icon.png` rasters if restyled).
 4. Prose docs / README — a grep-replace of the old name (attribution excluded).
 5. Domain + repo + deployment plumbing (see `docs/presk-rename-runbook.md` for
    the full external checklist: GitHub rename, DNS, old-domain sunset Worker —
