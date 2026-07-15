@@ -628,6 +628,16 @@ assert(
     leakedDevUi.map((file) => `  - ${file}`).join('\n'),
 );
 
+// No OS/editor junk in the deployed output. adapter-static copies static/
+// verbatim, so a stray static/.DS_Store ships to the site root (the SW precache
+// filter drops it from the manifest, but the file is still served).
+const junkFiles = files.filter((file) => /(^|\/)\.DS_Store$/.test(file));
+assert(
+  junkFiles.length === 0,
+  'OS junk files present in the build output (delete them from static/):\n' +
+    junkFiles.map((file) => `  - ${file}`).join('\n'),
+);
+
 console.log(
   [
     'Static output audit passed.',
