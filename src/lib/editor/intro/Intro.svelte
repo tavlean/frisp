@@ -188,11 +188,20 @@
     </span>
 
     <h1 class="headline">
-      {#if dragActive}
-        Release to <span class="accent">add.</span>
-      {:else}
-        Drop images anywhere.
-      {/if}
+      <!-- Stable, searchable heading name (carries the app identity, which now
+           lives only in the HUD micro-copy). The visible line below is
+           aria-hidden so the heading name never mutates to a drag fragment. -->
+      <span class="visually-hidden"
+        >{APP_NAME} — compress images in your browser</span
+      >
+      <span class="headline-visible" aria-hidden="true">
+        {#if dragActive}
+          Release to <span class="accent">add.</span>
+        {:else}
+          <span class="hl-pointer">Drop images anywhere.</span>
+          <span class="hl-touch">Add an image.</span>
+        {/if}
+      </span>
     </h1>
 
     <p class="subline">
@@ -230,8 +239,12 @@
       rgba(255, 255, 255, 0.18)
     );
     --i-text-1: light-dark(#1a1a1e, #f5f5f7);
-    --i-text-2: light-dark(rgba(26, 26, 30, 0.62), rgba(245, 245, 247, 0.64));
-    --i-text-3: light-dark(rgba(26, 26, 30, 0.4), rgba(245, 245, 247, 0.4));
+    /* Contrast-tuned for WCAG AA (>= 4.5:1) on --i-page in BOTH themes. The HUD
+       micro-copy (--i-text-3) is 11.5px, so it needs the full 4.5:1 body-text
+       ratio, not the relaxed large-text one. Measured: text-2 ~6:1;
+       text-3 ~5:1 light / ~7:1 dark. */
+    --i-text-2: light-dark(rgba(26, 26, 30, 0.7), rgba(245, 245, 247, 0.74));
+    --i-text-3: light-dark(rgba(26, 26, 30, 0.64), rgba(245, 245, 247, 0.66));
     --i-accent: light-dark(#e4602f, #ff8a5e);
     --i-shadow-control: light-dark(
       0 1px 2px rgba(30, 25, 20, 0.08),
@@ -384,6 +397,10 @@
     justify-content: center;
     text-align: center;
     gap: 18px;
+    /* Fixed, centered measure so the headline wraps predictably and the drag
+       swap can't reflow the column. */
+    width: min(90vw, 620px);
+    box-sizing: border-box;
     /* Reserve the tallest state so idle→drag never jumps. */
     min-height: 340px;
     padding: 0 24px;
@@ -427,11 +444,27 @@
     letter-spacing: -0.03em;
     line-height: 1.02;
     color: var(--i-text-1);
-    /* Reserve one display line so the drag swap doesn't reflow. */
-    min-height: 1.02em;
+    text-wrap: balance;
+    /* Reserve two display lines: the idle line wraps to two at the widths the
+       design ships at, while the drag line is one — reserving the taller state
+       keeps the column from jumping on drag. */
+    min-height: 2.04em;
   }
   .headline .accent {
     color: var(--i-accent);
+  }
+  /* Pointer vs touch headline: coarse-pointer devices can't drag or press ⌘V,
+     so they get a tap-first line instead of the drop instruction. */
+  .hl-touch {
+    display: none;
+  }
+  @media (hover: none) and (pointer: coarse) {
+    .hl-pointer {
+      display: none;
+    }
+    .hl-touch {
+      display: inline;
+    }
   }
 
   .subline {
@@ -489,6 +522,37 @@
     clip: rect(0 0 0 0);
     white-space: nowrap;
     border: 0;
+  }
+
+  /* Narrow screens: the two bottom HUD corners are both bottom-anchored and
+     collide (~200px of copy each into ~290px of width). Collapse them into one
+     centered, wrapping stack — formats above the privacy lines. */
+  @media (max-width: 560px) {
+    .intro-frame {
+      --hud-pad: 16px;
+    }
+    .hud-tl {
+      top: calc(var(--frame-inset) + 14px);
+    }
+    .hud-bl,
+    .hud-br {
+      left: 50%;
+      right: auto;
+      transform: translateX(-50%);
+      align-items: center;
+      text-align: center;
+      width: max-content;
+      max-width: calc(100% - 2 * var(--frame-inset) - 2 * var(--hud-pad));
+    }
+    .hud-bl {
+      bottom: calc(var(--frame-inset) + var(--hud-pad) + 46px);
+    }
+    .hud-br {
+      bottom: calc(var(--frame-inset) + var(--hud-pad));
+    }
+    .hud-line {
+      font-size: 11px;
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {
