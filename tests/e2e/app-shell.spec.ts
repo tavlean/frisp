@@ -1,5 +1,4 @@
 import { expect, test } from '@playwright/test';
-import { APP_NAME } from '../../src/shared/brand';
 
 // Boot + cross-origin-isolation. If COOP/COEP regress, WASM threads silently
 // die — this catches that, plus any console/page errors on load.
@@ -14,7 +13,12 @@ test.describe('app shell', () => {
     page.on('pageerror', (e) => errors.push(String(e)));
 
     await page.goto('/');
-    await expect(page.getByRole('heading', { name: APP_NAME })).toBeVisible();
+    // Boot anchor: the landing's primary CTA. Stable across brand/copy changes
+    // and present on first paint (the app name now lives in HUD micro-copy, not
+    // a heading, so assert the control that proves the intro rendered).
+    await expect(
+      page.getByRole('button', { name: 'Browse files' }),
+    ).toBeVisible();
 
     // The whole point of the threading work: the page must be cross-origin
     // isolated so SharedArrayBuffer (and therefore WASM threads) is available.
