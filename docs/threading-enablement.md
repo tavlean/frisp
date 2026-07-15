@@ -36,8 +36,10 @@ The app **already ships multithreaded codec variants** and already detects
 thread support — AVIF, JPEG XL, and OxiPNG each call
 `worker-shared/supports-wasm-threads` and load a `_mt` / `_mt_simd` /
 `pkg-parallel` build when threads are available
-(e.g. `src/features/encoders/oxiPNG/worker/oxipngEncode.ts` calls
-`initThreadPool(navigator.hardwareConcurrency)`). (WebP 2 also shipped a `_mt`
+(e.g. `src/features/encoders/oxiPNG/worker/oxipngEncode.ts` called
+`initThreadPool(navigator.hardwareConcurrency)`; that per-encoder worker was
+later removed in the codegen retirement — `initThreadPool` now lives in
+`src/worker/codec-worker.ts`). (WebP 2 also shipped a `_mt`
 build but was removed from the codec surface — see
 [codec-surface-cleanup.md](codec-surface-cleanup.md).)
 

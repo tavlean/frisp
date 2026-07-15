@@ -13,7 +13,7 @@ Use this as the first public support target:
 | Chrome / Chromium |            121 | Modern Chromium baseline with WebAssembly, workers, service workers, WebP, and AVIF.                        |
 | Edge              |            121 | Aligns with Chromium and MDN's AVIF support note for Edge 121.                                              |
 | Firefox           |        115 ESR | Long-lived Firefox baseline with WebAssembly, workers, service workers, WebP, and AVIF still-image support. |
-| Safari            |             17 | Avoid Safari 16 because this codebase has a known WebAssembly-thread/nested-worker compatibility concern.   |
+| Safari            |             17 | Safari 16 had a WASM-thread/nested-worker gap (fixed in 17+, verified in [threading-enablement.md](threading-enablement.md)); 17 is a clean modern baseline (AVIF landed in 16.1). |
 
 These are support targets, not artificial blockers. The app can still run in newer compatible browsers outside this list, and many older versions may work. The project should only promise support for versions that we test.
 

@@ -46,7 +46,7 @@ seeds are fixed so they're reproducible too.
 
 - Why multiple types: a codec change can improve photos but hurt flat
   illustrations, break alpha, or behave differently on huge inputs. The fixtures
-  cover all four so a regression in any of them is caught.
+  cover all four of those scenarios so a regression in any of them is caught.
 - Swap `photo.jpg` / `photo-large.jpg` for your own images for article-quality
   numbers; if you do, re-capture the benchmark baseline.
 
