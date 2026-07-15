@@ -1,7 +1,9 @@
 # Lab — intro page re-design
 
-Last updated: 2026-07-10 (round 3). Status: **DECISION PENDING** (maintainer picks a
-direction; losers get deleted on promotion).
+Last updated: 2026-07-15. Status: **DECIDED — `frame` promoted to the live intro**
+(2026-07-15). The other takes were kept as lab exhibits rather than deleted, and
+the previous production landing was preserved as a new `aurora` variant (see
+Promotion notes below).
 
 Six dev-only takes on the landing screen as a modern minimal full-viewport
 single section — inviting drop area, tiny header + footer, light AND dark —
@@ -55,3 +57,22 @@ prism.
 - Decide whether the theme toggle ships (production is dark-only today;
   the `light-dark()` token bridge from the re-style lab is the app-wide
   light-mode path — see [lab-editor-restyle.md](lab-editor-restyle.md)).
+
+## What actually shipped (`frame`, 2026-07-15)
+
+- `src/lib/editor/intro/Intro.svelte` was replaced wholesale with the frame
+  design, keeping the `onFiles` prop (`routeFiles`) as its only input. It
+  attaches its **own** drop target and `stopPropagation`s the drag events, so a
+  drop over the intro routes exactly once (here, not the app-wide `fileDrop`)
+  and the global pink overlay stays hidden — the viewfinder is the drag
+  feedback instead. Browse (multi-file input) and Cmd/Ctrl+V paste route the
+  same way. The lab's `--il-*` tokens were inlined as scoped `--i-*`
+  `light-dark()` values, so the intro follows the **OS** theme (no toggle —
+  the lab `ThemeToggle` did not ship). The tray icon and brand lockup are
+  inlined (no `$lib/lab` imports leak into production).
+- The old production landing was preserved verbatim as the **`aurora`** lab
+  variant (`/lab/intro/aurora`, `AuroraIntro.svelte`); `blob-anim.ts` moved
+  from `editor/intro/` to `lib/lab/intro/` since aurora is now its only user.
+- The losing variants (`billboard`, `split`, `ledger`, `prism`, `showcase`)
+  were **kept** as lab exhibits rather than deleted, so `drop-demo.svelte.ts`,
+  `ThemeToggle`, `Brand`, `Icon`, and `intro-lab.css` all remain in use.
