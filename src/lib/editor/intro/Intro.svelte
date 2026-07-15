@@ -29,7 +29,7 @@
   }
   let { onFiles, onMessage }: Props = $props();
 
-  const formatsLine = 'WebP · AVIF · JPEG XL · JPEG · PNG';
+  const formatsLine = 'WebP · SVG · AVIF · JPEG XL · PNG · JPEG';
 
   // Backs the quiet "paste" action; keyboard ⌘V is handled separately by
   // onWindowPaste (synchronous clipboardData, no permission prompt).
@@ -464,13 +464,13 @@
   .brand {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
+    gap: 9px;
     line-height: 1;
     color: var(--i-text-1);
   }
   .brand-mark {
     display: inline-grid;
-    height: 20px;
+    height: 22.5px;
   }
   .brand-mark :global(svg) {
     height: 100%;
@@ -478,7 +478,7 @@
     display: block;
   }
   .brand-name {
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 850;
     letter-spacing: -0.02em;
   }
@@ -622,7 +622,10 @@
     align-items: center;
     gap: 6px;
     padding: 10px 14px;
-    border: 1px solid transparent;
+    /* A faint resting outline gives it a defined footprint next to the filled
+       Browse pill (an outline vs. filled pair reads balanced); it fills in on
+       hover/focus. */
+    border: 1px solid var(--i-border);
     border-radius: 12px;
     background: none;
     color: var(--i-text-2);
@@ -637,7 +640,7 @@
   .paste:hover {
     color: var(--i-text-1);
     background: var(--i-surface);
-    border-color: var(--i-border);
+    border-color: var(--i-border-strong);
     box-shadow: var(--i-shadow-control);
   }
   .paste:focus-visible {
