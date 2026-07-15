@@ -122,35 +122,49 @@
     <canvas class="blob-canvas" {@attach blobAnim} aria-hidden="true"></canvas>
 
     <h1 class="logo-container reveal" style="--reveal-order: 0">
-      <!-- The logomark swaps per theme: the graphite badge on the light page,
-           the white badge on dark. Both are the brand mark shipped in
-           static/logomark*.svg (the light one keeps its gradient). -->
-      <picture class="logo-pic">
-        <source
-          srcset={asset('/logomark-white.svg')}
-          media="(prefers-color-scheme: dark)"
-        />
-        <img
-          class="logo"
-          src={asset('/logomark.svg')}
-          alt=""
-          width="88"
-          height="96"
-          fetchpriority="high"
-        />
-      </picture>
-      <!-- Inlined (was an <img src=wordmark.svg>) so its colour follows the
-           theme via currentColor instead of an external SVG we can't recolour. -->
+      <!-- The full lockup from static/logo.svg, inlined so its colour follows
+           the theme: it keeps its graphite gradient on the light page, and the
+           dark-mode rule below flips every path to white. Inlining (rather than
+           <img src>) is the only way page CSS can reach inside to recolour it,
+           so one asset covers both modes — no separate white file. Keep this in
+           sync with static/logo.svg if the mark or wordmark ever changes. -->
       <svg
-        class="wordmark"
-        viewBox="0 0 827 365"
+        class="logo"
+        viewBox="0 0 1309 428"
+        fill="none"
         role="img"
         aria-label={APP_NAME}
       >
+        <g clip-path="url(#frisp-logo-clip)">
+          <path
+            fill="url(#frisp-logo-grad)"
+            d="M124.64 193.62a32.61 32.61 0 1 0 0-65.22 32.61 32.61 0 0 0 0 65.22"
+          />
+          <path
+            fill="url(#frisp-logo-grad)"
+            d="m330.52 325.9-111.75 64.53a71.9 71.9 0 0 1-71.6.06L36 326.63a72 72 0 0 1-36-62.36l.25-128.18a72 72 0 0 1 35.89-62l111.75-64.5a71.9 71.9 0 0 1 71.6-.07l111.14 63.87a72 72 0 0 1 36 62.36l-.25 128.19a72 72 0 0 1-35.86 61.97m-37.78-135.94 34.6 34.6.17-88.91a32.6 32.6 0 0 0-16.36-28.34L200 43.44a32.7 32.7 0 0 0-32.55.03L55.7 107.99a32.8 32.8 0 0 0-16.32 28.19l-.23 128.17a32.6 32.6 0 0 0 16.36 28.34l21 12.06 114.8-114.82c27.99-27.97 73.49-27.97 101.46 0z"
+          />
+        </g>
         <path
-          fill="currentColor"
-          d="M0 285.4V15.92h183.52v58.61H65.36v53.56h82.96v54.5H65.36v102.8zM312.56 88.2c12.36 0 20.97 3.94 29.03 8.62l-11.05 58.05c-14.98-9.17-24.35-10.49-34.65-10.49-9.74 0-21.16 4.5-32.02 14.05V285.4h-63.48V92.7h37.64l13.1 36.52c14.99-21.35 38.77-41.02 61.43-41.02m78.85-23.03c-20.23 0-36.33-13.67-36.33-32.77 0-18.35 16.1-32.4 36.33-32.4 20.41 0 36.89 14.05 36.89 32.4 0 19.1-16.3 32.77-36.9 32.77M359.76 285.4V92.7h63.67v192.7zm168.74 4.5c-30.53 0-61.8-9.18-81.47-19.48l15.92-43.64c22.85 8.8 48.88 17.04 64.05 17.04 13.67 0 21.16-5.61 21.16-13.3 0-8.6-8.24-14.79-26.97-21.34l-15.73-4.87c-30.52-9.92-54.3-27.72-54.3-59.93 0-36.89 33.51-56.36 77.9-56.36 26.22 0 48.13 4.68 68.54 12.92l-13.67 45.7c-17.8-6.56-40.26-12.55-52.06-12.55-11.61 0-19.85 4.49-19.85 11.8 0 6.74 5.24 12.91 22.28 18.35l11.05 3.55c34.46 10.3 63.67 25.85 63.67 62.74 0 38.01-36.33 59.36-80.52 59.36M750.23 88.2c40.45 0 76.6 30.15 76.6 92.89 0 72.85-37.09 108.8-92.14 108.8-15.36 0-29.03-3-39.9-7.11v81.83h-63.47l.18-206.93V92.7h37.64l11.43 31.83c20.78-21.16 48.31-36.33 69.66-36.33M725.7 239.52c27.9 0 38.58-24.16 38.58-52.25 0-31.84-11.99-46.63-32.96-46.63-12.74 0-24.54 4.68-36.52 14.05v74.53a53 53 0 0 0 30.9 10.3"
+          fill="#2b303b"
+          d="M469.65 348V78.52h183.52v58.61H535.01v53.56h82.96v54.5H535V348zm312.56-197.2c12.36 0 20.97 3.94 29.03 8.62l-11.05 58.05C785.2 208.3 775.84 207 765.54 207c-9.74 0-21.16 4.5-32.02 14.04V348h-63.48V155.3h37.64l13.1 36.52c14.99-21.35 38.77-41.01 61.43-41.01m78.85-23.03c-20.23 0-36.33-13.67-36.33-32.77 0-18.35 16.1-32.4 36.33-32.4 20.41 0 36.89 14.05 36.89 32.4 0 19.1-16.3 32.77-36.9 32.77M829.4 348V155.3h63.67V348zm168.74 4.5c-30.53 0-61.8-9.18-81.47-19.48l15.92-43.63c22.85 8.8 48.88 17.04 64.05 17.04 13.67 0 21.16-5.62 21.16-13.3 0-8.61-8.24-14.8-26.97-21.35l-15.73-4.87c-30.52-9.92-54.3-27.71-54.3-59.92 0-36.9 33.52-56.37 77.9-56.37 26.22 0 48.13 4.68 68.54 12.92l-13.67 45.7c-17.79-6.56-40.26-12.55-52.06-12.55-11.61 0-19.85 4.5-19.85 11.8 0 6.74 5.24 12.92 22.28 18.35l11.05 3.56c34.46 10.3 63.67 25.84 63.67 62.73 0 38.02-36.33 59.36-80.52 59.36m221.73-201.7c40.45 0 76.59 30.16 76.59 92.9 0 72.84-37.08 108.8-92.13 108.8-15.36 0-29.03-3-39.89-7.12v81.83h-63.48l.18-206.93V155.3h37.64l11.43 31.84c20.78-21.17 48.31-36.33 69.66-36.33m-24.53 151.32c27.9 0 38.58-24.16 38.58-52.25 0-31.84-11.99-46.63-32.96-46.63-12.74 0-24.54 4.68-36.52 14.05v74.53a53 53 0 0 0 30.9 10.3"
         />
+        <defs>
+          <linearGradient
+            id="frisp-logo-grad"
+            x1="-.09"
+            x2="238.68"
+            y1="0"
+            y2="465.59"
+            gradientUnits="userSpaceOnUse"
+          >
+            <stop stop-color="#4a5264" />
+            <stop offset="1" stop-color="#111318" />
+          </linearGradient>
+          <clipPath id="frisp-logo-clip">
+            <path fill="#fff" d="M0 0h366.63v400H0z" />
+          </clipPath>
+        </defs>
       </svg>
     </h1>
 
@@ -326,29 +340,19 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 10px;
   }
-  /* Flex (not display:contents) so the <source> stays metadata — under
-     display:contents it would surface as a zero-width flex item and add a
-     phantom gap that shoves the lockup off-centre. */
-  .logo-pic {
-    display: flex;
-  }
+  /* The whole lockup (mark + wordmark) is one inlined SVG, sized by height. */
   .logo {
     display: block;
-    height: 96px;
+    height: 104px;
     width: auto;
-    filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.35));
   }
-  /* Size the wordmark by height so it locks up optically with the icon as one
-     horizontal logo. Width follows the SVG's intrinsic aspect ratio; colour
-     follows the theme via currentColor (zinc-100 dark / zinc-800 light). */
-  .wordmark {
-    display: block;
-    height: 56px;
-    width: auto;
-    margin-top: 8px;
-    color: #f4f4f5;
+  /* Dark mode: flip the graphite lockup to solid white. Light mode keeps the
+     SVG's own gradient mark and #2b303b wordmark ink. */
+  @media (prefers-color-scheme: dark) {
+    .logo :where(path) {
+      fill: #fff;
+    }
   }
 
   .load-img {
@@ -538,36 +542,27 @@
     }
   }
 
-  /* Ease the wordmark down a touch on small screens. */
+  /* Ease the lockup down a touch on small screens. */
   @media (max-width: 599px) {
-    .wordmark {
-      height: 48px;
+    .logo {
+      height: 88px;
     }
   }
 
   /*
    * Light mode — driven purely by the user's OS/browser theme setting (no
    * toggle yet), and scoped to the intro screen only. We flip: the base
-   * background (to a soft off-white), the wordmark ink, the load-target copy,
-   * and the format chips + privacy tagline. The logomark is transparent and
-   * swaps to its graphite variant here, so it sits cleanly on the page. The
-   * blobs are left alone on purpose — they paint the coral accent at low
-   * opacity, so they read correctly over either background without a change.
+   * background (to a soft off-white), the load-target copy, and the format
+   * chips + privacy tagline. The lockup needs nothing here — it carries its
+   * own graphite gradient and ink, which read correctly on the light page (the
+   * dark-mode rule up by .logo is what recolours it to white). The blobs are
+   * left alone on purpose — they paint the coral accent at low opacity, so
+   * they read correctly over either background without a change.
    */
   @media (prefers-color-scheme: light) {
     .intro {
       color: #18181b;
       background: #f8fbfb;
-    }
-
-    /* Softer, neutral shadow under the graphite badge on the light page. */
-    .logo {
-      filter: drop-shadow(0 8px 20px rgba(17, 19, 24, 0.14));
-    }
-
-    /* zinc-800 ink on the light background. */
-    .wordmark {
-      color: #27272a;
     }
 
     .load-text {
