@@ -4,6 +4,46 @@ Short session-by-session build log: what changed, why, and the gotchas a future
 session must know. Newest first. (Live project state stays in
 [STATUS.md](STATUS.md); this is the narrative trail.)
 
+## 2026-07-15 (Opus) — Rebrand, "frame" landing, and a review-driven hardening pass
+
+Two shipped changes plus a hardening batch. **Rebrand:** new Frisp logomark +
+wordmark across the app, a theme-aware SVG favicon (`static/favicon.svg`), and
+regenerated PNG / apple-touch rasters; the old origami `.webp` logo assets were
+dropped. **Landing:** the intro-lab "frame" variant was promoted to the live
+landing (`src/lib/editor/intro/Intro.svelte`) — a full-viewport dashed
+viewfinder with HUD corner micro-copy — and the retired coral blob landing was
+preserved as the dev-only `/lab/intro/aurora` exhibit.
+
+A review (external AI plus a local multi-agent audit) then found gaps, fixed
+here:
+
+- **e2e was red.** The app name moved out of the `<h1>`, so `app-shell` +
+  `offline` asserted a heading that no longer existed — and because that
+  assertion ran first, the COOP/COEP, console-error, SW-install and
+  offline-reload checks silently stopped running. Re-anchored all three
+  assertions (incl. offline's post-reload one) on the "Browse files" control.
+- **Landing hardening.** The HUD micro-copy failed WCAG AA in both themes
+  (2.5:1 light / 3.6:1 dark) — retuned the `--i-text-*` tokens to clear 4.5:1;
+  added a `max-width:560px` layout (the two bottom HUD corners collided on
+  phones) and a coarse-pointer headline ("Add an image." instead of the drop
+  instruction); gave the `<h1>` a stable accessible name carrying the app
+  identity; and restored the "choose a folder" + "paste" actions the promotion
+  had dropped, rewiring the snackbar feedback.
+- **Dead lab code shipped to prod.** `/lab` + `/bench-svg` guard on `dev` at
+  RUNTIME, so their chunks (~234 KB) were still emitted and precached. Added the
+  `app-strip-dev-only-routes` Vite plugin (`apply: 'build'`) that stubs those
+  routes to "Not found" in production; guarded in `audit:static-output`.
+  **Gotcha:** an `{#if dev}` template guard does NOT keep a statically-imported
+  component out of the bundle — only the build-time plugin (or a `dev`-gated
+  dynamic import that DCE can drop) does. Client JS+CSS fell ~1697 KB → ~1463 KB.
+- **Brand hygiene.** One canonical logomark source (`src/lib/brand/logomark.svg`)
+  shared by the intro + lab instead of three hand-copied paths; `.DS_Store`
+  removed from `static/` and guarded so it can't ship again.
+
+Deferred: a theme-aware `favicon.png` fallback (a single PNG can't be
+theme-aware without an opaque/neutral badge redesign, and no CLI rasterizer is
+available here; the primary SVG favicon already covers modern browsers).
+
 ## 2026-07-12 (late night, Opus) — SVG benchmark: nano + ImageOptim legs
 
 Ran the external-baseline comparison the maintainer asked for.

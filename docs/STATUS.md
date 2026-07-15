@@ -1,11 +1,28 @@
 # Frisp Status
 
-Last updated: 2026-07-12.
+Last updated: 2026-07-15.
 
 Read this first. Frisp is a local-first image optimizer: image work stays in the
 browser, the build is static, and offline reload must work after load.
 
 ## Current State
+
+- **Rebrand + new landing SHIPPED (2026-07-15).** New Frisp logomark + wordmark
+  across the app and a theme-aware SVG favicon (`static/favicon.svg` is the
+  primary icon; `favicon.png` + `apple-touch-icon.png` are raster fallbacks).
+  The canonical mark lives at `src/lib/brand/logomark.svg` and is shared by the
+  production intro and the lab. The landing was replaced by the **"frame"**
+  design promoted from the intro lab (`src/lib/editor/intro/Intro.svelte`): a
+  full-viewport dashed viewfinder with HUD corner micro-copy, a "Browse files"
+  button plus quiet "choose a folder / paste" actions, OS theming. The retired
+  coral "aurora" blob landing is preserved as a dev-only exhibit at
+  `/lab/intro/aurora`. Review-driven hardening the same day: WCAG-AA contrast on
+  the HUD copy, a mobile layout + touch-first headline, a stable accessible
+  heading name, and the e2e boot assertions re-anchored on the Browse control.
+  **Dev-only `/lab` + `/bench-svg` routes are now stripped from production
+  builds** (the `app-strip-dev-only-routes` Vite plugin), removing ~234 KB of
+  dead UI from the app shell / precache; guarded by `audit:static-output`.
+  Narrative + gotchas in [WORKLOG.md](WORKLOG.md).
 
 - **SVG optimization IN BUILD (2026-07-12, evening — top priority, jumps the
   codec batch).** Maintainer-approved same day as the research pass. SVG
