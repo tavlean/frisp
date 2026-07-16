@@ -56,55 +56,69 @@ export function fromFileList(list: FileList | File[]): ImportedFile[] {
   });
 }
 
+type SnapshotItem =
+  | { kind: 'file'; file: File }
+  | { kind: 'directory'; entry: WebkitDirectoryEntry };
+
 /** Drop: walks directory entries recursively; plain files pass through.
  *  Skips dot-files/dirs (.DS_Store etc.). */
 export async function fromDataTransfer(
   dataTransfer: DataTransfer,
 ): Promise<ImportedFile[]> {
-  const entries = snapshotEntries(dataTransfer.items);
-  if (entries.length === 0) {
+  const snapshot = snapshotItems(dataTransfer.items);
+  if (snapshot.length === 0) {
     return Array.from(dataTransfer.files).map((file) => ({ file }));
   }
 
   const imported = await Promise.all(
-    entries.map((entry) => walkEntry(entry, entry.isDirectory)),
+    snapshot.map((item) => {
+      if (item.kind === 'file') {
+        return shouldSkipEntryName(item.file.name) ? [] : [{ file: item.file }];
+      }
+      return walkEntry(item.entry);
+    }),
   );
   return imported.flat();
 }
 
-function snapshotEntries(
+/** The item list is only readable during the drop event, so it must be
+ *  snapshotted synchronously. Plain files come straight off getAsFile();
+ *  only directories need the webkit entry walk. (Never read plain files
+ *  through their entry's async file(): Safari can hand out entries whose
+ *  file() rejects with NotFoundError while getAsFile() works — the old
+ *  entry-first path turned such drops into a silent no-op.) */
+function snapshotItems(
   items: DataTransferItemList | undefined,
-): WebkitEntry[] {
+): SnapshotItem[] {
   if (!items) return [];
 
-  const entries: WebkitEntry[] = [];
+  const snapshot: SnapshotItem[] = [];
   for (const item of Array.from(items) as WebkitDataTransferItem[]) {
     if (item.kind !== 'file') continue;
     const entry = item.webkitGetAsEntry?.() as WebkitEntry | null | undefined;
-    if (entry) entries.push(entry);
+    if (entry?.isDirectory) {
+      snapshot.push({ kind: 'directory', entry });
+      continue;
+    }
+    const file = item.getAsFile();
+    if (file) snapshot.push({ kind: 'file', file });
   }
-  return entries;
+  return snapshot;
 }
 
-async function walkEntry(
-  entry: WebkitEntry,
-  includeRelativePath: boolean,
-): Promise<ImportedFile[]> {
+/** Recursive directory walk; every file keeps its path inside the folder. */
+async function walkEntry(entry: WebkitEntry): Promise<ImportedFile[]> {
   if (shouldSkipEntryName(entry.name)) return [];
 
   if (entry.isFile) {
     const file = await readFileEntry(entry);
     if (!file) return [];
-    const relativePath = includeRelativePath
-      ? normalizeRelativePath(entry.fullPath)
-      : undefined;
+    const relativePath = normalizeRelativePath(entry.fullPath);
     return [relativePath ? { file, relativePath } : { file }];
   }
 
   const children = await readAllDirectoryEntries(entry.createReader());
-  const imported = await Promise.all(
-    children.map((child) => walkEntry(child, true)),
-  );
+  const imported = await Promise.all(children.map(walkEntry));
   return imported.flat();
 }
 
