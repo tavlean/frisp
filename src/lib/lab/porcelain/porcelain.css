@@ -9,7 +9,8 @@
  *
  * Mechanism: every porcelain value is a `light-dark(lightVal, darkVal)`, and
  * `.porcelain-root` sets `color-scheme: light dark;` so the OS drives the mode.
- * The ThemeSwitch forces it via `.force-light` / `.force-dark` on the same root.
+ * The toolbar theme button forces it via `.force-light` / `.force-dark` on the
+ * same root.
  *
  * This file is plain CSS (imported alongside theme.css). It does two things:
  *   1. Defines private `--pc-*` tokens (used by the NEW lab components), and
@@ -160,17 +161,41 @@
   background-color: light-dark(#ffffff, #d4d4d8);
 }
 
-/* ── Output bottom controls: white raised pills with inset hovers ─────────
-   The component hardcodes dark backdrop-blur fills + rgba(45,45,54) hovers. */
+/* ── Output canvas controls, docked into the toolbar ──────────────────────
+   Output owns the zoom / fit / rotate / view-options cluster; porcelain docks
+   it into the top toolbar's reserved centre slot (positioning block below) and
+   strips the component's own dark blur-pill so the buttons sit flat on the one
+   toolbar surface, as quiet icon buttons matching TopBar's. */
+.porcelain-root .controls .button-group {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+}
 .porcelain-root .controls .button,
 .porcelain-root .controls .zoom {
-  background-color: var(--pc-surface);
+  background-color: transparent;
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
-  border-color: var(--pc-border);
+  border: none;
+  height: 36px;
   color: var(--pc-text-2);
 }
-.porcelain-root .controls .button:hover {
+.porcelain-root .controls .button {
+  min-width: 34px;
+  padding: 0 6px;
+  border-radius: 10px;
+}
+@supports (corner-shape: squircle) {
+  .porcelain-root .controls .button {
+    corner-shape: squircle;
+    border-radius: 12px;
+  }
+}
+.porcelain-root .controls .zoom {
+  width: 3.6rem;
+}
+.porcelain-root .controls .button:hover:not(:disabled) {
   background: var(--pc-inset);
   color: var(--pc-text-1);
 }
@@ -179,11 +204,12 @@
   color: var(--pc-text-1);
 }
 .porcelain-root .controls .button:disabled:hover {
-  background-color: var(--pc-surface);
+  background-color: transparent;
   color: var(--pc-text-2);
 }
-.porcelain-root .controls .button-group {
-  box-shadow: var(--pc-shadow-control);
+.porcelain-root .controls .button:focus-visible {
+  outline: 2px solid var(--pc-focus);
+  outline-offset: 2px;
 }
 .porcelain-root .controls .zoom-value {
   color: var(--pc-text-1);
@@ -370,17 +396,20 @@
 }
 
 /* ── Toolbar-integrated canvas controls ────────────────────────────────────
-   Reference 1 keeps zoom inside the TOP toolbar. Output owns the cluster, so
-   it is repositioned from bottom-centre into the toolbar row: the TopBar
-   pills right-align to the viewport centre and the cluster starts just right
-   of it, reading as one centred toolbar. 23px = toolbar top (16px) +
-   (pill 52px − button 38px) / 2, so pills and buttons share a centreline. */
+   The cluster docks into the centre of the one toolbar pill: both the toolbar
+   and this cluster centre on the viewport, and TopBar reserves an equal-width
+   centre slot for it (flex:1 side clusters), so it lands inside the pill.
+   24px = toolbar top (16px) + (pill 52px − button 36px) / 2, so the cluster
+   and the toolbar's buttons share a centreline. */
 .porcelain-root .controls {
-  top: 23px;
+  top: 24px;
   bottom: auto;
-  left: calc(50% + 4px);
+  left: 50%;
   right: auto;
-  justify-content: flex-start;
+  transform: translateX(-50%);
+  justify-content: center;
+  flex-wrap: nowrap;
+  gap: 4px;
   z-index: 12;
 }
 /* The popover anchored to the cluster must now open DOWNWARD. */
@@ -389,14 +418,10 @@
   bottom: auto;
 }
 @media (max-width: 760px) {
-  /* The compact toolbar leaves no room beside it — the cluster becomes a
-     second centred row beneath it. */
+  /* The compact toolbar drops its centre slot — the cluster becomes a second
+     centred row beneath the bar. */
   .porcelain-root .controls {
     top: 60px;
-    left: 50%;
-    right: auto;
-    transform: translateX(-50%);
-    justify-content: center;
   }
 }
 

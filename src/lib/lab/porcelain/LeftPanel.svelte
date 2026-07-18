@@ -1,17 +1,18 @@
 <script lang="ts">
   // The left comparison panel. Two faces:
-  //  • the "info" face — a frisp wordmark + project title, then Image | Compare
-  //    tabs (image info rows, or a grid of format tiles to preview against);
+  //  • the "info" face — project title + subtitle, then Image | Compare tabs
+  //    (image info rows, or a grid of format tiles to preview against);
   //  • the "compare" face — when the left side has picked a format, the shared
   //    LabOptionsPanel takes over, with a header to close the comparison.
-  import { APP_NAME } from 'shared/brand';
+  // The brand mark lives in the toolbar, not here.
   import ImageInfoRows from '$lib/editor/ImageInfoRows.svelte';
   import { prettySize } from '$lib/editor/pretty-size';
   import { IDENTITY, type SideFormat } from '$lib/compress';
   import type { EditorSession } from '$lib/editor/editor-session.svelte';
   import Segmented from './Segmented.svelte';
   import LabOptionsPanel from './LabOptionsPanel.svelte';
-  import Logomark from '$lib/lab/Logomark.svelte';
+  import LabIcon from '$lib/lab/LabIcon.svelte';
+  import closeIcon from '$lib/lab/icons/close.svg?raw';
 
   interface Props {
     session: EditorSession;
@@ -61,15 +62,7 @@
         aria-label="Close comparison"
         onclick={() => session.setFormat(0, IDENTITY)}
       >
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path
-            d="M7 7l10 10M17 7L7 17"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.7"
-            stroke-linecap="round"
-          />
-        </svg>
+        <LabIcon svg={closeIcon} size={18} />
       </button>
     </div>
 
@@ -89,10 +82,6 @@
     />
   {:else if file}
     <header class="head">
-      <div class="brand">
-        <Logomark size={16} />
-        <span class="wordmark">{APP_NAME}</span>
-      </div>
       <p class="project-title" title={file.name}>{file.name}</p>
       <p class="project-sub">{subtitle}</p>
     </header>
@@ -150,22 +139,6 @@
     display: grid;
     gap: 3px;
     padding: 14px var(--horizontal-padding) 10px;
-  }
-
-  .brand {
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    margin-bottom: 4px;
-    /* currentColor for the logomark. */
-    color: var(--pc-text-1);
-  }
-
-  .wordmark {
-    font-size: 13px;
-    font-weight: 600;
-    letter-spacing: 0.01em;
-    color: var(--pc-text-1);
   }
 
   .project-title {
@@ -305,11 +278,6 @@
     transition:
       background-color 140ms ease,
       color 140ms ease;
-  }
-
-  .close-btn svg {
-    width: 18px;
-    height: 18px;
   }
 
   .close-btn:hover {

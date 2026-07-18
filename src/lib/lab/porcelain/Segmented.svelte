@@ -1,8 +1,8 @@
 <script lang="ts">
   // Generic inset segmented control: a recessed warm-gray track holding equal
   // segments, the active one lifted into a raised white pill. Used for the
-  // panel tabs (Image|Compare, Edit|Compress) and the theme switch. Purely
-  // presentational — the parent owns `value` and reacts to `onchange`.
+  // panel tabs (Image|Compare, Edit|Compress). Purely presentational — the
+  // parent owns `value` and reacts to `onchange`.
   interface Option {
     id: string;
     label: string;
@@ -12,15 +12,13 @@
     options: Option[];
     value: string;
     onchange: (id: string) => void;
-    /** Compact variant for the tiny theme-switch pill. */
-    small?: boolean;
     ariaLabel?: string;
   }
 
-  let { options, value, onchange, small = false, ariaLabel }: Props = $props();
+  let { options, value, onchange, ariaLabel }: Props = $props();
 </script>
 
-<div class="segmented" class:small role="tablist" aria-label={ariaLabel}>
+<div class="segmented" role="tablist" aria-label={ariaLabel}>
   {#each options as option (option.id)}
     <button
       type="button"
@@ -95,11 +93,5 @@
   .segment:focus-visible {
     outline: 2px solid var(--pc-focus);
     outline-offset: 2px;
-  }
-
-  .small .segment {
-    height: 22px;
-    padding: 0 9px;
-    font-size: 11px;
   }
 </style>

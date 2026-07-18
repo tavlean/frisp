@@ -1,10 +1,27 @@
+<script lang="ts" module>
+  export type ThemeMode = 'system' | 'light' | 'dark';
+</script>
+
 <script lang="ts">
-  // The floating top toolbar: a raised white pill of icon actions (Back, Undo,
-  // Redo) and a SEPARATE adjacent pill holding the primary Export button. All
-  // wiring is real — Back clears the file, Undo/Redo drive the session history,
-  // Export downloads the right side's encoded result. Tooltips are pure CSS
-  // (no `title`) so they can carry a right-aligned kbd shortcut.
+  // The one floating porcelain toolbar: a single raised pill spanning the top.
+  // LEFT holds the brand mark and the history/edit actions (back, undo, redo,
+  // crop); the CENTRE reserves a slot the production Output docks its
+  // zoom/fit/rotate/view-options cluster into (see porcelain.css) so the whole
+  // row reads as one pill; RIGHT holds the theme-cycle button and the dark
+  // primary Export. All wiring is real — Back clears the file, Undo/Redo drive
+  // session history, Export downloads the right side's encoded result. Tooltips
+  // are pure CSS (no `title`) so they can carry a right-aligned kbd shortcut.
   import type { EditorSession } from '$lib/editor/editor-session.svelte';
+  import Logomark from '$lib/lab/Logomark.svelte';
+  import LabIcon from '$lib/lab/LabIcon.svelte';
+  import backIcon from '$lib/lab/icons/back.svg?raw';
+  import undoIcon from '$lib/lab/icons/undo.svg?raw';
+  import redoIcon from '$lib/lab/icons/redo.svg?raw';
+  import cropIcon from '$lib/lab/icons/crop.svg?raw';
+  import sunMoonIcon from '$lib/lab/icons/sun-moon.svg?raw';
+  import sunIcon from '$lib/lab/icons/sun.svg?raw';
+  import moonIcon from '$lib/lab/icons/moon.svg?raw';
+  import exportIcon from '$lib/lab/icons/export.svg?raw';
 
   interface Props {
     session: EditorSession;
@@ -12,12 +29,30 @@
     /** Enter crop mode (lab crop tool). Absent → no crop button. */
     oncrop?: () => void;
     cropDisabled?: boolean;
+    /** Current forced color scheme; drives the theme button's label. */
+    theme: ThemeMode;
+    /** Advance the theme one step (system → light → dark → system). */
+    onCycleTheme: () => void;
   }
 
-  let { session, isMac, oncrop, cropDisabled = false }: Props = $props();
+  let {
+    session,
+    isMac,
+    oncrop,
+    cropDisabled = false,
+    theme,
+    onCycleTheme,
+  }: Props = $props();
 
   const undoKbd = $derived(isMac ? '⌘Z' : 'Ctrl+Z');
   const redoKbd = $derived(isMac ? '⇧⌘Z' : 'Ctrl+Shift+Z');
+  const themeLabel = $derived(
+    theme === 'light' ? 'Light' : theme === 'dark' ? 'Dark' : 'System',
+  );
+  // The button shows the CURRENT mode's glyph (not a fixed cycle icon).
+  const themeGlyph = $derived(
+    theme === 'light' ? sunIcon : theme === 'dark' ? moonIcon : sunMoonIcon,
+  );
 
   // Export targets the RIGHT side (index 1) — the encoded output the user came
   // to produce. It's unavailable while that side is mid-encode or has no result.
@@ -27,8 +62,12 @@
   const exportDisabled = $derived(exporting || !exportUrl);
 </script>
 
-<div class="topbar">
-  <div class="pill actions">
+<div class="toolbar">
+  <div class="cluster left">
+    <span class="logo"><Logomark size={20} /></span>
+
+    <span class="divider" aria-hidden="true"></span>
+
     <div class="tip-wrap">
       <button
         type="button"
@@ -36,23 +75,12 @@
         onclick={() => session.clearFile()}
         aria-label="Back"
       >
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path
-            d="M14.5 6l-6 6 6 6"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.7"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
-        </svg>
+        <LabIcon svg={backIcon} size={18} />
       </button>
       <span class="tooltip" role="tooltip"
         ><span class="tip-label">Back</span></span
       >
     </div>
-
-    <span class="divider" aria-hidden="true"></span>
 
     <div class="tip-wrap">
       <button
@@ -62,16 +90,7 @@
         disabled={!session.history.canUndo}
         aria-label="Undo"
       >
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path
-            d="M9 14L4 9l5-5M4 9h10.5a5.5 5.5 0 0 1 0 11H9"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.7"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
-        </svg>
+        <LabIcon svg={undoIcon} size={18} />
       </button>
       <span class="tooltip" role="tooltip">
         <span class="tip-label">Undo</span><span class="tip-kbd">{undoKbd}</span
@@ -87,16 +106,7 @@
         disabled={!session.history.canRedo}
         aria-label="Redo"
       >
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path
-            d="M15 14l5-5-5-5M20 9H9.5a5.5 5.5 0 0 0 0 11H15"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.7"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
-        </svg>
+        <LabIcon svg={redoIcon} size={18} />
       </button>
       <span class="tooltip" role="tooltip">
         <span class="tip-label">Redo</span><span class="tip-kbd">{redoKbd}</span
@@ -115,16 +125,7 @@
           disabled={cropDisabled}
           aria-label="Crop"
         >
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path
-              d="M7 3v14h14M3 7h14v14"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.7"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-          </svg>
+          <LabIcon svg={cropIcon} size={18} />
         </button>
         <span class="tooltip" role="tooltip"
           ><span class="tip-label">Crop</span></span
@@ -133,7 +134,26 @@
     {/if}
   </div>
 
-  <div class="pill export-pill">
+  <!-- Reserved centre: Output's zoom/fit/rotate/view-options cluster is docked
+       here from porcelain.css (centred over the viewport, which is this slot's
+       centre), so it reads as the toolbar's middle section. -->
+  <div class="canvas-slot" aria-hidden="true"></div>
+
+  <div class="cluster right">
+    <div class="tip-wrap">
+      <button
+        type="button"
+        class="icon-btn"
+        onclick={() => onCycleTheme()}
+        aria-label={`Theme: ${themeLabel}`}
+      >
+        <LabIcon svg={themeGlyph} size={18} />
+      </button>
+      <span class="tooltip" role="tooltip"
+        ><span class="tip-label">Theme: {themeLabel}</span></span
+      >
+    </div>
+
     <a
       class="export"
       class:disabled={exportDisabled}
@@ -144,16 +164,7 @@
       {#if exporting}
         <span class="spinner" aria-hidden="true"></span>
       {:else}
-        <svg class="export-icon" viewBox="0 0 24 24" aria-hidden="true">
-          <path
-            d="M12 3v10.5m0 0l4-4M12 13.5l-4-4M5 16v3h14v-3"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.7"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
-        </svg>
+        <LabIcon svg={exportIcon} size={17} />
       {/if}
       <span class="export-text">Export</span>
     </a>
@@ -161,38 +172,60 @@
 </div>
 
 <style>
-  .topbar {
-    /* Right-aligned to the viewport centre: Output's zoom cluster is CSS-docked
-       just right of centre (see porcelain.css), so the two halves read as one
-       centred toolbar — the reference keeps zoom in the top bar. */
+  .toolbar {
+    /* One centred pill. flex:1 clusters flank a fixed-width centre slot, so the
+       slot is centred on the viewport — exactly where Output docks its control
+       cluster (porcelain.css). Width stays modest and shrinks with the
+       viewport so it clears the side panels. */
     position: absolute;
     top: 16px;
-    right: calc(50% + 4px);
-    z-index: 12;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .pill {
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(720px, calc(100vw - 32px));
+    z-index: 11;
     display: flex;
     align-items: center;
     height: 52px;
-    padding: 0 8px;
+    padding: 0 10px;
     background: var(--pc-surface);
     border: 1px solid var(--pc-border);
     border-radius: 16px;
     box-shadow: var(--pc-shadow-panel);
   }
   @supports (corner-shape: squircle) {
-    .pill {
+    .toolbar {
       corner-shape: squircle;
       border-radius: 20px;
     }
   }
 
-  .actions {
-    gap: 4px;
+  .cluster {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  .cluster.right {
+    justify-content: flex-end;
+    gap: 8px;
+  }
+
+  /* Holds the docked Output cluster; its edges divide the pill's sections. */
+  .canvas-slot {
+    flex: 0 0 268px;
+    align-self: stretch;
+    margin: 0 4px;
+    border-left: 1px solid var(--pc-border);
+    border-right: 1px solid var(--pc-border);
+  }
+
+  .logo {
+    display: inline-flex;
+    align-items: center;
+    padding: 0 6px;
+    color: var(--pc-text-1);
   }
 
   .icon-btn {
@@ -216,11 +249,6 @@
       corner-shape: squircle;
       border-radius: 12px;
     }
-  }
-
-  .icon-btn svg {
-    width: 20px;
-    height: 20px;
   }
 
   .icon-btn:hover:not(:disabled) {
@@ -286,10 +314,9 @@
     font-variant-numeric: tabular-nums;
   }
 
-  .export-pill {
-    padding: 0 7px;
-  }
-
+  /* Export + the Results download are the skin's only primary buttons: a dark
+     charcoal fill (near-white in dark), matching porcelain.css's
+     `.results .download`. */
   .export {
     display: inline-flex;
     align-items: center;
@@ -298,12 +325,13 @@
     height: 38px;
     padding: 0 16px;
     border-radius: 11px;
-    background: var(--pc-inset);
-    color: var(--pc-text-1);
+    background: light-dark(#1b1b1f, #f5f5f7);
+    color: light-dark(#ffffff, #16161c);
     font: inherit;
     font-size: 14px;
     font-weight: 600;
     text-decoration: none;
+    box-shadow: var(--pc-shadow-control);
     transition:
       background-color 140ms ease,
       opacity 140ms ease;
@@ -316,7 +344,7 @@
   }
 
   .export:hover:not(.disabled) {
-    background: var(--pc-inset-strong);
+    background: light-dark(#000000, #ffffff);
   }
 
   .export.disabled {
@@ -329,16 +357,12 @@
     outline-offset: 2px;
   }
 
-  .export-icon {
-    width: 17px;
-    height: 17px;
-  }
-
   .spinner {
     width: 14px;
     height: 14px;
-    border: 2px solid var(--pc-spinner-track);
-    border-top-color: var(--pc-spinner-head);
+    border: 2px solid
+      light-dark(rgba(255, 255, 255, 0.35), rgba(20, 20, 15, 0.25));
+    border-top-color: light-dark(#ffffff, #16161c);
     border-radius: 50%;
     animation: pc-spin 0.8s linear infinite;
   }
@@ -360,14 +384,20 @@
     }
   }
 
-  /* Compact below 760px: hide the Export text (icon-only) and tighten gaps. */
+  /* Compact below 760px: the docked cluster becomes its own row beneath the bar
+     (porcelain.css), so the slot collapses and the pill sizes to content. */
   @media (max-width: 760px) {
-    .topbar {
+    .toolbar {
       top: 10px;
-      gap: 6px;
-    }
-    .pill {
+      width: auto;
+      max-width: calc(100vw - 20px);
       height: 46px;
+    }
+    .cluster {
+      flex: 0 0 auto;
+    }
+    .canvas-slot {
+      display: none;
     }
     .icon-btn {
       width: 32px;
