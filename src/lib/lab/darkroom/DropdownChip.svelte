@@ -5,6 +5,9 @@
   // lightDismiss (Escape + click-out). Used for the Inspector's format picker;
   // kept generic (value/options/onchange) so it can be reused.
   import { lightDismiss } from '$lib/editor/light-dismiss';
+  import LabIcon from '$lib/lab/LabIcon.svelte';
+  import chevronDownIcon from '$lib/lab/icons/chevron-down.svg?raw';
+  import checkIcon from '$lib/lab/icons/check.svg?raw';
 
   interface Option {
     value: string;
@@ -54,16 +57,7 @@
   >
     <span class="dr-dropdown-current">{current?.label ?? ''}</span>
     <span class="dr-dropdown-chevron">
-      <svg viewBox="0 0 10 10" aria-hidden="true">
-        <path
-          d="M2 3.5L5 6.5L8 3.5"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.5"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        />
-      </svg>
+      <LabIcon svg={chevronDownIcon} size={12} />
     </span>
   </button>
 
@@ -80,16 +74,7 @@
         >
           <span class="dr-option-check">
             {#if option.value === value}
-              <svg viewBox="0 0 12 10" aria-hidden="true">
-                <path
-                  d="M1 5.5L4.5 9L11 1.5"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.7"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
-              </svg>
+              <LabIcon svg={checkIcon} size={12} />
             {/if}
           </span>
           <span class="dr-option-label">{option.label}</span>
@@ -154,11 +139,6 @@
     height: 12px;
     color: var(--dr-text-2);
   }
-  .dr-dropdown-chevron svg {
-    width: 10px;
-    height: 10px;
-    display: block;
-  }
 
   .dr-dropdown-card {
     position: absolute;
@@ -213,11 +193,6 @@
     width: 12px;
     height: 12px;
     color: var(--dr-text-1);
-  }
-  .dr-option-check svg {
-    width: 12px;
-    height: 10px;
-    display: block;
   }
 
   .dr-option-label {

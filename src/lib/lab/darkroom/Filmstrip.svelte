@@ -2,8 +2,13 @@
   // The bottom strip: the lab's SESSION GALLERY (a real stepping-stone toward
   // bulk mode). The page owns the gallery array and object-URL lifecycle; this
   // component renders the count chip, a scrollable thumbnail row (active thumb
-  // ringed, ✕ on hover removes), a trailing "+" add chip, and a quiet
-  // "batch coming" hint while only one image is loaded.
+  // ringed, close on hover removes) and a trailing "+" add chip. Its right end
+  // reserves --dr-dock-w for the zoom/rotate controls docked over it (Output's
+  // .controls, positioned in darkroom.css).
+  import LabIcon from '$lib/lab/LabIcon.svelte';
+  import closeIcon from '$lib/lab/icons/close.svg?raw';
+  import plusIcon from '$lib/lab/icons/plus.svg?raw';
+
   interface Entry {
     id: string;
     name: string;
@@ -47,15 +52,7 @@
           aria-label={`Remove ${entry.name}`}
           onclick={() => onRemove(entry.id)}
         >
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path
-              d="M7 7l10 10M17 7L7 17"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-            />
-          </svg>
+          <LabIcon svg={closeIcon} size={12} />
         </button>
       </div>
     {/each}
@@ -67,21 +64,9 @@
       aria-label="Add images"
       onclick={() => onAdd()}
     >
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path
-          d="M12 6v12M6 12h12"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.7"
-          stroke-linecap="round"
-        />
-      </svg>
+      <LabIcon svg={plusIcon} size={18} />
     </button>
   </div>
-
-  {#if entries.length === 1}
-    <span class="dr-hint">Drop more images — batch editing is coming.</span>
-  {/if}
 </div>
 
 <style>
@@ -95,7 +80,9 @@
     align-items: center;
     gap: 12px;
     height: 64px;
-    padding: 0 12px;
+    /* Right reserve = room for the zoom/rotate controls docked over the bar's
+       right end (Output's .controls, positioned in darkroom.css). */
+    padding: 0 var(--dr-dock-w) 0 12px;
     box-sizing: border-box;
     border-radius: 12px;
     border: 1px solid var(--dr-border);
@@ -188,12 +175,6 @@
   .dr-thumb-remove:hover {
     color: var(--dr-text-1);
   }
-  .dr-thumb-remove svg {
-    width: 12px;
-    height: 12px;
-    display: block;
-  }
-
   .dr-thumb-add {
     flex: none;
     display: grid;
@@ -215,24 +196,9 @@
     border-color: var(--dr-text-3);
     background: var(--dr-chip);
   }
-  .dr-thumb-add svg {
-    width: 18px;
-    height: 18px;
-    display: block;
-  }
-
-  .dr-hint {
-    flex: none;
-    color: var(--dr-text-3);
-    font-size: 0.9rem;
-    white-space: nowrap;
-  }
 
   @media (max-width: 900px) {
     .dr-count {
-      display: none;
-    }
-    .dr-hint {
       display: none;
     }
   }

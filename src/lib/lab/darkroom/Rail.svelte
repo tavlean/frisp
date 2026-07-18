@@ -6,6 +6,11 @@
   // just renders buttons and forwards intents, binding the two opener buttons so
   // the flyouts can anchor near them and restore focus on close.
   import ThemeToggle, { type ThemeMode } from './ThemeToggle.svelte';
+  import LabIcon from '$lib/lab/LabIcon.svelte';
+  import backIcon from '$lib/lab/icons/back.svg?raw';
+  import infoIcon from '$lib/lab/icons/info.svg?raw';
+  import compareIcon from '$lib/lab/icons/compare.svg?raw';
+  import rotateIcon from '$lib/lab/icons/rotate.svg?raw';
 
   type Flyout = 'info' | 'compare' | null;
 
@@ -46,16 +51,7 @@
         aria-label="Back"
         onclick={() => onBack()}
       >
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path
-            d="M14 6l-6 6 6 6M8 12h11"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.5"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
-        </svg>
+        <LabIcon svg={backIcon} size={18} />
       </button>
     {/if}
   </div>
@@ -71,24 +67,7 @@
       bind:this={infoBtn}
       onclick={() => onToggleFlyout('info')}
     >
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <circle
-          cx="12"
-          cy="12"
-          r="9"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.5"
-        />
-        <path
-          d="M12 11v5"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.5"
-          stroke-linecap="round"
-        />
-        <circle cx="12" cy="7.8" r="1.05" fill="currentColor" />
-      </svg>
+      <LabIcon svg={infoIcon} size={18} />
     </button>
 
     <button
@@ -101,24 +80,7 @@
       bind:this={compareBtn}
       onclick={() => onToggleFlyout('compare')}
     >
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <rect
-          x="3.5"
-          y="4.5"
-          width="17"
-          height="15"
-          rx="2"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.5"
-        />
-        <path
-          d="M12 4.5v15"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.5"
-        />
-      </svg>
+      <LabIcon svg={compareIcon} size={18} />
     </button>
   </div>
 
@@ -130,23 +92,7 @@
       aria-label="Rotate"
       onclick={() => onRotate()}
     >
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path
-          d="M4.5 9A8 8 0 1 1 4 13"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.5"
-          stroke-linecap="round"
-        />
-        <path
-          d="M4.5 4.5v4.8h4.8"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.5"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        />
-      </svg>
+      <LabIcon svg={rotateIcon} size={18} />
     </button>
 
     <ThemeToggle

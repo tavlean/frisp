@@ -6,6 +6,11 @@
   // has no accounts, so the reference's avatar/pro chips are honestly omitted.
   import { resolve } from '$app/paths';
   import Logomark from '$lib/lab/Logomark.svelte';
+  import LabIcon from '$lib/lab/LabIcon.svelte';
+  import undoIcon from '$lib/lab/icons/undo.svg?raw';
+  import redoIcon from '$lib/lab/icons/redo.svg?raw';
+  import exportIcon from '$lib/lab/icons/export.svg?raw';
+  import plusIcon from '$lib/lab/icons/plus.svg?raw';
 
   interface Props {
     /** The right side's download URL, or undefined while encoding / no result. */
@@ -56,16 +61,7 @@
         aria-label={undoTip}
         onclick={() => onUndo()}
       >
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path
-            d="M9 14L4 9l5-5M4 9h10.5a5.5 5.5 0 0 1 0 11H9"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.6"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
-        </svg>
+        <LabIcon svg={undoIcon} />
       </button>
       <button
         type="button"
@@ -75,16 +71,7 @@
         aria-label={redoTip}
         onclick={() => onRedo()}
       >
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path
-            d="M15 14l5-5-5-5M20 9H9.5a5.5 5.5 0 0 0 0 11H15"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.6"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
-        </svg>
+        <LabIcon svg={redoIcon} />
       </button>
     </div>
 
@@ -96,16 +83,7 @@
       aria-disabled={!exportReady}
       data-tooltip="Download the compared result"
     >
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path
-          d="M12 3v10.5m0 0l4-4M12 13.5L8 9.5M5 16.5v2c0 1 .8 1.8 1.8 1.8h10.4c1 0 1.8-.8 1.8-1.8v-2"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.6"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        />
-      </svg>
+      <LabIcon svg={exportIcon} />
       <span class="dr-export-text">Export</span>
     </a>
 
@@ -116,15 +94,7 @@
       aria-label="Add images"
       onclick={() => onAddImages()}
     >
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path
-          d="M12 5.5v13M5.5 12h13"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.7"
-          stroke-linecap="round"
-        />
-      </svg>
+      <LabIcon svg={plusIcon} size={18} />
     </button>
   </div>
 </header>
@@ -198,10 +168,27 @@
     display: flex;
     gap: 6px;
   }
+  /* Disabled undo/redo read as recessed inset chips, not 40%-opacity ghosts —
+     the chrome stays fully drawn so the control reads present-but-inactive. */
+  .dr-chip-pair .dr-chip-btn:disabled {
+    opacity: 1;
+    background: var(--dr-inset);
+    border-color: var(--dr-border);
+    color: var(--dr-text-3);
+  }
 
+  /* EXPORT is the bar's only primary — the raised-chip treatment it shares with
+     the inspector's Save (Results .download). */
   .dr-export {
     gap: 7px;
     padding: 0 14px;
+    background: var(--dr-chip-active);
+    border-color: var(--dr-border-strong);
+    color: var(--dr-text-1);
+  }
+  .dr-export:hover {
+    background: var(--dr-chip-hover);
+    color: var(--dr-text-1);
   }
   .dr-export-text {
     font-size: 0.92rem;
@@ -209,21 +196,11 @@
     letter-spacing: 0.08em;
     text-transform: uppercase;
   }
-  .dr-export svg {
-    width: 16px;
-    height: 16px;
-    display: block;
-  }
   .dr-export.disabled {
     opacity: 0.4;
     pointer-events: none;
   }
 
-  .dr-add svg {
-    width: 18px;
-    height: 18px;
-    display: block;
-  }
   .dr-add {
     border-radius: 999px;
   }

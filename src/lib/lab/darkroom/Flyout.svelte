@@ -1,10 +1,12 @@
 <script lang="ts">
   // A rail-anchored flyout panel: a floating card positioned just right of the
-  // left icon rail, with a title + close (✕) header and lightDismiss (Escape +
+  // left icon rail, with a title + close header and lightDismiss (Escape +
   // click-out). The `anchorTop` prop lets each opener line the flyout up near
   // its trigger. Content is a snippet.
   import type { Snippet } from 'svelte';
   import { lightDismiss } from '$lib/editor/light-dismiss';
+  import LabIcon from '$lib/lab/LabIcon.svelte';
+  import closeIcon from '$lib/lab/icons/close.svg?raw';
 
   interface Props {
     title: string;
@@ -51,15 +53,7 @@
       aria-label="Close"
       onclick={() => onClose()}
     >
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path
-          d="M6.5 6.5l11 11m0-11l-11 11"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.7"
-          stroke-linecap="round"
-        />
-      </svg>
+      <LabIcon svg={closeIcon} />
     </button>
   </header>
   <div class="dr-flyout-body">
@@ -128,11 +122,6 @@
   .dr-flyout-close:focus-visible {
     outline: 2px solid var(--dr-focus);
     outline-offset: 2px;
-  }
-  .dr-flyout-close svg {
-    width: 16px;
-    height: 16px;
-    display: block;
   }
 
   .dr-flyout-body {

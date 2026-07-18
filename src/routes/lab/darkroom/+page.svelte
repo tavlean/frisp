@@ -22,6 +22,8 @@
   import Inspector from '$lib/lab/darkroom/Inspector.svelte';
   import Filmstrip from '$lib/lab/darkroom/Filmstrip.svelte';
   import type { ThemeMode } from '$lib/lab/darkroom/ThemeToggle.svelte';
+  import LabIcon from '$lib/lab/LabIcon.svelte';
+  import closeIcon from '$lib/lab/icons/close.svg?raw';
   import { labSourceFile, rememberLabSource } from '$lib/lab/lab-source';
   import '$lib/editor/theme.css';
   import '$lib/lab/darkroom/darkroom.css';
@@ -354,7 +356,8 @@
                 class="dr-compare-clear"
                 onclick={() => session.setFormat(0, IDENTITY)}
               >
-                ✕ Stop comparing
+                <LabIcon svg={closeIcon} size={13} />
+                Stop comparing
               </button>
               <Inspector
                 side={0}

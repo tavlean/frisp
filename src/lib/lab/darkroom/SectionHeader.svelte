@@ -5,6 +5,11 @@
   // per-section visibility control onto Frisp's real per-section ENABLE state
   // (Resize / Reduce-palette). A disabled section reads dimmed; the caller keeps
   // `open` and `enabled` as bindable local/real state respectively.
+  import LabIcon from '$lib/lab/LabIcon.svelte';
+  import chevronDownIcon from '$lib/lab/icons/chevron-down.svg?raw';
+  import eyeIcon from '$lib/lab/icons/eye.svg?raw';
+  import eyeOffIcon from '$lib/lab/icons/eye-off.svg?raw';
+
   interface Props {
     label: string;
     /** When defined, renders the eye enable-toggle bound to this side's state. */
@@ -34,16 +39,7 @@
     onclick={() => onToggleOpen?.()}
   >
     <span class="dr-chevron" class:open>
-      <svg viewBox="0 0 10 10" aria-hidden="true">
-        <path
-          d="M2 3.5L5 6.5L8 3.5"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.5"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        />
-      </svg>
+      <LabIcon svg={chevronDownIcon} size={12} />
     </span>
     <span class="dr-section-title">{label}</span>
   </button>
@@ -61,35 +57,9 @@
       onclick={() => onToggleEnabled?.(!enabled)}
     >
       {#if enabled}
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path
-            d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.5"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
-          <circle
-            cx="12"
-            cy="12"
-            r="2.6"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.5"
-          />
-        </svg>
+        <LabIcon svg={eyeIcon} size={17} />
       {:else}
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path
-            d="M4 4L20 20M9.5 9.6A2.6 2.6 0 0 0 14.4 14.5M6.3 6.4C3.8 8 2.5 12 2.5 12S6 18.5 12 18.5c1.3 0 2.4-.3 3.5-.7M17.6 17.5C20.2 15.9 21.5 12 21.5 12S18 5.5 12 5.5c-.5 0-1 0-1.5.1"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.5"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
-        </svg>
+        <LabIcon svg={eyeOffIcon} size={17} />
       {/if}
     </button>
   {/if}
@@ -147,11 +117,6 @@
   .dr-chevron.open {
     transform: none;
   }
-  .dr-chevron svg {
-    width: 10px;
-    height: 10px;
-    display: block;
-  }
 
   .dr-eye {
     flex: none;
@@ -176,11 +141,6 @@
   }
   .dr-eye.on {
     color: var(--dr-text-1);
-  }
-  .dr-eye svg {
-    width: 17px;
-    height: 17px;
-    display: block;
   }
   .dr-eye:focus-visible {
     outline: 2px solid var(--dr-focus);

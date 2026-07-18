@@ -45,15 +45,6 @@
   --dr-good: light-dark(#1f9d63, #3ddc97);
   --dr-bad: light-dark(#d23a54, #ff7d92);
 
-  /* Chip cluster on the canvas (Output controls). */
-  --dr-canvas-chip: light-dark(#ffffff, rgba(0, 0, 0, 0.55));
-  --dr-canvas-chip-hover: light-dark(#f6f6f5, rgba(0, 0, 0, 0.7));
-  --dr-canvas-chip-ink: light-dark(#17171a, #ffffff);
-  --dr-canvas-chip-border: light-dark(
-    rgba(0, 0, 0, 0.08),
-    rgba(255, 255, 255, 0.14)
-  );
-
   --dr-shadow-panel: light-dark(
     0 1px 3px rgba(20, 20, 15, 0.05),
     0 0 0 rgba(0, 0, 0, 0)
@@ -79,6 +70,10 @@
   --fit-inset-right: 296px; /* 272px inspector + 12px margin + 12px gap */
   --fit-inset-top: 68px; /* top bar */
   --fit-inset-bottom: 88px; /* filmstrip */
+  /* Right end of the filmstrip reserved for the docked zoom/rotate controls
+     (Output's .controls, positioned below); the strip pads its content by this
+     so thumbnails never scroll under the cluster. */
+  --dr-dock-w: 316px;
   background: var(--dr-page);
 }
 
@@ -110,53 +105,57 @@
   background-color: light-dark(#ffffff, #0c0c0d) !important;
 }
 
-/* ── Output bottom controls → canvas chip cluster ──────────────────────────
-   Reference: small chips bottom-RIGHT. Re-skin the pill button-group into
-   individual-feeling chips and push the cluster to the right — but reserve the
-   inspector-dock width on the right (it floats above the canvas at a higher
-   stacking level, so a full-width flex-end would tuck the chips underneath it).
-   The cluster lands in the canvas area just left of the inspector, clear of the
-   filmstrip below. */
+/* ── Output bottom controls → docked into the filmstrip's right end ────────
+   Nothing floats over the image (spec). Output's .controls (two segmented
+   groups: zoom-out · zoom% · zoom-in · fit, then rotate · sliders) is pulled
+   out of the canvas and pinned over the filmstrip's reserved right gutter
+   (--dr-dock-w) — vertically centred in the 64px bar, above its panel
+   (z 21 → 23). Re-skinned from Output's glass pills to the darkroom's flat
+   panel chips. */
 .darkroom-root .controls {
+  left: auto;
+  right: 24px; /* 12px strip margin + 12px into the bar */
+  bottom: 28px; /* centre a 32px cluster in the bar (12 + (64-32)/2 + hairline) */
+  z-index: 23;
   justify-content: flex-end;
-  padding: 0 var(--fit-inset-right) 0 16px;
+  flex-wrap: nowrap;
+  padding: 0;
   gap: 8px;
-  bottom: 96px; /* clear the filmstrip */
 }
 
 .darkroom-root .button-group {
-  border-radius: 8px;
-  box-shadow: var(--dr-shadow-panel);
+  border-radius: 9px;
+  box-shadow: none;
   overflow: hidden;
 }
 
 .darkroom-root .button,
 .darkroom-root .zoom {
-  height: 28px;
-  background-color: var(--dr-canvas-chip);
+  height: 32px;
+  background-color: var(--dr-chip);
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
-  border-color: var(--dr-canvas-chip-border);
-  color: var(--dr-canvas-chip-ink);
+  border-color: var(--dr-border);
+  color: var(--dr-text-2);
   font-size: 0.95rem;
 }
 .darkroom-root .button:hover {
-  background: var(--dr-canvas-chip-hover);
-  color: var(--dr-canvas-chip-ink);
+  background: var(--dr-chip-hover);
+  color: var(--dr-text-1);
 }
 .darkroom-root .button.active {
-  background: var(--dr-canvas-chip-hover);
-  color: var(--dr-canvas-chip-ink);
+  background: var(--dr-chip-active);
+  color: var(--dr-text-1);
 }
 .darkroom-root .button:disabled:hover {
-  background-color: var(--dr-canvas-chip);
-  color: var(--dr-canvas-chip-ink);
+  background-color: var(--dr-chip);
+  color: var(--dr-text-2);
 }
 .darkroom-root .first-button {
-  border-radius: 8px 0 0 8px;
+  border-radius: 9px 0 0 9px;
 }
 .darkroom-root .last-button {
-  border-radius: 0 8px 8px 0;
+  border-radius: 0 9px 9px 0;
 }
 .darkroom-root .zoom {
   width: 5.5rem;
@@ -165,11 +164,11 @@
   color: var(--dr-text-2);
 }
 .darkroom-root .zoom-value {
-  color: var(--dr-canvas-chip-ink);
+  color: var(--dr-text-1);
   border-bottom-color: var(--dr-border-strong);
 }
 .darkroom-root input.zoom {
-  color: var(--dr-canvas-chip-ink);
+  color: var(--dr-text-1);
 }
 .darkroom-root .view-options-trigger.dirty::after {
   background: var(--dr-text-1);
@@ -297,6 +296,9 @@
 }
 .darkroom-root .dr-compare-clear {
   align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   margin: 0 6px;
   padding: 4px 8px;
   border-radius: 8px;
@@ -759,15 +761,11 @@
   .darkroom-root.compress {
     --fit-inset-right: 72px;
     --fit-inset-bottom: 20px;
+    /* Narrower bar → a tighter dock reserve (count chip is hidden here). */
+    --dr-dock-w: 300px;
   }
   .darkroom-root .dr-inspector-dock {
     bottom: 20px;
-  }
-  .darkroom-root .controls {
-    bottom: 20px;
-    /* The inspector still overlays from the right here (full 272px), so the
-       chips must clear its width even though the auto-fit inset shrank. */
-    padding: 0 296px 0 16px;
   }
 }
 
