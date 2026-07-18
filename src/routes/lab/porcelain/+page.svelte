@@ -13,16 +13,17 @@
   import { EditorSession } from '$lib/editor/editor-session.svelte';
   import { IDENTITY } from '$lib/compress';
   import type { ImportedFile } from '$lib/bulk/import-sources';
-  import TopBar from '$lib/lab/porcelain/TopBar.svelte';
+  import TopBar, { type ThemeMode } from '$lib/lab/porcelain/TopBar.svelte';
   import LeftPanel from '$lib/lab/porcelain/LeftPanel.svelte';
   import LabOptionsPanel from '$lib/lab/porcelain/LabOptionsPanel.svelte';
   import CropStage from '$lib/lab/crop/CropStage.svelte';
   import CropPanel from '$lib/lab/crop/CropPanel.svelte';
   import { CropTool } from '$lib/lab/crop/crop-tool.svelte';
   import type { CropSnapshot } from '$lib/lab/crop/crop-types';
-  import ThemeSwitch, {
-    type ThemeMode,
-  } from '$lib/lab/porcelain/ThemeSwitch.svelte';
+  import LabIcon from '$lib/lab/LabIcon.svelte';
+  import copyIcon from '$lib/lab/icons/copy.svg?raw';
+  import saveIcon from '$lib/lab/icons/save.svg?raw';
+  import importIcon from '$lib/lab/icons/import.svg?raw';
   import { labSourceFile, rememberLabSource } from '$lib/lab/lab-source';
   import '$lib/editor/theme.css';
   import '$lib/lab/porcelain/porcelain.css';
@@ -123,6 +124,12 @@
     cropSnapshot = null;
     rememberLabSource(first.file);
     pickFiles([first.file]);
+  }
+
+  // Theme cycle for the toolbar button: system → light → dark → system.
+  function cycleTheme() {
+    theme =
+      theme === 'system' ? 'light' : theme === 'light' ? 'dark' : 'system';
   }
 
   function onBrowse() {
@@ -236,6 +243,8 @@
         {isMac}
         oncrop={() => void openCrop()}
         cropDisabled={session.isVectorSource}
+        {theme}
+        onCycleTheme={cycleTheme}
       />
 
       {#if session.firstError}
@@ -257,25 +266,7 @@
               aria-label="Copy settings to left side"
               onclick={() => session.copyToOther(1)}
             >
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <rect
-                  x="9"
-                  y="9"
-                  width="11"
-                  height="11"
-                  rx="2.5"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.6"
-                />
-                <path
-                  d="M15 6.5A2.5 2.5 0 0 0 12.5 4H6.5A2.5 2.5 0 0 0 4 6.5v6A2.5 2.5 0 0 0 6.5 15"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.6"
-                  stroke-linecap="round"
-                />
-              </svg>
+              <LabIcon svg={copyIcon} size={18} />
             </button>
             <button
               type="button"
@@ -283,23 +274,7 @@
               aria-label="Save side settings"
               onclick={() => session.saveSide(1)}
             >
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path
-                  d="M5 5.5A1.5 1.5 0 0 1 6.5 4h9.3L20 8.2V18.5A1.5 1.5 0 0 1 18.5 20h-12A1.5 1.5 0 0 1 5 18.5z"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.6"
-                  stroke-linejoin="round"
-                />
-                <path
-                  d="M8 4v4.5h6.5M8.5 20v-5h7v5"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.6"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
-              </svg>
+              <LabIcon svg={saveIcon} size={18} />
             </button>
             <button
               type="button"
@@ -308,23 +283,7 @@
               disabled={!session.canImport[1]}
               onclick={() => session.importSide(1)}
             >
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path
-                  d="M12 4v10m0 0l4-4M12 14l-4-4"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.6"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
-                <path
-                  d="M5 16v2.5A1.5 1.5 0 0 0 6.5 20h11a1.5 1.5 0 0 0 1.5-1.5V16"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.6"
-                  stroke-linecap="round"
-                />
-              </svg>
+              <LabIcon svg={importIcon} size={18} />
             </button>
           </div>
         </header>
@@ -348,7 +307,6 @@
     {:else}
       <div class="dropzone">
         <div class="drop-card">
-          <span class="eyebrow">porcelain — lab</span>
           <p class="drop-title">Drop an image to start</p>
           <p class="drop-caption">
             Or browse for a file. Everything runs on the real pipeline — real
@@ -369,7 +327,6 @@
       onchange={onFileInputChange}
     />
 
-    <ThemeSwitch value={theme} onchange={(mode) => (theme = mode)} />
     <Snackbar />
   </div>
 {/if}
@@ -416,8 +373,14 @@
     }
   }
 
+  /* The left info panel is a content-height card, not a full-height column: it
+     hugs its content and only scrolls internally once it would pass the bottom
+     gutter. (Mobile restores the docked half-height sheet below.) */
   .panel-left {
     left: 16px;
+    bottom: auto;
+    height: fit-content;
+    max-height: calc(100dvh - 84px - 16px);
   }
 
   .panel-right {
@@ -467,11 +430,6 @@
       background-color 140ms ease,
       color 140ms ease,
       opacity 140ms ease;
-  }
-
-  .quiet-btn svg {
-    width: 18px;
-    height: 18px;
   }
 
   .quiet-btn:hover:not(:disabled) {
@@ -548,16 +506,8 @@
     }
   }
 
-  .eyebrow {
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.06em;
-    color: var(--pc-text-3);
-    text-transform: none;
-  }
-
   .drop-title {
-    margin: 2px 0 0;
+    margin: 0;
     font-size: 16px;
     font-weight: 600;
     color: var(--pc-text-1);
@@ -570,11 +520,14 @@
     color: var(--pc-text-2);
   }
 
+  /* The unreachable drop state's button uses the neutral panel-control look
+     (raised surface + hairline + soft shadow), matching FormatDropdown's
+     trigger — not a primary. */
   .browse-btn {
-    height: 38px;
+    height: 44px;
     padding: 0 18px;
     border: 1px solid var(--pc-border);
-    border-radius: 11px;
+    border-radius: 12px;
     background: var(--pc-raise);
     color: var(--pc-text-1);
     font: inherit;
@@ -582,20 +535,17 @@
     font-weight: 600;
     cursor: pointer;
     box-shadow: var(--pc-shadow-control);
-    transition:
-      border-color 140ms ease,
-      transform 140ms ease;
+    transition: border-color 140ms ease;
   }
   @supports (corner-shape: squircle) {
     .browse-btn {
       corner-shape: squircle;
-      border-radius: 13px;
+      border-radius: 14px;
     }
   }
 
   .browse-btn:hover {
     border-color: var(--pc-border-strong);
-    transform: translateY(-1px);
   }
 
   .browse-btn:focus-visible {
