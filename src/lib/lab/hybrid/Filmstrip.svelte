@@ -8,6 +8,10 @@
   // docked by hybrid.css. The page owns the gallery array + object-URL lifecycle;
   // this component only renders it. The trailing padding (--hy-dock-reserve) keeps
   // long thumbnail rows scrolling UNDER the docked cluster instead of colliding.
+  import LabIcon from '$lib/lab/LabIcon.svelte';
+  import closeIcon from '$lib/lab/icons/close.svg?raw';
+  import plusIcon from '$lib/lab/icons/plus.svg?raw';
+
   interface Entry {
     id: string;
     name: string;
@@ -50,15 +54,7 @@
           aria-label={`Remove ${entry.name}`}
           onclick={() => onRemove(entry.id)}
         >
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path
-              d="M7 7l10 10M17 7L7 17"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-            />
-          </svg>
+          <LabIcon svg={closeIcon} size={12} />
         </button>
       </div>
     {/each}
@@ -69,15 +65,7 @@
       aria-label="Add images"
       onclick={() => onAdd()}
     >
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path
-          d="M12 6v12M6 12h12"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.7"
-          stroke-linecap="round"
-        />
-      </svg>
+      <LabIcon svg={plusIcon} size={18} />
     </button>
 
     {#if entries.length === 1}
@@ -206,12 +194,6 @@
   .hy-thumb-remove:hover {
     color: var(--pc-text-1);
   }
-  .hy-thumb-remove svg {
-    width: 12px;
-    height: 12px;
-    display: block;
-  }
-
   .hy-thumb-add {
     flex: none;
     display: grid;
@@ -242,11 +224,6 @@
   .hy-thumb-add:focus-visible {
     outline: 2px solid var(--pc-focus);
     outline-offset: 2px;
-  }
-  .hy-thumb-add svg {
-    width: 18px;
-    height: 18px;
-    display: block;
   }
 
   .hy-hint {

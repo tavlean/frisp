@@ -6,6 +6,10 @@
   // shared attachment. Reads `--pc-*` tokens, which resolve under `.hybrid-root`.
   import { lightDismiss } from '$lib/editor/light-dismiss';
   import { IDENTITY, type SideFormat } from '$lib/compress';
+  import LabIcon from '$lib/lab/LabIcon.svelte';
+  import imageIcon from '$lib/lab/icons/image.svg?raw';
+  import chevronIcon from '$lib/lab/icons/chevron-down.svg?raw';
+  import checkIcon from '$lib/lab/icons/check.svg?raw';
 
   interface FormatOption {
     id: string;
@@ -61,45 +65,9 @@
     aria-haspopup="listbox"
     aria-expanded={open}
   >
-    <svg class="lead" viewBox="0 0 24 24" aria-hidden="true">
-      <rect
-        x="3.5"
-        y="4.5"
-        width="17"
-        height="15"
-        rx="2.5"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="1.6"
-      />
-      <circle
-        cx="9"
-        cy="10"
-        r="1.6"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="1.5"
-      />
-      <path
-        d="M4.5 17.5l4.8-4.4 3.4 3 3-2.4 4 3.8"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="1.6"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-      />
-    </svg>
+    <span class="lead"><LabIcon svg={imageIcon} size={20} /></span>
     <span class="label">{currentLabel}</span>
-    <svg class="chev" viewBox="0 0 24 24" aria-hidden="true">
-      <path
-        d="M6 9l6 6 6-6"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="1.8"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-      />
-    </svg>
+    <span class="chev"><LabIcon svg={chevronIcon} size={16} /></span>
   </button>
 
   {#if open}
@@ -114,16 +82,7 @@
       >
         <span class="opt-label">Original Image</span>
         {#if value === IDENTITY}
-          <svg class="check" viewBox="0 0 24 24" aria-hidden="true">
-            <path
-              d="M5 12.5l4.2 4.2L19 7"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-          </svg>
+          <span class="check"><LabIcon svg={checkIcon} size={16} /></span>
         {/if}
       </button>
       {#each formats as format (format.id)}
@@ -139,16 +98,7 @@
           <span class="opt-label">{format.label}</span>
           <span class="ext">{format.ext.toUpperCase()}</span>
           {#if value === format.id}
-            <svg class="check" viewBox="0 0 24 24" aria-hidden="true">
-              <path
-                d="M5 12.5l4.2 4.2L19 7"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              />
-            </svg>
+            <span class="check"><LabIcon svg={checkIcon} size={16} /></span>
           {/if}
         </button>
       {/each}
@@ -198,8 +148,7 @@
 
   .lead {
     flex: none;
-    width: 20px;
-    height: 20px;
+    display: inline-flex;
     color: var(--pc-text-2);
   }
 
@@ -214,8 +163,7 @@
 
   .chev {
     flex: none;
-    width: 18px;
-    height: 18px;
+    display: inline-flex;
     color: var(--pc-text-3);
   }
 
@@ -296,8 +244,7 @@
 
   .check {
     flex: none;
-    width: 16px;
-    height: 16px;
+    display: inline-flex;
     color: var(--pc-text-1);
   }
 </style>

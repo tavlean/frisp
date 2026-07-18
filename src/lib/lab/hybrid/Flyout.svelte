@@ -6,6 +6,8 @@
   // squircle corners.
   import type { Snippet } from 'svelte';
   import { lightDismiss } from '$lib/editor/light-dismiss';
+  import LabIcon from '$lib/lab/LabIcon.svelte';
+  import closeIcon from '$lib/lab/icons/close.svg?raw';
 
   interface Props {
     title: string;
@@ -51,15 +53,7 @@
       aria-label="Close"
       onclick={() => onClose()}
     >
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path
-          d="M6.5 6.5l11 11m0-11l-11 11"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.7"
-          stroke-linecap="round"
-        />
-      </svg>
+      <LabIcon svg={closeIcon} size={16} />
     </button>
   </header>
   <div class="hy-flyout-body">
@@ -133,12 +127,6 @@
     outline: 2px solid var(--pc-focus);
     outline-offset: 2px;
   }
-  .hy-flyout-close svg {
-    width: 16px;
-    height: 16px;
-    display: block;
-  }
-
   .hy-flyout-body {
     flex: 1;
     min-height: 0;

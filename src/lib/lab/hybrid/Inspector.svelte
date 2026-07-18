@@ -19,6 +19,8 @@
   import Results from '$lib/editor/Results.svelte';
   import SectionHeader from './SectionHeader.svelte';
   import FormatDropdown from './FormatDropdown.svelte';
+  import LabIcon from '$lib/lab/LabIcon.svelte';
+  import moreIcon from '$lib/lab/icons/more.svg?raw';
   import { lightDismiss } from '$lib/editor/light-dismiss';
   import {
     IDENTITY,
@@ -133,11 +135,7 @@
           bind:this={menuBtn}
           onclick={() => (menuOpen = !menuOpen)}
         >
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <circle cx="5" cy="12" r="1.6" fill="currentColor" />
-            <circle cx="12" cy="12" r="1.6" fill="currentColor" />
-            <circle cx="19" cy="12" r="1.6" fill="currentColor" />
-          </svg>
+          <LabIcon svg={moreIcon} size={18} />
         </button>
         {#if menuOpen}
           <div class="hy-menu" role="menu">
@@ -344,10 +342,6 @@
       corner-shape: squircle;
       border-radius: 10px;
     }
-  }
-  .hy-quiet-btn svg {
-    width: 18px;
-    height: 18px;
   }
   .hy-quiet-btn:hover,
   .hy-quiet-btn.active {

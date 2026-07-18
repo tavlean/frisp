@@ -5,11 +5,18 @@
   // near-black kbd tooltips). All wiring is real: nav "Diagnostics" resolves to
   // the production route, Undo/Redo drive session history, Export downloads the
   // RIGHT side's encoded result (spinner while it's mid-encode, copied from
-  // porcelain's TopBar), and "+" adds images to the session strip.
+  // porcelain's TopBar), and "+" adds images to the session strip. The right side
+  // is ONE pill — undo · redo · add · Export — with Export the single filled
+  // primary at its end.
   import { resolve } from '$app/paths';
   import { APP_NAME } from 'shared/brand';
   import type { EditorSession } from '$lib/editor/editor-session.svelte';
   import Logomark from '$lib/lab/Logomark.svelte';
+  import LabIcon from '$lib/lab/LabIcon.svelte';
+  import undoIcon from '$lib/lab/icons/undo.svg?raw';
+  import redoIcon from '$lib/lab/icons/redo.svg?raw';
+  import plusIcon from '$lib/lab/icons/plus.svg?raw';
+  import exportIcon from '$lib/lab/icons/export.svg?raw';
 
   interface Props {
     session: EditorSession;
@@ -42,110 +49,73 @@
     </nav>
   </div>
 
-  <div class="hy-actions">
-    <div class="hy-pill hy-icon-pair">
-      <div class="hy-tip-wrap">
-        <button
-          type="button"
-          class="hy-icon-btn"
-          onclick={() => session.undo()}
-          disabled={!session.history.canUndo}
-          aria-label="Undo"
-        >
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path
-              d="M9 14L4 9l5-5M4 9h10.5a5.5 5.5 0 0 1 0 11H9"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.7"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-          </svg>
-        </button>
-        <span class="hy-tooltip" role="tooltip">
-          <span class="hy-tip-label">Undo</span><span class="hy-tip-kbd"
-            >{undoKbd}</span
-          >
-        </span>
-      </div>
-
-      <div class="hy-tip-wrap">
-        <button
-          type="button"
-          class="hy-icon-btn"
-          onclick={() => session.redo()}
-          disabled={!session.history.canRedo}
-          aria-label="Redo"
-        >
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path
-              d="M15 14l5-5-5-5M20 9H9.5a5.5 5.5 0 0 0 0 11H15"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.7"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-          </svg>
-        </button>
-        <span class="hy-tooltip" role="tooltip">
-          <span class="hy-tip-label">Redo</span><span class="hy-tip-kbd"
-            >{redoKbd}</span
-          >
-        </span>
-      </div>
-    </div>
-
-    <div class="hy-pill hy-export-pill">
-      <a
-        class="hy-export"
-        class:disabled={exportDisabled}
-        href={exportDisabled ? undefined : exportUrl}
-        download={exportDisabled ? undefined : exportName}
-        aria-disabled={exportDisabled}
+  <div class="hy-pill hy-actions">
+    <div class="hy-tip-wrap">
+      <button
+        type="button"
+        class="hy-icon-btn"
+        onclick={() => session.undo()}
+        disabled={!session.history.canUndo}
+        aria-label="Undo"
       >
-        {#if exporting}
-          <span class="hy-spinner" aria-hidden="true"></span>
-        {:else}
-          <svg class="hy-export-icon" viewBox="0 0 24 24" aria-hidden="true">
-            <path
-              d="M12 3v10.5m0 0l4-4M12 13.5l-4-4M5 16v3h14v-3"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.7"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-          </svg>
-        {/if}
-        <span class="hy-export-text">Export</span>
-      </a>
+        <LabIcon svg={undoIcon} size={18} />
+      </button>
+      <span class="hy-tooltip" role="tooltip">
+        <span class="hy-tip-label">Undo</span><span class="hy-tip-kbd"
+          >{undoKbd}</span
+        >
+      </span>
     </div>
 
-    <div class="hy-pill hy-add-pill">
-      <div class="hy-tip-wrap">
-        <button
-          type="button"
-          class="hy-icon-btn hy-add"
-          aria-label="Add images"
-          onclick={() => onAddImages()}
+    <div class="hy-tip-wrap">
+      <button
+        type="button"
+        class="hy-icon-btn"
+        onclick={() => session.redo()}
+        disabled={!session.history.canRedo}
+        aria-label="Redo"
+      >
+        <LabIcon svg={redoIcon} size={18} />
+      </button>
+      <span class="hy-tooltip" role="tooltip">
+        <span class="hy-tip-label">Redo</span><span class="hy-tip-kbd"
+          >{redoKbd}</span
         >
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path
-              d="M12 5.5v13M5.5 12h13"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.8"
-              stroke-linecap="round"
-            />
-          </svg>
-        </button>
-        <span class="hy-tooltip" role="tooltip">
-          <span class="hy-tip-label">Add images</span>
-        </span>
-      </div>
+      </span>
     </div>
+
+    <div class="hy-tip-wrap">
+      <button
+        type="button"
+        class="hy-icon-btn"
+        aria-label="Add images"
+        onclick={() => onAddImages()}
+      >
+        <LabIcon svg={plusIcon} size={18} />
+      </button>
+      <span class="hy-tooltip" role="tooltip">
+        <span class="hy-tip-label">Add images</span>
+      </span>
+    </div>
+
+    <span class="hy-divider" aria-hidden="true"></span>
+
+    <a
+      class="hy-export"
+      class:disabled={exportDisabled}
+      href={exportDisabled ? undefined : exportUrl}
+      download={exportDisabled ? undefined : exportName}
+      aria-disabled={exportDisabled}
+    >
+      {#if exporting}
+        <span class="hy-spinner" aria-hidden="true"></span>
+      {:else}
+        <span class="hy-export-icon"
+          ><LabIcon svg={exportIcon} size={16} /></span
+        >
+      {/if}
+      <span class="hy-export-text">Export</span>
+    </a>
   </div>
 </header>
 
@@ -230,16 +200,11 @@
     border-radius: 4px;
   }
 
-  /* ── Right: action pills ─────────────────────────────────────────────── */
+  /* ── Right: ONE action pill (undo · redo · add · Export) ──────────────── */
   .hy-actions {
     display: flex;
     align-items: center;
-    gap: 8px;
-  }
-
-  .hy-pill {
-    display: flex;
-    align-items: center;
+    gap: 4px;
     height: var(--hy-topbar-h);
     padding: 0 7px;
     background: var(--pc-surface);
@@ -248,14 +213,10 @@
     box-shadow: var(--pc-shadow-panel);
   }
   @supports (corner-shape: squircle) {
-    .hy-pill {
+    .hy-actions {
       corner-shape: squircle;
       border-radius: 20px;
     }
-  }
-
-  .hy-icon-pair {
-    gap: 4px;
   }
 
   .hy-icon-btn {
@@ -280,10 +241,6 @@
       border-radius: 13px;
     }
   }
-  .hy-icon-btn svg {
-    width: 20px;
-    height: 20px;
-  }
   .hy-icon-btn:hover:not(:disabled) {
     background: var(--pc-inset);
   }
@@ -296,9 +253,13 @@
     outline-offset: 2px;
   }
 
-  .hy-add svg {
-    width: 22px;
+  /* Hairline separating the quiet actions from the Export primary. */
+  .hy-divider {
+    flex: none;
+    width: 1px;
     height: 22px;
+    margin: 0 3px;
+    background: var(--pc-border);
   }
 
   /* Pure-CSS near-black tooltip below the control (kbd right-aligned). */
@@ -339,9 +300,6 @@
   }
 
   /* ── Export: porcelain neutral primary ───────────────────────────────── */
-  .hy-export-pill {
-    padding: 0 7px;
-  }
   .hy-export {
     display: inline-flex;
     align-items: center;
@@ -379,8 +337,7 @@
     outline-offset: 2px;
   }
   .hy-export-icon {
-    width: 17px;
-    height: 17px;
+    display: inline-flex;
   }
 
   .hy-spinner {

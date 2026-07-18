@@ -24,6 +24,8 @@
   import Flyout from '$lib/lab/hybrid/Flyout.svelte';
   import Inspector from '$lib/lab/hybrid/Inspector.svelte';
   import Filmstrip from '$lib/lab/hybrid/Filmstrip.svelte';
+  import LabIcon from '$lib/lab/LabIcon.svelte';
+  import closeIcon from '$lib/lab/icons/close.svg?raw';
   import type { ThemeMode } from '$lib/lab/hybrid/ThemeToggle.svelte';
   import { labSourceFile, rememberLabSource } from '$lib/lab/lab-source';
   import '$lib/editor/theme.css';
@@ -341,7 +343,10 @@
                 class="hy-compare-clear"
                 onclick={() => session.setFormat(0, IDENTITY)}
               >
-                ✕ Compare — {session.availableFormats.find(
+                <span class="hy-compare-clear-x" aria-hidden="true"
+                  ><LabIcon svg={closeIcon} size={14} /></span
+                >
+                Compare — {session.availableFormats.find(
                   (f) => f.id === session.sides[0].format,
                 )?.label ?? ''}
               </button>
@@ -539,6 +544,9 @@
   }
 
   .hy-compare-clear {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
     align-self: flex-start;
     margin: 0 6px;
     padding: 6px 10px;
@@ -558,6 +566,11 @@
     transition:
       color 140ms ease,
       background-color 140ms ease;
+  }
+  .hy-compare-clear-x {
+    flex: none;
+    display: inline-flex;
+    color: var(--pc-text-3);
   }
   .hy-compare-clear:hover {
     color: var(--pc-text-1);

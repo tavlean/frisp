@@ -5,6 +5,11 @@
   // visibility control onto Frisp's real enable state. A disabled section reads
   // dimmed. Porcelain skin: sentence-case 13px semibold label, thin-stroke glyphs,
   // inset hover on the eye. Caller owns `open` (local UI) and `enabled` (real).
+  import LabIcon from '$lib/lab/LabIcon.svelte';
+  import chevronIcon from '$lib/lab/icons/chevron-down.svg?raw';
+  import eyeIcon from '$lib/lab/icons/eye.svg?raw';
+  import eyeOffIcon from '$lib/lab/icons/eye-off.svg?raw';
+
   interface Props {
     label: string;
     /** When defined, the eye enable-toggle is bound to this side's state. */
@@ -34,16 +39,7 @@
     onclick={() => onToggleOpen?.()}
   >
     <span class="hy-chevron" class:open>
-      <svg viewBox="0 0 10 10" aria-hidden="true">
-        <path
-          d="M2 3.5L5 6.5L8 3.5"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.5"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        />
-      </svg>
+      <LabIcon svg={chevronIcon} size={12} />
     </span>
     <span class="hy-section-title">{label}</span>
   </button>
@@ -60,37 +56,7 @@
       aria-label={enabled ? `Disable ${label}` : `Enable ${label}`}
       onclick={() => onToggleEnabled?.(!enabled)}
     >
-      {#if enabled}
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path
-            d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.5"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
-          <circle
-            cx="12"
-            cy="12"
-            r="2.6"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.5"
-          />
-        </svg>
-      {:else}
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path
-            d="M4 4L20 20M9.5 9.6A2.6 2.6 0 0 0 14.4 14.5M6.3 6.4C3.8 8 2.5 12 2.5 12S6 18.5 12 18.5c1.3 0 2.4-.3 3.5-.7M17.6 17.5C20.2 15.9 21.5 12 21.5 12S18 5.5 12 5.5c-.5 0-1 0-1.5.1"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.5"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
-        </svg>
-      {/if}
+      <LabIcon svg={enabled ? eyeIcon : eyeOffIcon} size={17} />
     </button>
   {/if}
 </div>
@@ -152,11 +118,6 @@
   .hy-chevron.open {
     transform: none;
   }
-  .hy-chevron svg {
-    width: 10px;
-    height: 10px;
-    display: block;
-  }
 
   .hy-eye {
     flex: none;
@@ -185,11 +146,6 @@
   }
   .hy-eye.on {
     color: var(--pc-text-1);
-  }
-  .hy-eye svg {
-    width: 17px;
-    height: 17px;
-    display: block;
   }
   .hy-eye:focus-visible {
     outline: 2px solid var(--pc-focus);
