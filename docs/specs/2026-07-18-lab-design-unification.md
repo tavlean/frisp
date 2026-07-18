@@ -36,11 +36,16 @@ the auto-loaded sample image (see WORKLOG entry).
    (add image / zoom in), `minus` (zoom out), `fit` (fit-to-screen / reset
    view), `export` (Export CTA), `save` (save side settings), `copy` (copy
    settings to other side), `import` (import saved side settings), `info`
-   (image info), `compare` (second side / split view), `theme` (theme
-   cycle), `eye` / `eye-off` (section enable, keep-original), `close`
-   (dismiss/clear), `chevron-down` / `chevron-right` (dropdowns,
+   (image info), `compare` (second side / split view), `sun-moon` / `sun` /
+   `moon` (theme cycle), `eye` / `eye-off` (section enable, keep-original),
+   `close` (dismiss/clear), `chevron-down` / `chevron-right` (dropdowns,
    disclosures), `image` (format dropdown), `remove` (trash/remove from
    batch), `check` (selected menu item), `more` (overflow menu).
+
+   **Theme cycle button (maintainer decision 2026-07-18):** there is no
+   `theme.svg`. The button shows the CURRENT mode's glyph — `sun-moon.svg`
+   while following the system, `sun.svg` when forced light, `moon.svg` when
+   forced dark.
 
 2. **One island style per skin.** Within a skin, every floating surface
    (toolbar, panel, docked bar) uses the same background, border, radius and
@@ -52,10 +57,11 @@ the auto-loaded sample image (see WORKLOG entry).
 4. **Nothing floats over the canvas image.** Zoom/rotate/view clusters dock
    into a bar (top toolbar or bottom strip), never hover mid-image.
 
-5. **Theme control.** One icon button (`theme.svg`) cycling
-   system → light → dark, with an `aria-label` + tooltip naming the current
-   mode. No segmented three-way switches; no "<skin> lab" caption (the lab
-   tab bar already names the experiment).
+5. **Theme control.** One icon button cycling system → light → dark, its
+   glyph showing the current mode (`sun-moon` / `sun` / `moon` — see the
+   map above), with an `aria-label` + tooltip naming the current mode. No
+   segmented three-way switches; no "<skin> lab" caption (the lab tab bar
+   already names the experiment).
 
 6. **A11y + themes.** Keep every existing `aria-label`/`aria-current`,
    keyboard handler and focus-visible outline. Verify BOTH color schemes —
@@ -95,7 +101,7 @@ the auto-loaded sample image (see WORKLOG entry).
   undo/redo (currently near-invisible).
 - Rail: swap glyphs for set icons (`back`, `info`, `compare`; bottom:
   `fit` for reset-view if that's the ↺ semantics — read the handler — and
-  `theme`).
+  the theme cycle glyphs per the map above).
 - Inspector/chips/menus: set icons for chevrons, `more`, `check`, eye
   toggles, filmstrip `plus`/`close`.
 
