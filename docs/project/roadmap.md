@@ -1,6 +1,6 @@
 # Roadmap
 
-Last updated: 2026-08-08.
+Last updated: 2026-11-02.
 
 The plan and its status, highest priority first. Product direction and
 engineering tracks in one list, because they compete for the same time.
@@ -23,6 +23,12 @@ engineering tracks in one list, because they compete for the same time.
 
 ## Now
 
+- [ ] **Decide on the 2026-11-02 first-principles review.** It found six
+      code-confirmed paths (and one likely) where the saved file disagrees with
+      what the user asked for, and proposes trust fixes ahead of every track
+      below, then a reordering of this roadmap. Seven decisions wait on the
+      maintainer.
+      [reports/2026-11-02-first-principles-review.md](reports/2026-11-02-first-principles-review.md)
 - [ ] **SVG benchmark (stage S8).** The competitive comparison against nano and
       ImageOptim over the stratified corpus in `benchmarks/svg/`. Everything else
       in the SVG track shipped on 2026-07-12. The protocol is self-contained in
