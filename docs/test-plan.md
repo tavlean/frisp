@@ -67,15 +67,14 @@ by hand.
 
 1. **Decoder-input matrix.** E2E mostly starts from browser-native JPEG/PNG;
    add AVIF/WebP/JXL/QOI input fixtures where WASM decode paths matter.
-2. **SVG/vector path.** SVG import and future vector optimization need a stable
-   browser smoke.
-3. **Error paths.** Corrupt/unsupported imports, encoder throws, and bulk
+2. **Error paths.** Corrupt/unsupported imports, encoder throws, and bulk
    partial-failure/retry flows need automated coverage.
-4. **Single-image helper extraction.** Some editor-session parsing, snapshot,
+3. **Single-image helper extraction.** Some editor-session parsing, snapshot,
    and object-URL lifecycle logic still lives behind Svelte state and should be
    extracted before broad unit testing.
-5. **Result cache/history units.** `ResultCache` and `EditorHistory` are high ROI
-   for unit coverage because they protect undo, redo, pinning, and URL cleanup.
+4. **History units.** `EditorHistory` has no unit tests; it protects undo and
+   redo. (`ResultCache` gained its tests on 2026-08-08, and the SVG lane is
+   covered by `tests/e2e/svg.spec.ts` and the export-contract suite.)
 
 ---
 
@@ -154,8 +153,6 @@ Add tests using the existing Playwright patterns:
 
 - **Decoder-input matrix:** import `.jxl`, `.qoi`, `.avif`, and `.webp` fixtures
   as applicable, then assert dimensions and non-garbage output.
-- **SVG import smoke:** import an SVG, rasterize, encode, and assert a valid
-  output.
 - **Unsupported/corrupt file:** assert a user-facing failure and no app crash.
 - **Object-URL lifecycle:** assert eviction/clear paths revoke URLs and pinned
   displayed results survive while visible.
