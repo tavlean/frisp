@@ -200,6 +200,14 @@
     "cache": "precache"
   },
   {
+    "logicalKey": "ssimulacra2:metric:default",
+    "codec": "ssimulacra2",
+    "role": "metric",
+    "variant": "default",
+    "path": "codecs/ssimulacra2/ssimulacra2.wasm",
+    "cache": "precache"
+  },
+  {
     "logicalKey": "rotate:preprocessor:default",
     "codec": "rotate",
     "role": "preprocessor",

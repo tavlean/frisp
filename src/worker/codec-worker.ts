@@ -48,6 +48,9 @@ import initHqxWasm, {
 } from 'app-generated/codecs/hqx/pkg/squooshhqx';
 import { createRotate } from 'features/preprocessors/rotate/worker/runtime';
 import type { Options as RotateOptions } from 'features/preprocessors/rotate/shared/meta';
+import type { Ssimulacra2Module } from 'codecs/ssimulacra2/ssimulacra2';
+import ssimulacra2 from 'app-generated/codecs/ssimulacra2/ssimulacra2';
+import { initEmscriptenModule } from 'features/worker-utils';
 
 export interface AvifWasmUrls {
   decoder: string;
@@ -105,6 +108,10 @@ export interface RotateWasmUrls {
   preprocessor: string;
 }
 
+export interface Ssimulacra2WasmUrls {
+  metric: string;
+}
+
 // Threaded (Emscripten pthread) codec glue URLs, stashed by locateCodecWasm so
 // the runtimes' loadMultiThread closures can dynamically import the right glue
 // and hand it to the pthread workers as mainScriptUrlOrBlob. Undefined until a
@@ -120,6 +127,7 @@ function locateCodecWasm({
   jxl,
   mozjpeg,
   qoi,
+  ssimulacra2,
   webp,
 }: {
   avif?: AvifWasmUrls;
@@ -128,6 +136,7 @@ function locateCodecWasm({
   jxl?: JxlWasmUrls;
   mozjpeg?: MozjpegWasmUrls;
   qoi?: QoiWasmUrls;
+  ssimulacra2?: Ssimulacra2WasmUrls;
   webp?: WebpWasmUrls;
 }): void {
   avifMtScriptUrl = avif?.encoderMtScript;
@@ -153,6 +162,7 @@ function locateCodecWasm({
     if (path === 'mozjpeg_enc.wasm') return mozjpeg?.encoder ?? path;
     if (path === 'jpegli_enc.wasm') return jpegli?.encoder ?? path;
     if (path === 'imagequant.wasm') return imagequant?.processor ?? path;
+    if (path === 'ssimulacra2.wasm') return ssimulacra2?.metric ?? path;
     return path;
   };
 }
@@ -253,6 +263,7 @@ const resize = createResize({
   wasmResize,
 });
 let rotate: ReturnType<typeof createRotate> | undefined;
+let ssimulacra2Module: Promise<Ssimulacra2Module> | undefined;
 
 function rotateWith(wasmUrls: RotateWasmUrls): ReturnType<typeof createRotate> {
   rotate ??= createRotate(wasmUrls.preprocessor);
@@ -383,6 +394,24 @@ const workerApi = {
     wasmUrls: RotateWasmUrls,
   ): Promise<ImageData> {
     return transferImage(rotateWith(wasmUrls)(data, options));
+  },
+  // Nothing is transferred either way: the inputs arrive as structured-clone
+  // copies, so the caller keeps its own (often the cached decoded source), and
+  // a number has no buffer.
+  async ssimulacra2Score(
+    ref: ImageData,
+    dist: ImageData,
+    wasmUrls: Ssimulacra2WasmUrls,
+  ): Promise<number> {
+    if (ref.width !== dist.width || ref.height !== dist.height) {
+      throw new Error(
+        `SSIMULACRA2 needs equal dimensions, got ${ref.width}x${ref.height} and ${dist.width}x${dist.height}.`,
+      );
+    }
+    locateCodecWasm({ ssimulacra2: wasmUrls });
+    ssimulacra2Module ??= initEmscriptenModule(ssimulacra2);
+    const module = await ssimulacra2Module;
+    return module.score(ref.data, dist.data, ref.width, ref.height);
   },
 };
 

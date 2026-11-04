@@ -23,6 +23,7 @@ import { jpegliEncoderWasmUrl } from './jpegli';
 import { mozjpegEncoderWasmUrl } from './mozjpeg';
 import { oxipngMtWasmUrl, oxipngWasmUrl } from './oxipng';
 import { qoiDecoderWasmUrl, qoiEncoderWasmUrl } from './qoi';
+import { ssimulacra2WasmUrl } from './ssimulacra2';
 import {
   webpDecoderWasmUrl,
   webpEncoderSimdWasmUrl,
@@ -51,6 +52,7 @@ const serviceWorkerAssetUrlEntries = [
   ['codecs/qoi/dec/qoi_dec.wasm', qoiDecoderWasmUrl],
   ['codecs/qoi/enc/qoi_enc.wasm', qoiEncoderWasmUrl],
   ['codecs/resize/pkg/squoosh_resize_bg.wasm', resizeWasmUrl],
+  ['codecs/ssimulacra2/ssimulacra2.wasm', ssimulacra2WasmUrl],
   ['codecs/webp/dec/webp_dec.wasm', webpDecoderWasmUrl],
   ['codecs/webp/enc/webp_enc.wasm', webpEncoderWasmUrl],
   ['codecs/webp/enc/webp_enc_simd.wasm', webpEncoderSimdWasmUrl],

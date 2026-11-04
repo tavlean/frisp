@@ -14,11 +14,13 @@ export type CodecAssetCodec =
   | 'qoi'
   | 'resize'
   | 'rotate'
+  | 'ssimulacra2'
   | 'webp';
 
 export type CodecAssetRole =
   | 'decoder'
   | 'encoder'
+  | 'metric'
   | 'processor'
   | 'preprocessor'
   | 'worker-helper';

@@ -41,6 +41,10 @@ import {
   imagequantWasmUrl,
 } from 'shared/codec-assets/imagequant';
 import {
+  ssimulacra2CodecAssetUrls,
+  ssimulacra2WasmUrl,
+} from 'shared/codec-assets/ssimulacra2';
+import {
   hqxWasmUrl,
   resizeCodecAssetUrls,
   resizeWasmUrl,
@@ -80,6 +84,8 @@ export {
   rotateWasmUrl,
   precacheCodecAssetRecords,
   precacheCodecAssetUrls,
+  ssimulacra2CodecAssetUrls,
+  ssimulacra2WasmUrl,
   svelteKitFeaturesWorkerUrl,
   svelteKitCodecAssetRecords,
   webpCodecAssetUrls,

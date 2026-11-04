@@ -82,6 +82,7 @@ const codecAssetUrlImportPaths = (
       'qoi.ts',
       'resize.ts',
       'rotate.ts',
+      'ssimulacra2.ts',
       'webp.ts',
     ].map((file) =>
       readFile(join(root, 'src', 'shared', 'codec-assets', file), 'utf8'),
@@ -173,6 +174,9 @@ const resizeWasmAssets = files
 const hqxWasmAssets = files
   .filter((file) => file.includes('squooshhqx_bg') && file.endsWith('.wasm'))
   .sort();
+const ssimulacra2WasmAssets = files
+  .filter((file) => file.includes('ssimulacra2') && file.endsWith('.wasm'))
+  .sort();
 const wasmAsset = files.find(
   (file) =>
     file.includes('/webp_enc.') &&
@@ -226,6 +230,9 @@ const resizeWasmAsset = files.find(
 );
 const hqxWasmAsset = files.find(
   (file) => file.includes('/squooshhqx_bg.') && file.endsWith('.wasm'),
+);
+const ssimulacra2WasmAsset = files.find(
+  (file) => file.includes('/ssimulacra2.') && file.endsWith('.wasm'),
 );
 // The service-worker build must not re-emit worker chunks of its own (it
 // used to import `?worker&url` modules, duplicating the app's worker chunks
@@ -315,6 +322,7 @@ const physicalWasmGroups = [
   ['imagequant:processor:default', imagequantWasmAssets],
   ['resize:processor:default', resizeWasmAssets],
   ['hqx:processor:hqx', hqxWasmAssets],
+  ['ssimulacra2:metric:default', ssimulacra2WasmAssets],
 ];
 
 assert(files.includes('index.html'), 'Missing static index.html output.');
@@ -346,6 +354,7 @@ assert(oxipngWasmAsset, 'Missing emitted OxiPNG WASM asset.');
 assert(imagequantWasmAsset, 'Missing emitted ImageQuant WASM asset.');
 assert(resizeWasmAsset, 'Missing emitted resize WASM asset.');
 assert(hqxWasmAsset, 'Missing emitted HQX WASM asset.');
+assert(ssimulacra2WasmAsset, 'Missing emitted SSIMULACRA2 WASM asset.');
 assert(
   baselineWasmAssets.length === 1,
   `Expected exactly one baseline WebP WASM asset after the generated wrapper patch, found ${baselineWasmAssets.length}.`,
@@ -417,6 +426,10 @@ assert(
 assert(
   hqxWasmAssets.length === 1,
   `Expected exactly one HQX WASM asset after the generated wrapper patch, found ${hqxWasmAssets.length}.`,
+);
+assert(
+  ssimulacra2WasmAssets.length === 1,
+  `Expected exactly one SSIMULACRA2 WASM asset after the generated wrapper patch, found ${ssimulacra2WasmAssets.length}.`,
 );
 assert(
   serviceWorkerDuplicateWorkerAssets.length === 0,
@@ -573,6 +586,10 @@ assert(
   `Service-worker build manifest does not include ${hqxWasmAsset}.`,
 );
 assert(
+  serviceWorker.includes(ssimulacra2WasmAsset),
+  `Service-worker build manifest does not include ${ssimulacra2WasmAsset}.`,
+);
+assert(
   serviceWorker.includes('avif:encoder:multi-thread'),
   'Service worker does not carry the codec-asset logical records for variant-aware precache.',
 );
@@ -698,6 +715,7 @@ console.log(
     `ImageQuant WASM asset: ${imagequantWasmAsset}`,
     `Resize WASM asset: ${resizeWasmAsset}`,
     `HQX WASM asset: ${hqxWasmAsset}`,
+    `SSIMULACRA2 WASM asset: ${ssimulacra2WasmAsset}`,
     `Codec asset JSON records: ${expectedLogicalAssetKeys.length}`,
     `Physical WASM groups: ${physicalWasmGroups
       .map(([logicalKey, assets]) => `${logicalKey}=${assets.length}`)
@@ -738,6 +756,8 @@ console.log(
     ...resizeWasmAssets.map((asset) => `  - ${asset}`),
     `HQX WASM copies: ${hqxWasmAssets.length}`,
     ...hqxWasmAssets.map((asset) => `  - ${asset}`),
+    `SSIMULACRA2 WASM copies: ${ssimulacra2WasmAssets.length}`,
+    ...ssimulacra2WasmAssets.map((asset) => `  - ${asset}`),
     `OxiPNG parallel worker helper assets: ${workerHelperAssets.length}`,
     ...workerHelperAssets.map((asset) => `  - ${asset}`),
     `App codec worker asset: ${immutableFeaturesWorkerAsset}`,

@@ -21,6 +21,7 @@ import type {
   QoiWasmUrls,
   ResizeWasmUrls,
   RotateWasmUrls,
+  Ssimulacra2WasmUrls,
   WebpWasmUrls,
 } from '../worker/codec-worker';
 import {
@@ -45,6 +46,7 @@ const methodNames = [
   'quantize',
   'resize',
   'oxipngEncode',
+  'ssimulacra2Score',
 ] as const;
 
 export interface SvelteKitWorkerBridgeApi {
@@ -115,6 +117,17 @@ export interface SvelteKitWorkerBridgeApi {
     imageData: ImageData,
     options: WorkerResizeOptions,
   ): Promise<ImageData>;
+  /**
+   * The SSIMULACRA2 score of `dist` against `ref` (100 identical, 90 visually
+   * lossless, -1000 when a side is under 8 px). Rejects on a dimension
+   * mismatch. Both images are copied to the worker, never transferred, so the
+   * caller keeps using them.
+   */
+  ssimulacra2Score(
+    signal: AbortSignal,
+    ref: ImageData,
+    dist: ImageData,
+  ): Promise<number>;
   dispose(): void;
 }
 
@@ -211,6 +224,12 @@ interface SvelteKitWorkerBridgeWorkerApi {
     options: RotateOptions,
     wasmUrls: RotateWasmUrls,
   ): Promise<ImageData>;
+  ssimulacra2Score(
+    signal: AbortSignal,
+    ref: ImageData,
+    dist: ImageData,
+    wasmUrls: Ssimulacra2WasmUrls,
+  ): Promise<number>;
   dispose(): void;
 }
 
@@ -277,6 +296,10 @@ const resizeWasmUrls = {
 const rotateWasmUrls = {
   preprocessor: codecAssetUrl('rotate:preprocessor:default'),
 } satisfies RotateWasmUrls;
+
+const ssimulacra2WasmUrls = {
+  metric: codecAssetUrl('ssimulacra2:metric:default'),
+} satisfies Ssimulacra2WasmUrls;
 
 export default class SvelteKitWorkerBridge
   extends SvelteKitWorkerBridgeBase
@@ -383,5 +406,13 @@ export default class SvelteKitWorkerBridge
     options: RotateOptions,
   ): Promise<ImageData> {
     return super.rotate(signal, data, options, rotateWasmUrls);
+  }
+
+  ssimulacra2Score(
+    signal: AbortSignal,
+    ref: ImageData,
+    dist: ImageData,
+  ): Promise<number> {
+    return super.ssimulacra2Score(signal, ref, dist, ssimulacra2WasmUrls);
   }
 }

@@ -30,8 +30,9 @@ export function dedupeUrls(urls: readonly string[]): string[] {
  * - WebP encodes through the SIMD build when supported, else baseline;
  * - the AVIF/WebP WASM decoders are fallbacks for browsers without native
  *   decode support — natively-supported browsers never fetch them;
- * - the JXL/QOI decoders, the jpegli encoder, and the processors each have a
- *   single variant used everywhere.
+ * - the JXL/QOI decoders, the jpegli encoder, the processors, and the
+ *   SSIMULACRA2 metric (auto-quality's scorer, so it must work offline) each
+ *   have a single variant used everywhere.
  *
  * The QOI and MozJPEG ENCODERS are deliberately NOT precached: neither is a
  * user-selectable output (QOI left the picker 2026-06-27, MozJPEG 2026-11-04
@@ -55,6 +56,7 @@ export function selectCodecPrecacheUrls(
     'imagequant:processor:default',
     'resize:processor:default',
     'hqx:processor:hqx',
+    'ssimulacra2:metric:default',
   ]);
 
   if (!support.avifDecode) wanted.add('avif:decoder:default');
