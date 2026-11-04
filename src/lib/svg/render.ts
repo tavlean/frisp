@@ -2,7 +2,7 @@
 // remain on the main-thread <img> path for Safari and dimensionless viewBox
 // documents. The existing import pipeline owns those compatibility rules.
 
-import { processSvg } from 'client/lazy-app/image-pipeline-shared';
+import { processSvg } from 'client/lazy-app/svg-source';
 
 export async function renderSvgToImageData(
   svgText: string,

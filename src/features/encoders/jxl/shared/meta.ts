@@ -14,9 +14,9 @@ import type { EncodeOptions as WasmEncodeOptions } from 'codecs/jxl/enc/jxl_enc'
 
 /**
  * The wasm encoder's options plus one app-level field. `jpegTranscode` picks a
- * different pipeline rather than a different encoder setting (see
- * `transcodeJpegToJxl`), but it belongs in the options object all the same: it
- * changes the output bytes, so it has to reach the encode signature that keys
+ * different pipeline rather than a different encoder setting (the transcode
+ * lane in src/worker/pipeline-op.ts), but it belongs in the options object
+ * all the same: it changes the output bytes, so it has to reach the encode signature that keys
  * the result cache and the undo history. The wasm encoder never sees it:
  * embind reads only the fields it has registered.
  */

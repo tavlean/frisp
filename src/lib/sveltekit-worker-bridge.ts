@@ -1,17 +1,6 @@
 import { transfer } from 'comlink';
 import { createWorkerBridgeRuntime } from 'client/lazy-app/worker-bridge/runtime';
 import { getCodecAssetUrl } from 'shared/codec-assets';
-import type { EncodeOptions as AvifEncodeOptions } from 'features/encoders/avif/shared/meta';
-import type { EncodeOptions } from 'features/encoders/webP/shared/meta';
-import type { EncodeOptions as QoiEncodeOptions } from 'features/encoders/qoi/shared/meta';
-import type { EncodeOptions as JxlEncodeOptions } from 'features/encoders/jxl/shared/meta';
-import type { EncodeOptions as MozjpegEncodeOptions } from 'features/encoders/mozJPEG/shared/meta';
-import type { EncodeOptions as JpegliEncodeOptions } from 'features/encoders/jpegli/shared/meta';
-import type { EncodeOptions as OxipngEncodeOptions } from 'features/encoders/oxiPNG/shared/meta';
-import type { Options as GrainOptions } from 'features/processors/grain/shared/meta';
-import type { Options as QuantizeOptions } from 'features/processors/quantize/shared/meta';
-import type { WorkerResizeOptions } from 'features/processors/resize/shared/meta';
-import type { Options as RotateOptions } from 'features/preprocessors/rotate/shared/meta';
 import type {
   OptimizeReply,
   OptimizeRequest,
@@ -37,27 +26,7 @@ import {
   svelteKitCodecAssetRecords,
 } from './codec-assets';
 
-const methodNames = [
-  'avifDecode',
-  'avifEncode',
-  'webpEncode',
-  'rotate',
-  'qoiDecode',
-  'jxlDecode',
-  'webpDecode',
-  'qoiEncode',
-  'jxlEncode',
-  'jxlTranscode',
-  'mozjpegEncode',
-  'jpegliEncode',
-  'grain',
-  'quantize',
-  'resize',
-  'oxipngEncode',
-  'optimize',
-  'prepare',
-  'decodeOutput',
-] as const;
+const methodNames = ['optimize', 'prepare', 'decodeOutput'] as const;
 
 export interface SvelteKitWorkerBridgeApi {
   /** One encode: the worker decodes or reuses the source and runs every step.
@@ -70,73 +39,6 @@ export interface SvelteKitWorkerBridgeApi {
   prepare(signal: AbortSignal, request: PrepareRequest): Promise<PrepareReply>;
   /** An encoded file decoded for display. */
   decodeOutput(signal: AbortSignal, blob: Blob): Promise<ImageData>;
-  avifDecode(signal: AbortSignal, blob: Blob): Promise<ImageData>;
-  avifEncode(
-    signal: AbortSignal,
-    imageData: ImageData,
-    options: AvifEncodeOptions,
-  ): Promise<ArrayBuffer>;
-  webpEncode(
-    signal: AbortSignal,
-    imageData: ImageData,
-    options: EncodeOptions,
-  ): Promise<ArrayBuffer>;
-  webpDecode(signal: AbortSignal, blob: Blob): Promise<ImageData>;
-  rotate(
-    signal: AbortSignal,
-    data: ImageData,
-    options: RotateOptions,
-  ): Promise<ImageData>;
-  qoiEncode(
-    signal: AbortSignal,
-    imageData: ImageData,
-    options: QoiEncodeOptions,
-  ): Promise<ArrayBuffer>;
-  qoiDecode(signal: AbortSignal, blob: Blob): Promise<ImageData>;
-  jxlEncode(
-    signal: AbortSignal,
-    imageData: ImageData,
-    options: JxlEncodeOptions,
-  ): Promise<ArrayBuffer>;
-  jxlDecode(signal: AbortSignal, blob: Blob): Promise<ImageData>;
-  /**
-   * Repack a JPEG file's own coefficients into a reversible JXL. Takes the file
-   * bytes, not pixels; resolves null when libjxl cannot transcode this JPEG.
-   */
-  jxlTranscode(
-    signal: AbortSignal,
-    jpeg: ArrayBuffer,
-  ): Promise<ArrayBuffer | null>;
-  mozjpegEncode(
-    signal: AbortSignal,
-    imageData: ImageData,
-    options: MozjpegEncodeOptions,
-  ): Promise<ArrayBuffer>;
-  jpegliEncode(
-    signal: AbortSignal,
-    imageData: ImageData,
-    options: JpegliEncodeOptions,
-  ): Promise<ArrayBuffer>;
-  oxipngEncode(
-    signal: AbortSignal,
-    imageData: ImageData,
-    options: OxipngEncodeOptions,
-  ): Promise<ArrayBuffer>;
-  grain(
-    signal: AbortSignal,
-    imageData: ImageData,
-    options: GrainOptions & { enabled: boolean },
-  ): Promise<ImageData>;
-  quantize(
-    signal: AbortSignal,
-    imageData: ImageData,
-    options: QuantizeOptions,
-  ): Promise<ImageData>;
-  resize(
-    signal: AbortSignal,
-    imageData: ImageData,
-    options: WorkerResizeOptions,
-  ): Promise<ImageData>;
   dispose(): void;
 }
 
@@ -155,98 +57,6 @@ interface SvelteKitWorkerBridgeWorkerApi {
     signal: AbortSignal,
     blob: Blob,
     context: WorkerContext,
-  ): Promise<ImageData>;
-  avifDecode(
-    signal: AbortSignal,
-    blob: Blob,
-    wasmUrls: AvifWasmUrls,
-  ): Promise<ImageData>;
-  avifEncode(
-    signal: AbortSignal,
-    imageData: ImageData,
-    options: AvifEncodeOptions,
-    wasmUrls: AvifWasmUrls,
-  ): Promise<ArrayBuffer>;
-  webpEncode(
-    signal: AbortSignal,
-    imageData: ImageData,
-    options: EncodeOptions,
-    wasmUrls: WebpWasmUrls,
-  ): Promise<ArrayBuffer>;
-  webpDecode(
-    signal: AbortSignal,
-    blob: Blob,
-    wasmUrls: WebpWasmUrls,
-  ): Promise<ImageData>;
-  qoiEncode(
-    signal: AbortSignal,
-    imageData: ImageData,
-    options: QoiEncodeOptions,
-    wasmUrls: QoiWasmUrls,
-  ): Promise<ArrayBuffer>;
-  qoiDecode(
-    signal: AbortSignal,
-    blob: Blob,
-    wasmUrls: QoiWasmUrls,
-  ): Promise<ImageData>;
-  jxlEncode(
-    signal: AbortSignal,
-    imageData: ImageData,
-    options: JxlEncodeOptions,
-    wasmUrls: JxlWasmUrls,
-  ): Promise<ArrayBuffer>;
-  jxlDecode(
-    signal: AbortSignal,
-    blob: Blob,
-    wasmUrls: JxlWasmUrls,
-  ): Promise<ImageData>;
-  jxlTranscode(
-    signal: AbortSignal,
-    jpeg: ArrayBuffer,
-    wasmUrls: JxlWasmUrls,
-  ): Promise<ArrayBuffer | null>;
-  mozjpegEncode(
-    signal: AbortSignal,
-    imageData: ImageData,
-    options: MozjpegEncodeOptions,
-    wasmUrls: MozjpegWasmUrls,
-  ): Promise<ArrayBuffer>;
-  jpegliEncode(
-    signal: AbortSignal,
-    imageData: ImageData,
-    options: JpegliEncodeOptions,
-    wasmUrls: JpegliWasmUrls,
-  ): Promise<ArrayBuffer>;
-  oxipngEncode(
-    signal: AbortSignal,
-    imageData: ImageData,
-    options: OxipngEncodeOptions,
-    wasmUrls: OxipngWasmUrls,
-  ): Promise<ArrayBuffer>;
-  // No wasmUrls: grain is pure JS in the worker, so the base bridge method
-  // passes through unwrapped (no subclass override needed).
-  grain(
-    signal: AbortSignal,
-    imageData: ImageData,
-    options: GrainOptions & { enabled: boolean },
-  ): Promise<ImageData>;
-  quantize(
-    signal: AbortSignal,
-    imageData: ImageData,
-    options: QuantizeOptions,
-    wasmUrls: ImagequantWasmUrls,
-  ): Promise<ImageData>;
-  resize(
-    signal: AbortSignal,
-    imageData: ImageData,
-    options: WorkerResizeOptions,
-    wasmUrls: ResizeWasmUrls,
-  ): Promise<ImageData>;
-  rotate(
-    signal: AbortSignal,
-    data: ImageData,
-    options: RotateOptions,
-    wasmUrls: RotateWasmUrls,
   ): Promise<ImageData>;
   dispose(): void;
 }
@@ -376,108 +186,5 @@ export default class SvelteKitWorkerBridge
 
   decodeOutput(signal: AbortSignal, blob: Blob): Promise<ImageData> {
     return super.decodeOutput(signal, blob, this.#context);
-  }
-
-  avifDecode(signal: AbortSignal, blob: Blob): Promise<ImageData> {
-    return super.avifDecode(signal, blob, avifWasmUrls);
-  }
-
-  avifEncode(
-    signal: AbortSignal,
-    imageData: ImageData,
-    options: AvifEncodeOptions,
-  ): Promise<ArrayBuffer> {
-    return super.avifEncode(signal, imageData, options, avifWasmUrls);
-  }
-
-  webpEncode(
-    signal: AbortSignal,
-    imageData: ImageData,
-    options: EncodeOptions,
-  ): Promise<ArrayBuffer> {
-    return super.webpEncode(signal, imageData, options, webpWasmUrls);
-  }
-
-  webpDecode(signal: AbortSignal, blob: Blob): Promise<ImageData> {
-    return super.webpDecode(signal, blob, webpWasmUrls);
-  }
-
-  qoiEncode(
-    signal: AbortSignal,
-    imageData: ImageData,
-    options: QoiEncodeOptions,
-  ): Promise<ArrayBuffer> {
-    return super.qoiEncode(signal, imageData, options, qoiWasmUrls);
-  }
-
-  qoiDecode(signal: AbortSignal, blob: Blob): Promise<ImageData> {
-    return super.qoiDecode(signal, blob, qoiWasmUrls);
-  }
-
-  jxlEncode(
-    signal: AbortSignal,
-    imageData: ImageData,
-    options: JxlEncodeOptions,
-  ): Promise<ArrayBuffer> {
-    return super.jxlEncode(signal, imageData, options, jxlWasmUrls);
-  }
-
-  jxlDecode(signal: AbortSignal, blob: Blob): Promise<ImageData> {
-    return super.jxlDecode(signal, blob, jxlWasmUrls);
-  }
-
-  jxlTranscode(
-    signal: AbortSignal,
-    jpeg: ArrayBuffer,
-  ): Promise<ArrayBuffer | null> {
-    return super.jxlTranscode(signal, jpeg, jxlWasmUrls);
-  }
-
-  mozjpegEncode(
-    signal: AbortSignal,
-    imageData: ImageData,
-    options: MozjpegEncodeOptions,
-  ): Promise<ArrayBuffer> {
-    return super.mozjpegEncode(signal, imageData, options, mozjpegWasmUrls);
-  }
-
-  jpegliEncode(
-    signal: AbortSignal,
-    imageData: ImageData,
-    options: JpegliEncodeOptions,
-  ): Promise<ArrayBuffer> {
-    return super.jpegliEncode(signal, imageData, options, jpegliWasmUrls);
-  }
-
-  oxipngEncode(
-    signal: AbortSignal,
-    imageData: ImageData,
-    options: OxipngEncodeOptions,
-  ): Promise<ArrayBuffer> {
-    return super.oxipngEncode(signal, imageData, options, oxipngWasmUrls);
-  }
-
-  quantize(
-    signal: AbortSignal,
-    imageData: ImageData,
-    options: QuantizeOptions,
-  ): Promise<ImageData> {
-    return super.quantize(signal, imageData, options, imagequantWasmUrls);
-  }
-
-  resize(
-    signal: AbortSignal,
-    imageData: ImageData,
-    options: WorkerResizeOptions,
-  ): Promise<ImageData> {
-    return super.resize(signal, imageData, options, resizeWasmUrls);
-  }
-
-  rotate(
-    signal: AbortSignal,
-    data: ImageData,
-    options: RotateOptions,
-  ): Promise<ImageData> {
-    return super.rotate(signal, data, options, rotateWasmUrls);
   }
 }

@@ -3,7 +3,7 @@
 // with the rest of the pipeline: the worker receives these pixels instead.
 
 import { abortable } from 'client/lazy-app/abort';
-import { processSvg } from 'client/lazy-app/image-pipeline-shared';
+import { processSvg } from 'client/lazy-app/svg-source';
 import { drawableToImageData } from 'client/lazy-app/util/canvas';
 import { getContainOffsets } from 'features/processors/resize/shared/util';
 import type { VectorResizeOptions } from 'features/processors/resize/shared/meta';

@@ -65,7 +65,7 @@ export const defaultProcessorState: ProcessorState = {
 /**
  * Grain only affects the output when it's enabled at a non-zero amount, so
  * every consumer that fingerprints or runs the pipeline (encode signature,
- * bulk recipe normalization, processImage) folds "enabled at 0" to a true
+ * bulk recipe normalization, encodeFrame) folds "enabled at 0" to a true
  * no-op through this one predicate.
  */
 export function grainIsReal(grain: ProcessorState['grain']): boolean {
