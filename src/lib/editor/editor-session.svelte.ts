@@ -23,12 +23,20 @@ import {
   resizeSignature,
   unrotatedSource,
 } from './encode-signature';
-import { normalizedRecipe, recipeChangesPixels } from 'client/lazy-app/recipe';
+import {
+  normalizedRecipe,
+  recipeChangesPixels,
+  recipeSignature,
+  type ImageRecipe,
+} from 'client/lazy-app/recipe';
+import { getPercentChange } from 'client/lazy-app/bulk/size';
 import { recipeFromSide } from './side-recipe';
 import { applyGrainToPixels } from 'features/processors/grain/shared/apply';
 import {
+  decodeImage,
   decodeSourceImage,
   preprocessImage,
+  type ImagePipelineWorkerBridge,
   type DecodedSourceImage,
   type SourceImage,
 } from 'client/lazy-app/image-pipeline';
@@ -530,6 +538,72 @@ export class EditorSession {
       clearTimeout(timer);
       controller.abort();
     };
+  }
+
+  /**
+   * Offer an encoded file made elsewhere (bulk) as the result for `recipe` on
+   * the current source, so the encode effect lands on it instead of encoding
+   * again. It goes in as an in-flight pass under the exact key encodeSide will
+   * compute for a side holding `recipe` (same projection, same source size,
+   * which is 0 until this load's first result lands), so a side that wants it
+   * piggybacks and the finished outcome is cached like any other. Building the
+   * preview decodes the file once; the source pixels come from this session's
+   * own prepared source. Any failure rejects as an abort, which makes a
+   * waiting side fall back to a pass of its own. Raster outputs only: an SVG
+   * result needs the vector lane's text facts. The cache mints and owns its
+   * own URL for the file, so the caller's URL is never revoked here.
+   */
+  adoptResult(recipe: ImageRecipe, outputFile: File): void {
+    const file = this.file;
+    if (!file || recipe.output.kind !== 'raster') return;
+    const key = recipeSignature(
+      recipe,
+      unrotatedSource(
+        { rotate: { rotate: recipe.rotate } },
+        this.naturalWidth,
+        this.naturalHeight,
+      ),
+    );
+    if (this.cache.get(key) || this.inflight.has(key)) return;
+
+    const loadId = this.loadId;
+    const bridge = this.bridgeFor(1);
+    const signal = new AbortController().signal;
+    const pass = (async (): Promise<CompressOutcome> => {
+      const prepared = await this.#preparedSource(bridge, {
+        rotate: { rotate: recipe.rotate },
+      });
+      const outputImageData = await decodeImage(
+        signal,
+        outputFile,
+        bridge as unknown as ImagePipelineWorkerBridge,
+      );
+      if (this.loadId !== loadId) throw Error('The source changed');
+      const existing = this.cache.get(key);
+      if (existing) return existing;
+      const outcome: CompressOutcome = {
+        outputFile,
+        outputUrl: URL.createObjectURL(outputFile),
+        outputSize: outputFile.size,
+        originalSize: file.size,
+        percentChange:
+          Math.round(getPercentChange(file.size, outputFile.size) * 10) / 10,
+        sourceImageData: prepared.preprocessed,
+        outputImageData,
+        isOriginal: false,
+        preprocessedWidth: prepared.preprocessed.width,
+        preprocessedHeight: prepared.preprocessed.height,
+      };
+      this.cache.set(key, outcome);
+      return outcome;
+    })().catch(() => {
+      throw new DOMException('Adopted result unavailable', 'AbortError');
+    });
+    this.inflight.set(key, pass);
+    const settle = () => {
+      if (this.inflight.get(key) === pass) this.inflight.delete(key);
+    };
+    pass.then(settle, settle);
   }
 
   /** The side's persistent bridge, created on first use (see `bridges`). */

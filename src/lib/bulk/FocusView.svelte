@@ -305,9 +305,10 @@
         containWidth={focusSession.naturalWidth}
         containHeight={focusSession.naturalHeight}
         {orientationOverride}
+        onRotate={focusSession.isVectorSource
+          ? undefined
+          : () => focusSession.rotate()}
       />
-      <!-- No onRotate: the bulk recipe has no rotation, so a rotate here would
-           change the preview and never the exported file. -->
     {:else if showStack}
       <StackStage
         items={stackItems}

@@ -65,6 +65,7 @@ import {
 import type { ImageRecipe, SvgOutputOptions } from 'client/lazy-app/recipe';
 import { applyRecipeToSide, recipeFromSide } from '$lib/editor/side-recipe';
 import { DEFAULT_SVG_OPTIONS } from '$lib/svg/optimize-options';
+import { isSvgSource } from '$lib/svg/detect';
 import { stableStringify } from 'shared/stable-stringify';
 import { snackbar } from '$lib/editor/snackbar-store.svelte';
 import type { ImportedFile } from './import-sources';
@@ -196,6 +197,18 @@ export class BulkStore {
   // OptionsPanel-compatible pseudo-side the global panel edits; it converts to
   // the shared recipe on apply.
   globalSide = $state<SideState>(sideFromRecipe(this.session.sharedRecipe));
+  // The SVG options the global panel edits when every image is an SVG; they
+  // apply to the shared SVG options (see setSharedSvgOptions).
+  globalSvgOptions = $state<Record<string, unknown>>(
+    structuredClone(this.session.sharedSvgOptions),
+  );
+  readonly hasSvgJobs = $derived(
+    this.session.jobs.some((job) => isSvgSource(job.sourceFile)),
+  );
+  readonly allJobsSvg = $derived(
+    this.session.jobs.length > 0 &&
+      this.session.jobs.every((job) => isSvgSource(job.sourceFile)),
+  );
 
   // Thumbnails + natural dims, keyed by job id. SvelteMap entries are replaced
   // (never deeply mutated) so its shallow reactivity is sufficient.
@@ -277,6 +290,8 @@ export class BulkStore {
   #syncingGlobalSide = false;
   #sharedApplyTimer: ReturnType<typeof setTimeout> | null = null;
   #pendingShared: { recipe: ImageRecipe; onApplied?: () => void } | null = null;
+  #svgApplyTimer: ReturnType<typeof setTimeout> | null = null;
+  #pendingSvgOptions: SvgOutputOptions | null = null;
   #selectedApplyTimer: ReturnType<typeof setTimeout> | null = null;
   #pendingSelectedEdit: {
     ids: string[];
@@ -445,11 +460,17 @@ export class BulkStore {
     if (meaningful) pending.onApplied?.();
   }
 
+  /** Replace the shared SVG options, coalesced like setSharedRecipe. */
   setSharedSvgOptions(options: SvgOutputOptions): void {
-    if (deepEqual(options, this.session.sharedSvgOptions)) return;
-    this.#adoptSettingsSession(
-      updateSharedSvgOptions(this.session, structuredClone(options)),
-    );
+    this.#pendingSvgOptions = structuredClone(options);
+    if (this.#svgApplyTimer !== null) clearTimeout(this.#svgApplyTimer);
+    this.#svgApplyTimer = setTimeout(() => {
+      this.#svgApplyTimer = null;
+      const next = this.#pendingSvgOptions;
+      this.#pendingSvgOptions = null;
+      if (!next || deepEqual(next, this.session.sharedSvgOptions)) return;
+      this.#adoptSettingsSession(updateSharedSvgOptions(this.session, next));
+    }, 200);
   }
 
   /**
@@ -490,7 +511,13 @@ export class BulkStore {
     const ids = pending.ids.filter((id) => liveIds.has(id));
     if (ids.length === 0) return;
 
-    if (pending.allJobsSelected && ids.length === this.session.jobs.length) {
+    // Every image selected: the edit becomes a shared edit, except a
+    // rotation, which is per image (the shared recipe never rotates).
+    if (
+      pending.allJobsSelected &&
+      ids.length === this.session.jobs.length &&
+      pending.edit(structuredClone(this.session.sharedRecipe)).rotate === 0
+    ) {
       this.#applyEditToShared(pending.edit);
       return;
     }
@@ -955,6 +982,11 @@ export class BulkStore {
       this.#sharedApplyTimer = null;
     }
     this.#pendingShared = null;
+    if (this.#svgApplyTimer !== null) {
+      clearTimeout(this.#svgApplyTimer);
+      this.#svgApplyTimer = null;
+    }
+    this.#pendingSvgOptions = null;
     if (this.#selectedApplyTimer !== null) {
       clearTimeout(this.#selectedApplyTimer);
       this.#selectedApplyTimer = null;
@@ -975,6 +1007,7 @@ export class BulkStore {
     this.#globalResizeSeededJobId = null;
     this.#globalResizeReference = null;
     this.refreshGlobalSideFromSession();
+    this.globalSvgOptions = structuredClone(this.session.sharedSvgOptions);
   }
 
   async saveAll(): Promise<void> {

@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { expect, test, type Page } from '@playwright/test';
 
@@ -102,18 +103,26 @@ test('Save never offers the previous result under the new format name', async ({
   ).toHaveAttribute('download', /\.avif$/, { timeout: 60_000 });
 });
 
-test('bulk offers no Rotate that its export would ignore', async ({ page }) => {
-  await page.goto('/');
-  await page.setInputFiles(FILE_INPUT, [photo, gradient]);
-  await waitBulkReady(page, 2);
-  await page.locator(CELL).nth(0).locator('.thumb').click();
-  await expect(page.locator('.bulk-mode .options-2')).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Rotate' })).toHaveCount(0);
-});
+/** Decode downloaded image bytes in the page and return their dimensions. */
+async function imageSize(
+  page: Page,
+  bytes: Buffer,
+): Promise<{ width: number; height: number }> {
+  return page.evaluate(
+    async (data: number[]) => {
+      const bitmap = await createImageBitmap(new Blob([new Uint8Array(data)]));
+      return { width: bitmap.width, height: bitmap.height };
+    },
+    [...bytes],
+  );
+}
 
-// Rotation joins the bulk recipe with the one-recipe model (first-principles
-// review 2026-11-02, change A); until then bulk hides Rotate instead.
-test.fixme('rotating an image in bulk rotates its exported file', async ({
+/** The first cell's override dot, which an image-scope edit adds and Reset
+ *  removes. Waiting on it lets the coalesced edit land before the next step. */
+const overrideDot = (page: Page, index: number) =>
+  page.locator(CELL).nth(index).locator('.override-dot');
+
+test('rotating an image in bulk rotates its exported file', async ({
   page,
 }) => {
   await page.goto('/');
@@ -122,24 +131,35 @@ test.fixme('rotating an image in bulk rotates its exported file', async ({
 
   await page.locator(CELL).nth(0).locator('.thumb').click();
   await page.getByRole('button', { name: 'Rotate' }).click();
+  await expect(overrideDot(page, 0)).toBeVisible();
   await waitBulkReady(page, 2);
 
   const { bytes } = await downloadCell(page, 0);
-  const size = await page.evaluate(
-    async (data: number[]) => {
-      const bitmap = await createImageBitmap(new Blob([new Uint8Array(data)]));
-      return { width: bitmap.width, height: bitmap.height };
-    },
-    [...bytes],
-  );
   // photo.jpg is 1024x683; a quarter turn makes it portrait.
-  expect(size).toEqual({ width: 683, height: 1024 });
+  expect(await imageSize(page, bytes)).toEqual({ width: 683, height: 1024 });
 });
 
-// Bulk has no vector lane yet: a batch of SVGs exports WebP (consistently
-// labelled), while one SVG stays vector. The one-recipe model (change A)
-// dispatches raster, SVG, and transcode alike and lifts this fixme.
-test.fixme('a batch of SVGs gets the same vector optimization as one SVG', async ({
+test('Reset after a bulk rotate exports the unrotated size', async ({
+  page,
+}) => {
+  await page.goto('/');
+  await page.setInputFiles(FILE_INPUT, [photo, gradient]);
+  await waitBulkReady(page, 2);
+
+  await page.locator(CELL).nth(0).locator('.thumb').click();
+  await page.getByRole('button', { name: 'Rotate' }).click();
+  await expect(overrideDot(page, 0)).toBeVisible();
+  await waitBulkReady(page, 2);
+
+  await page.getByRole('button', { name: 'Reset to global' }).first().click();
+  await expect(overrideDot(page, 0)).toHaveCount(0);
+  await waitBulkReady(page, 2);
+
+  const { bytes } = await downloadCell(page, 0);
+  expect(await imageSize(page, bytes)).toEqual({ width: 1024, height: 683 });
+});
+
+test('a batch of SVGs gets the same vector optimization as one SVG', async ({
   page,
 }) => {
   await page.goto('/');
@@ -152,6 +172,29 @@ test.fixme('a batch of SVGs gets the same vector optimization as one SVG', async
   const { name, bytes } = await downloadCell(page, 0);
   expect(name).toMatch(/\.svg$/);
   expect(bytes.toString('utf8')).toMatch(/^\s*(<\?xml[^>]*>\s*)?<svg/);
+});
+
+test('a mixed PNG and SVG batch exports WebP and SVG', async ({ page }) => {
+  await page.goto('/');
+  // setInputFiles takes paths or buffers, never both, so the PNG goes in as a
+  // buffer too.
+  await page.setInputFiles(FILE_INPUT, [
+    {
+      name: 'gradient.png',
+      mimeType: 'image/png',
+      buffer: readFileSync(gradient),
+    },
+    { name: 'logo.svg', mimeType: 'image/svg+xml', buffer: Buffer.from(SVG) },
+  ]);
+  await waitBulkReady(page, 2);
+
+  const png = await downloadCell(page, 0);
+  expect(png.name).toMatch(/\.webp$/);
+  expect(ascii([...png.bytes.subarray(0, 12)], 8, 12)).toBe('WEBP');
+
+  const svg = await downloadCell(page, 1);
+  expect(svg.name).toMatch(/\.svg$/);
+  expect(svg.bytes.toString('utf8')).toMatch(/^\s*(<\?xml[^>]*>\s*)?<svg/);
 });
 
 test('changing settings during the first pass leaves no job stale', async ({

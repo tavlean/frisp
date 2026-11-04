@@ -1,29 +1,12 @@
 <script lang="ts">
   import { onMount, untrack } from 'svelte';
   import { EditorSession } from '$lib/editor/editor-session.svelte';
-  import {
-    encodeSignature,
-    resizeSignature,
-  } from '$lib/editor/encode-signature';
   import { applyRecipeToSide, recipeFromSide } from '$lib/editor/side-recipe';
-  import type { CompressOutcome } from '$lib/compress';
-  import SvelteKitWorkerBridge from '$lib/sveltekit-worker-bridge';
-  import { bulkStore, deepEqual } from '$lib/bulk/store.svelte';
+  import { bulkStore } from '$lib/bulk/store.svelte';
   import { fromFileList } from '$lib/bulk/import-sources';
   import Home from '$lib/bulk/Home.svelte';
-  import { applyRecipeChanges, type ImageJob } from 'client/lazy-app/bulk';
-  import type { ImageRecipe } from 'client/lazy-app/recipe';
-  import {
-    decodeImage,
-    decodeSourceImage,
-    preprocessImage,
-    processImage,
-    type ImagePipelineWorkerBridge,
-  } from 'client/lazy-app/image-pipeline';
-  import {
-    defaultPreprocessorState,
-    defaultProcessorState,
-  } from 'client/lazy-app/feature-meta';
+  import { applyRecipeChanges } from 'client/lazy-app/bulk';
+  import { recipeSignature, type ImageRecipe } from 'client/lazy-app/recipe';
 
   interface Props {
     onExit: () => void;
@@ -31,57 +14,25 @@
 
   let { onExit }: Props = $props();
 
+  // The focus view is a real EditorSession: side 0 shows the original, side 1
+  // the selected image's effective recipe. Edits flow one way, from side 1
+  // into the store; a load writes the recipe in and nothing else.
   const focusSession = new EditorSession();
 
   let fileInput = $state<HTMLInputElement>();
-  let seeding = true;
-  let pendingSeed = $state<{ jobId: string; loadId: number } | null>(null);
-  let seedSerial = 0;
-  // The focus recipe as last seeded or emitted. Each focus edit is sent as the
-  // change from this, so it lands on every selected image without flattening
-  // their other differences.
+  // The focus recipe as last loaded or sent. Each edit is sent as the change
+  // from it (so it lands on every selected image without flattening their
+  // other differences), and the load's own write compares equal by signature,
+  // so it is never sent back as an edit.
   let lastFocusRecipe: ImageRecipe | null = null;
-  let focusPreviewBridge: SvelteKitWorkerBridge | null = null;
-  let focusPreviewController: AbortController | null = null;
 
-  onMount(() => {
-    return () => {
-      focusPreviewController?.abort();
-      focusPreviewBridge?.dispose();
-      focusSession.dispose();
-    };
-  });
+  onMount(() => () => focusSession.dispose());
 
   $effect(() => focusSession.seedResizeDimensions());
 
   $effect(() => {
     const selectedId = bulkStore.selectedId;
-    if (!selectedId) {
-      seeding = true;
-      pendingSeed = null;
-      focusSession.clearFile();
-      return;
-    }
-
-    untrack(() => seedFocusFromSelected());
-  });
-
-  $effect(() => {
-    const seed = pendingSeed;
-    const selectedId = bulkStore.selectedId;
-    const loadId = focusSession.loadId;
-    const naturalWidth = focusSession.naturalWidth;
-
-    if (
-      !seed ||
-      seed.jobId !== selectedId ||
-      seed.loadId !== loadId ||
-      naturalWidth <= 0
-    ) {
-      return;
-    }
-
-    untrack(() => finishFocusSeed(seed));
+    untrack(() => (selectedId ? loadFocus() : clearFocus()));
   });
 
   $effect(() => {
@@ -91,256 +42,50 @@
 
   $effect(() => {
     $state.snapshot(bulkStore.globalSide);
-    bulkStore.queueGlobalSideApply(() => seedFocusFromSelected());
+    bulkStore.queueGlobalSideApply(() => loadFocus());
   });
 
   $effect(() => {
-    const recipe = currentFocusRecipe();
-
-    if (seeding || !bulkStore.selectedId || !bulkStore.selectedJob) return;
-
+    const recipe = $state.snapshot(
+      recipeFromSide(focusSession.sides[1], focusSession.preprocessorState),
+    ) as ImageRecipe;
     const before = lastFocusRecipe;
-    if (!before || deepEqual(before, recipe)) return;
+    if (!before || recipeSignature(before) === recipeSignature(recipe)) return;
     lastFocusRecipe = recipe;
     bulkStore.editSelected((target) =>
       applyRecipeChanges(target, before, recipe),
     );
   });
 
-  function currentFocusRecipe(): ImageRecipe {
-    return $state.snapshot(
-      recipeFromSide(focusSession.sides[1], focusSession.preprocessorState),
-    ) as ImageRecipe;
-  }
-
-  function seedFocusFromSelected(): void {
+  /** Load the selected image and its effective recipe into the focus view. A
+   *  current bulk output is adopted as the result, so it shows without a new
+   *  encode; otherwise the editor encodes as usual. */
+  function loadFocus(): void {
     const job = bulkStore.selectedJob;
-    if (!job) return;
+    const recipe = job && bulkStore.effectiveRecipeFor(job.id);
+    if (!job || !recipe) return;
 
-    seeding = true;
-    pendingSeed = null;
-    focusPreviewController?.abort();
-    const seedId = ++seedSerial;
-
-    const effective = bulkStore.effectiveRecipeFor(job.id);
-    if (
-      effective?.output.kind === 'raster' &&
-      job.output?.settingsHash === bulkStore.settingsHashForJob(job)
-    ) {
-      void hydrateFocusFromBulkOutput(job, effective, seedId);
-      return;
-    }
-
-    seedFocusThroughEditor(job);
-  }
-
-  function seedFocusThroughEditor(job: ImageJob): void {
     const transfer = new DataTransfer();
     transfer.items.add(job.sourceFile);
-    // The production method currently requires a callback for the "first open"
-    // route hook; bulk owns route state here, so this is intentionally inert.
+    // The callback is the single editor's "first open" route hook; bulk owns
+    // route state, so it is inert here.
     focusSession.pickFiles(transfer.files, () => {});
-    pendingSeed = { jobId: job.id, loadId: focusSession.loadId };
-  }
-
-  function finishFocusSeed(seed: { jobId: string; loadId: number }): void {
-    const job = bulkStore.selectedJob;
-    if (
-      !job ||
-      job.id !== seed.jobId ||
-      bulkStore.selectedId !== seed.jobId ||
-      focusSession.loadId !== seed.loadId ||
-      focusSession.naturalWidth <= 0
-    ) {
-      return;
-    }
-
-    focusSession.seedResizeDimensions();
-
-    const effective = bulkStore.effectiveRecipeFor(job.id);
-    // Bulk recipes carry no rotation yet (no Rotate control), so the returned
-    // preprocessor state is always the unrotated one the load set.
-    if (effective) applyRecipeToSide(effective, focusSession.sides[1]);
-    focusSession.history.clear();
-    lastFocusRecipe = currentFocusRecipe();
-
-    pendingSeed = null;
-    seeding = false;
-  }
-
-  function focusPreviewWorkerBridge(): ImagePipelineWorkerBridge {
-    focusPreviewBridge ??= new SvelteKitWorkerBridge();
-    return focusPreviewBridge as unknown as ImagePipelineWorkerBridge;
-  }
-
-  async function hydrateFocusFromBulkOutput(
-    job: ImageJob,
-    effective: ImageRecipe,
-    seedId: number,
-  ): Promise<void> {
-    const output = job.output;
-    if (!output || effective.output.kind !== 'raster') {
-      seedFocusThroughEditor(job);
-      return;
-    }
-
-    const controller = new AbortController();
-    focusPreviewController = controller;
-    const signal = controller.signal;
-
-    try {
-      const bridge = focusPreviewWorkerBridge();
-      const decodedSource = await decodeSourceImage(
-        signal,
-        job.sourceFile,
-        bridge,
-      );
-      const preprocessed = await preprocessImage(
-        signal,
-        decodedSource.decoded,
-        defaultPreprocessorState,
-        bridge,
-      );
-      const processed = await processImage(
-        signal,
-        { ...decodedSource, preprocessed },
-        effective.processors,
-        bridge,
-      );
-      const outputImageData = await decodeImage(signal, output.file, bridge);
-
-      if (
-        signal.aborted ||
-        seedId !== seedSerial ||
-        bulkStore.selectedId !== job.id
-      ) {
-        return;
-      }
-
-      applyHydratedFocus(job, effective, {
-        sourceImageData: preprocessed,
-        processedImageData: processed,
-        outputImageData,
-      });
-    } catch {
-      // Hydration is an optimization; any failure falls back to a real encode.
-      if (signal.aborted) return;
-      if (seedId === seedSerial && bulkStore.selectedId === job.id) {
-        seedFocusThroughEditor(job);
-      }
-    } finally {
-      if (focusPreviewController === controller) {
-        focusPreviewController = null;
-      }
-    }
-  }
-
-  function applyHydratedFocus(
-    job: ImageJob,
-    effective: ImageRecipe,
-    images: {
-      sourceImageData: ImageData;
-      processedImageData: ImageData;
-      outputImageData: ImageData;
-    },
-  ): void {
-    const output = job.output;
-    if (!output || effective.output.kind !== 'raster') {
-      seedFocusThroughEditor(job);
-      return;
-    }
-
-    focusSession.clearFile();
-    focusSession.preprocessorState = structuredClone(defaultPreprocessorState);
     focusSession.sides[0].format = 'identity';
-    focusSession.sides[0].processorState = structuredClone(
-      defaultProcessorState,
+    focusSession.preprocessorState = applyRecipeToSide(
+      recipe,
+      focusSession.sides[1],
     );
-    applyRecipeToSide(effective, focusSession.sides[1]);
-
-    const loadId = focusSession.loadId + 1;
-    const preprocessedWidth = images.sourceImageData.width;
-    const preprocessedHeight = images.sourceImageData.height;
-    // Seed each runtime under the exact signature the editor's own encode
-    // effect will recompute for this document, so hydration registers as
-    // "already on screen" instead of triggering a redundant re-encode.
-    const leftSig = encodeSignature(
-      focusSession.preprocessorState,
-      'identity',
-      {},
-      focusSession.sides[0].processorState,
-      preprocessedWidth,
-      preprocessedHeight,
-    );
-    const rightSig = encodeSignature(
-      focusSession.preprocessorState,
-      focusSession.sides[1].format,
-      focusSession.sides[1].optionsByFormat[focusSession.sides[1].format] ?? {},
-      focusSession.sides[1].processorState,
-      preprocessedWidth,
-      preprocessedHeight,
-    );
-    const leftResizeSig = resizeSignature(
-      focusSession.sides[0].processorState,
-      preprocessedWidth,
-      preprocessedHeight,
-    );
-    const rightResizeSig = resizeSignature(
-      focusSession.sides[1].processorState,
-      preprocessedWidth,
-      preprocessedHeight,
-    );
-
-    const leftOutcome: CompressOutcome = {
-      outputFile: job.sourceFile,
-      outputUrl: '#',
-      outputSize: job.sourceFile.size,
-      originalSize: job.sourceFile.size,
-      percentChange: 0,
-      sourceImageData: images.sourceImageData,
-      outputImageData: images.sourceImageData,
-      isOriginal: true,
-      preprocessedWidth,
-      preprocessedHeight,
-    };
-    const rightOutcome: CompressOutcome = {
-      outputFile: output.file,
-      outputUrl: output.downloadUrl,
-      outputSize: output.size,
-      originalSize: job.originalSize,
-      percentChange: Math.round(output.percentChange * 10) / 10,
-      sourceImageData: images.processedImageData,
-      outputImageData: images.outputImageData,
-      isOriginal: false,
-      preprocessedWidth,
-      preprocessedHeight,
-    };
-
-    focusSession.file = job.sourceFile;
-    focusSession.loadId = loadId;
-    seedHydratedRuntime(0, leftOutcome, leftSig, leftResizeSig, loadId);
-    seedHydratedRuntime(1, rightOutcome, rightSig, rightResizeSig, loadId);
     focusSession.history.clear();
-    lastFocusRecipe = currentFocusRecipe();
-    pendingSeed = null;
-    seeding = false;
+    lastFocusRecipe = recipe;
+
+    if (job.output?.settingsHash === bulkStore.settingsHashForJob(job)) {
+      focusSession.adoptResult(recipe, job.output.file);
+    }
   }
 
-  function seedHydratedRuntime(
-    index: 0 | 1,
-    outcome: CompressOutcome,
-    signature: string,
-    resizeSig: string,
-    loadId: number,
-  ): void {
-    const runtime = focusSession.runtime[index];
-    runtime.result = outcome;
-    runtime.displayedSig = signature;
-    runtime.encodedLoadId = loadId;
-    runtime.lastResizeSig = resizeSig;
-    runtime.spinnerDelayPassed = false;
-    runtime.error = '';
-    runtime.status = 'done';
+  function clearFocus(): void {
+    lastFocusRecipe = null;
+    focusSession.clearFile();
   }
 
   function onPick(event: Event) {
@@ -379,7 +124,7 @@
     />
   </div>
 
-  <Home {focusSession} onReseed={seedFocusFromSelected} />
+  <Home {focusSession} onReseed={loadFocus} />
 </div>
 
 <style>

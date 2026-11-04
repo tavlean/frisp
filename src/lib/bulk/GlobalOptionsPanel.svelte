@@ -1,6 +1,7 @@
 <script lang="ts">
   import OptionsPanel from '$lib/editor/OptionsPanel.svelte';
   import type { EditorSession } from '$lib/editor/editor-session.svelte';
+  import { SVG_FORMAT } from '$lib/editor/format-label';
   import { bulkStore } from './store.svelte';
 
   interface Props {
@@ -37,6 +38,23 @@
     bulkStore.seedGlobalResizeDimensions(width, height);
   });
 
+  // A batch of only SVGs edits the shared SVG options; anything else edits
+  // the raster shared recipe, and its SVGs keep the vector lane regardless.
+  const svgOnly = $derived(bulkStore.allJobsSvg);
+  const svgFormats = [
+    {
+      id: 'svg',
+      label: SVG_FORMAT.label,
+      tooltip: 'SVGO',
+      ext: SVG_FORMAT.extension,
+    },
+  ];
+
+  $effect(() => {
+    if (!svgOnly) return;
+    bulkStore.setSharedSvgOptions($state.snapshot(bulkStore.globalSvgOptions));
+  });
+
   function applyFormat(format: string): void {
     if (format === 'identity') return;
     bulkStore.setGlobalFormat(format as typeof bulkStore.globalSide.format);
@@ -48,23 +66,41 @@
      only) and render a quiet scope caption in its place; the batch result total
      lives once, in the LEFT panel footer. -->
 <div class="global-panel">
-  <OptionsPanel
-    side="left"
-    format={bulkStore.globalSide.format}
-    {formats}
-    options={bulkStore.globalSide.optionsByFormat[
-      bulkStore.globalSide.format
-    ] ?? {}}
-    processorState={bulkStore.globalSide.processorState}
-    {naturalWidth}
-    {naturalHeight}
-    isVector={bulkStore.selectedFile?.type === 'image/svg+xml'}
-    result={null}
-    working={false}
-    exportable={false}
-    downloadName=""
-    onFormatChange={applyFormat}
-  />
+  {#if svgOnly}
+    <OptionsPanel
+      side="left"
+      format="svg"
+      formats={svgFormats}
+      options={bulkStore.globalSvgOptions}
+      processorState={bulkStore.globalSide.processorState}
+      {naturalWidth}
+      {naturalHeight}
+      isVector
+      result={null}
+      working={false}
+      exportable={false}
+      downloadName=""
+      onFormatChange={() => {}}
+    />
+  {:else}
+    <OptionsPanel
+      side="left"
+      format={bulkStore.globalSide.format}
+      {formats}
+      options={bulkStore.globalSide.optionsByFormat[
+        bulkStore.globalSide.format
+      ] ?? {}}
+      processorState={bulkStore.globalSide.processorState}
+      {naturalWidth}
+      {naturalHeight}
+      isVector={bulkStore.selectedFile?.type === 'image/svg+xml'}
+      result={null}
+      working={false}
+      exportable={false}
+      downloadName=""
+      onFormatChange={applyFormat}
+    />
+  {/if}
 
   <!-- The batch result total lives once, in the LEFT panel footer. Here we just
        remind the user what these controls touch. -->
@@ -73,6 +109,11 @@
       Applies to all {totalJobs}
       {totalJobs === 1 ? 'image' : 'images'}
     </span>
+    {#if bulkStore.hasSvgJobs && !svgOnly}
+      <span class="scope-caption">
+        SVGs keep vector optimization. Open one to convert it.
+      </span>
+    {/if}
   </div>
 </div>
 
@@ -88,7 +129,8 @@
 
   .scope-footer {
     display: flex;
-    align-items: baseline;
+    flex-direction: column;
+    gap: 2px;
     padding: 11px 16px;
     border-top: 1px solid var(--border, rgba(255, 255, 255, 0.08));
     background: rgba(0, 0, 0, 0.18);
