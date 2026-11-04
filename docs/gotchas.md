@@ -121,6 +121,14 @@ this doc holds the cross-cutting ones that no single file owns.
   `downloadUrl`, silently breaks that owner's download later. Mint a fresh
   URL for the cache, as `adoptResult` does.
 
+- **A new select inside an encoder panel must not carry `builtin-select`.**
+  Many e2e specs (and the lab skins' CSS) find a panel's setting selects as
+  `select.builtin-select`, several expecting exactly one per panel
+  (`left-panel.spec.ts` counts them; `codec-encode.spec.ts` uses the right
+  panel's only one). The Auto select therefore uses `<Select action>`, which
+  drops the class. Adding a plain `<Select>` to an always-visible panel row
+  breaks specs far from the change with strict-mode violations.
+
 ## Measurement
 
 - **Any repeat encode of the same recipe in one page session is a `ResultCache`
@@ -141,12 +149,24 @@ this doc holds the cross-cutting ones that no single file owns.
   re-captured, so the next run looked like WebP had regressed 6 to 22 percent
   when nothing had regressed at all. Re-capture the baseline in the same commit
   that changes a default, a codec build, or the harness.
+- **SSIMULACRA2 at full size costs more than the encode it judges.** At
+  12 MP the metric took about 3 s per call in the worker against a 0.9 to
+  1.4 s WebP encode, so a time-boxed auto-quality search fit two probes.
+  Scoring now runs on a box-shrunk pair above 4 MP
+  (`src/worker/score-scale.ts`); anything new that scores large frames
+  should go through `scorePair` too.
 - **The `photo-large` bench fixture is a single cold run.** Treat it as a
   regression signal, never as a timing measurement.
 - **The SVG auto gate deliberately upscales small sources.** Precision loss that
   is invisible at 24px is obvious at 256px.
 
 ## Environment and process
+
+- **Playwright's `getByLabel(text, { exact: true })` cannot find a native
+  `<select>` wrapped in its `<label>`.** The label's text content includes
+  every option's text, so the exact match fails and the test times out
+  waiting. Use `getByRole('combobox', { name, exact: true })`, which reads
+  the computed accessible name.
 
 - **Dimensionless SVGs** with no `width`, `height`, or `viewBox` are rejected by
   the inherited import contract. They surface as errors in the benchmark and are

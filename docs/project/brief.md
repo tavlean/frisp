@@ -109,6 +109,19 @@ the multi-threaded runtime is verified in Chromium and WebKit. Gates are green:
 
 Shipped since then, newest first:
 
+- **Auto quality for WebP (2026-11-04, review change D, first codec).** An
+  Auto select under WebP's Quality (Visually lossless 90, High 80, Balanced
+  70, Compact 60) finds the lowest quality whose output meets the
+  SSIMULACRA2 target and sets the slider. Scoring runs in the codec worker
+  inside the `optimize` op against the processed frame, from a new
+  `codecs/ssimulacra2` module (precached, so it works offline). At most 8
+  encodes; a budget of 8 s plus 1 s per megapixel above 2 (capped at 20 s);
+  scoring on a box-shrunk pair above 4 MP; and no commit when time runs out
+  before anything below 100 passes. photo.jpg meets Balanced at quality 74
+  in about 2 s; a 12 MP photo at 37 to 38 in 13 to 15 s. AVIF, JPEG XL, and
+  jpegli are next. As built:
+  [specs/2026-07-11-auto-quality-mode.md](specs/2026-07-11-auto-quality-mode.md).
+
 - **The worker-side pipeline (2026-11-04, review change B).** Every raster
   encode is one call into the codec worker, which decodes the file itself
   (`createImageBitmap` plus `OffscreenCanvas`, WASM when the browser cannot),
@@ -209,8 +222,9 @@ The full ordered plan is [roadmap.md](roadmap.md).
    (2026-11-04, change B); what is left of change C is measuring and
    publishing a supported batch size. Thumbnail decodes, the output byte cap,
    and the OxiPNG thread budget have landed.
-3. **Auto-quality on one codec, then outcome-first defaults.** The feature
-   that makes Frisp more than a maintained Squoosh, in both doors.
+3. **Auto-quality on the remaining lossy codecs, then outcome-first
+   defaults.** WebP shipped 2026-11-04; AVIF, JPEG XL, and jpegli are next.
+   The feature that makes Frisp more than a maintained Squoosh, in both doors.
 4. **The UI revisit.** The maintainer revisits the editor re-style soon; the
    three lab skins stay until then.
 5. **Close the SVG benchmark (S8)** with what it has.

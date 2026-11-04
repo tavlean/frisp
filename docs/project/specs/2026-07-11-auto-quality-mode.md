@@ -1,10 +1,59 @@
 # Spec: Auto-quality mode (SSIMULACRA2-targeted quality search)
 
-Last updated: 2026-07-11. Status: **not started.**
+Last updated: 2026-11-04. Status: **WebP shipped 2026-11-04; other codecs pending.**
 Origin: maintainer decision 2026-07-11 (codec guidance session). Related:
 [2026-07-11-frisp-cli-analysis](../../frisp-cli-analysis.md) (the same engine is
 the planned core of a future CLI), [codec-options-model.md](../../codec-options-model.md)
 (the control-registry seam this feature slots into).
+
+## As built (2026-11-04)
+
+What shipped differs from the plan below in these ways; the rest of this spec
+is kept as the history of the decision.
+
+- **Module.** `codecs/ssimulacra2/` is built natively with emsdk 3.1.0 from
+  cloudinary/ssimulacra2 `81feacf6` plus Highway 1.0.2 and **lcms2 2.16**. The
+  plan said only Highway was needed; the metric's vendored libjxl slice does
+  its colour management through lcms2 (its skcms branch needs a header the
+  slice does not ship). The `.js`/`.wasm` pair sits in the codec root, not
+  `pkg/`. Pins and licenses: [codec-provenance.md](../../codec-provenance.md);
+  recipe: [codec-build-notes.md](../../codec-build-notes.md#ssimulacra2).
+- **Alpha is scored, not ignored.** With any transparency, both images are
+  blended onto a dark and a bright background and the worse score counts, as
+  the reference CLI does.
+- **Scoring runs in the codec worker, inside the `optimize` op** (the
+  worker-side pipeline, change B). A probe is
+  `optimizeImage(..., { preview: true, score: true })`: the worker runs resize,
+  grain, and quantize (`processFrame` in pipeline-core.ts), encodes, decodes
+  the output once, and scores the decoded output against that **processed**
+  frame, not the raw source. The target therefore measures the encoder's loss
+  alone, and a resize can never cause a size mismatch. The decoded output is
+  also the preview, so nothing decodes twice. Scored requests are pixel-lane
+  only; a JXL transcode is refused.
+- **Downscaled scoring.** Above 4 MP both frames are box-filtered by the same
+  whole factor until the long edge is at most 2048 px (`src/worker/score-scale.ts`).
+  At 12 MP the full-size metric took about 3 s per probe, more than the WebP
+  encode.
+- **Search.** `searchQuality` in `src/lib/editor/auto-quality.ts`: a ceiling
+  probe, then at most 7 bisection steps with lo starting one below the range
+  (so the bottom of the range can win), so at most 8 encodes.
+- **Budget.** 8 s plus 1 s per megapixel above 2 of the processed size, capped
+  at 20 s. Once spent, no new probe starts.
+- **No guessed commits.** A budget stop with a pass below the ceiling commits
+  that pass ("stopped after n s"). A budget stop with nothing passing below
+  the ceiling commits nothing ("Auto ran out of time on this large image;
+  quality unchanged."). A ceiling that fails within budget commits 100 with
+  the honest best score.
+- **Caching.** Losing probes' URLs are revoked as soon as the search drops
+  them; the winner goes into the session ResultCache under the key encodeSide
+  computes after the commit, so the displayed result is a cache hit.
+- **Cancel.** A new search, any change to the side's recipe (not only
+  Quality), a format change, or a new or closed file cancels the running one.
+- **WebP only.** Bounds exist for `webP` alone; AVIF, JPEG XL, and jpegli are
+  next (one bounds entry plus the panel row each). MozJPEG left the picker.
+- **Measured (2026-11-04, Balanced):** photo.jpg meets the target at quality
+  74 in about 2 s in Chromium and WebKit; photo-large.jpg (12 MP) meets it at
+  quality 37 to 38 in 13 to 15 s.
 
 ## Objective
 

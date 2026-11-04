@@ -129,6 +129,19 @@ struct. Lossless vs lossy splits the whole panel.
 | Slight loss         | `near_lossless`           | range    | 0–100, **inverted** (`100 − value`)                                          | 100 → bubble shows 0 |
 | Discrete tone image | `image_hint`              | checkbox | sets 3 (`WEBP_HINT_GRAPH`) vs 0 (`WEBP_HINT_DEFAULT`)                        | 0                    |
 
+**Lossy → Auto** (an action, not a stored option; no `EncodeOptions` key)
+
+A select under Quality: Visually lossless (SSIMULACRA2 90), High (80), Balanced (70),
+Compact (60). Choosing one runs a search for the lowest `quality` (0–100) whose output
+scores at least the target against the processed frame, then writes that quality like
+a slider move. At most 8 encodes (a ceiling probe at 100, then up to 7 bisection
+steps). Budget: 8 s plus 1 s per megapixel above 2, capped at 20 s; above 4 MP the
+score is taken on a box-shrunk pair (long edge at most 2048 px). A budget stop with a
+pass keeps the pass; a budget stop with nothing passing below 100 commits nothing. A
+ceiling that fails within budget commits 100. Shown only in lossy mode and only in the
+single-image editor (bulk and the labs omit it). Source: `src/lib/editor/auto-quality.ts`,
+`EditorSession.autoQuality`.
+
 Lossy Effort defaults to 4, libwebp's own default (it was 6 until 2026-11-04).
 Method 6 saved 3 to 5% on photos but ran about 50x slower on alpha content for a
 slightly larger file (transparent.png: 2880 ms vs 57 ms). The slider still reaches

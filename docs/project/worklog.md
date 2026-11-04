@@ -4,6 +4,42 @@ Short session-by-session build log: what changed, why, and the gotchas a future
 session must know. Newest first. (Live project state stays in
 [the project brief](brief.md); this is the narrative trail.)
 
+## 2026-11-04 (Opus, executor) - Auto quality for WebP (review change D, first codec)
+
+Branch `feat/auto-quality`, in three phases:
+
+- `d258b31e`: `codecs/ssimulacra2/`, built natively with emsdk 3.1.0 from
+  cloudinary/ssimulacra2 `81feacf6`, Highway 1.0.2, and lcms2 2.16 (the
+  metric's libjxl slice needs lcms2 for colour management). One export,
+  `score(ref, dist, w, h)` on RGBA8; alpha is judged on dark and bright
+  backgrounds and the worse score counts.
+- `aab29fa3`, `4fe62570`: wired through the add-a-codec touch list
+  (precached everywhere, so Auto works offline), a worker op, provenance
+  pins, and build notes. `tests/e2e/ssimulacra2.spec.ts` drives the built
+  worker over Comlink's message protocol, with no hook in the app.
+- `ab01c135`: `src/lib/editor/auto-quality.ts` (`searchQuality`: ceiling
+  probe plus at most 7 bisection steps, at most 8 encodes), `autoQuality`
+  on `EditorSession`, and the Auto row in `WebpOptions.svelte`. The winning
+  probe goes into the ResultCache under the key encodeSide computes, so the
+  final display is a cache hit.
+- After merging change B: scoring moved into the worker. `OptimizeRequest`
+  gained `score`; the `optimize` op runs `processFrame` (split out of
+  `encodeFrame`), encodes, decodes once, and scores against the processed
+  frame, with that decode doubling as the preview.
+- The 12 MP fix: the full-size metric cost about 3 s per probe at 12 MP
+  (more than the 0.9 to 1.4 s WebP encode), so an 8 s budget fit two probes
+  and committed quality 100. Now scoring runs on a box-shrunk pair above
+  4 MP (`src/worker/score-scale.ts`, long edge at most 2048 px), the budget is
+  8 s plus 1 s per megapixel above 2 (capped at 20 s), and a budget stop with
+  nothing passing below 100 commits nothing.
+
+Measured on Balanced (e2e logs): photo.jpg meets the target at quality 74 in
+about 2 s in Chromium and WebKit; photo-large.jpg meets it at 37 (Chromium,
+15.0 s) and 38 (WebKit, 13.4 s); transparent.png on High at 24 in 1.3 s.
+
+Gotchas: see docs/gotchas.md (Playwright and native selects inside labels;
+the `select.builtin-select` convention; the metric's cost at 12 MP).
+
 ## 2026-11-04 (Opus, executor) - the worker-side pipeline (review change B)
 
 Wrote [specs/2026-11-04-worker-side-pipeline.md](specs/2026-11-04-worker-side-pipeline.md)

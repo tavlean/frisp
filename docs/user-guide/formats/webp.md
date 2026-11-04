@@ -45,6 +45,16 @@ The panel changes shape depending on the **Lossless** toggle. Two controls are a
 - **How to choose:** This is the setting you'll adjust most. Watch the preview and the output size, then pick the lowest value that still looks good. Below ~50 you'll start seeing visible artifacts on most photos; above ~90 the file grows quickly for little visible gain.
 - **Recommended starting point:** **80** (the default). Try **65–85** for typical web photos — lower for smaller files, higher when quality matters most.
 
+#### Auto
+
+- **What it does:** Picks the Quality value for you. Choose a target and Frisp tries a handful of qualities, scores each result against your image with SSIMULACRA2 (a perceptual metric: 100 means identical, 90 visually lossless, 70 high quality), and sets the slider to the **lowest** quality that still reaches the target. You see the slider move and the result update; nothing else changes.
+- **Targets:** **Visually lossless** (score 90), **High** (80), **Balanced** (70), **Compact** (60, slight loss you may notice when you look for it).
+- **What it measures:** only what the encoder loses. The score compares the encoded result with the image the encoder received, after any resize, film grain, or palette reduction you set, so those edits never count against the target. With transparency, the image is judged on both a dark and a bright background and the worse score counts, so damage cannot hide in transparent areas.
+- **How long it takes:** at most 8 encodes, usually a second or two for a typical photo. It is given 8 seconds, plus 1 second per megapixel above 2 (at most 20 seconds); on images above 4 megapixels the scoring runs on a shrunk copy (long edge at most 2048 px) of both images so it keeps up. If time runs out after a passing result was found, Frisp keeps that result and says it stopped early. If time runs out before anything below quality 100 passed, it changes nothing and tells you so, rather than guess.
+- **When the target is out of reach:** if even quality 100 scores below the target (for example after a heavy palette reduction), Frisp sets 100 and tells you the best score WebP managed.
+- **While it runs:** the row shows "Finding quality…" and a **Cancel** button. Moving any setting on that side, switching format, or opening another image also cancels it. Hidden in lossless mode, where there is no quality to choose.
+- **Recommended starting point:** **Balanced** for web photos; **High** or **Visually lossless** when quality matters more than bytes.
+
 ---
 
 ### Lossless mode controls (Lossless on)
