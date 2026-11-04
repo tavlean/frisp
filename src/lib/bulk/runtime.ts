@@ -38,6 +38,8 @@ export interface BulkRunnerHost {
   cachedOutputFor?(job: ImageJob): ImageOutput | undefined;
   rememberOutput?(jobId: string, output: ImageOutput): void;
   settingsHashForJob?(job: ImageJob): string;
+  /** Requeue every job whose output no longer matches its live settings. */
+  requeueStale?(): void;
 }
 
 export class BulkRuntime {
@@ -94,8 +96,12 @@ export class BulkRuntime {
         ]);
       } while (!signal.aborted && this.#rerunRequested);
     } finally {
-      if (this.#controller === controller) this.#controller = null;
-      this.#running = false;
+      // Only the current run releases the latch: after cancelProcessing() a
+      // newer run may already own it while this aborted loop unwinds.
+      if (this.#controller === controller) {
+        this.#controller = null;
+        this.#running = false;
+      }
     }
   }
 
@@ -144,6 +150,18 @@ export class BulkRuntime {
       };
       host.session = completeJob(host.session, job.id, completedOutput);
       host.rememberOutput?.(job.id, completedOutput);
+      // Settings can change while a job is in flight, and the store's
+      // settings pass leaves an active job with no output alone. Recheck
+      // against the live recipe now, so a job never settles under settings
+      // the user has already replaced.
+      const settled = host.session.jobs.find((item) => item.id === job.id);
+      if (
+        settled &&
+        host.settingsHashForJob &&
+        host.settingsHashForJob(settled) !== completedOutput.settingsHash
+      ) {
+        host.requeueStale?.();
+      }
     } catch (error) {
       // An abort is a clean cancel, not a job failure: leave the reducer to
       // cancelActiveJobs() (called from cancelProcessing()) so the job returns
@@ -164,6 +182,11 @@ export class BulkRuntime {
   cancelProcessing(host: BulkRunnerHost): void {
     this.#controller?.abort();
     this.#controller = null;
+    // Release the latch now rather than when the aborted loop unwinds, so a
+    // run() requested right after the cancel starts a fresh drain instead of
+    // flagging a rerun the aborted loop will never honor.
+    this.#running = false;
+    this.#rerunRequested = false;
     host.session = cancelActiveJobs(host.session);
   }
 

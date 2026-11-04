@@ -102,6 +102,17 @@ test('Save never offers the previous result under the new format name', async ({
   ).toHaveAttribute('download', /\.avif$/, { timeout: 60_000 });
 });
 
+test('bulk offers no Rotate that its export would ignore', async ({ page }) => {
+  await page.goto('/');
+  await page.setInputFiles(FILE_INPUT, [photo, gradient]);
+  await waitBulkReady(page, 2);
+  await page.locator(CELL).nth(0).locator('.thumb').click();
+  await expect(page.locator('.bulk-mode .options-2')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Rotate' })).toHaveCount(0);
+});
+
+// Rotation joins the bulk recipe with the one-recipe model (first-principles
+// review 2026-11-02, change A); until then bulk hides Rotate instead.
 test.fixme('rotating an image in bulk rotates its exported file', async ({
   page,
 }) => {
@@ -125,6 +136,9 @@ test.fixme('rotating an image in bulk rotates its exported file', async ({
   expect(size).toEqual({ width: 683, height: 1024 });
 });
 
+// Bulk has no vector lane yet: a batch of SVGs exports WebP (consistently
+// labelled), while one SVG stays vector. The one-recipe model (change A)
+// dispatches raster, SVG, and transcode alike and lifts this fixme.
 test.fixme('a batch of SVGs gets the same vector optimization as one SVG', async ({
   page,
 }) => {
@@ -140,7 +154,7 @@ test.fixme('a batch of SVGs gets the same vector optimization as one SVG', async
   expect(bytes.toString('utf8')).toMatch(/^\s*(<\?xml[^>]*>\s*)?<svg/);
 });
 
-test.fixme('changing settings during the first pass leaves no job stale', async ({
+test('changing settings during the first pass leaves no job stale', async ({
   page,
 }) => {
   await page.goto('/');
@@ -223,4 +237,27 @@ test.fixme('the first SVG optimized offline works without a prior online SVG', a
   );
   expect(outputBytes).toBeLessThan(Buffer.byteLength(SVG));
   await context.setOffline(false);
+});
+
+test('removing an image mid-encode does not stall the rest of the batch', async ({
+  page,
+}) => {
+  await page.goto('/');
+  await page.setInputFiles(FILE_INPUT, [photoLarge, gradient, screenshot]);
+  await expect(page.locator(CELL)).toHaveCount(3, { timeout: 10_000 });
+
+  // Remove the 12 MP image while the first pass is still on it; the cancel
+  // returns the other active job to the queue and must restart the run.
+  await expect(
+    page.locator(CELL).first().locator('.spinner-overlay'),
+  ).toBeVisible({
+    timeout: 10_000,
+  });
+  await page
+    .locator(CELL)
+    .first()
+    .locator('button.remove')
+    .evaluate((node: HTMLButtonElement) => node.click());
+  await expect(page.locator(CELL)).toHaveCount(2);
+  await waitBulkReady(page, 2);
 });

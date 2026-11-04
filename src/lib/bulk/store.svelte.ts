@@ -811,6 +811,13 @@ export class BulkStore {
     );
   }
 
+  requeueStale(): void {
+    const next = this.#restoreCachedOrQueueStale(this.session);
+    if (next === this.session) return;
+    this.session = next;
+    this.#pinCurrentOutputs();
+  }
+
   settingsHashForJob(job: ImageJob): string {
     return this.#settingsHashForJob(this.session, job);
   }

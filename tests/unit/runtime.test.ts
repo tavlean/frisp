@@ -159,4 +159,70 @@ describe('bulk runtime', () => {
       ['c', 'encoded'],
     ]);
   });
+
+  it('a run requested right after a cancel restarts the drain', async () => {
+    const runtime = new BulkRuntime();
+    const host = createHost([job('a'), job('b'), job('c')]);
+    const processor = installControlledProcessor();
+
+    const first = runtime.run(host);
+    expect(processor.starts).toEqual(['a', 'b']);
+
+    // The store removes an active image: cancel, then ask for a new run
+    // before the aborted loop has unwound.
+    runtime.cancelProcessing(host);
+    const second = runtime.run(host);
+    await first;
+    await flushMicrotasks();
+
+    expect(processor.starts).toEqual(['a', 'b', 'a', 'b']);
+    processor.resolve('a');
+    processor.resolve('b');
+    await flushMicrotasks();
+    processor.resolve('c');
+    await second;
+    expect(host.session.jobs.map((item) => item.status)).toEqual([
+      'encoded',
+      'encoded',
+      'encoded',
+    ]);
+  });
+
+  it('asks the host to requeue a job that finished under superseded settings', async () => {
+    const runtime = new BulkRuntime();
+    let recipe = 'v1';
+    const requeueStale = vi.fn();
+    const host: BulkRunnerHost = {
+      ...createHost([job('a')]),
+      settingsHashForJob: () => recipe,
+      requeueStale,
+    };
+    const processor = installControlledProcessor();
+
+    const run = runtime.run(host);
+    expect(processor.starts).toEqual(['a']);
+    recipe = 'v2';
+    processor.resolve('a');
+    await run;
+
+    expect(host.session.jobs[0].output?.settingsHash).toBe('v1');
+    expect(requeueStale).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not requeue a job whose settings held for the whole pass', async () => {
+    const runtime = new BulkRuntime();
+    const requeueStale = vi.fn();
+    const host: BulkRunnerHost = {
+      ...createHost([job('a')]),
+      settingsHashForJob: () => 'v1',
+      requeueStale,
+    };
+    const processor = installControlledProcessor();
+
+    const run = runtime.run(host);
+    processor.resolve('a');
+    await run;
+
+    expect(requeueStale).not.toHaveBeenCalled();
+  });
 });
