@@ -39,6 +39,7 @@
   import type { EncodeOptions as JpegliEncodeOptions } from 'features/encoders/jpegli/shared/meta';
   import type { EncodeOptions as OxipngEncodeOptions } from 'features/encoders/oxiPNG/shared/meta';
   import type { SvgOptimizeOptions } from '$lib/svg/optimize-options';
+  import type { AutoQualityControl } from './auto-quality';
 
   interface Props {
     side: 'left' | 'right';
@@ -65,6 +66,8 @@
     downloadName: string;
     onFormatChange: (format: SideFormat) => void;
     onCloseCompare?: () => void;
+    /** The side's Auto quality action; hosts without one (bulk, labs) omit it. */
+    autoQuality?: AutoQualityControl;
   }
 
   let {
@@ -84,6 +87,7 @@
     downloadName,
     onFormatChange,
     onCloseCompare,
+    autoQuality,
   }: Props = $props();
 
   const isOriginal = $derived(format === 'identity');
@@ -179,7 +183,10 @@
             winner={result?.svg?.winner}
           />
         {:else if format === 'webP'}
-          <WebpOptions options={options as unknown as WebpEncodeOptions} />
+          <WebpOptions
+            options={options as unknown as WebpEncodeOptions}
+            {autoQuality}
+          />
         {:else if format === 'avif'}
           <AvifOptions options={options as unknown as AvifEncodeOptions} />
         {:else if format === 'jxl'}

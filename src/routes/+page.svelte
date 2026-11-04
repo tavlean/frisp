@@ -21,12 +21,24 @@
   import { snackbar } from '$lib/editor/snackbar-store.svelte';
   import { fileDrop } from '$lib/editor/file-drop';
   import { EditorSession } from '$lib/editor/editor-session.svelte';
+  import type { AutoQualityControl } from '$lib/editor/auto-quality';
   import { IDENTITY, type CompressOutcome } from '$lib/compress';
   import { isSupportedBulkImage } from 'client/lazy-app/bulk';
   import { APP_NAME } from 'shared/brand';
   import '$lib/editor/theme.css';
 
   const session = new EditorSession();
+
+  // Each side's Auto quality action. A getter, not a copied value, so the
+  // panel reads `running` live from the session.
+  const autoQualityFor = (index: 0 | 1): AutoQualityControl => ({
+    get running() {
+      return session.autoQualityRunning[index];
+    },
+    run: (target) => void session.autoQuality(index, target),
+    cancel: () => session.cancelAutoQuality(index),
+  });
+  const autoQuality = [autoQualityFor(0), autoQualityFor(1)] as const;
 
   // A side whose output IS an SVG file (the Original side of an SVG source, or
   // the optimized 'svg' side) previews via the vector-true overlay instead of
@@ -329,6 +341,7 @@
             downloadName={session.downloadName(0)}
             onFormatChange={(f) => session.setFormat(0, f)}
             onCloseCompare={() => session.setFormat(0, IDENTITY)}
+            autoQuality={autoQuality[0]}
           />
         {/if}
       </aside>
@@ -351,6 +364,7 @@
           exportable={session.runtime[1].exportable}
           downloadName={session.downloadName(1)}
           onFormatChange={(f) => session.setFormat(1, f)}
+          autoQuality={autoQuality[1]}
         />
       </aside>
     </div>

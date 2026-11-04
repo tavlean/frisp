@@ -1,6 +1,10 @@
 <script lang="ts">
   // A styled native select with a custom chevron. `value` is bindable;
   // children supply <option>s. `large` is the prominent format picker.
+  // `action` marks a select that runs a one-shot command on choose (Auto
+  // quality) rather than holding a setting: it drops the `builtin-select`
+  // class, which hosts and e2e specs use to find a panel's setting selects
+  // (the format picker first among them).
   import type { Snippet } from 'svelte';
 
   interface Props {
@@ -9,6 +13,7 @@
     /** Hover tooltip on the collapsed control (e.g. the active encoder). */
     title?: string;
     large?: boolean;
+    action?: boolean;
     disabled?: boolean;
     onchange?: (value: string) => void;
     children: Snippet;
@@ -19,6 +24,7 @@
     name,
     title,
     large = false,
+    action = false,
     disabled = false,
     onchange,
     children,
@@ -27,8 +33,7 @@
 
 <div class="select">
   <select
-    class="builtin-select"
-    class:large
+    class={{ 'builtin-select': !action, large }}
     {name}
     {title}
     {disabled}
@@ -51,7 +56,7 @@
     position: relative;
   }
 
-  .builtin-select {
+  select {
     background: rgba(0, 0, 0, 0.35);
     border-radius: 8px;
     font: inherit;
@@ -70,12 +75,12 @@
       background-color 150ms ease;
   }
 
-  .builtin-select:hover {
+  select:hover {
     border-color: var(--border-strong, rgba(255, 255, 255, 0.16));
     background: rgba(0, 0, 0, 0.45);
   }
 
-  .builtin-select:focus-visible {
+  select:focus-visible {
     outline: none;
     border-color: var(--main-theme-color);
   }

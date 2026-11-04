@@ -31,6 +31,13 @@ import {
 } from 'client/lazy-app/recipe';
 import { getPercentChange } from 'client/lazy-app/bulk/size';
 import { recipeFromSide } from './side-recipe';
+import {
+  AUTO_QUALITY_BOUNDS,
+  AUTO_QUALITY_LABELS,
+  AUTO_QUALITY_TARGETS,
+  searchQuality,
+  type AutoQualityTarget,
+} from './auto-quality';
 import { applyGrainToPixels } from 'features/processors/grain/shared/apply';
 import {
   decodeImage,
@@ -100,6 +107,13 @@ const SETTINGS_PERSIST_DELAY = 200;
 const HISTORY_COMMIT_DELAY = 350;
 
 const sideLabel = (index: SideIndex) => (index === 0 ? 'Left' : 'Right');
+
+interface AutoQualityRun {
+  controller: AbortController;
+  sig: string;
+}
+
+const formatScore = (score: number) => score.toFixed(1);
 
 function buildSide(
   saved: SavedSide | undefined,
@@ -220,6 +234,13 @@ export class EditorSession {
     new SideRuntime(),
   ];
   canImport = $state<[boolean, boolean]>([hasSavedSide(0), hasSavedSide(1)]);
+  // Whether each side has an auto-quality search running (drives the panel's
+  // busy row). See autoQuality.
+  autoQualityRunning = $state<[boolean, boolean]>([false, false]);
+  // The running search per side: its controller, and the side's recipe
+  // signature when it started, which the watcher compares against to cancel
+  // it the moment the user changes anything the search snapshotted.
+  #autoQuality: [AutoQualityRun | null, AutoQualityRun | null] = [null, null];
 
   // Undo/redo over the editable document (see DocSnapshot). The UI reads
   // `history.canUndo` / `history.canRedo` to drive the toolbar buttons.
@@ -325,6 +346,7 @@ export class EditorSession {
         $effect(() => this.encodeSide(index));
         $effect(() => this.updateSpinner(index));
         $effect(() => this.updateGrainPreview(index));
+        $effect(() => this.watchAutoQuality(index));
       }
       // One watcher commits debounced undo steps as the document changes.
       $effect(() => this.watchHistory());
@@ -604,6 +626,183 @@ export class EditorSession {
       if (this.inflight.get(key) === pass) this.inflight.delete(key);
     };
     pass.then(settle, settle);
+  }
+
+  // ── Auto quality ─────────────────────────────────────────────────────────
+  // A one-shot action: find the lowest quality whose output meets a
+  // SSIMULACRA2 target (auto-quality.ts owns the search), then write it into
+  // the side's options like a slider move would. Nothing about it is stored or
+  // signed: the committed quality is an ordinary option value.
+
+  /** The side's output-affecting recipe plus the open file, as the watcher
+   *  sees it. Reads deeply, so calling it from an effect tracks every field. */
+  #autoQualitySig(index: SideIndex): string {
+    return stableStringify({
+      loadId: this.loadId,
+      recipe: normalizedRecipe(
+        recipeFromSide(
+          this.snapshotSide(index),
+          $state.snapshot(this.preprocessorState) as PreprocessorState,
+        ),
+      ),
+    });
+  }
+
+  /** Cancels a running search once its side's recipe, format, or file moves
+   *  away from what the search snapshotted (a Quality drag included), since
+   *  committing `{ ...snapshot, quality }` would then undo the user's edit.
+   *  Cancelling writes `autoQualityRunning` from inside this effect on
+   *  purpose: it stops async work, which no $derived can do, and the effect
+   *  never reads that flag, so the write cannot loop. */
+  private watchAutoQuality(index: SideIndex): void {
+    const sig = this.#autoQualitySig(index);
+    const run = this.#autoQuality[index];
+    if (run && run.sig !== sig) this.cancelAutoQuality(index);
+  }
+
+  cancelAutoQuality(index: SideIndex): void {
+    const run = this.#autoQuality[index];
+    if (!run) return;
+    this.#autoQuality[index] = null;
+    this.autoQualityRunning[index] = false;
+    run.controller.abort();
+  }
+
+  /**
+   * Search this side's quality for `target` and commit the result. Probes run
+   * the side's own recipe with only `quality` substituted, on the side's own
+   * bridge, through the same optimizeImage call encodeSide makes, and score
+   * the decoded output against the outcome's `sourceImageData`: the processed
+   * frame (after resize, grain, palette) the encoder received, so the target
+   * measures the encoder's loss alone and the sizes always match. Every probe
+   * URL is revoked as soon as the search drops it; the winner goes into the
+   * result cache under the key encodeSide computes after the commit, so the
+   * displayed encode is a cache hit rather than a ninth encode.
+   */
+  async autoQuality(
+    index: SideIndex,
+    target: AutoQualityTarget,
+  ): Promise<void> {
+    this.cancelAutoQuality(index);
+    const side = this.sides[index];
+    const format = side.format;
+    const bounds = AUTO_QUALITY_BOUNDS[format];
+    if (!this.file || !bounds) return;
+
+    const options = $state.snapshot(side.optionsByFormat[format]) as Record<
+      string,
+      unknown
+    >;
+    const processorState = $state.snapshot(
+      side.processorState,
+    ) as ProcessorState;
+    const preprocessorState = $state.snapshot(
+      this.preprocessorState,
+    ) as PreprocessorState;
+    const loadId = this.loadId;
+    const controller = new AbortController();
+    const { signal } = controller;
+    this.#autoQuality[index] = { controller, sig: this.#autoQualitySig(index) };
+    this.autoQualityRunning[index] = true;
+
+    const bridge = this.bridgeFor(index);
+    const withQuality = (quality: number) => ({ ...options, quality });
+    const probe = async (quality: number) => {
+      const prepared = await abortable(
+        signal,
+        this.#preparedSource(bridge, preprocessorState),
+      );
+      const recipe = recipeFromSide(
+        {
+          format,
+          optionsByFormat: { [format]: withQuality(quality) },
+          processorState,
+        },
+        preprocessorState,
+      );
+      const outcome = await optimizeImage(prepared, recipe, {
+        signal,
+        bridge,
+        preview: true,
+      });
+      try {
+        // The metric op copies both frames to the worker and transfers
+        // nothing, so the cached decoded source behind sourceImageData stays
+        // intact for the next probe and the editor.
+        const score = await bridge.ssimulacra2Score(
+          signal,
+          outcome.sourceImageData,
+          outcome.outputImageData,
+        );
+        return { score, outcome };
+      } catch (error) {
+        URL.revokeObjectURL(outcome.outputUrl);
+        throw error;
+      }
+    };
+
+    const started = performance.now();
+    try {
+      const found = await searchQuality({
+        probe,
+        lo: bounds.lo,
+        hi: bounds.hi,
+        target: AUTO_QUALITY_TARGETS[target],
+        signal,
+        discard: ({ outcome }) => URL.revokeObjectURL(outcome.outputUrl),
+      });
+      const { outcome } = found.result;
+      // searchQuality rejects on an abort at any of its awaits; this guards
+      // the synchronous tail as well, so a cancelled search never commits.
+      if (signal.aborted || this.loadId !== loadId) {
+        URL.revokeObjectURL(outcome.outputUrl);
+        return;
+      }
+      this.#autoQuality[index] = null;
+      this.autoQualityRunning[index] = false;
+
+      const committed = withQuality(found.quality);
+      const key = encodeSignature(
+        preprocessorState,
+        format,
+        committed,
+        processorState,
+        untrack(() => this.naturalWidth),
+        untrack(() => this.naturalHeight),
+      );
+      if (this.cache.get(key)) URL.revokeObjectURL(outcome.outputUrl);
+      else this.cache.set(key, outcome);
+      // A new object, not a mutation, so the panel's {#key options} remounts
+      // and the encode effect runs (and lands on the cache entry above).
+      side.optionsByFormat[format] = committed;
+
+      const score = formatScore(found.score);
+      const label =
+        OUTPUT_FORMATS.find((entry) => entry.id === format)?.label ?? format;
+      if (!found.met) {
+        void snackbar.show(
+          `Best ${label} can do here is ${score}; used quality ${found.quality}.`,
+        );
+      } else if (found.timedOut) {
+        const seconds = Math.round((performance.now() - started) / 1000);
+        void snackbar.show(
+          `Auto: stopped after ${seconds} s at quality ${found.quality} (score ${score}).`,
+        );
+      } else {
+        void snackbar.show(
+          `Auto: ${AUTO_QUALITY_LABELS[target]} met at quality ${found.quality} (score ${score}).`,
+        );
+      }
+    } catch (error) {
+      if (this.#autoQuality[index]?.controller === controller) {
+        this.#autoQuality[index] = null;
+        this.autoQualityRunning[index] = false;
+      }
+      if (signal.aborted || isAbortError(error)) return;
+      void snackbar.show(
+        `Auto quality failed: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
   }
 
   /** The side's persistent bridge, created on first use (see `bridges`). */
@@ -1083,6 +1282,8 @@ export class EditorSession {
   }
 
   clearFile(): void {
+    this.cancelAutoQuality(0);
+    this.cancelAutoQuality(1);
     this.file = null;
     for (const runtime of this.runtime) runtime.reset();
     this.preprocessorState = structuredClone(defaultPreprocessorState);
@@ -1097,6 +1298,8 @@ export class EditorSession {
     // constructor.
     this.stopEffects?.();
     this.stopEffects = null;
+    this.cancelAutoQuality(0);
+    this.cancelAutoQuality(1);
     this.clearHistoryTimer();
     // Persist any pending settings change before teardown so the debounce never
     // drops the user's last edit.
