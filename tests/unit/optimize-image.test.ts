@@ -3,29 +3,27 @@ import {
   defaultProcessorState,
   type EncoderState,
 } from '../../src/client/lazy-app/feature-meta/shared';
-import type { SourceImage } from '../../src/client/lazy-app/image-pipeline';
 import type { ImageRecipe } from '../../src/client/lazy-app/recipe';
 import { getDefaultOptions } from '../../src/lib/compress';
 import type SvelteKitWorkerBridge from '../../src/lib/sveltekit-worker-bridge';
 import { DEFAULT_SVG_OPTIONS } from '../../src/lib/svg/optimize-options';
 import { fakeFile } from './fixtures';
 
-const lanes = vi.hoisted(() => ({
-  compressPreprocessed: vi.fn(),
-  transcodeJpegToJxl: vi.fn(),
-  optimizeSvgSide: vi.fn(),
-}));
+const lanes = vi.hoisted(() => ({ optimizeSvgSide: vi.fn() }));
 
-vi.mock('../../src/lib/compress', async (importOriginal) => ({
-  ...(await importOriginal<typeof import('../../src/lib/compress')>()),
-  compressPreprocessed: lanes.compressPreprocessed,
-  transcodeJpegToJxl: lanes.transcodeJpegToJxl,
-}));
 vi.mock('../../src/lib/svg/optimize', () => ({
   optimizeSvgSide: lanes.optimizeSvgSide,
 }));
 
-const { TranscodeUnsupportedError } = await import('../../src/lib/compress');
+globalThis.ImageData ??= class {
+  constructor(
+    public data: Uint8ClampedArray,
+    public width: number,
+    public height: number,
+  ) {}
+} as unknown as typeof ImageData;
+URL.createObjectURL ??= () => 'blob:fake';
+
 const { chooseLane, optimizeImage } =
   await import('../../src/lib/optimize-image');
 
@@ -109,68 +107,126 @@ describe('chooseLane', () => {
 
 describe('optimizeImage', () => {
   const signal = new AbortController().signal;
-  const bridge = {} as SvelteKitWorkerBridge;
-  const pixels = { data: new Uint8ClampedArray(4), ...SOURCE };
-
-  function source(file: File): SourceImage {
-    return {
-      file,
-      decoded: pixels,
-      preprocessed: pixels,
-    } as unknown as SourceImage;
-  }
+  const frame = new ImageData(new Uint8ClampedArray(16), 2, 2);
+  const svgRaster = () =>
+    Promise.resolve({
+      image: {} as HTMLImageElement,
+      raster: new ImageData(
+        new Uint8ClampedArray(SOURCE.width * SOURCE.height * 4),
+        SOURCE.width,
+        SOURCE.height,
+      ),
+    });
+  const encoded = (edit: object = {}) => ({
+    kind: 'encoded',
+    bytes: new ArrayBuffer(10),
+    decodedWidth: 4,
+    decodedHeight: 2,
+    preparedWidth: 2,
+    preparedHeight: 4,
+    transcodeFellBack: false,
+    ...edit,
+  });
+  let optimize: ReturnType<typeof vi.fn>;
+  let bridge: SvelteKitWorkerBridge;
 
   beforeEach(() => {
-    for (const lane of Object.values(lanes)) lane.mockReset();
-    lanes.compressPreprocessed.mockResolvedValue({ lane: 'pixels' });
-    lanes.transcodeJpegToJxl.mockResolvedValue({ lane: 'transcode' });
+    lanes.optimizeSvgSide.mockReset();
     lanes.optimizeSvgSide.mockResolvedValue({ lane: 'svg' });
+    optimize = vi.fn(async () => encoded());
+    bridge = { optimize } as unknown as SvelteKitWorkerBridge;
   });
 
-  it('passes the recipe and the preview choice to the pixel lane', async () => {
-    const r = recipe(webP, (r) => (r.rotate = 180));
-    await optimizeImage(source(PNG), r, { signal, bridge, preview: false });
-    expect(lanes.compressPreprocessed).toHaveBeenCalledWith(
-      expect.anything(),
-      {
-        format: 'webP',
-        options: webP.options,
-        processorState: r.processors,
-        preprocessorState: { rotate: { rotate: 180 } },
-      },
+  it('sends a raster recipe to the worker in one call, with the file', async () => {
+    const r = recipe(webP, (r) => (r.rotate = 90));
+    const outcome = await optimizeImage({ file: PNG }, r, {
       signal,
       bridge,
-      false,
+      preview: false,
+    });
+    expect(optimize).toHaveBeenCalledOnce();
+    expect(optimize).toHaveBeenCalledWith(signal, {
+      key: expect.stringMatching(/^src-/),
+      file: { type: 'image/png', name: 'photo.png' },
+      source: { kind: 'file', file: PNG },
+      recipe: r,
+      preview: false,
+    });
+    expect(outcome.outputFile.name).toBe('photo.webp');
+    expect(outcome.outputFile.type).toBe('image/webp');
+    expect(outcome.preprocessedWidth).toBe(2);
+    expect(outcome.transcodeFellBack).toBeUndefined();
+  });
+
+  it('keys one file the same way every time', async () => {
+    await optimizeImage({ file: PNG }, recipe(webP), {
+      signal,
+      bridge,
+      preview: false,
+    });
+    await optimizeImage({ file: PNG }, recipe(webP), {
+      signal,
+      bridge,
+      preview: false,
+    });
+    await optimizeImage({ file: JPEG }, recipe(webP), {
+      signal,
+      bridge,
+      preview: false,
+    });
+    const keys = optimize.mock.calls.map(([, request]) => request.key);
+    expect(keys[0]).toBe(keys[1]);
+    expect(keys[2]).not.toBe(keys[0]);
+  });
+
+  it('reports a transcode that fell back to pixels', async () => {
+    optimize.mockResolvedValueOnce(encoded({ transcodeFellBack: true }));
+    const outcome = await optimizeImage({ file: JPEG }, recipe(jxl(true)), {
+      signal,
+      bridge,
+      preview: true,
+    });
+    expect(outcome.transcodeFellBack).toBe(true);
+    expect(outcome.outputFile.name).toBe('photo.jxl');
+  });
+
+  it('shows the Original from the prepared frame without the worker', async () => {
+    const identity = {
+      type: 'identity',
+      options: {},
+    } as unknown as EncoderState;
+    const prepared = vi.fn(async () => frame);
+    const outcome = await optimizeImage(
+      { file: PNG, prepared },
+      recipe(identity, (r) => (r.rotate = 270)),
+      { signal, bridge, preview: true },
     );
+    expect(prepared).toHaveBeenCalledWith(270);
+    expect(optimize).not.toHaveBeenCalled();
+    expect(outcome).toMatchObject({
+      isOriginal: true,
+      outputImageData: frame,
+      outputFile: PNG,
+    });
   });
 
-  it('transcodes, and falls back to pixels when libjxl declines', async () => {
-    const r = recipe(jxl(true));
-    expect(
-      await optimizeImage(source(JPEG), r, { signal, bridge, preview: true }),
-    ).toEqual({ lane: 'transcode' });
-
-    lanes.transcodeJpegToJxl.mockRejectedValue(new TranscodeUnsupportedError());
-    expect(
-      await optimizeImage(source(JPEG), r, { signal, bridge, preview: true }),
-    ).toEqual({ lane: 'pixels', transcodeFellBack: true });
+  it('sends an SVG raster only when the worker asks for it', async () => {
+    optimize.mockResolvedValueOnce({ kind: 'needs-source' });
+    await optimizeImage({ file: SVG, svg: svgRaster }, recipe(webP), {
+      signal,
+      bridge,
+      preview: true,
+    });
+    expect(optimize).toHaveBeenCalledTimes(2);
+    expect(optimize.mock.calls[0][1].source).toBeUndefined();
+    expect(optimize.mock.calls[1][1].source).toMatchObject({
+      kind: 'pixels',
+      image: { width: SOURCE.width, height: SOURCE.height },
+    });
   });
 
-  it('propagates any other transcode failure', async () => {
-    const failure = new Error('worker died');
-    lanes.transcodeJpegToJxl.mockRejectedValue(failure);
-    await expect(
-      optimizeImage(source(JPEG), recipe(jxl(true)), {
-        signal,
-        bridge,
-        preview: true,
-      }),
-    ).rejects.toBe(failure);
-    expect(lanes.compressPreprocessed).not.toHaveBeenCalled();
-  });
-
-  it('optimizes SVG text at the prepared size', async () => {
-    await optimizeImage(source(SVG), recipe('svg'), {
+  it('optimizes SVG text at the rasterized size', async () => {
+    await optimizeImage({ file: SVG, svg: svgRaster }, recipe('svg'), {
       signal,
       bridge,
       preview: true,
@@ -184,5 +240,6 @@ describe('optimizeImage', () => {
       SOURCE.height,
       signal,
     );
+    expect(optimize).not.toHaveBeenCalled();
   });
 });

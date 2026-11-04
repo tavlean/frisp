@@ -95,10 +95,13 @@ export async function optimizeSvgSide(
   // The badge must describe the file the user gets: when the original wins,
   // no candidate id applies, except to say the visual gate turned them down.
   if (final.keptOriginal) winner = verified ? undefined : UNVERIFIED_WINNER;
-  const [sourceImageData, outputImageData] = await Promise.all([
-    renderSvgToImageData(sourceText, naturalWidth, naturalHeight, null, signal),
-    renderSvgToImageData(final.text, naturalWidth, naturalHeight, null, signal),
-  ]);
+  const outputImageData = await renderSvgToImageData(
+    final.text,
+    naturalWidth,
+    naturalHeight,
+    null,
+    signal,
+  );
   const outputName = fileName.replace(/(?:\.[^.]+)?$/, '.svg');
   const outputFile = new File([final.text], outputName, {
     type: 'image/svg+xml',
@@ -112,7 +115,6 @@ export async function optimizeSvgSide(
     percentChange: final.keptOriginal
       ? 0
       : Math.round(getPercentChange(source.rawBytes, final.rawBytes) * 10) / 10,
-    sourceImageData,
     outputImageData,
     isOriginal: false,
     preprocessedWidth: naturalWidth,

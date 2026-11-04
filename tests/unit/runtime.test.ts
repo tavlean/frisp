@@ -1,5 +1,4 @@
 import { describe, expect, it, vi } from 'vitest';
-import { decodeSourceImage } from 'client/lazy-app/image-pipeline';
 import { optimizeImage } from '$lib/optimize-image';
 import type { BulkRunnerHost } from '../../src/lib/bulk/runtime';
 import { BulkRuntime } from '../../src/lib/bulk/runtime';
@@ -16,14 +15,6 @@ vi.mock(
   { virtual: true },
 );
 
-vi.mock('client/lazy-app/image-pipeline', async () => ({
-  ...(await vi.importActual<typeof import('client/lazy-app/image-pipeline')>(
-    'client/lazy-app/image-pipeline',
-  )),
-  decodeSourceImage: vi.fn(),
-  preprocessImage: vi.fn(),
-}));
-
 vi.mock('$lib/optimize-image', () => ({ optimizeImage: vi.fn() }));
 
 type ResolveJob = (output?: ImageOutput) => void;
@@ -37,18 +28,20 @@ async function flushMicrotasks(): Promise<void> {
 }
 
 /**
- * A job "starts" when the runtime asks to decode its source (synchronously
+ * A job "starts" when the runtime calls optimizeImage for it (synchronously
  * inside run()), and finishes when the test resolves it: the encode the
- * runtime then awaits from optimizeImage is that job's pending promise.
+ * runtime awaits is that job's pending promise.
  */
 function installControlledProcessor(starts: string[] = []) {
   const resolvers = new Map<string, ResolveJob>();
   const rejecters = new Map<string, (error: unknown) => void>();
-  const passes = new Map<string, Promise<unknown>>();
   const idOf = (file: File) => file.name.replace(/\.jpg$/, '');
 
-  vi.mocked(decodeSourceImage).mockImplementation((signal, file) => {
-    const id = idOf(file);
+  vi.mocked(optimizeImage).mockImplementation((source, _recipe, { signal }) => {
+    if (signal.aborted) {
+      return Promise.reject(new DOMException('AbortError', 'AbortError'));
+    }
+    const id = idOf(source.file);
     starts.push(id);
     const pass = new Promise((resolve, reject) => {
       const onAbort = () => {
@@ -71,17 +64,8 @@ function installControlledProcessor(starts: string[] = []) {
         reject(error);
       });
     });
-    // A pass cancelled before the runtime reached its encode has no awaiter.
-    pass.catch(() => {});
-    passes.set(id, pass);
-    const pixels = { width: 1, height: 1 } as ImageData;
-    return Promise.resolve({ file, decoded: pixels });
+    return pass as ReturnType<typeof optimizeImage>;
   });
-  vi.mocked(optimizeImage).mockImplementation((source, _recipe, { signal }) =>
-    signal.aborted
-      ? Promise.reject(new DOMException('AbortError', 'AbortError'))
-      : (passes.get(idOf(source.file)) as ReturnType<typeof optimizeImage>),
-  );
 
   return {
     starts,

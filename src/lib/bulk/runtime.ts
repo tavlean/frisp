@@ -11,11 +11,6 @@
 
 import { isAbortError } from 'client/lazy-app/abort';
 import {
-  decodeSourceImage,
-  preprocessImage,
-  type ImagePipelineWorkerBridge,
-} from 'client/lazy-app/image-pipeline';
-import {
   completeJob,
   effectiveRecipe,
   failJob,
@@ -137,29 +132,13 @@ export class BulkRuntime {
       const canonicalSettingsHash =
         host.settingsHashForJob?.(job) ?? jobRecipeHash(host.session, job);
       const recipe = effectiveRecipe(host.session, job);
-      const bridge = this.#bridgeFor(slot);
-      const pipelineBridge = bridge as unknown as ImagePipelineWorkerBridge;
-      // Decode and rotate the way EditorSession's #preparedSource does, so
-      // optimizeImage sees the same prepared frame in both surfaces.
-      const decoded = await decodeSourceImage(
+      // The slot's worker decodes the file itself and keeps it only until
+      // the slot moves on to another file.
+      const outcome = await optimizeImage({ file: job.sourceFile }, recipe, {
         signal,
-        job.sourceFile,
-        pipelineBridge,
-      );
-      const preprocessed =
-        recipe.rotate === 0
-          ? decoded.decoded
-          : await preprocessImage(
-              signal,
-              decoded.decoded,
-              { rotate: { rotate: recipe.rotate } },
-              pipelineBridge,
-            );
-      const outcome = await optimizeImage(
-        { ...decoded, preprocessed },
-        recipe,
-        { signal, bridge, preview: false },
-      );
+        bridge: this.#bridgeFor(slot),
+        preview: false,
+      });
       // The outcome's URL becomes the output's download URL, so the store's
       // existing revoke paths own it from here. A cancel that lands after the
       // encode finished leaves no owner, so it is revoked on the spot.
