@@ -76,6 +76,7 @@ import { stableStringify } from 'shared/stable-stringify';
 // `encoderState.options` for `type:'webP'` wants exactly this type).
 import { snackbar } from '$lib/editor/snackbar-store.svelte';
 import type { ImportedFile } from './import-sources';
+import { createLimiter } from './limiter';
 import { BulkOutputCache } from './output-cache';
 import { BulkRuntime } from './runtime';
 import { buildZipBlob, triggerBlobDownload } from './zip';
@@ -112,6 +113,8 @@ interface PendingRemoval {
 
 /** Longest edge of the generated thumbnail canvas. */
 const THUMB_MAX = 320;
+/** Thumbnails decoded at once; each decode holds the full-size source. */
+const THUMB_CONCURRENCY = 2;
 
 let sessionCounter = 0;
 
@@ -246,6 +249,7 @@ export class BulkStore {
   // The processing driver (two persistent bridges + abort control).
   readonly runtime = new BulkRuntime();
   readonly #outputCache = new BulkOutputCache({ maxEntriesPerJob: 3 });
+  readonly #thumbLimit = createLimiter(THUMB_CONCURRENCY);
   #pendingRemoval: PendingRemoval | null = null;
 
   // ── Derived view-models (engine selectors) ────────────────────────────────
@@ -342,7 +346,7 @@ export class BulkStore {
     // Decode thumbnails for the newly accepted jobs (fire-and-forget each).
     // Use the POST-add ids, because the engine may suffix duplicate file ids.
     for (const job of this.session.jobs.slice(previousJobCount)) {
-      void this.#ensureThumb(job.id, job.sourceFile);
+      void this.#thumbLimit(() => this.#ensureThumb(job.id, job.sourceFile));
     }
 
     void this.runtime.run(this);
@@ -1122,7 +1126,9 @@ export class BulkStore {
    * already exists for the id.
    */
   async #ensureThumb(id: string, file: File): Promise<void> {
-    if (this.thumbs.has(id)) return;
+    // Queued behind the limiter, so the job may be gone by its turn.
+    if (this.thumbs.has(id) || !this.session.jobs.some((job) => job.id === id))
+      return;
     let bitmap: ImageBitmap | undefined;
     try {
       bitmap = await createImageBitmap(file);
