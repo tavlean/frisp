@@ -63,6 +63,7 @@ is kept as the history of the decision.
   JPEG 54 to 55 in 1.9 s. On photo-large.jpg (12 MP): WebP 37 to 38 in 13 to
   21 s; in Chromium, AVIF stopped at the budget with 49 (score 72.7) after
   25 s, JPEG XL stopped with 30 (75.3) after 22 s, JPEG met it at 24 in 11 s.
+  WebKit agreed: AVIF 49, JPEG XL 24, JPEG 23.
 - **Open question: downscaled scoring flatters blocky codecs.** JPEG at
   quality 24 on the 12 MP photo is lower than WebP's 37 on the same image.
   Above 4 MP the score runs on a box-shrunk pair (2x at 12 MP), which halves

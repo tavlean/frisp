@@ -22,7 +22,7 @@ session must know. Newest first. (Live project state stays in
 - Measured on photo-large.jpg (12 MP), Balanced, Chromium, one cold run:
   AVIF stopped at the budget after 25 s with quality 49 (score 72.7), JPEG XL
   stopped after 22 s with quality 30 (75.3), JPEG met it at quality 24 (70.4)
-  in 11 s. AVIF and JXL encodes at 12 MP take several seconds each, so the
+  in 11 s (WebKit: 49, 24, 23). AVIF and JXL encodes at 12 MP take several seconds each, so the
   budget ends the search with a passing but loose result, as designed. JPEG
   24 is suspiciously low: the score runs on a 2x box-shrunk pair above 4 MP,
   which halves JPEG's 8x8 blocking before the metric sees it. Logged as an
