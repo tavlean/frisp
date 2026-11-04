@@ -18,14 +18,16 @@ export const label = 'WebP';
 export const mimeType = 'image/webp';
 export const extension = 'webp';
 // These come from struct WebPConfig in encode.h. We diverge from upstream
-// Squoosh on two values: quality 80 (was 75) and method 6 — the highest effort,
-// best compression (was 4) — as the project's preferred WebP default, since WebP
-// is the default right-side encoder and stays sub-second even at method 6.
+// Squoosh on one value: quality 80 (was 75). Method stays at libwebp's own
+// default of 4. Method 6 saved 3 to 5 percent on photos but ran 50x slower on
+// alpha content for a slightly LARGER file (transparent.png: 2880ms vs 57ms,
+// 2026-08-08), and WebP is the default encoder, so every transparent drop paid
+// it. Users who want the last few percent still have the Effort slider.
 export const defaultOptions: EncodeOptions = {
   quality: 80,
   target_size: 0,
   target_PSNR: 0,
-  method: 6,
+  method: 4,
   sns_strength: 50,
   filter_strength: 60,
   filter_sharpness: 0,
