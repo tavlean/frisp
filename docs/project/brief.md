@@ -1,6 +1,6 @@
 # Project brief: Frisp
 
-Last updated: 2026-08-08.
+Last updated: 2026-11-04.
 
 Intent, where things stand, and what is still undecided. Read this and
 [../README.md](../README.md) (the docs index) before starting work.
@@ -52,10 +52,15 @@ auto-quality brain. Integrations expose one or both doors; the planned Raycast
 extension is the model case, with an automatic headless command and an
 open-in-the-app handoff.
 
-Priority between the doors (2026-08-08): the human surface leads. The first
-focus is making the UI and UX absolutely amazing; the agent surface is never
-deferred but never takes over, advancing in parallel where the work does not
-compete for the same time. When choosing agent surfaces (CLI, MCP, skills,
+Priority between the doors (2026-08-08, refined 2026-11-04): the human
+surface leads, and humans want outcomes too, not only knobs: "small enough
+for this upload", "smaller without visible damage". So the human door moves
+toward outcome-first defaults (a named quality and a maximum size up front,
+codec knobs under Advanced) once auto-quality exists. The agent door is never
+designed out: the engine keeps a framework-neutral boundary and change B
+proves it runs in Node. But CLI, MCP, and Raycast distribution wait until a
+real recurring workflow asks for them, because each is a surface one
+maintainer has to keep working. When choosing agent surfaces (CLI, MCP, skills,
 harness plugins), prefer the most universal one, so there are fewer surfaces
 to maintain.
 
@@ -85,7 +90,7 @@ images live; images never travel to Frisp.
 - Service worker and PWA: `src/service-worker.ts`, variant-aware precache,
   prompt-to-refresh.
 
-## Current state (2026-07-25)
+## Current state (2026-11-04)
 
 The SvelteKit migration is concluded and `main` is the production app. All seven
 WASM codecs were rebuilt from source natively in 2026-06, closing 14 CVEs, and
@@ -94,6 +99,16 @@ the multi-threaded runtime is verified in Chromium and WebKit. Gates are green:
 `corner-shape` property), the unit suite passes, and Prettier is clean.
 
 Shipped since then, newest first:
+
+- **Export-contract trust fixes (2026-11-04).** The 2026-11-02
+  first-principles review found paths where the saved file disagreed with
+  what the user asked for; each was reproduced and fixed with a regression
+  test in `tests/e2e/export-contract.spec.ts`. The largest: no first offline
+  encode worked at all, because the service worker never precached the
+  worker chunks. Also jpegli became the one JPEG, WebP went back to method
+  4, and production lost `/diagnostics`, dead code, and the per-side
+  copy/save/import buttons. Record:
+  [reports/2026-11-02-first-principles-review.md](reports/2026-11-02-first-principles-review.md).
 
 - **Lossless JPEG to JXL transcode (2026-08-11).** A toggle on the JXL panel
   for JPEG sources repacks the existing DCT coefficients into a JXL container
@@ -154,28 +169,21 @@ later phase. Do not delete it.
 
 ## Intentions and priorities
 
-1. **Finish the SVG benchmark (S8).** The maintainer optimizes SVGs daily, so
-   this track outranks the codec batch. Resume from the protocol in
-   [specs/2026-07-12-svg-optimization.md](specs/2026-07-12-svg-optimization.md).
-2. **Bulk Phase 3 overrides polish**, but the codec-options-model minimal slice
-   first per the sequencing analysis in
-   [../codec-options-model.md](../codec-options-model.md).
-3. **Pick an editor re-style direction** from the three lab skins, then promote.
-4. **Keyboard control**: a Figma-style single-key proposal is ready at
-   [../keyboard-control.md](../keyboard-control.md) with five open decisions.
-5. **The 2026-07 codec batch**: only auto-quality mode remains, specced and
-   unblocked (libjxl 0.12 landed 2026-08-08, jpegli 2026-08-09, the transcode
-   2026-08-11). It is also the shared brain of the agent surface, so it closes
-   the batch and opens the headless-core track.
+Set by the 2026-11-02 review and confirmed by the maintainer on 2026-11-04.
+The full ordered plan is [roadmap.md](roadmap.md).
 
-Sequencing (decided 2026-08-08): the UI and UX tracks lead. The libjxl 0.12
-upgrade was fast-tracked out of the codec batch because it blocked jpegli, the
-transcode, the auto-quality engine, and through auto-quality everything
-agent-facing; it landed the same day, so the batch is fully unblocked. The
-rest of the agent track (headless core, CLI, Raycast) follows without
-displacing the human surface.
+1. **One recipe and one result owner per image.** Single and bulk stop
+   translating between two editing models; rotation and the SVG lane work in
+   bulk because the recipe carries them.
+2. **The worker-side pipeline and a bulk resource budget.** Performance,
+   memory, and the honest headless boundary.
+3. **Auto-quality on one codec, then outcome-first defaults.** The feature
+   that makes Frisp more than a maintained Squoosh, in both doors.
+4. **The UI revisit.** The maintainer revisits the editor re-style soon; the
+   three lab skins stay until then.
+5. **Close the SVG benchmark (S8)** with what it has.
 
-The full phased plan with status is [roadmap.md](roadmap.md).
+The lab skins and the desktop-shell direction stay (maintainer, 2026-11-04).
 
 ## Hard open questions
 
@@ -185,7 +193,16 @@ The full phased plan with status is [roadmap.md](roadmap.md).
 - **Mixed-size batches.** Whether the global resize rule is a percentage or
   fixed dimensions.
 - **Memory ceiling for N images.** Decode-on-demand, thumbnail strategy, LRU.
-- **Whether the codec-options-model refactor precedes the override UI.**
+  Review change C measures and sets a supported batch size.
+- **Overrides inside the one recipe.** Keep per-leaf inheritance (a global
+  edit flows into every value an image did not touch), or "an image follows
+  the shared recipe or owns a full copy" (300 to 400 lines simpler, but a
+  global edit stops reaching touched images). The review recommends the
+  simpler model plus "apply to selected"; decide in change A's spec.
+- **A usage signal.** Nothing measures what anyone uses, so questions like
+  "does anyone use the two-sided compare" have no answer. A cookieless
+  counter (Cloudflare Web Analytics) would fit the privacy stance, but it is
+  the maintainer's values call and is not built.
 - **The agent surface.** The go decision was settled by the 2026-08-08 product
   thesis; [../frisp-cli-analysis.md](../frisp-cli-analysis.md) holds the design.
   Still open: the Node decode path and the format-race policy. Surface choice
@@ -203,7 +220,9 @@ The full phased plan with status is [roadmap.md](roadmap.md).
 - The engine stays framework-neutral and pure. UI wraps it and never forks
   `EditorSession`.
 - Never store live blobs or object URLs in localStorage; snapshots are
-  metadata-only. The `app:settings:v3` schema is frozen.
+  metadata-only. The `app:settings:v3` key names are frozen (they never follow
+  a rebrand); the payload under them extends in place, which is how grain and
+  the 2026-11-04 MozJPEG-to-jpegli migration landed without a new key.
 - Desktop shells are direction, not scheduled work: an Electron shell (macOS
   first, maintainer preference 2026-08-08) around the same static build, for
   OS integration, once PWA polish hits its ceiling. A separate product

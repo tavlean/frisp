@@ -1,7 +1,8 @@
 # First-principles review, 2026-11-02
 
-Last updated: 2026-11-02.
-Status: review delivered; every recommendation below waits on a maintainer decision.
+Last updated: 2026-11-04.
+Status: trust fixes and low-risk cuts executed 2026-11-04 (see Execution);
+structural changes A to F and auto-quality open.
 
 The maintainer asked for the app to be questioned from scratch: if we built
 Frisp today, what would we remove, change, and add? This is the second such
@@ -15,6 +16,36 @@ top-down verdict from the `judge` role (Fable 5.1); and two independent
 council opinions (GPT-6.1 Sol and GPT-6 Astra), each written without seeing
 the others. The driver re-checked every claim marked verified against the
 code. Line counts are `.ts`/`.svelte`/`.css` lines from `git ls-files`.
+
+## Execution (2026-11-04)
+
+The maintainer's answers to the decisions at the end: trust fixes first; keep
+the lab skins for now (the UI gets revisited soon); jpegli is the one JPEG;
+keep the desktop app on the roadmap; proceed with everything else. Each bug
+below was reproduced before its fix (browser e2e where the behavior is
+observable, unit tests for pure logic), and each fix has its own commit.
+
+| Item | Outcome | Commit |
+|---|---|---|
+| T1 stale Save | Reproduced in Chromium (WebP bytes saved as `.avif`). Fixed: `SideRuntime.exportable` gates Save and Share. | `42c0bf8d` |
+| T2 bulk rotate | Reproduced (export stayed 1024x683). Rotate hidden in bulk until the recipe carries rotation (change A). | `3b6fe559` |
+| T3 SVG batch | Reproduced, but preview and export agree (both WebP). Deferred to change A, which adds a vector lane to the one recipe. | none yet |
+| T4 keep originals | Reproduced at unit level. The original stands in only for a pure re-encode. | `f387de6c` |
+| T5 multi-tab update | Confirmed in code; fix verified with two real Chromium tabs. | `fe183e14` |
+| T6 offline | Worse than reviewed: with the network truly off, no first encode worked at all, raster or SVG, because no worker chunk was precached. Fixed with a build-time worker list. | `5b608581` |
+| T7 stale bulk jobs | Reproduced 3 of 3 with a 12 MP photo; the remove-mid-encode stall reproduced 1 of 3 in WebKit. Both fixed in the runtime. | `3b6fe559` |
+| SVG Auto fallback | Keeps the original when nothing passes the gate. | `4b4d878b` |
+| jpegli tooltip, one JPEG | jpegli is "JPEG"; MozJPEG saves migrate; MozJPEG no longer precached. | `bf7da4dd`, `579f7bee` |
+| WebP default | Back to method 4. | `555def1c` |
+| Dead code | `compressFile` and the WebP-era bulk store API, 267 lines. | `76140ac3` |
+| Side slots | Copy/save/import buttons gone from production; session methods stay for the labs. | `d49552d0` |
+| `/diagnostics` | Stripped from production with its probe workers. | `1de9e651` |
+
+Corrections to this review, found while executing: the AVIF and WebP WASM
+decoders were already skipped from precache on browsers with native decode,
+and the QOI encoder was already excluded, so the precache row below
+overstated the waste; and hqx is a selectable resize method ("hqx (pixel
+art)"), not an unused processor, so it stays.
 
 ## Verdict
 

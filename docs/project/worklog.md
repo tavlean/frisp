@@ -4,6 +4,53 @@ Short session-by-session build log: what changed, why, and the gotchas a future
 session must know. Newest first. (Live project state stays in
 [the project brief](brief.md); this is the narrative trail.)
 
+## 2026-11-04 (Opus, driver) - export-contract trust fixes and low-risk cuts
+
+Executed the first stage of
+[reports/2026-11-02-first-principles-review.md](reports/2026-11-02-first-principles-review.md)
+after the maintainer's go-ahead (keep the lab skins and the desktop
+direction; jpegli is the one JPEG; proceed with the rest). Every bug was
+reproduced before its fix, in a real browser where the behavior is visible,
+and each fix is its own commit; the execution table in the report maps items
+to commits. The new regression home is `tests/e2e/export-contract.spec.ts`.
+
+**The offline finding was bigger than the review thought.** The review said
+the first SVG optimized offline would fail. The truth: no first offline
+encode worked at all, raster or SVG. SvelteKit's `$service-worker` `build`
+list omits the worker chunks Vite emits for `new Worker(new URL(...))`, so the
+WASM was precached and nothing could load it. It hid because Playwright's
+`context.setOffline(true)` does not cut dedicated workers' network in
+Chromium: the worker fetched over the network and the old offline tests
+passed. Only aborting every request with `context.route` exposed it. A build
+plugin now writes `_app/worker-precache.json`, the service worker precaches
+it, and the audit fails if the list and the emitted workers disagree. The
+"SVG worker precache exclusion" it replaced never matched anything.
+
+**Two bulk races, both in the runtime latch.** A job in flight when the
+settings changed finished under the old recipe and nothing requeued it
+(3 of 3 with a 12 MP photo); `#processOne` now rechecks each completion
+against the live recipe. And `cancelProcessing()` left `#running` set while
+the aborted loop unwound, so the run the store requested right after a
+removal was flagged and then dropped (1 of 3 in WebKit). Only the current
+run may clear the latch now.
+
+**Corrections to the review.** The AVIF and WebP WASM decoders were already
+skipped on browsers with native decode, and hqx is a selectable resize method,
+so neither was cut. The SVG-batch gap (two SVGs rasterize to WebP, one stays
+vector) is consistent between preview and export, so it waits for change A
+instead of a parallel fix.
+
+**Not done here:** change A (one recipe), B (worker-side pipeline), C (bulk
+budget), D (auto-quality), and the MozJPEG/QOI-encoder codec retirement. The
+bench baseline needs a re-capture for the WebP rows after the method change.
+
+**Gotchas** (recorded in [../gotchas.md](../gotchas.md)): `setOffline` and
+dedicated workers; the omitted worker chunks; a `?worker&url` import in a
+production-imported module ships that worker; unquoted zsh globs in `grep
+--include` match nothing; changed codec defaults do not reach autosaved
+settings; the Playwright Chromium shell must be installed or every Chromium
+test fails at launch; the "Compare as" count in `left-panel.spec.ts`.
+
 ## 2026-08-11 (Opus, executor) - lossless JPEG to JXL transcode
 
 Executed

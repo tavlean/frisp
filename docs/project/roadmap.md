@@ -1,6 +1,6 @@
 # Roadmap
 
-Last updated: 2026-11-02.
+Last updated: 2026-11-04.
 
 The plan and its status, highest priority first. Product direction and
 engineering tracks in one list, because they compete for the same time.
@@ -23,38 +23,55 @@ engineering tracks in one list, because they compete for the same time.
 
 ## Now
 
-- [ ] **Decide on the 2026-11-02 first-principles review.** It found six
-      code-confirmed paths (and one likely) where the saved file disagrees with
-      what the user asked for, and proposes trust fixes ahead of every track
-      below, then a reordering of this roadmap. Seven decisions wait on the
-      maintainer.
-      [reports/2026-11-02-first-principles-review.md](reports/2026-11-02-first-principles-review.md)
-- [ ] **SVG benchmark (stage S8).** The competitive comparison against nano and
-      ImageOptim over the stratified corpus in `benchmarks/svg/`. Everything else
-      in the SVG track shipped on 2026-07-12. The protocol is self-contained in
-      [specs/2026-07-12-svg-optimization.md](specs/2026-07-12-svg-optimization.md),
-      so this needs no design work, only execution. The maintainer optimizes
-      SVGs daily, which keeps this in Now.
+The 2026-11-02 first-principles review set this order, and the maintainer
+confirmed it on 2026-11-04 (keep the lab skins and the desktop direction;
+everything else proceeds). Its trust fixes landed the same day; the
+structural changes below come next. Full reasoning and the execution table:
+[reports/2026-11-02-first-principles-review.md](reports/2026-11-02-first-principles-review.md).
+
+- [ ] **One recipe and one result owner per image (review change A).** One
+      typed recipe covering rotation, processors, and output kind (raster
+      codec, SVG optimize, or JPEG to JXL transcode), and one source-aware
+      operation that runs it. Bulk schedules recipes; the focused editor
+      previews the same result; the seeding bridge in `BulkMode.svelte` stops
+      translating between two models. Lifts the two `fixme` tests in
+      `tests/e2e/export-contract.spec.ts` (rotation in bulk, SVG batches).
+- [ ] **Worker-side pipeline (review change B).** One worker op keeps the
+      decoded source hot and runs every step, returning bytes plus a
+      transferable preview. Closes the 2026-07-07 review's P2(b) and P2(c), and
+      proves one Node operation for the headless core.
+- [ ] **Bulk resource budget (review change C).** Bound thumbnail decodes,
+      cap historical outputs by bytes, budget codec threads against concurrent
+      jobs, and publish a supported batch size.
 
 ## Next
 
-- [ ] **Codec options model, minimal slice.** Pre-pays the override UI below. The
-      sequencing analysis in [../codec-options-model.md](../codec-options-model.md)
-      concluded the slice comes first; its open decisions were resolved on
-      2026-07-07, so it is executable.
-- [ ] **Bulk Phase 3, overrides polish.** Per-control override dots and resets
-      wired through to the UI. The engine half landed on 2026-07-07 (per-codec
-      control registries plus sparse per-control overrides); the control tables and
-      binding directives are in
-      [specs/2026-07-07-ws-g-control-inventory.md](specs/2026-07-07-ws-g-control-inventory.md).
-- [ ] **Pick an editor re-style direction.** Three finished skins are waiting on a
-      look-and-choose decision; hybrid is the standing recommendation. Registry:
+- [ ] **Auto-quality on one codec, then outcome-first defaults (review change
+      D).** The spec below, proven on one codec first, with its two gaps fixed
+      (alpha is ignored; up to eight encodes per search needs a latency budget
+      and an honest "target not met"). Then named targets become the primary
+      control and codec knobs move under Advanced.
+- [ ] **Retire the MozJPEG codec and the QOI encoder.** Neither is selectable
+      (MozJPEG since 2026-11-04, QOI encode since 2026-06-27) and neither is
+      precached; their worker, bridge, meta, controls, and panel code remain.
+      Codec deletion needs the e2e suite, per AGENTS.md.
+- [ ] **Close the SVG benchmark (stage S8).** The ImageOptim and nano legs are
+      measured; finish the Frisp run and publish with its limitations, per
+      [specs/2026-07-12-svg-optimization.md](specs/2026-07-12-svg-optimization.md).
+      Note that Auto now keeps the original when no candidate passes its gate,
+      which changes Frisp's numbers on gate-failing files.
+- [ ] **Pick an editor re-style direction.** Three finished skins wait on a
+      look-and-choose decision; the maintainer revisits the UI soon. Registry:
       [../lab.md](../lab.md).
+- [ ] **Codec options model, minimal slice.** Shrinks once auto-quality makes
+      targets primary: only the Advanced controls need the registry. Analysis
+      in [../codec-options-model.md](../codec-options-model.md).
+- [ ] **Bulk Phase 3, overrides polish.** Lands inside change A's recipe
+      rather than on today's sparse per-leaf overrides. Control tables:
+      [specs/2026-07-07-ws-g-control-inventory.md](specs/2026-07-07-ws-g-control-inventory.md).
 - [ ] **Keyboard control.** Figma-style single-key actions plus Photoshop-style
       digit entry for Quality. The proposal at
-      [../keyboard-control.md](../keyboard-control.md) is ready and has five open
-      decisions: which letters, whether to free 1/2/3 from the divider, digit
-      semantics, S versus Cmd+S, and what S means in bulk.
+      [../keyboard-control.md](../keyboard-control.md) has five open decisions.
 
 ## The 2026-07 codec batch
 
@@ -75,13 +92,11 @@ conversation.
 
 ## After the batch
 
-- [ ] **Multi-Format Compare.** On import, encode across MozJPEG, WebP, AVIF, JXL,
-      and OxiPNG in parallel workers and present a size and quality comparison, so
-      the user picks by result instead of guessing a format. Multi-threading, which
-      landed on 2026-06-03, was the prerequisite; the bulk worker-bridge pool is
-      the same substrate, which is why bulk comes first. Use fast presets for the
-      compare pass and a full-quality encode once the user commits, with
-      concurrency bounded by `navigator.hardwareConcurrency`.
+- [ ] **Find smaller (format race).** An explicit action, not an automatic
+      pass on every import: encode across WebP, AVIF, JXL, JPEG, and PNG in
+      parallel workers within a compatibility profile and time and memory
+      limits, and present size against quality so the user picks by result.
+      Needs change C's resource budget first (2026-11-02 review).
 - [ ] **Frisp headless core and CLI.** Target-driven, metric-verified,
       agent-first, reusing the existing `*_node_*` codec artifacts, the pure
       bulk engine, and the auto-quality engine. The go decision was settled by
@@ -95,6 +110,11 @@ conversation.
       maintained surface count low. Two design questions (the Node decode
       path, the format-race policy) come before a spec.
       [../frisp-cli-analysis.md](../frisp-cli-analysis.md)
+      Timing (2026-11-02 review, maintainer 2026-11-04): change B proves one
+      Node operation inside the worker-side pipeline, so the boundary stays
+      honest; CLI, MCP, and Raycast distribution wait until a real recurring
+      workflow asks for them. The agent door is never designed out, but it
+      does not add surfaces ahead of demand.
 - [ ] **Raycast extension.** One command per door: "Optimize with Frisp" runs
       the headless core over the Finder selection with auto targets and no
       window; "Open in Frisp" hands files to the app through the
@@ -173,6 +193,16 @@ conversation.
 
 Newest first. The narrative, with the gotchas, is in [worklog.md](worklog.md).
 
+- [x] **Export-contract trust fixes and low-risk cuts** (2026-11-04), from the
+      2026-11-02 review: Save and Share only hand out a result matching the
+      current recipe; bulk jobs never settle under replaced settings and a
+      mid-encode removal never stalls the queue; Keep originals never undoes
+      a pixel edit; a first offline encode works (worker chunks precached);
+      an update asks before reloading another tab with open images; SVG Auto
+      keeps the original when nothing passes its gate; jpegli is the one
+      JPEG; WebP defaults to method 4; dead code, the per-side copy/save/import
+      buttons, and production `/diagnostics` are gone. Regression suite:
+      `tests/e2e/export-contract.spec.ts`.
 - [x] **Lossless JPEG to JXL transcode** (2026-08-11): a "Lossless transcode"
       toggle on the JXL panel for JPEG sources repacks the source's DCT
       coefficients into a JXL container, bit-for-bit reversible (proven by a
