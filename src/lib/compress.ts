@@ -8,9 +8,7 @@
 
 import {
   decodeImage,
-  decodeSourceImage,
   imagePipeline,
-  preprocessImage,
   processImage,
   type ImagePipelineWorkerBridge,
   type SourceImage,
@@ -302,36 +300,4 @@ export async function transcodeJpegToJxl(
     preprocessedWidth: preprocessed.width,
     preprocessedHeight: preprocessed.height,
   };
-}
-
-/**
- * Compress one file. Caller owns `outputUrl` and must revoke it when done.
- *
- * The caller also owns `bridge` and its lifecycle. The bridge runtime is built
- * to be long-lived — lazy worker start, idle-timeout reclaim, terminate-on-abort
- * with lazy restart — so passing a persistent per-side bridge means consecutive
- * passes reuse a warm worker (WASM already instantiated, pthread pool already
- * spawned) instead of paying full startup on every debounced option tweak.
- */
-export async function compressFile(
-  file: File,
-  request: CompressRequest,
-  signal: AbortSignal,
-  bridge: SvelteKitWorkerBridge,
-): Promise<CompressOutcome> {
-  const pipelineBridge = bridge as unknown as ImagePipelineWorkerBridge;
-  const decodedSource = await decodeSourceImage(signal, file, pipelineBridge);
-  const preprocessed = await preprocessImage(
-    signal,
-    decodedSource.decoded,
-    request.preprocessorState,
-    pipelineBridge,
-  );
-
-  return compressPreprocessed(
-    { ...decodedSource, preprocessed },
-    request,
-    signal,
-    bridge,
-  );
 }

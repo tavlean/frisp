@@ -74,7 +74,6 @@ import { stableStringify } from 'shared/stable-stringify';
 // `quality`/`method`) rather than the wide `EncoderOptions` union (whose members
 // share no common keys — it can't be indexed by encoder-specific fields, and
 // `encoderState.options` for `type:'webP'` wants exactly this type).
-import type { EncodeOptions as WebpEncodeOptions } from 'features/encoders/webP/shared/meta';
 import { snackbar } from '$lib/editor/snackbar-store.svelte';
 import type { ImportedFile } from './import-sources';
 import { BulkOutputCache } from './output-cache';
@@ -110,9 +109,6 @@ interface PendingRemovalItem {
 interface PendingRemoval {
   items: PendingRemovalItem[];
 }
-
-/** The two overridable WebP option leaves the bulk UI exposes as controls. */
-export type BulkOverridablePath = 'quality' | 'method';
 
 /** Longest edge of the generated thumbnail canvas. */
 const THUMB_MAX = 320;
@@ -212,76 +208,6 @@ function emptySession(): BulkSession {
     defaultGlobalSettings(),
     createImageJobs([]),
   );
-}
-
-/** The WebP encode options carried by a settings object (format is locked). */
-function webpOptions(settings: BulkImageSettings): WebpEncodeOptions {
-  return (settings.encoderState?.options ??
-    encoderMap.webP.meta.defaultOptions) as WebpEncodeOptions;
-}
-
-/**
- * Rebuild a job's sparse override object WITHOUT one dotted path (e.g.
- * "encoderState" or "processorState.resize.width"). Used by resetOverridePath:
- * take the current overrides, drop the branch the path names, and drop any
- * container that becomes empty, so `hasSettingsOverrides` reads correctly and
- * the per-control dot clears.
- */
-function omitOverridePath(
-  overrides: BulkImageOverrides | undefined,
-  path: string,
-): BulkImageOverrides {
-  if (!overrides) return {};
-  const segments = path.split('.');
-  const [head] = segments;
-
-  if (head === 'encoderState') {
-    // Format/encoder override is a single visible leaf in the current UI;
-    // dropping it also drops the sparse engine companion.
-    const {
-      encoderState: _droppedEncoder,
-      encoderControls: _droppedControls,
-      ...rest
-    } = overrides;
-    return rest;
-  }
-
-  if (head !== 'processorState' || !overrides.processorState) {
-    return { ...overrides };
-  }
-
-  // Deep-clone the processorState branch, delete the addressed leaf, then prune
-  // empty ancestors on the way back up.
-  const clone = structuredClone(overrides.processorState) as Record<
-    string,
-    unknown
-  >;
-  const chain = segments.slice(1);
-  const parents: Record<string, unknown>[] = [clone];
-  let cursor: Record<string, unknown> = clone;
-
-  for (let i = 0; i < chain.length - 1; i += 1) {
-    const next = cursor[chain[i]];
-    if (typeof next !== 'object' || next === null) break;
-    cursor = next as Record<string, unknown>;
-    parents.push(cursor);
-  }
-  delete cursor[chain[chain.length - 1]];
-
-  for (let i = parents.length - 1; i > 0; i -= 1) {
-    if (Object.keys(parents[i]).length === 0) {
-      const parentKey = chain[i - 1];
-      delete parents[i - 1][parentKey];
-    }
-  }
-
-  const next: BulkImageOverrides = { ...overrides };
-  if (Object.keys(clone).length === 0) {
-    delete next.processorState;
-  } else {
-    next.processorState = clone as BulkImageOverrides['processorState'];
-  }
-  return next;
 }
 
 export class BulkStore {
@@ -510,106 +436,6 @@ export class BulkStore {
     this.#removeJobIds(this.#selectedJobIds());
   }
 
-  /**
-   * Update GLOBAL WebP encode options (merged onto the current global options).
-   * Routes through the cache-aware global settings applicator so only genuinely
-   * stale jobs queue, then kicks a run to encode the misses.
-   */
-  updateGlobal(partial: Partial<WebpEncodeOptions>): void {
-    const current = webpOptions(this.session.globalSettings);
-    const nextSettings: BulkImageSettings = {
-      ...this.session.globalSettings,
-      encoderState: {
-        type: 'webP',
-        options: { ...current, ...partial } as WebpEncodeOptions,
-      },
-    };
-    if (
-      bulkSettingsEqualForBulkDiff(nextSettings, this.session.globalSettings)
-    ) {
-      return;
-    }
-    this.#applyGlobalSettings(nextSettings);
-  }
-
-  /**
-   * Override WebP options for the SELECTED job. The UI still writes the legacy
-   * full option object; the engine reducer records the sparse control companion.
-   * Start from the job's effective options and layer the changed keys on top.
-   * Requeues the job if its output went stale, then kicks a run.
-   */
-  overrideSelected(partial: Partial<WebpEncodeOptions>): void {
-    const id = this.session.selectedJobId;
-    if (!id) return;
-    const job = this.session.jobs.find((item) => item.id === id);
-    if (!job) return;
-
-    const effective = getEffectiveSettings(
-      this.session.globalSettings,
-      job.overrides,
-    );
-    const base = webpOptions(effective);
-    const overrides: BulkImageOverrides = {
-      ...job.overrides,
-      encoderState: {
-        type: 'webP',
-        options: { ...base, ...partial } as WebpEncodeOptions,
-      },
-    };
-    this.#applyJobOverrides(id, overrides);
-  }
-
-  /**
-   * Clear ONE overridden leaf on a job (the per-control reset affordance). For
-   * the WebP option leaves (quality/method) still use the current UI path, so
-   * resetting one option means recomputing the encoder override from the global
-   * with only the OTHER overridden options kept, and dropping it entirely if
-   * that leaves nothing deviating from the global.
-   */
-  resetOverridePath(id: string, path: string): void {
-    const job = this.session.jobs.find((item) => item.id === id);
-    if (!job) return;
-
-    let next: BulkImageOverrides;
-    if (path === 'quality' || path === 'method') {
-      next = this.#clearEncoderOption(job, path);
-    } else {
-      next = omitOverridePath(job.overrides, path);
-    }
-
-    this.#applyJobOverrides(id, next);
-  }
-
-  /**
-   * Recompute a job's encoder override with ONE WebP option leaf reset back to
-   * the global value; drop the whole encoderState override if nothing deviates.
-   */
-  #clearEncoderOption(
-    job: ImageJob,
-    leaf: BulkOverridablePath,
-  ): BulkImageOverrides {
-    const globalOptions = webpOptions(this.session.globalSettings);
-    const jobOptions = webpOptions(
-      getEffectiveSettings(this.session.globalSettings, job.overrides),
-    );
-
-    const merged: WebpEncodeOptions = {
-      ...jobOptions,
-      [leaf]: globalOptions[leaf],
-    };
-    const stillDeviates = (['quality', 'method'] as const).some(
-      (key) => merged[key] !== globalOptions[key],
-    );
-
-    const next: BulkImageOverrides = { ...job.overrides };
-    if (stillDeviates) {
-      next.encoderState = { type: 'webP', options: merged };
-    } else {
-      delete next.encoderState;
-    }
-    return next;
-  }
-
   /** Clear ALL overrides on a job ("Reset all to global"). */
   resetAllOverrides(id: string): void {
     this.#clearJobOverrides(id);
@@ -627,35 +453,6 @@ export class BulkStore {
     if (!id) return;
 
     this.#clearJobOverrides(id);
-  }
-
-  applySelectedOverrides(overrides: BulkImageOverrides): void {
-    const ids = this.#selectedJobIds();
-    if (ids.length === 0) return;
-
-    if (this.allJobsSelected) {
-      const nextSettings = getEffectiveSettings(
-        this.session.globalSettings,
-        overrides,
-      );
-      if (
-        bulkSettingsEqualForBulkDiff(nextSettings, this.session.globalSettings)
-      ) {
-        return;
-      }
-      this.#applyGlobalSettings(nextSettings);
-      return;
-    }
-
-    let nextSession = this.session;
-    for (const id of ids) {
-      nextSession = updateJobOverrides(
-        nextSession,
-        id,
-        structuredClone(overrides),
-      );
-    }
-    this.#adoptSettingsSession(nextSession);
   }
 
   clearSelectedOverrides(): void {
@@ -926,16 +723,6 @@ export class BulkStore {
     }, 200);
   }
 
-  /** Effective (global + override) WebP options for a job, or the global. */
-  effectiveOptionsFor(jobId: string | undefined): WebpEncodeOptions {
-    const job = jobId
-      ? this.session.jobs.find((item) => item.id === jobId)
-      : undefined;
-    return webpOptions(
-      getEffectiveSettings(this.session.globalSettings, job?.overrides),
-    );
-  }
-
   /**
    * The ready-to-download output for a job (the engine-minted URL + an
    * export-safe filename), or `undefined` while the job has no current output.
@@ -981,26 +768,6 @@ export class BulkStore {
 
   isSelected(id: string): boolean {
     return this.selectedIds.has(id);
-  }
-
-  /**
-   * Whether a specific WebP option leaf deviates from the global for a job.
-   * The Phase-3 UI wiring is not consuming control ids yet, so compare the
-   * effective value against the global.
-   */
-  isPathOverridden(
-    jobId: string | undefined,
-    leaf: BulkOverridablePath,
-  ): boolean {
-    const job = jobId
-      ? this.session.jobs.find((item) => item.id === jobId)
-      : undefined;
-    if (!job?.overrides?.encoderState) return false;
-    const globalOptions = webpOptions(this.session.globalSettings);
-    const jobOptions = webpOptions(
-      getEffectiveSettings(this.session.globalSettings, job.overrides),
-    );
-    return jobOptions[leaf] !== globalOptions[leaf];
   }
 
   /**
