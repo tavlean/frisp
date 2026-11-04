@@ -81,3 +81,18 @@ describe('SVG lane integration', () => {
     });
   });
 });
+
+describe('retired output formats', () => {
+  it('loads a saved MozJPEG side as jpegli at the same quality', () => {
+    const parsed = parseSavedSide(
+      JSON.stringify({
+        format: 'mozJPEG',
+        optionsByFormat: { mozJPEG: { quality: 62, baseline: false } },
+        processorState: defaultProcessorState,
+      }),
+    );
+
+    expect(parsed?.format).toBe('jpegli');
+    expect(parsed?.optionsByFormat?.jpegli?.quality).toBe(62);
+  });
+});

@@ -26,11 +26,6 @@ const FORMATS: Fmt[] = [
     magic: (h) => (h[0] === 0xff && h[1] === 0x0a) || ascii(h, 4, 8) === 'JXL ',
   },
   {
-    id: 'mozJPEG',
-    label: 'MozJPEG',
-    magic: (h) => h[0] === 0xff && h[1] === 0xd8 && h[2] === 0xff,
-  },
-  {
     id: 'jpegli',
     label: 'jpegli',
     magic: (h) => h[0] === 0xff && h[1] === 0xd8 && h[2] === 0xff,
@@ -40,6 +35,7 @@ const FORMATS: Fmt[] = [
     label: 'OxiPNG',
     magic: (h) => h[0] === 0x89 && ascii(h, 1, 4) === 'PNG',
   },
+  // MozJPEG left the picker on 2026-11-04 (jpegli is the one JPEG).
   // QOI and the canvas/browser encoders (Browser JPEG/PNG/GIF) were removed from
   // the output picker on 2026-06-27, so they're no longer selectable here. The
   // QOI encoder stays wired for decode/import + the /diagnostics probe; QOI

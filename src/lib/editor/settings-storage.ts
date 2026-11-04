@@ -93,6 +93,26 @@ type ParsedSide = {
   processorState: ProcessorState;
 };
 
+/**
+ * MozJPEG left the picker on 2026-11-04: jpegli is the one JPEG (faster and
+ * smaller at the shipped defaults). A save that chose MozJPEG loads as jpegli
+ * at the same quality; the other MozJPEG knobs have no jpegli counterpart.
+ */
+function migrateRetiredFormat(incoming: {
+  format?: unknown;
+  optionsByFormat?: Record<string, Record<string, unknown>>;
+}): void {
+  if (incoming.format !== 'mozJPEG') return;
+  const quality = incoming.optionsByFormat?.mozJPEG?.quality;
+  incoming.format = 'jpegli';
+  if (typeof quality === 'number') {
+    incoming.optionsByFormat = {
+      ...incoming.optionsByFormat,
+      jpegli: { ...incoming.optionsByFormat?.jpegli, quality },
+    };
+  }
+}
+
 /** Parse + validate a stored side payload; null if absent, corrupt, or invalid. */
 function parseSavedSide(raw: string | null): ParsedSide | null {
   if (!raw) return null;
@@ -111,6 +131,7 @@ function parseSavedSide(raw: string | null): ParsedSide | null {
     optionsByFormat?: Record<string, Record<string, unknown>>;
     processorState?: unknown;
   };
+  migrateRetiredFormat(incoming);
   if (
     !isValidFormat(incoming.format) ||
     !isValidProcessorState(incoming.processorState)
