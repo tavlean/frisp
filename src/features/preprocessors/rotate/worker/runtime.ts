@@ -7,13 +7,19 @@ export interface RotateModuleInstance {
   };
 }
 
-export function createRotate(wasmUrl: string) {
+/** `wasm` is the module's URL, or a loader returning its bytes (Node has no
+ *  fetch for file paths). */
+export function createRotate(wasm: string | (() => Promise<BufferSource>)) {
   // We are loading a 500B module here. Loading the code to feature-detect
   // `instantiateStreaming` probably takes longer to load than the time we save
   // by using `instantiateStreaming` in the first place. So use ArrayBuffers.
-  const instancePromise = fetch(wasmUrl)
-    .then((response) => response.arrayBuffer())
-    .then((buffer) => WebAssembly.instantiate(buffer));
+  const load =
+    typeof wasm === 'string'
+      ? () => fetch(wasm).then((response) => response.arrayBuffer())
+      : wasm;
+  const instancePromise = load().then((buffer) =>
+    WebAssembly.instantiate(buffer),
+  );
 
   return async function rotate(
     data: ImageData,

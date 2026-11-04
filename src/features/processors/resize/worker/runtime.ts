@@ -19,6 +19,9 @@ function optsIsHqxOpts(opts: WorkerResizeOptions): opts is HqxResizeOptions {
   return opts.method === 'hqx';
 }
 
+// Copies the kept rows into a new buffer: the input may be the codec
+// worker's cached source frame, which a later call reads again. (An in-place
+// copyWithin here once corrupted that frame for every following resize.)
 function crop(
   data: ImageData,
   sx: number,
@@ -26,19 +29,17 @@ function crop(
   sw: number,
   sh: number,
 ): ImageData {
-  const inputPixels = new Uint32Array(data.data.buffer);
-
-  // Copy within the same buffer for speed and memory efficiency.
+  const input = new Uint32Array(
+    data.data.buffer,
+    data.data.byteOffset,
+    data.width * data.height,
+  );
+  const output = new Uint32Array(sw * sh);
   for (let y = 0; y < sh; y += 1) {
     const start = (y + sy) * data.width + sx;
-    inputPixels.copyWithin(y * sw, start, start + sw);
+    output.set(input.subarray(start, start + sw), y * sw);
   }
-
-  return new ImageData(
-    new Uint8ClampedArray(inputPixels.buffer.slice(0, sw * sh * 4)),
-    sw,
-    sh,
-  );
+  return new ImageData(new Uint8ClampedArray(output.buffer), sw, sh);
 }
 
 interface ClampOpts {
