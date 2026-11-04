@@ -1113,6 +1113,9 @@ export class EditorSession {
     this.sides[index].format = format;
   }
 
+  // copyToOther, saveSide, importSide, and canImport serve only the lab skins
+  // now (docs/lab.md). Production dropped the per-side copy/save/import
+  // buttons on 2026-11-04; retire these with the labs that still call them.
   copyToOther(from: SideIndex): void {
     const to: SideIndex = from === 0 ? 1 : 0;
     const previous = $state.snapshot(this.sides[to]) as SideState;

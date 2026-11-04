@@ -62,12 +62,8 @@
     working: boolean;
     /** Whether `result` matches the current recipe; gates Save and Share. */
     exportable: boolean;
-    canImport: boolean;
     downloadName: string;
     onFormatChange: (format: SideFormat) => void;
-    onCopy: () => void;
-    onSave: () => void;
-    onImport: () => void;
     onCloseCompare?: () => void;
   }
 
@@ -85,12 +81,8 @@
     result,
     working,
     exportable,
-    canImport,
     downloadName,
     onFormatChange,
-    onCopy,
-    onSave,
-    onImport,
     onCloseCompare,
   }: Props = $props();
 
@@ -117,60 +109,6 @@
               ✕
             </button>
           {/if}
-          <button
-            type="button"
-            class="title-button copy-over-button"
-            title="Copy settings to other side"
-            onclick={onCopy}
-          >
-            <svg viewBox="0 0 18 14">
-              <path
-                d="M5.5 3.6v6.8L2.1 7l3.4-3.4M7 0L0 7l7 7V0zm4 0v14l7-7-7-7z"
-              />
-            </svg>
-          </button>
-          <button
-            type="button"
-            class="title-button save-button"
-            title="Save side settings"
-            onclick={onSave}
-          >
-            <svg viewBox="0 0 24 24">
-              <g
-                fill="none"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-              >
-                <path
-                  d="M12.501 20.93c-.866.25-1.914-.166-2.176-1.247a1.724 1.724 0 0 0-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 0 0-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 0 0 1.066-2.573c-.94-1.543.826-3.31 2.37-2.37c1 .608 2.296.07 2.572-1.065c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.074.26 1.49 1.296 1.252 2.158M19 22v-6m3 3l-3-3l-3 3"
-                />
-                <path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0-6 0" />
-              </g>
-            </svg>
-          </button>
-          <button
-            type="button"
-            class="title-button import-button"
-            class:button-opacity={!canImport}
-            title="Import saved side settings"
-            onclick={onImport}
-            disabled={!canImport}
-          >
-            <svg viewBox="0 0 24 24">
-              <g
-                fill="none"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-              >
-                <path
-                  d="M12.52 20.924c-.87.262-1.93-.152-2.195-1.241a1.724 1.724 0 0 0-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 0 0-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 0 0 1.066-2.573c-.94-1.543.826-3.31 2.37-2.37c1 .608 2.296.07 2.572-1.065c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.088.264 1.502 1.323 1.242 2.192M19 16v6m3-3l-3 3l-3-3"
-                />
-                <path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0-6 0" />
-              </g>
-            </svg>
-          </button>
         </div>
       </h3>
 
@@ -368,41 +306,14 @@
     color: var(--text-1);
     transform: scale(1.08);
   }
-  .title-button svg {
-    --size: 18px;
-    display: block;
-    width: var(--size);
-    height: var(--size);
-  }
   .close-compare-button {
     font-size: 1.1rem;
     font-weight: 700;
     line-height: 1;
   }
-  .copy-over-button {
-    /* Point the filled arrow towards the other side (set per-side in theme). */
-    transform: rotate(var(--rotate-copyoverbutton-angle, 0deg));
-  }
-  .copy-over-button:hover {
-    transform: rotate(var(--rotate-copyoverbutton-angle, 0deg)) scale(1.08);
-  }
-  .copy-over-button svg {
-    fill: currentColor;
-  }
-  .save-button svg,
-  .import-button svg {
-    stroke: currentColor;
-  }
   .title-button:focus-visible {
     outline: var(--main-theme-color) solid 2px;
     outline-offset: 0.25em;
-  }
-  .button-opacity {
-    pointer-events: none;
-    cursor: not-allowed;
-  }
-  .button-opacity svg {
-    opacity: 0.4;
   }
 
   .no-opts {
@@ -433,10 +344,6 @@
 
     .title-and-buttons {
       gap: 0.6rem;
-    }
-
-    .title-button svg {
-      --size: 17px;
     }
   }
 </style>

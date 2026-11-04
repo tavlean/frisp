@@ -449,12 +449,8 @@
             result={focusSession.runtime[1].result}
             working={focusSession.runtime[1].showSpinner}
             exportable={focusSession.runtime[1].exportable}
-            canImport={focusSession.canImport[1]}
             downloadName={focusSession.downloadName(1)}
             onFormatChange={setRightFormat}
-            onCopy={() => focusSession.copyToOther(1)}
-            onSave={() => focusSession.saveSide(1)}
-            onImport={() => focusSession.importSide(1)}
           />
         {:else}
           <GlobalOptionsPanel {focusSession} />

@@ -59,12 +59,8 @@
     result={null}
     working={false}
     exportable={false}
-    canImport={false}
     downloadName=""
     onFormatChange={applyFormat}
-    onCopy={() => {}}
-    onSave={() => {}}
-    onImport={() => {}}
   />
 
   <!-- The batch result total lives once, in the LEFT panel footer. Here we just
