@@ -7,6 +7,8 @@
   import {
     registerServiceWorker,
     applyServiceWorkerUpdate,
+    anotherTabIsBusy,
+    answerBusyQueries,
   } from '$lib/service-worker-registration';
   import Output from '$lib/editor/output/Output.svelte';
   import OptionsPanel from '$lib/editor/OptionsPanel.svelte';
@@ -50,7 +52,9 @@
 
     // When a new build is downloaded and waiting, offer a non-intrusive
     // "refresh now" prompt rather than reloading mid-task. Clicking Refresh
-    // activates the waiting worker, which reloads the page onto the new build.
+    // activates the waiting worker, which reloads EVERY open tab onto the new
+    // build, so first check that no other tab would lose open images.
+    const stopAnswering = answerBusyQueries(() => !isLanding);
     registerServiceWorker({
       onUpdateReady: () => {
         void snackbar
@@ -58,15 +62,26 @@
             actions: ['Refresh'],
             timeout: null,
           })
-          .then((action) => {
-            if (action === 'Refresh') applyServiceWorkerUpdate();
+          .then(async (action) => {
+            if (action !== 'Refresh') return;
+            if (await anotherTabIsBusy()) {
+              const confirm = await snackbar.show(
+                `Refreshing also reloads another ${APP_NAME} tab that has images open.`,
+                { actions: ['Refresh anyway'], timeout: null },
+              );
+              if (confirm !== 'Refresh anyway') return;
+            }
+            applyServiceWorkerUpdate();
           });
       },
     }).catch((error: unknown) => {
       console.error('Service worker registration failed', error);
     });
 
-    return () => session.dispose();
+    return () => {
+      stopAnswering();
+      session.dispose();
+    };
   });
 
   // The per-side encode + spinner effects now live inside EditorSession (set up

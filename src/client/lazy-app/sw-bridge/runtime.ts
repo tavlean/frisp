@@ -76,6 +76,66 @@ export function applyServiceWorkerUpdate(): void {
   waitingWorker?.postMessage({ type: 'SKIP_WAITING' });
 }
 
+// Activating an update reloads EVERY controlled tab (controllerchange above),
+// and the activated worker purges the old build's cache, so a tab cannot
+// safely stay on the old build. Before activating, the tab that accepted the
+// update asks the others over this channel whether any holds open images.
+const TAB_CHANNEL = 'app:tabs';
+const THIS_TAB = Math.random().toString(36).slice(2);
+
+type TabMessage =
+  | { type: 'busy?'; from: string; query: string }
+  | { type: 'busy'; query: string };
+
+interface TabOptions {
+  /** Overridable so tests can stand up several "tabs" in one process. */
+  tabId?: string;
+  channelName?: string;
+}
+
+/** Answer other tabs' busy queries while `isBusy()` holds. Returns a disposer. */
+export function answerBusyQueries(
+  isBusy: () => boolean,
+  { tabId = THIS_TAB, channelName = TAB_CHANNEL }: TabOptions = {},
+): () => void {
+  if (typeof BroadcastChannel === 'undefined') return () => {};
+  const channel = new BroadcastChannel(channelName);
+  channel.onmessage = (event: MessageEvent<TabMessage>) => {
+    const message = event.data;
+    if (message?.type !== 'busy?' || message.from === tabId) return;
+    if (isBusy()) channel.postMessage({ type: 'busy', query: message.query });
+  };
+  return () => channel.close();
+}
+
+/**
+ * Whether any OTHER open tab reports open images. Resolves false when nobody
+ * answers within `waitMs`, which is also the answer where BroadcastChannel is
+ * missing: the update then behaves as it always did.
+ */
+export function anotherTabIsBusy({
+  tabId = THIS_TAB,
+  channelName = TAB_CHANNEL,
+  waitMs = 250,
+}: TabOptions & { waitMs?: number } = {}): Promise<boolean> {
+  if (typeof BroadcastChannel === 'undefined') return Promise.resolve(false);
+  return new Promise((resolve) => {
+    const channel = new BroadcastChannel(channelName);
+    const query = Math.random().toString(36).slice(2);
+    const finish = (busy: boolean) => {
+      clearTimeout(timer);
+      channel.close();
+      resolve(busy);
+    };
+    const timer = setTimeout(() => finish(false), waitMs);
+    channel.onmessage = (event: MessageEvent<TabMessage>) => {
+      const message = event.data;
+      if (message?.type === 'busy' && message.query === query) finish(true);
+    };
+    channel.postMessage({ type: 'busy?', from: tabId, query });
+  });
+}
+
 export async function registerServiceWorkerUrl(
   serviceWorkerUrl: string,
   {

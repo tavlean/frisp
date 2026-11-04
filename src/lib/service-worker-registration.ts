@@ -1,11 +1,13 @@
 import {
   registerServiceWorkerUrl,
   applyServiceWorkerUpdate,
+  anotherTabIsBusy,
+  answerBusyQueries,
 } from 'client/lazy-app/sw-bridge/runtime';
 import { base } from '$app/paths';
 import { browser, dev } from '$app/environment';
 
-export { applyServiceWorkerUpdate };
+export { applyServiceWorkerUpdate, anotherTabIsBusy, answerBusyQueries };
 
 /** localStorage flag set by the `?sw` opt-in (see `localhostSwForced`). */
 const FORCE_LOCALHOST_SW_KEY = 'app:force-localhost-sw';
