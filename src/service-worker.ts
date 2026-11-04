@@ -24,12 +24,6 @@ const codecAssetUrlSet = new Set(codecAssetUrls);
 // shipping to every visitor up front.
 const isProbeWorkerUrl = (url: string) => /probe\.worker[^/]*\.js$/.test(url);
 
-// The SVG optimizer worker contains the heavy SVGO + fflate payload. Keep it
-// out of the install shell so non-SVG visitors do not download it; it remains
-// in `assets` below and is cached by the fetch handler on first SVG use.
-const isSvgOptimizerWorkerUrl = (url: string) =>
-  url.includes('/workers/svg-optimizer.worker-');
-
 // Files that exist only for crawlers. The app never requests them, and the
 // social card alone is ~42 kB, so precaching them would put dead weight in every
 // visitor's install for the benefit of robots that bypass the service worker
@@ -50,13 +44,11 @@ const isInstallIconUrl = (url: string) =>
 // The app shell: everything needed to boot offline, minus the
 // variant-selected codec assets (`build` lists every emitted file, including
 // all mutually-exclusive codec variants). Tiny codec files not in the records
-// (rotate WASM, pthread worker stubs) deliberately stay in the shell.
+// (rotate WASM, pthread worker stubs) deliberately stay in the shell. The
+// worker chunks are not in `build` at all; see emittedWorkerUrls below.
 const appShellUrls = [
   ...build.filter(
-    (url) =>
-      !codecAssetUrlSet.has(url) &&
-      !isProbeWorkerUrl(url) &&
-      !isSvgOptimizerWorkerUrl(url),
+    (url) => !codecAssetUrlSet.has(url) && !isProbeWorkerUrl(url),
   ),
   ...files.filter((url) => !isCrawlerFileUrl(url) && !isInstallIconUrl(url)),
   ...prerendered,
@@ -137,12 +129,31 @@ async function fetchAndCache(request: Request): Promise<Response> {
   return response;
 }
 
+// The worker chunks `build` leaves out, listed at build time by the
+// app-worker-precache-manifest plugin in vite.config.ts. Without them the
+// codec WASM is cached but no worker can load it offline. A missing list (a
+// dev or partial build) degrades to runtime caching, never a failed install.
+async function emittedWorkerUrls(): Promise<string[]> {
+  try {
+    const response = await fetch('/_app/worker-precache.json', {
+      cache: 'no-cache',
+    });
+    return response.ok ? ((await response.json()) as string[]) : [];
+  } catch {
+    return [];
+  }
+}
+
 worker.addEventListener('install', (event) => {
   event.waitUntil(
     (async () => {
-      const support = await detectCodecSupport();
+      const [support, workerUrls] = await Promise.all([
+        detectCodecSupport(),
+        emittedWorkerUrls(),
+      ]);
       const precacheUrls = dedupeUrls([
         ...appShellUrls,
+        ...workerUrls,
         ...selectCodecPrecacheUrls(serviceWorkerCodecAssetRecords, support),
       ]).map((url) => new URL(url, worker.location.origin).toString());
       const cache = await caches.open(cacheName);

@@ -197,7 +197,7 @@ test('changing settings during the first pass leaves no job stale', async ({
   }
 });
 
-test.fixme('the first SVG optimized offline works without a prior online SVG', async ({
+test('the first SVG optimized offline works without a prior online SVG', async ({
   page,
   context,
   browserName,
@@ -260,4 +260,32 @@ test('removing an image mid-encode does not stall the rest of the batch', async 
     .evaluate((node: HTMLButtonElement) => node.click());
   await expect(page.locator(CELL)).toHaveCount(2);
   await waitBulkReady(page, 2);
+});
+
+test('the first raster encode works offline without a prior online encode', async ({
+  page,
+  context,
+  browserName,
+}) => {
+  test.skip(
+    browserName === 'webkit',
+    'Playwright-WebKit setOffline + reload is unsupported (harness limitation)',
+  );
+  await page.goto('/?sw=1');
+  await page.waitForFunction(
+    () => navigator.serviceWorker?.controller != null,
+    null,
+    { timeout: 30_000 },
+  );
+
+  // setOffline alone does not reach dedicated workers in Chromium, so also
+  // fail every request that leaves the service worker for the network.
+  await context.setOffline(true);
+  await context.route('**/*', (route) => route.abort('internetdisconnected'));
+  await page.reload();
+  await page.setInputFiles(FILE_INPUT, photo);
+  await expect(
+    page.locator(`${RIGHT_PANEL} a.download[href^="blob:"]`),
+  ).toHaveAttribute('download', /\.webp$/, { timeout: 30_000 });
+  await context.setOffline(false);
 });

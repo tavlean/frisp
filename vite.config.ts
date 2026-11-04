@@ -121,6 +121,35 @@ const stripDevOnlyRoutesInProd: Plugin = {
   },
 };
 
+// The service worker's precache list comes from SvelteKit's `build`, which
+// leaves out the worker chunks Vite emits for `new Worker(new URL(...))`: the
+// codec worker, the SVG optimizer, and OxiPNG's thread helper. Without them the
+// WASM was cached but nothing could load it, so a first offline encode failed
+// until an online visit had fetched each worker once. This records the emitted
+// workers in `_app/worker-precache.json`, which the service worker reads at
+// install. Diagnostics probe workers stay out (see service-worker.ts).
+export const WORKER_PRECACHE_MANIFEST = '_app/worker-precache.json';
+const workerPrecacheManifest: Plugin = {
+  name: 'app-worker-precache-manifest',
+  apply: 'build',
+  generateBundle(_options, bundle) {
+    const files = Object.keys(bundle);
+    // Only the SvelteKit client build carries its start entry; the SSR,
+    // service-worker, and nested worker builds pass through untouched.
+    if (!files.some((file) => /\/entry\/start\.[^/]+\.js$/.test(file))) return;
+    const workers = files
+      .filter((file) => /\/workers\/[^/]+\.js$/.test(file))
+      .filter((file) => !/probe\.worker[^/]*\.js$/.test(file))
+      .map((file) => `/${file}`)
+      .sort();
+    this.emitFile({
+      type: 'asset',
+      fileName: WORKER_PRECACHE_MANIFEST,
+      source: JSON.stringify(workers),
+    });
+  },
+};
+
 // Exported so vitest.config.ts resolves the same aliases (it does NOT inherit
 // this file: a standalone vitest.config takes full precedence, and without
 // these an aliased import inside any transitively-loaded source module makes
@@ -145,6 +174,7 @@ export default defineConfig({
     rawThreadedCodecWorkers,
     crossOriginIsolation,
     stripDevOnlyRoutesInProd,
+    workerPrecacheManifest,
     sveltekit(),
   ],
   optimizeDeps: {

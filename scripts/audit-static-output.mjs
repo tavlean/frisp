@@ -261,6 +261,24 @@ const svgOptimizerWorkerSources = await Promise.all(
     readFile(join(buildDir, file), 'utf8'),
   ),
 );
+// The service worker precaches workers from this list (SvelteKit's `build`
+// omits them). Every emitted worker except the diagnostics probes must be on
+// it, or a first offline encode has WASM but no worker to run it.
+const workerPrecacheList = JSON.parse(
+  await readFile(join(buildDir, '_app/worker-precache.json'), 'utf8'),
+);
+const emittedAppWorkers = files
+  .filter(
+    (file) =>
+      /^_app\/immutable\/workers\/[^/]+\.js$/.test(file) &&
+      !/probe\.worker[^/]*\.js$/.test(file),
+  )
+  .map((file) => `/${file}`)
+  .sort();
+assert(
+  JSON.stringify(workerPrecacheList) === JSON.stringify(emittedAppWorkers),
+  `Worker precache list ${JSON.stringify(workerPrecacheList)} does not match the emitted workers ${JSON.stringify(emittedAppWorkers)}.`,
+);
 const otherJavascriptSources = await Promise.all(
   files
     .filter(
@@ -572,8 +590,8 @@ assert(
   'Service worker does not feature-detect native decoders for variant-aware precache.',
 );
 assert(
-  serviceWorker.includes('/workers/svg-optimizer.worker-'),
-  'Service worker is missing the stable SVG optimizer worker precache exclusion.',
+  serviceWorker.includes('/_app/worker-precache.json'),
+  'Service worker does not read the worker precache list, so workers would not be available offline.',
 );
 assert(
   serviceWorker.includes(appEntryAsset),
