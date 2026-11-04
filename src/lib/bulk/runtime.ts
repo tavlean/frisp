@@ -11,11 +11,6 @@
 
 import { isAbortError } from 'client/lazy-app/abort';
 import {
-  decodeSourceImage,
-  preprocessImage,
-  type ImagePipelineWorkerBridge,
-} from 'client/lazy-app/image-pipeline';
-import {
   completeJob,
   effectiveRecipe,
   failJob,
@@ -45,6 +40,19 @@ export interface BulkRunnerHost {
   requeueStale?(): void;
 }
 
+/** The concurrent jobs a bulk run drains at once, one per worker slot. */
+const SLOTS = 2;
+
+/**
+ * OxiPNG threads per bulk worker. Each worker's pool otherwise takes every
+ * core, so two concurrent PNG encodes ran twice as many threads as the
+ * machine has, contending instead of speeding up. AVIF and JPEG XL size their
+ * pools at build time and are not covered.
+ */
+export function bulkThreadBudget(cores: number, slots: number = SLOTS): number {
+  return Math.max(1, Math.floor(cores / slots));
+}
+
 export class BulkRuntime {
   // Two long-lived bridges. Created lazily on the first run and reused for the
   // session's lifetime (warm worker: WASM instantiated, pthread pool spawned).
@@ -64,7 +72,9 @@ export class BulkRuntime {
 
   /** The persistent bridge for a round-robin slot, created on first use. */
   #bridgeFor(slot: 0 | 1): SvelteKitWorkerBridge {
-    return (this.#bridges[slot] ??= new SvelteKitWorkerBridge());
+    return (this.#bridges[slot] ??= new SvelteKitWorkerBridge({
+      threads: bulkThreadBudget(navigator.hardwareConcurrency),
+    }));
   }
 
   /** True while a run() loop is draining the queue. */
@@ -137,29 +147,13 @@ export class BulkRuntime {
       const canonicalSettingsHash =
         host.settingsHashForJob?.(job) ?? jobRecipeHash(host.session, job);
       const recipe = effectiveRecipe(host.session, job);
-      const bridge = this.#bridgeFor(slot);
-      const pipelineBridge = bridge as unknown as ImagePipelineWorkerBridge;
-      // Decode and rotate the way EditorSession's #preparedSource does, so
-      // optimizeImage sees the same prepared frame in both surfaces.
-      const decoded = await decodeSourceImage(
+      // The slot's worker decodes the file itself and keeps it only until
+      // the slot moves on to another file.
+      const outcome = await optimizeImage({ file: job.sourceFile }, recipe, {
         signal,
-        job.sourceFile,
-        pipelineBridge,
-      );
-      const preprocessed =
-        recipe.rotate === 0
-          ? decoded.decoded
-          : await preprocessImage(
-              signal,
-              decoded.decoded,
-              { rotate: { rotate: recipe.rotate } },
-              pipelineBridge,
-            );
-      const outcome = await optimizeImage(
-        { ...decoded, preprocessed },
-        recipe,
-        { signal, bridge, preview: false },
-      );
+        bridge: this.#bridgeFor(slot),
+        preview: false,
+      });
       // The outcome's URL becomes the output's download URL, so the store's
       // existing revoke paths own it from here. A cancel that lands after the
       // encode finished leaves no owner, so it is revoked on the spot.

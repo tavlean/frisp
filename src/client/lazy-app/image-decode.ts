@@ -1,5 +1,3 @@
-import { abortable, assertSignal } from './abort';
-import { drawableToImageData } from './util/canvas';
 import { blobToArrayBuffer } from 'shared/blob';
 
 async function decodeImage(url: string): Promise<HTMLImageElement> {
@@ -21,38 +19,6 @@ async function decodeImage(url: string): Promise<HTMLImageElement> {
   // Always await loaded, as we may have bailed due to the Safari bug above.
   await loaded;
   return img;
-}
-
-/** Caches results from canDecodeImageType */
-const canDecodeCache = new Map<string, Promise<boolean>>();
-
-/**
- * Tests whether the browser supports a particular image mime type.
- *
- * @param type Mimetype
- * @example await canDecodeImageType('image/avif')
- */
-export function canDecodeImageType(type: string): Promise<boolean> {
-  if (!canDecodeCache.has(type)) {
-    const resultPromise = (async () => {
-      const picture = document.createElement('picture');
-      const img = document.createElement('img');
-      const source = document.createElement('source');
-      source.srcset = 'data:,x';
-      source.type = type;
-      picture.append(source, img);
-
-      // Wait a single microtick just for the `img.currentSrc` to get populated.
-      await 0;
-      // At this point `img.currentSrc` will contain "data:,x" if format is supported and ""
-      // otherwise.
-      return !!img.currentSrc;
-    })();
-
-    canDecodeCache.set(type, resultPromise);
-  }
-
-  return canDecodeCache.get(type)!;
 }
 
 export function blobToText(blob: Blob): Promise<string> {
@@ -101,24 +67,5 @@ export async function blobToImg(blob: Blob): Promise<HTMLImageElement> {
     return await decodeImage(url);
   } finally {
     URL.revokeObjectURL(url);
-  }
-}
-
-export async function builtinDecode(
-  signal: AbortSignal,
-  blob: Blob,
-): Promise<ImageData> {
-  assertSignal(signal);
-
-  // Prefer createImageBitmap as it's the off-thread option for Firefox.
-  const drawable = await abortable<HTMLImageElement | ImageBitmap>(
-    signal,
-    'createImageBitmap' in self ? createImageBitmap(blob) : blobToImg(blob),
-  );
-
-  try {
-    return drawableToImageData(drawable);
-  } finally {
-    if ('close' in drawable) drawable.close();
   }
 }

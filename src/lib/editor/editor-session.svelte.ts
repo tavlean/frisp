@@ -6,15 +6,16 @@ import {
   type CompressOutcome,
   type SideFormat,
 } from '$lib/compress';
-import { optimizeImage } from '$lib/optimize-image';
+import { optimizeImage, type OptimizeSource } from '$lib/optimize-image';
 import { ResultCache } from '$lib/result-cache';
 import SvelteKitWorkerBridge from '$lib/sveltekit-worker-bridge';
 import type { ResizeOptionsState } from './options/processor-types';
 import { isSvgSource } from '$lib/svg/detect';
+import { rasterizeSvg, type SvgRaster } from '$lib/svg/raster';
 import { SVG_FORMAT } from './format-label';
 import { EditorHistory } from './editor-history.svelte';
 import { snackbar } from './snackbar-store.svelte';
-import { abortable, isAbortError } from 'client/lazy-app/abort';
+import { isAbortError } from 'client/lazy-app/abort';
 import { APP_NAME } from 'shared/brand';
 import { stableStringify } from 'shared/stable-stringify';
 import {
@@ -28,6 +29,7 @@ import {
   recipeChangesPixels,
   recipeSignature,
   type ImageRecipe,
+  type Rotation,
 } from 'client/lazy-app/recipe';
 import { getPercentChange } from 'client/lazy-app/bulk/size';
 import { recipeFromSide } from './side-recipe';
@@ -39,14 +41,6 @@ import {
   type AutoQualityTarget,
 } from './auto-quality';
 import { applyGrainToPixels } from 'features/processors/grain/shared/apply';
-import {
-  decodeImage,
-  decodeSourceImage,
-  preprocessImage,
-  type ImagePipelineWorkerBridge,
-  type DecodedSourceImage,
-  type SourceImage,
-} from 'client/lazy-app/image-pipeline';
 import {
   defaultPreprocessorState,
   defaultProcessorState,
@@ -257,19 +251,22 @@ export class EditorSession {
   // across" makes this a one-click situation). Not reactive; cleared with the
   // cache on a new file (the signature doesn't include file identity).
   private inflight = new Map<string, Promise<CompressOutcome>>();
-  // Session-level source prep shared by both sides and by successive passes for
-  // the same open file. Pass aborts are wrapped around the await, not wired into
-  // this controller, so a debounced option change never poisons the shared decode.
+  // The source as the main thread sees it, for the Original side, the grain
+  // preview, and adopted results. Encodes never wait on it: the codec workers
+  // decode the file themselves. One rotated frame per load, decoded on its
+  // own bridge (below) under its own controller, so it never queues behind an
+  // encode and a debounced option change never aborts it.
   #sourceAbort: AbortController | null = null;
-  #decodedPromise: Promise<DecodedSourceImage> | null = null;
-  #decodedLoadId = -1;
+  #sourceBridge: SvelteKitWorkerBridge | null = null;
+  #frame: {
+    loadId: number;
+    rotate: Rotation;
+    promise: Promise<ImageData>;
+  } | null = null;
+  // An SVG source's raster (DOM-only, so it is made here, not in a worker).
+  #svgRaster: { loadId: number; promise: Promise<SvgRaster> } | null = null;
   #svgTextPromise: Promise<string> | null = null;
   #svgTextLoadId = -1;
-  // One rotated frame is cached alongside the decoded frame. Rotation 0 reuses
-  // decoded pixels exactly like preprocessImage does today (no copy).
-  #preprocessedPromise: Promise<ImageData> | null = null;
-  #preprocessedLoadId = -1;
-  #preprocessedRotate: 0 | 90 | 180 | 270 = 0;
   // Debounced commit timer for the history watcher (see watchHistory).
   private historyTimer: ReturnType<typeof setTimeout> | null = null;
   // Bookkeeping keyed to `loadId` (bumped on every new file). Comparing against
@@ -463,22 +460,15 @@ export class EditorSession {
     // A pass this side OWNS: runs the pipeline on this side's bridge and
     // publishes itself in `inflight` so the other side can piggyback.
     const startOwnPass = () => {
-      const pass = abortable(
-        controller.signal,
-        // The pass's OWN preprocessor snapshot decides the prepared frame —
-        // never a live re-read after the decode await, which could disagree
-        // with `request` in the abort window and cache a result under the
-        // wrong signature. The SVG lane shares this decode: rotate is hidden
-        // for SVG sources, so "prepared" is just the rasterized source — it
-        // supplies the natural dimensions the vector lane renders at.
-        this.#preparedSource(bridge, request.preprocessorState),
-      ).then(async (prepared) => {
-        const outcome = await optimizeImage(prepared, recipe, {
-          signal: controller.signal,
-          bridge,
-          preview: true,
-          svgText: request.format === 'svg' ? this.#svgSourceText() : undefined,
-        });
+      // The recipe carries the pass's OWN rotation snapshot, so the frame
+      // it encodes can never disagree with `request` in the abort window and
+      // cache a result under the wrong signature.
+      const pass = optimizeImage(this.#optimizeSource(), recipe, {
+        signal: controller.signal,
+        bridge,
+        preview: true,
+        svgText: request.format === 'svg' ? this.#svgSourceText() : undefined,
+      }).then((outcome) => {
         if (outcome.transcodeFellBack) {
           void snackbar.show(
             "Couldn't transcode this JPEG losslessly, so it was encoded normally.",
@@ -569,8 +559,8 @@ export class EditorSession {
    * compute for a side holding `recipe` (same projection, same source size,
    * which is 0 until this load's first result lands), so a side that wants it
    * piggybacks and the finished outcome is cached like any other. Building the
-   * preview decodes the file once; the source pixels come from this session's
-   * own prepared source. Any failure rejects as an abort, which makes a
+   * preview decodes the file once, in a worker; the source size comes from
+   * this session's own prepared frame. Any failure rejects as an abort, which makes a
    * waiting side fall back to a pass of its own. Raster outputs only: an SVG
    * result needs the vector lane's text facts. The cache mints and owns its
    * own URL for the file, so the caller's URL is never revoked here.
@@ -589,16 +579,11 @@ export class EditorSession {
     if (this.cache.get(key) || this.inflight.has(key)) return;
 
     const loadId = this.loadId;
-    const bridge = this.bridgeFor(1);
-    const signal = new AbortController().signal;
     const pass = (async (): Promise<CompressOutcome> => {
-      const prepared = await this.#preparedSource(bridge, {
-        rotate: { rotate: recipe.rotate },
-      });
-      const outputImageData = await decodeImage(
-        signal,
+      const frame = await this.#preparedFrame(recipe.rotate);
+      const outputImageData = await this.#sourceBridgeFor().decodeOutput(
+        this.#sourceSignal(),
         outputFile,
-        bridge as unknown as ImagePipelineWorkerBridge,
       );
       if (this.loadId !== loadId) throw Error('The source changed');
       const existing = this.cache.get(key);
@@ -610,11 +595,10 @@ export class EditorSession {
         originalSize: file.size,
         percentChange:
           Math.round(getPercentChange(file.size, outputFile.size) * 10) / 10,
-        sourceImageData: prepared.preprocessed,
         outputImageData,
         isOriginal: false,
-        preprocessedWidth: prepared.preprocessed.width,
-        preprocessedHeight: prepared.preprocessed.height,
+        preprocessedWidth: frame.width,
+        preprocessedHeight: frame.height,
       };
       this.cache.set(key, outcome);
       return outcome;
@@ -671,9 +655,9 @@ export class EditorSession {
   /**
    * Search this side's quality for `target` and commit the result. Probes run
    * the side's own recipe with only `quality` substituted, on the side's own
-   * bridge, through the same optimizeImage call encodeSide makes, and score
-   * the decoded output against the outcome's `sourceImageData`: the processed
-   * frame (after resize, grain, palette) the encoder received, so the target
+   * bridge, through the same optimizeImage call encodeSide makes, with the
+   * worker scoring the decoded output against the processed frame (after
+   * resize, grain, palette) the encoder received, so the target
    * measures the encoder's loss alone and the sizes always match. Every probe
    * URL is revoked as soon as the search drops it; the winner goes into the
    * result cache under the key encodeSide computes after the commit, so the
@@ -708,10 +692,6 @@ export class EditorSession {
     const bridge = this.bridgeFor(index);
     const withQuality = (quality: number) => ({ ...options, quality });
     const probe = async (quality: number) => {
-      const prepared = await abortable(
-        signal,
-        this.#preparedSource(bridge, preprocessorState),
-      );
       const recipe = recipeFromSide(
         {
           format,
@@ -720,25 +700,21 @@ export class EditorSession {
         },
         preprocessorState,
       );
-      const outcome = await optimizeImage(prepared, recipe, {
+      // Same source path and bridge as encodeSide, so the worker's hot
+      // decoded source serves every probe. The worker scores the decoded
+      // output against the processed frame it encoded, which is also the
+      // preview, so the winner can be cached as a displayable result.
+      const outcome = await optimizeImage(this.#optimizeSource(), recipe, {
         signal,
         bridge,
         preview: true,
+        score: true,
       });
-      try {
-        // The metric op copies both frames to the worker and transfers
-        // nothing, so the cached decoded source behind sourceImageData stays
-        // intact for the next probe and the editor.
-        const score = await bridge.ssimulacra2Score(
-          signal,
-          outcome.sourceImageData,
-          outcome.outputImageData,
-        );
-        return { score, outcome };
-      } catch (error) {
+      if (outcome.score === undefined) {
         URL.revokeObjectURL(outcome.outputUrl);
-        throw error;
+        throw Error('The codec worker returned no score.');
       }
+      return { score: outcome.score, outcome };
     };
 
     const started = performance.now();
@@ -810,16 +786,23 @@ export class EditorSession {
     return (this.bridges[index] ??= new SvelteKitWorkerBridge());
   }
 
+  /** The bridge for source frames and adopted previews, created on first use. */
+  #sourceBridgeFor(): SvelteKitWorkerBridge {
+    return (this.#sourceBridge ??= new SvelteKitWorkerBridge());
+  }
+
+  /** This load's source controller: aborted only when the file goes away. */
+  #sourceSignal(): AbortSignal {
+    return (this.#sourceAbort ??= new AbortController()).signal;
+  }
+
   #clearPreparedSource(): void {
     this.#sourceAbort?.abort();
     this.#sourceAbort = null;
-    this.#decodedPromise = null;
-    this.#decodedLoadId = -1;
+    this.#frame = null;
+    this.#svgRaster = null;
     this.#svgTextPromise = null;
     this.#svgTextLoadId = -1;
-    this.#preprocessedPromise = null;
-    this.#preprocessedLoadId = -1;
-    this.#preprocessedRotate = 0;
   }
 
   #svgSourceText(): Promise<string> {
@@ -832,68 +815,73 @@ export class EditorSession {
     return this.#svgTextPromise;
   }
 
-  async #preparedSource(
-    bridge: SvelteKitWorkerBridge,
-    preprocessorState: PreprocessorState,
-  ): Promise<SourceImage> {
+  /** What optimizeImage needs from this session for the current file. */
+  #optimizeSource(): OptimizeSource {
+    const file = this.file;
+    if (!file) throw Error('No image loaded');
+    return {
+      file,
+      prepared: (rotate) => this.#preparedFrame(rotate),
+      svg: isSvgSource(file) ? () => this.#svgSourceRaster() : undefined,
+    };
+  }
+
+  #svgSourceRaster(): Promise<SvgRaster> {
+    const file = this.file;
+    if (!file || !isSvgSource(file)) throw Error('No SVG loaded');
+    if (this.#svgRaster?.loadId !== this.loadId) {
+      const promise = rasterizeSvg(this.#sourceSignal(), file);
+      this.#svgRaster = { loadId: this.loadId, promise };
+      // A failure surfaces to every current waiter but is not kept.
+      promise.catch(() => {
+        if (this.#svgRaster?.promise === promise) this.#svgRaster = null;
+      });
+    }
+    return this.#svgRaster.promise;
+  }
+
+  /**
+   * The current file rotated by `rotate`, on the main thread. Decoded in a
+   * worker and transferred out, so the main thread never decodes a raster
+   * source. An SVG is rasterized here instead (that needs the DOM), and a
+   * worker only rotates a copy of it.
+   */
+  #preparedFrame(rotate: Rotation): Promise<ImageData> {
     const file = this.file;
     if (!file) throw Error('No image loaded');
     const loadId = this.loadId;
-
-    if (this.#decodedLoadId !== loadId || !this.#decodedPromise) {
-      this.#sourceAbort?.abort();
-      const sourceAbort = new AbortController();
-      this.#sourceAbort = sourceAbort;
-      this.#decodedLoadId = loadId;
-      this.#preprocessedPromise = null;
-      this.#preprocessedLoadId = -1;
-
-      const decodedPromise: Promise<DecodedSourceImage> = decodeSourceImage(
-        sourceAbort.signal,
-        file,
-        bridge,
-      ).catch((error: unknown) => {
-        // A bad source should surface to every current waiter, but the rejected
-        // promise must not become the file's permanent decode cache entry.
-        if (this.#decodedPromise === decodedPromise) {
-          this.#decodedPromise = null;
-          this.#decodedLoadId = -1;
-          this.#preprocessedPromise = null;
-          this.#preprocessedLoadId = -1;
-        }
-        throw error;
-      });
-      this.#decodedPromise = decodedPromise;
+    const cached = this.#frame;
+    if (cached?.loadId === loadId && cached.rotate === rotate) {
+      return cached.promise;
     }
-
-    const decoded = await this.#decodedPromise;
-    const rotate = preprocessorState.rotate.rotate as 0 | 90 | 180 | 270;
-    if (rotate === 0) {
-      this.#preprocessedPromise = null;
-      this.#preprocessedLoadId = loadId;
-      this.#preprocessedRotate = rotate;
-      return { ...decoded, preprocessed: decoded.decoded };
-    }
-
-    if (
-      this.#preprocessedLoadId !== loadId ||
-      this.#preprocessedRotate !== rotate ||
-      !this.#preprocessedPromise
-    ) {
-      if (!this.#sourceAbort)
-        throw new DOMException('AbortError', 'AbortError');
-      this.#preprocessedLoadId = loadId;
-      this.#preprocessedRotate = rotate;
-      this.#preprocessedPromise = preprocessImage(
-        this.#sourceAbort.signal,
-        decoded.decoded,
-        preprocessorState,
-        bridge,
+    const signal = this.#sourceSignal();
+    const bridge = this.#sourceBridgeFor();
+    const promise = (async () => {
+      if (!isSvgSource(file)) {
+        const reply = await bridge.prepare(signal, {
+          source: { kind: 'file', file },
+          rotate,
+        });
+        return reply.image;
+      }
+      const { raster } = await this.#svgSourceRaster();
+      if (rotate === 0) return raster;
+      const copy = new ImageData(
+        new Uint8ClampedArray(raster.data),
+        raster.width,
+        raster.height,
       );
-    }
-
-    const preprocessed = await this.#preprocessedPromise;
-    return { ...decoded, preprocessed };
+      const reply = await bridge.prepare(signal, {
+        source: { kind: 'pixels', image: copy },
+        rotate,
+      });
+      return reply.image;
+    })();
+    this.#frame = { loadId, rotate, promise };
+    promise.catch(() => {
+      if (this.#frame?.promise === promise) this.#frame = null;
+    });
+    return promise;
   }
 
   /**
@@ -1015,24 +1003,12 @@ export class EditorSession {
   ): Promise<void> {
     const token = ++this.#grainPreviewToken[index];
     const loadId = this.loadId;
-    // Resolve the preprocessed frame the way #preparedSource defines it: at
-    // rotation 0 the decoded frame IS the preprocessed frame (and
-    // #preprocessedPromise stays deliberately null). The encode effect that
-    // engaged the preview has already kicked source prep, so these promises
-    // exist and are usually settled. On a brand-new file with nothing decoded
-    // yet, bail — the encode fallback covers that window.
-    const rotate = this.preprocessorState.rotate.rotate;
+    // The frame the encoder starts from. Usually settled already (the
+    // Original side or an earlier scrub asked for it); otherwise this starts
+    // it on the source bridge, which no encode can hold up.
     let data: ImageData;
     try {
-      if (rotate === 0) {
-        const decoded = this.#decodedPromise;
-        if (!decoded) return;
-        data = (await decoded).decoded;
-      } else {
-        const preprocessed = this.#preprocessedPromise;
-        if (!preprocessed) return;
-        data = await preprocessed;
-      }
+      data = await this.#preparedFrame(this.preprocessorState.rotate.rotate);
     } catch {
       return; // decode failures surface through the encode path
     }
@@ -1309,6 +1285,8 @@ export class EditorSession {
     this.#clearPreparedSource();
     for (const bridge of this.bridges) bridge?.dispose();
     this.bridges = [null, null];
+    this.#sourceBridge?.dispose();
+    this.#sourceBridge = null;
   }
 
   rotate(): void {

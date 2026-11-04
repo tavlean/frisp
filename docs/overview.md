@@ -3,8 +3,8 @@
 Last updated: 2026-11-04.
 
 Frisp is a browser-local image optimizer. Users import one image or a batch,
-it decodes and processes pixels in the browser, and exports files or a ZIP
-from object URLs. There is no backend image-processing service and no upload
+it decodes and processes pixels in the browser's codec workers, and exports
+files or a ZIP from object URLs. There is no backend image-processing service and no upload
 path.
 
 ## What Runs Where
@@ -13,11 +13,15 @@ path.
   `200.html` fallback).
 - Svelte 5 components and `.svelte.ts` modules own editor UI, bulk UI, session
   state, history, and result caches.
-- Framework-neutral TypeScript under `src/client/lazy-app/` owns decode,
-  preprocess, resize, quantize, encode orchestration, filename safety, and bulk
-  reducers.
-- Web Workers run codec and processor work through Comlink. The committed worker
-  entry is `src/worker/codec-worker.ts`.
+- Framework-neutral TypeScript under `src/client/lazy-app/` owns the recipe,
+  the lane choice, the pixel step order (`pipeline-core.ts`), filename safety,
+  and bulk reducers.
+- The codec worker (`src/worker/codec-worker.ts`, through Comlink) runs a whole
+  encode in one call: it decodes the source itself, keeps it for the next call
+  on the same file, runs rotate, resize, grain, palette, and the encoder, and
+  transfers back the bytes and the decoded preview
+  (`src/worker/pipeline-op.ts`). The main thread decodes nothing except SVG
+  sources, which need the DOM to rasterize.
 - WASM codec artifacts live under `codecs/`; committed source modules under
   `src/shared/codec-assets/` import them with Vite `?url` records.
 - The service worker caches the app shell plus selected codec assets for offline
@@ -38,7 +42,8 @@ path.
 - `src/shared/`: brand, stable shared contracts, codec asset records/modules,
   and worker-support helpers.
 - `src/sw/`: service-worker cache-plan helpers and fixtures.
-- `src/worker/`: committed codec-worker entry.
+- `src/worker/`: the codec-worker entry, its pipeline ops, and the
+  OffscreenCanvas helpers.
 - `codecs/`: committed JS/WASM codec artifacts.
 - `scripts/`: codec-wrapper patching, static-output audit, and hook install.
 - `static/`: icons, fonts, headers, redirects, and static assets.
@@ -52,21 +57,26 @@ path.
    `recipeSignature` over it keys the editor's result cache and undo dedupe
    and the bulk output hashes, so both surfaces agree on "same result".
 3. `EditorSession` owns single-image side state, saved settings, undo/redo,
-   decoded-source reuse, and the shared result cache. Each side converts to a
-   recipe through `src/lib/editor/side-recipe.ts`.
-4. `src/lib/optimize-image.ts` runs one recipe on one prepared source and is
+   and the shared result cache. Each side converts to a recipe through
+   `src/lib/editor/side-recipe.ts`. A third worker bridge decodes the rotated
+   source frame for the Original side and the live grain preview, so that
+   decode never queues behind an encode.
+4. `src/lib/optimize-image.ts` runs one recipe on one source file and is
    the single dispatch point for three lanes, for the editor and bulk alike:
-   - the pixel pipeline: `src/lib/compress.ts` delegates process and encode
-     work to the shared image pipeline, and
-     `src/lib/sveltekit-worker-bridge.ts` calls `src/worker/codec-worker.ts`;
-   - the JPEG to JXL transcode, when the JXL transcode flag is on, the source
-     is a JPEG, and nothing changes pixels;
+   - the pixel pipeline: one `optimize` call through
+     `src/lib/sveltekit-worker-bridge.ts` to the codec worker, which decodes
+     (`createImageBitmap` plus `OffscreenCanvas`, or a WASM decoder), runs
+     `prepareFrame` and `encodeFrame`, and replies with transferred buffers;
+   - the JPEG to JXL transcode, chosen inside the worker once it knows the
+     decoded size: the JXL transcode flag is on, the source is a JPEG, and
+     nothing changes pixels;
    - the SVG lane, for SVG output on an SVG source: `src/lib/svg/optimize.ts`
      runs SVGO in a lazy worker with a deterministic auto-search, gates each
      candidate on a multi-scale pixel diff, keeps the smaller of optimized vs
      original, and returns the SVG file plus raw/gzip sizes. It is reached
      only through a dynamic import. Raster outputs stay available for SVG
-     sources through the pixel pipeline.
+     sources: the main thread rasterizes the SVG (and draws a vector resize)
+     and the worker receives those pixels.
 5. Bulk keeps one shared recipe plus, per image, an optional own recipe; its
    runtime runs `optimizeImage` per job, and its focus view is an
    `EditorSession` that adopts a current bulk output instead of encoding again
@@ -82,7 +92,13 @@ worker bridge metadata, and the codec worker are committed source.
 
 Threading is enabled for AVIF, JPEG XL, and OxiPNG. Chromium and WebKit use the
 multi-thread variants when SharedArrayBuffer support is available; single-thread
-fallback remains intact.
+fallback remains intact. OxiPNG's pool is sized per worker: every core in the
+editor, half the cores per slot in bulk, which runs two jobs at once.
+
+The pixel step order lives once, in `src/client/lazy-app/pipeline-core.ts`,
+with no DOM dependency. `tests/unit/node-pipeline.test.ts` bundles it for Node
+and runs it in a `worker_thread` over the committed `*_node_*` codecs, which
+keeps the headless boundary honest without shipping a CLI.
 
 The production build uses SvelteKit adapter-static plus host headers for
 COOP/COEP, immutable assets, and no-cache service-worker updates. `npm run check`

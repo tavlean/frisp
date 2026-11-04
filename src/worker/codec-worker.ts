@@ -3,11 +3,9 @@ import { createAvifDecoderRuntime } from 'features/decoders/avif/worker/runtime'
 import avifDecoder from 'app-generated/codecs/avif/dec/avif_dec';
 import { createAvifEncoderRuntime } from 'features/encoders/avif/worker/runtime';
 import avifEncoder from 'app-generated/codecs/avif/enc/avif_enc';
-import type { EncodeOptions as AvifEncodeOptions } from 'features/encoders/avif/shared/meta';
 import { createWebpDecoderRuntime } from 'features/decoders/webp/worker/runtime';
 import webpDecoder from 'app-generated/codecs/webp/dec/webp_dec';
 import { createWebpEncoderRuntime } from 'features/encoders/webP/worker/runtime';
-import type { EncodeOptions } from 'features/encoders/webP/shared/meta';
 import webpEncoder from 'app-generated/codecs/webp/enc/webp_enc';
 import webpEncoderSimd from 'app-generated/codecs/webp/enc/webp_enc_simd';
 import { createQoiDecoderRuntime } from 'features/decoders/qoi/worker/runtime';
@@ -15,16 +13,13 @@ import qoiDecoder from 'app-generated/codecs/qoi/dec/qoi_dec';
 import { createJxlDecoderRuntime } from 'features/decoders/jxl/worker/runtime';
 import jxlDecoder from 'app-generated/codecs/jxl/dec/jxl_dec';
 import { createQoiEncoderRuntime } from 'features/encoders/qoi/worker/runtime';
-import type { EncodeOptions as QoiEncodeOptions } from 'features/encoders/qoi/shared/meta';
 import qoiEncoder from 'app-generated/codecs/qoi/enc/qoi_enc';
 import { createJxlEncoderRuntime } from 'features/encoders/jxl/worker/runtime';
 import type { EncodeOptions as JxlEncodeOptions } from 'features/encoders/jxl/shared/meta';
 import jxlEncoder from 'app-generated/codecs/jxl/enc/jxl_enc';
 import { createMozjpegEncoderRuntime } from 'features/encoders/mozJPEG/worker/runtime';
-import type { EncodeOptions as MozjpegEncodeOptions } from 'features/encoders/mozJPEG/shared/meta';
 import mozjpegEncoder from 'app-generated/codecs/mozjpeg/enc/mozjpeg_enc';
 import { createJpegliEncoderRuntime } from 'features/encoders/jpegli/worker/runtime';
-import type { EncodeOptions as JpegliEncodeOptions } from 'features/encoders/jpegli/shared/meta';
 import jpegliEncoder from 'app-generated/codecs/jpegli/enc/jpegli_enc';
 import { createOxiPngEncoderRuntime } from 'features/encoders/oxiPNG/worker/runtime';
 import type { EncodeOptions as OxipngEncodeOptions } from 'features/encoders/oxiPNG/shared/meta';
@@ -33,13 +28,9 @@ import initOxipngWasm, {
 } from 'app-generated/codecs/oxipng/pkg/squoosh_oxipng';
 import checkThreadsSupport from 'worker-shared/supports-wasm-threads';
 import { simd } from 'wasm-feature-detect';
-import { applyGrain } from 'features/processors/grain/shared/apply';
-import type { Options as GrainOptions } from 'features/processors/grain/shared/meta';
 import { createQuantizeRuntime } from 'features/processors/quantize/worker/runtime';
-import type { Options as QuantizeOptions } from 'features/processors/quantize/shared/meta';
 import imagequant from 'app-generated/codecs/imagequant/imagequant';
 import { createResize } from 'features/processors/resize/worker/runtime';
-import type { WorkerResizeOptions } from 'features/processors/resize/shared/meta';
 import initResizeWasm, {
   resize as wasmResize,
 } from 'app-generated/codecs/resize/pkg/squoosh_resize';
@@ -47,7 +38,17 @@ import initHqxWasm, {
   resize as wasmHqx,
 } from 'app-generated/codecs/hqx/pkg/squooshhqx';
 import { createRotate } from 'features/preprocessors/rotate/worker/runtime';
-import type { Options as RotateOptions } from 'features/preprocessors/rotate/shared/meta';
+import type { EncoderState } from 'client/lazy-app/feature-meta/shared';
+import type { PipelineSteps } from 'client/lazy-app/pipeline-core';
+import {
+  createPipelineOps,
+  replyTransfers,
+  type OptimizeReply,
+  type OptimizeRequest,
+  type PrepareReply,
+  type PrepareRequest,
+} from './pipeline-op';
+import { nativeDecode, pixelatedResize } from './offscreen';
 import type { Ssimulacra2Module } from 'codecs/ssimulacra2/ssimulacra2';
 import ssimulacra2 from 'app-generated/codecs/ssimulacra2/ssimulacra2';
 import { initEmscriptenModule } from 'features/worker-utils';
@@ -110,6 +111,31 @@ export interface RotateWasmUrls {
 
 export interface Ssimulacra2WasmUrls {
   metric: string;
+}
+
+/** Every WASM URL group, sent with each pipeline op so whichever codec the
+ *  recipe reaches can locate its module. */
+export interface CodecUrls {
+  avif: AvifWasmUrls;
+  webp: WebpWasmUrls;
+  qoi: QoiWasmUrls;
+  jxl: JxlWasmUrls;
+  mozjpeg: MozjpegWasmUrls;
+  jpegli: JpegliWasmUrls;
+  oxipng: OxipngWasmUrls;
+  imagequant: ImagequantWasmUrls;
+  resize: ResizeWasmUrls;
+  rotate: RotateWasmUrls;
+  ssimulacra2: Ssimulacra2WasmUrls;
+}
+
+/** What every pipeline op needs besides its request. A separate argument so
+ *  the request object the caller marked for transfer reaches Comlink as is. */
+export interface WorkerContext {
+  urls: CodecUrls;
+  /** OxiPNG thread-pool size. The pool is built once per worker, so the
+   *  first threaded OxiPNG encode in a worker's life fixes it. */
+  threads: number;
 }
 
 // Threaded (Emscripten pthread) codec glue URLs, stashed by locateCodecWasm so
@@ -245,7 +271,7 @@ const encodeOxipng = createOxiPngEncoderRuntime({
       optimise: optimiseOxipngMt,
     } = await import('app-generated/codecs/oxipng/pkg-parallel/squoosh_oxipng');
     await initOxipngMtWasm(wasmUrl);
-    await initThreadPool(navigator.hardwareConcurrency);
+    await initThreadPool(oxipngThreads);
     return optimiseOxipngMt;
   },
   async loadSingleThread(wasmUrl) {
@@ -253,6 +279,8 @@ const encodeOxipng = createOxiPngEncoderRuntime({
     return optimiseOxipng;
   },
 });
+// Set from each op's WorkerContext; read once, when OxiPNG's pool is built.
+let oxipngThreads = navigator.hardwareConcurrency;
 const quantize = createQuantizeRuntime({
   loadQuantizer: async () => imagequant,
 });
@@ -265,153 +293,112 @@ const resize = createResize({
 let rotate: ReturnType<typeof createRotate> | undefined;
 let ssimulacra2Module: Promise<Ssimulacra2Module> | undefined;
 
+/** SSIMULACRA2 of `dist` against `ref`, loading the metric on first use.
+ *  Reads both frames and writes neither, so `ref` may be the cached source.
+ *  The caller has pointed locateCodecWasm at the metric's URL. */
+async function scoreFrames(ref: ImageData, dist: ImageData): Promise<number> {
+  if (ref.width !== dist.width || ref.height !== dist.height) {
+    throw new Error(
+      `SSIMULACRA2 needs equal dimensions, got ${ref.width}x${ref.height} and ${dist.width}x${dist.height}.`,
+    );
+  }
+  ssimulacra2Module ??= initEmscriptenModule(ssimulacra2);
+  const module = await ssimulacra2Module;
+  return module.score(ref.data, dist.data, ref.width, ref.height);
+}
+
 function rotateWith(wasmUrls: RotateWasmUrls): ReturnType<typeof createRotate> {
   rotate ??= createRotate(wasmUrls.preprocessor);
   return rotate;
 }
 
-const transferBuffer = async (p: Promise<ArrayBuffer>) => {
-  const b = await p;
-  return transfer(b, [b]);
+// The URLs of the op in progress. Ops run one at a time per worker (the
+// bridge queues them), so the steps below can read this instead of threading
+// URLs through PipelineSteps, which Node implements without URLs at all.
+let currentUrls: CodecUrls | undefined;
+const urls = (): CodecUrls => {
+  if (!currentUrls) throw Error('No codec URLs for this operation.');
+  return currentUrls;
 };
 
-const transferImage = async (p: Promise<ImageData>) => {
-  const i = await p;
-  return transfer(i, [i.data.buffer]);
+type EncodeFn = (image: ImageData, options: unknown) => Promise<ArrayBuffer>;
+const encoders: Record<EncoderState['type'], EncodeFn> = {
+  avif: encodeAvif as EncodeFn,
+  jpegli: encodeJpegli as EncodeFn,
+  jxl: ((image, options) =>
+    jxl.encode(image, options as JxlEncodeOptions)) as EncodeFn,
+  mozJPEG: encodeMozjpeg as EncodeFn,
+  oxiPNG: ((image, options) =>
+    encodeOxipng(image, options as OxipngEncodeOptions, {
+      wasmUrls: urls().oxipng,
+    })) as EncodeFn,
+  qoi: encodeQoi as EncodeFn,
+  webP: encodeWebp as EncodeFn,
 };
+
+const steps: PipelineSteps = {
+  rotate: (image, rotate) => rotateWith(urls().rotate)(image, { rotate }),
+  resize: async (image, options) =>
+    options.method === 'browser-pixelated'
+      ? pixelatedResize(image, options)
+      : resize(image, options, urls().resize),
+  quantize: (image, options) => quantize(image, options),
+  encode: (image, encoder) => encoders[encoder.type](image, encoder.options),
+};
+
+const pipeline = createPipelineOps({
+  steps,
+  nativeDecode,
+  wasmDecode: {
+    'image/avif': decodeAvif,
+    'image/webp': decodeWebp,
+    'image/jxl': decodeJxl,
+    'image/qoi': decodeQoi,
+  },
+  transcodeJpeg: (jpeg) => jxl.transcodeJpeg(jpeg),
+  score: scoreFrames,
+});
+
+function enter(context: WorkerContext): void {
+  currentUrls = context.urls;
+  oxipngThreads = context.threads;
+  locateCodecWasm(context.urls);
+}
 
 const workerApi = {
-  avifDecode(blob: Blob, wasmUrls: AvifWasmUrls): Promise<ImageData> {
-    locateCodecWasm({ avif: wasmUrls });
-    return transferImage(decodeAvif(blob));
+  /** Decode (or reuse) the source, run the recipe, encode, and optionally
+   *  decode the output back. See pipeline-op.ts. */
+  async optimize(
+    request: OptimizeRequest,
+    context: WorkerContext,
+  ): Promise<OptimizeReply> {
+    enter(context);
+    const reply = await pipeline.optimize(request);
+    return transfer(reply, replyTransfers(reply));
   },
-  avifEncode(
-    imageData: ImageData,
-    options: AvifEncodeOptions,
-    wasmUrls: AvifWasmUrls,
-  ): Promise<ArrayBuffer> {
-    locateCodecWasm({ avif: wasmUrls });
-    return transferBuffer(encodeAvif(imageData, options));
+  async prepare(
+    request: PrepareRequest,
+    context: WorkerContext,
+  ): Promise<PrepareReply> {
+    enter(context);
+    const reply = await pipeline.prepare(request);
+    return transfer(reply, replyTransfers(reply));
   },
-  webpEncode(
-    imageData: ImageData,
-    options: EncodeOptions,
-    wasmUrls: WebpWasmUrls,
-  ): Promise<ArrayBuffer> {
-    locateCodecWasm({ webp: wasmUrls });
-    return transferBuffer(encodeWebp(imageData, options));
-  },
-  webpDecode(blob: Blob, wasmUrls: WebpWasmUrls): Promise<ImageData> {
-    locateCodecWasm({ webp: wasmUrls });
-    return transferImage(decodeWebp(blob));
-  },
-  qoiDecode(blob: Blob, wasmUrls: QoiWasmUrls): Promise<ImageData> {
-    locateCodecWasm({ qoi: wasmUrls });
-    return transferImage(decodeQoi(blob));
-  },
-  qoiEncode(
-    imageData: ImageData,
-    options: QoiEncodeOptions,
-    wasmUrls: QoiWasmUrls,
-  ): Promise<ArrayBuffer> {
-    locateCodecWasm({ qoi: wasmUrls });
-    return transferBuffer(encodeQoi(imageData, options));
-  },
-  jxlDecode(blob: Blob, wasmUrls: JxlWasmUrls): Promise<ImageData> {
-    locateCodecWasm({ jxl: wasmUrls });
-    return transferImage(decodeJxl(blob));
-  },
-  jxlEncode(
-    imageData: ImageData,
-    options: JxlEncodeOptions,
-    wasmUrls: JxlWasmUrls,
-  ): Promise<ArrayBuffer> {
-    locateCodecWasm({ jxl: wasmUrls });
-    return transferBuffer(jxl.encode(imageData, options));
-  },
-  // Not transferBuffer: the result is nullable, and a null has nothing to
-  // transfer.
-  async jxlTranscode(
-    jpeg: ArrayBuffer,
-    wasmUrls: JxlWasmUrls,
-  ): Promise<ArrayBuffer | null> {
-    locateCodecWasm({ jxl: wasmUrls });
-    const output = await jxl.transcodeJpeg(jpeg);
-    return output ? transfer(output, [output]) : null;
-  },
-  mozjpegEncode(
-    imageData: ImageData,
-    options: MozjpegEncodeOptions,
-    wasmUrls: MozjpegWasmUrls,
-  ): Promise<ArrayBuffer> {
-    locateCodecWasm({ mozjpeg: wasmUrls });
-    return transferBuffer(encodeMozjpeg(imageData, options));
-  },
-  jpegliEncode(
-    imageData: ImageData,
-    options: JpegliEncodeOptions,
-    wasmUrls: JpegliWasmUrls,
-  ): Promise<ArrayBuffer> {
-    locateCodecWasm({ jpegli: wasmUrls });
-    return transferBuffer(encodeJpegli(imageData, options));
-  },
-  oxipngEncode(
-    imageData: ImageData,
-    options: OxipngEncodeOptions,
-    wasmUrls: OxipngWasmUrls,
-  ): Promise<ArrayBuffer> {
-    return transferBuffer(
-      encodeOxipng(imageData, options, {
-        wasmUrls,
-      }),
-    );
-  },
-  grain(
-    imageData: ImageData,
-    options: GrainOptions & { enabled: boolean },
-  ): Promise<ImageData> {
-    // Pure JS — no WASM to locate.
-    return transferImage(Promise.resolve(applyGrain(imageData, options)));
-  },
-  quantize(
-    imageData: ImageData,
-    options: QuantizeOptions,
-    wasmUrls: ImagequantWasmUrls,
-  ): Promise<ImageData> {
-    locateCodecWasm({ imagequant: wasmUrls });
-    return transferImage(quantize(imageData, options));
-  },
-  resize(
-    imageData: ImageData,
-    options: WorkerResizeOptions,
-    wasmUrls: ResizeWasmUrls,
-  ): Promise<ImageData> {
-    return transferImage(resize(imageData, options, wasmUrls));
-  },
-  rotate(
-    data: ImageData,
-    options: RotateOptions,
-    wasmUrls: RotateWasmUrls,
-  ): Promise<ImageData> {
-    return transferImage(rotateWith(wasmUrls)(data, options));
+  async decodeOutput(blob: Blob, context: WorkerContext): Promise<ImageData> {
+    enter(context);
+    const image = await pipeline.decodeOutput(blob);
+    return transfer(image, replyTransfers(image));
   },
   // Nothing is transferred either way: the inputs arrive as structured-clone
   // copies, so the caller keeps its own (often the cached decoded source), and
   // a number has no buffer.
-  async ssimulacra2Score(
+  ssimulacra2Score(
     ref: ImageData,
     dist: ImageData,
     wasmUrls: Ssimulacra2WasmUrls,
   ): Promise<number> {
-    if (ref.width !== dist.width || ref.height !== dist.height) {
-      throw new Error(
-        `SSIMULACRA2 needs equal dimensions, got ${ref.width}x${ref.height} and ${dist.width}x${dist.height}.`,
-      );
-    }
     locateCodecWasm({ ssimulacra2: wasmUrls });
-    ssimulacra2Module ??= initEmscriptenModule(ssimulacra2);
-    const module = await ssimulacra2Module;
-    return module.score(ref.data, dist.data, ref.width, ref.height);
+    return scoreFrames(ref, dist);
   },
 };
 

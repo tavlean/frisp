@@ -2,15 +2,13 @@ import { describe, it, expect, beforeEach, afterAll } from 'vitest';
 import { ResultCache } from '$lib/result-cache';
 import type { CompressOutcome } from '$lib/compress';
 
-// The cache only ever reads `outputUrl`, the two ImageData byte lengths, and
-// the optional svg text length, so a minimal fake keeps the tests free of
+// The cache only ever reads `outputUrl`, the output ImageData byte length,
+// and the optional svg text length, so a minimal fake keeps the tests free of
 // browser host objects.
 function makeOutcome(url: string, bytes: number): CompressOutcome {
-  const half = { data: { byteLength: bytes / 2 } };
   return {
     outputUrl: url,
-    sourceImageData: half,
-    outputImageData: half,
+    outputImageData: { data: { byteLength: bytes } },
   } as unknown as CompressOutcome;
 }
 

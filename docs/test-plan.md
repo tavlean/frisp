@@ -41,9 +41,21 @@ by hand.
   with no prior online encode (Chromium only; WebKit's `setOffline` + reload is
   a harness limitation). The offline cases abort every request with
   `context.route`, because `setOffline` alone does not reach dedicated workers in
-  Chromium (see [gotchas.md](gotchas.md)). Two tests are `test.fixme` pending the
-  one-recipe model: rotating an image in bulk rotates its exported file, and a
-  batch of SVGs gets the same vector optimization as one SVG.
+  Chromium (see [gotchas.md](gotchas.md)). Since the one-recipe model
+  (2026-11-04) it also proves that rotating an image in bulk rotates its
+  exported file and that a batch of SVGs gets the same vector optimization as
+  one SVG.
+- `worker-pipeline.spec.ts` (2026-11-04) guards the worker-side pipeline: it
+  watches every message the page posts to a worker during a rotate plus
+  palette encode and fails on a frame-sized buffer that is not transferred,
+  with a second test proving the watcher flags a cloned frame.
+- `node-pipeline.test.ts` (2026-11-04, in the unit run) bundles
+  `tests/node/pipeline-worker.ts` for Node with Vite and runs the pipeline
+  core in a `worker_thread` over the committed `*_node_*` codecs: JPEG decode,
+  rotate, resize, grain, WebP encode, decode back. A DOM reference reaching
+  `pipeline-core.ts` fails it. `pipeline-op.test.ts` covers the worker's
+  source cache, `needs-source`, the transcode fallback, and the reply transfer
+  list with a fake codec host.
 - The e2e suite needs Playwright's Chromium headless shell installed
   (`npx playwright install chromium`); without it every Chromium test fails at
   launch.

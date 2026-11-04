@@ -83,13 +83,13 @@ human to judge; re-run on a quiet machine before believing it.
   and record here when and at which commit, because a stale baseline is worse
   than none: it reads as a codec regression long after the real cause (a changed
   default, a codec rebuild) has been forgotten. Current baseline captured
-  **2026-08-09 at commit `c788155f`** (the jpegli merge; also reflects the
-  libjxl v0.12.0 curve from 2026-08-08), on a Mac reporting 11 logical cores,
-  with
-  the cache-cold methodology described above. It replaced a 2026-06-02 capture
-  (commit `c9fe93d4`) that predated both the WebP default change (`e184882f`,
-  quality 75 → 80 and method 4 → 6) and AVIF multi-threading actually engaging
-  (`e9b1be6c`), which is why its WebP and AVIF numbers no longer reproduced.
+  **2026-11-04 at commit `e86298cb`** (the worker-side pipeline, review change
+  B), on a Mac reporting 11 logical cores, with the cache-cold methodology
+  described above. It is the first capture with WebP back at method 4
+  (`555def1c`) and with jpegli as the one JPEG, so MozJPEG has no rows. It
+  replaced a 2026-08-09 capture (commit `c788155f`) whose WebP rows were made at
+  method 6 and read as a WebP size regression of up to 3 percent against today's
+  default. Every size matched a same-day run at `b437df36`, before the change.
 - `results/`: per-run reports (gitignored).
 - Fixtures live in `tests/fixtures/` (shared with the e2e suite); see
   `tests/fixtures/README.md`. Swap `photo.jpg` / `photo-large.jpg` for your own

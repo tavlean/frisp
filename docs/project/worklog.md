@@ -4,6 +4,51 @@ Short session-by-session build log: what changed, why, and the gotchas a future
 session must know. Newest first. (Live project state stays in
 [the project brief](brief.md); this is the narrative trail.)
 
+## 2026-11-04 (Opus, executor) - the worker-side pipeline (review change B)
+
+Wrote [specs/2026-11-04-worker-side-pipeline.md](specs/2026-11-04-worker-side-pipeline.md)
+(`45f84244`), then executed it in seven commits:
+
+- `0233c3a2`: `src/client/lazy-app/pipeline-core.ts` holds the pixel step
+  order once (`prepareFrame`, `encodeFrame`), `lane.ts` the lane choice. The
+  WASM resize's contain-fit `crop` stopped rewriting its input buffer, a bug
+  that was harmless only while every step got its own clone.
+- `2f4a726c`: `src/worker/pipeline-op.ts` gives the codec worker `optimize`,
+  `prepare`, and `decodeOutput`: decode in the worker, one hot source per
+  worker, the transcode decided there once the size is known, every reply
+  buffer transferred. Tested with a fake codec host.
+- `27f551a7`: `optimizeImage` is one worker call. The editor stops decoding
+  on the main thread (a third bridge serves the Original side and the grain
+  preview), bulk stops decoding entirely, and `CompressOutcome` loses the
+  never-rendered `sourceImageData`.
+- `30f28b9a`: bulk sizes each slot's OxiPNG pool at half the cores.
+- `e09cefae`: the Node proof. `tests/unit/node-pipeline.test.ts` bundles
+  `tests/node/pipeline-worker.ts` with Vite and runs JPEG decode, rotate,
+  resize, grain, and WebP encode in a `worker_thread` over the `*_node_*`
+  codecs.
+- `f01aac28`: `tests/e2e/worker-pipeline.spec.ts` patches
+  `Worker.prototype.postMessage` and fails on any frame-sized buffer posted
+  without a transfer, plus a self-check that the watcher flags one.
+- `e86298cb`: 1,857 lines of the replaced chain deleted (per-codec bridge and
+  worker methods, `compressPreprocessed`, the `compressImage` switch, the
+  encoder client runtimes, the engine-level bulk runner, and the
+  `/diagnostics` WebP pipeline probe).
+
+Bench (`b0398272`, baseline re-captured): every size byte-identical to the
+before run at `b437df36`; times within the usual noise (photo WebP 195 to
+201 ms, photo-large AVIF 8,218 to 8,145 ms, photo-large jpegli 596 to 765 ms
+on its single cold run). The bench cannot show the win: it encodes at
+defaults with no processor steps, and its timed side now decodes the source
+in its own worker where it used to reuse the main thread's decode.
+
+Gates on `e86298cb`: `npm run check` 0 errors (57 `corner-shape` warnings),
+214 unit tests, full e2e 112 passed and 4 skipped in Chromium and WebKit.
+
+Gotchas (in [../gotchas.md](../gotchas.md)): a codec-worker step must never
+write to its input; spreading a request drops Comlink's transfer marker;
+aborting an encode drops the worker's source cache; the older Node codec
+artifacts need `wasmBinary` plus a `require` and `__dirname` shim.
+
 ## 2026-11-04 (Opus, executor) - one recipe per image (review change A)
 
 Executed [specs/2026-11-04-one-recipe-per-image.md](specs/2026-11-04-one-recipe-per-image.md)

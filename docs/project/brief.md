@@ -80,17 +80,22 @@ images live; images never travel to Frisp.
   `src/lib/editor/encode-signature.ts` and `side-recipe.ts` and bulk through
   its output hashes. `src/lib/optimize-image.ts` runs a recipe for both
   surfaces (SVG lane, JPEG to JXL transcode, or pixel encode).
-- Framework-neutral headless pipeline under `src/client/lazy-app/image-pipeline*`,
+- Framework-neutral pixel step order in `src/client/lazy-app/pipeline-core.ts`,
+  run by the codec worker in one op per encode (`src/worker/pipeline-op.ts`:
+  decode in the worker, a hot source per worker, transferred replies) and
+  proven in a Node `worker_thread` by `tests/unit/node-pipeline.test.ts`,
   with a complete pure-reducer bulk engine in `src/client/lazy-app/bulk/` and its
   production store and UI in `src/lib/bulk/`.
 - Codecs: committed WASM under `codecs/`, reached through Comlink workers via
-  `src/lib/sveltekit-worker-bridge.ts`. Each side keeps a persistent bridge,
-  in-flight encodes dedup, and one canonical recipe signature.
+  `src/lib/sveltekit-worker-bridge.ts`. Each side keeps a persistent bridge
+  (plus one for source frames), in-flight encodes dedup, and one canonical
+  recipe signature. The main thread decodes only SVG sources.
 - Generated modules are committed source; `npm run sync` only patches the
   Emscripten wrappers. One JSON manifest, `src/shared/codec-asset-records.json`,
   feeds both the app and the static-output audit.
 - Threading: COOP/COEP everywhere; oxipng, AVIF, and JXL run multi-core with a
-  single-thread fallback intact.
+  single-thread fallback intact. OxiPNG's pool is sized per worker: every core
+  in the editor, half per slot in bulk.
 - Service worker and PWA: `src/service-worker.ts`, variant-aware precache,
   prompt-to-refresh.
 
@@ -103,6 +108,19 @@ the multi-threaded runtime is verified in Chromium and WebKit. Gates are green:
 `corner-shape` property), the unit suite passes, and Prettier is clean.
 
 Shipped since then, newest first:
+
+- **The worker-side pipeline (2026-11-04, review change B).** Every raster
+  encode is one call into the codec worker, which decodes the file itself
+  (`createImageBitmap` plus `OffscreenCanvas`, WASM when the browser cannot),
+  keeps it hot for the next call, runs rotate, resize, grain, palette, and
+  the encoder, and transfers back the bytes and the preview. No frame is
+  structured-cloned across the boundary (an e2e test watches every worker
+  message), the main thread decodes only SVG sources, and the old
+  per-codec chain is gone (1,857 lines). Bench sizes are byte-identical; bench
+  times are flat, since the bench encodes at defaults with no processor steps.
+  The pipeline core also runs in a Node `worker_thread` over the committed
+  node codecs, without any CLI. Spec:
+  [specs/2026-11-04-worker-side-pipeline.md](specs/2026-11-04-worker-side-pipeline.md).
 
 - **One recipe per image (2026-11-04, review change A).** The editor and bulk
   share one `ImageRecipe`, one signature, and one `optimizeImage`. Bulk keeps
@@ -187,8 +205,10 @@ The full ordered plan is [roadmap.md](roadmap.md).
    (change A): single and bulk share one `ImageRecipe` and one
    `optimizeImage`; rotation and the SVG lane work in bulk because the recipe
    carries them.
-2. **The worker-side pipeline and a bulk resource budget.** Performance,
-   memory, and the honest headless boundary.
+2. **The bulk resource budget.** The worker-side pipeline is done
+   (2026-11-04, change B); what is left of change C is measuring and
+   publishing a supported batch size. Thumbnail decodes, the output byte cap,
+   and the OxiPNG thread budget have landed.
 3. **Auto-quality on one codec, then outcome-first defaults.** The feature
    that makes Frisp more than a maintained Squoosh, in both doors.
 4. **The UI revisit.** The maintainer revisits the editor re-style soon; the

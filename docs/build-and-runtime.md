@@ -1,5 +1,7 @@
 # Build And Runtime Map
 
+Last updated: 2026-11-04.
+
 The production app lives on `main` at the repo root, built with SvelteKit and
 Vite as a static SPA. The retired Preact/Rollup app is preserved only on the
 `preact` branch (tag `preact-final`); the old `svelte` branch is gone.
@@ -37,9 +39,13 @@ Former generated runtime modules are committed source now:
 
 - `src/client/lazy-app/feature-meta/`: encoder/processor/preprocessor
   metadata.
-- `src/worker/codec-worker.ts`: Comlink worker entry covering active codecs and
-  processors.
-- `src/lib/sveltekit-worker-bridge.ts`: method names and worker API typing.
+- `src/worker/codec-worker.ts`: Comlink worker entry. It builds the codec
+  runtimes and exposes three ops from `src/worker/pipeline-op.ts`:
+  `optimize` (decode or reuse the source, run the recipe, encode, optionally
+  decode the output back), `prepare` (the rotated source frame for a
+  main-thread view), and `decodeOutput`. Every reply buffer is transferred.
+- `src/lib/sveltekit-worker-bridge.ts`: the three op names, the codec URL
+  groups sent with each op, and the per-bridge OxiPNG thread count.
 - `src/shared/codec-asset-records.json`: the logical codec-asset record source
   of truth (logical key, codec, role, variant, relative path, cache class).
 - `src/shared/codec-assets/`: Vite `?url` imports plus app, precache, and
@@ -54,6 +60,29 @@ worker-local WASM assets. The `app-generated` alias points at that wrapper tree.
 
 The patched wrapper files are ignored and can be deleted; `npm run sync`
 recreates them. The committed runtime modules above are ordinary source files.
+
+## The Worker Pipeline
+
+Every raster encode is one `optimize` call (since 2026-11-04,
+[project/specs/2026-11-04-worker-side-pipeline.md](project/specs/2026-11-04-worker-side-pipeline.md)):
+
+- The request carries the source `File` (structured-cloned by reference, no
+  byte copy), a source key from `src/lib/source-key.ts`, and the recipe. An SVG
+  source sends pixels instead, rasterized on the main thread, and only when the
+  worker answers `needs-source`.
+- The worker keeps one decoded source (plus one rotation of it) per worker.
+  The bridge terminates a worker on abort and after 60 s idle, which drops the
+  cache; the next call decodes again. A slider drag that aborts mid-encode
+  therefore pays a decode, not a structured clone.
+- Decode inside the worker tries `createImageBitmap` plus `OffscreenCanvas`
+  first, and the AVIF, WebP, or JXL WASM decoder when the browser refuses;
+  QOI is always WASM.
+- The reply transfers the encoded bytes and, when asked, the decoded preview.
+  `tests/e2e/worker-pipeline.spec.ts` fails if the page posts any worker a
+  frame-sized buffer without transferring it.
+- Bridges take a `threads` option that sizes OxiPNG's pool for that worker;
+  bulk passes `bulkThreadBudget` (half the cores per slot). AVIF and JXL fix
+  their pthread counts at build time.
 
 ## Service Worker
 

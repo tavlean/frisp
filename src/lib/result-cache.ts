@@ -8,12 +8,12 @@
 // "return to a previous optimized snapshot" half of the undo feature.
 //
 // Not reactive on purpose: a `CompressOutcome` holds heavy browser host objects
-// (two `ImageData` buffers, a `File`, and a revocable object URL) that must stay
+// (the output `ImageData`, a `File`, and a revocable object URL) that must stay
 // out of Svelte's reactive graph — the same reason `EditorSession.results` is
 // `$state.raw`. This is a plain class; the session pushes hits into its reactive
 // `results` field.
 //
-// Memory: each entry pins two `ImageData` buffers alive, so a count cap alone
+// Memory: each entry pins its output `ImageData` alive, so a count cap alone
 // isn't enough — one 24-megapixel image dwarfs a dozen thumbnails. We bound by
 // total estimated bytes (with a count cap as a backstop) and evict
 // least-recently-used entries, revoking their object URLs as they go. Entries the
@@ -21,13 +21,10 @@
 
 import type { CompressOutcome } from './compress';
 
-/** Rough live-memory cost of an outcome: its decoded source + output pixels. */
+/** Rough live-memory cost of an outcome: its output pixels. */
 function outcomeBytes(outcome: CompressOutcome): number {
-  // `data.byteLength` is the RGBA buffer (width * height * 4). For the Original
-  // side source and output are the same buffer; double-counting it is harmless
-  // and keeps the estimate conservative (we'd rather evict early than OOM).
+  // `data.byteLength` is the RGBA buffer (width * height * 4).
   return (
-    outcome.sourceImageData.data.byteLength +
     outcome.outputImageData.data.byteLength +
     // SVG text is cheap, but count it anyway.
     (outcome.svg?.optimizedText.length ?? 0)

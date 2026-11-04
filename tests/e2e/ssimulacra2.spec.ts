@@ -7,7 +7,8 @@ import { expect, test } from '@playwright/test';
 // the built worker itself and speaks Comlink's wire protocol to it by hand: an
 // APPLY message with RAW arguments, answered by RAW (a value) or HANDLER
 // "throw" (an error). The WASM URLs a bridge would inject come from the build
-// output, which is also what the preview server serves.
+// output, which is also what the preview server serves. The degraded image
+// comes from the pipeline op's own scored encode (auto quality's probe path).
 const photo = fileURLToPath(new URL('../fixtures/photo.jpg', import.meta.url));
 const assetsDir = fileURLToPath(
   new URL('../../build/_app/immutable/assets', import.meta.url),
@@ -122,19 +123,47 @@ test('scores identical and degraded images through the codec worker', async ({
           use_delta_palette: 0,
           use_sharp_yuv: 0,
         };
-        const webp = (await call(
-          'webpEncode',
-          source,
-          webpOptions,
-          urls.webp,
-        )) as ArrayBuffer;
-        const degraded = await pixels(new Blob([webp], { type: 'image/webp' }));
-        const lowQuality = (await call(
+        // The pipeline op, asked to score: it encodes in the worker, decodes
+        // the output, and scores it against the frame it encoded (here the
+        // source itself, since no processor runs). The preview it returns is
+        // that same decoded output, so scoring it again through the plain
+        // metric op must agree.
+        const reply = (await call(
+          'optimize',
+          {
+            key: 'ssimulacra2-e2e',
+            file: { type: 'image/jpeg', name: 'photo.jpg' },
+            source: { kind: 'pixels', image: source },
+            recipe: {
+              rotate: 0,
+              processors: {
+                resize: { enabled: false },
+                grain: { enabled: false, amount: 0, size: 1 },
+                quantize: { enabled: false },
+              },
+              output: {
+                kind: 'raster',
+                encoder: { type: 'webP', options: webpOptions },
+              },
+            },
+            preview: true,
+            score: true,
+          },
+          { urls, threads: 1 },
+        )) as {
+          kind: string;
+          bytes: ArrayBuffer;
+          preview: ImageData;
+          score: number;
+        };
+        const lowQuality = reply.score;
+        const rescored = (await call(
           'ssimulacra2Score',
           source,
-          degraded,
+          reply.preview,
           urls.ssimulacra2,
         )) as number;
+        const webp = reply.bytes;
 
         // The source is still usable here, which proves it was not transferred.
         const cropped = new ImageData(
@@ -155,6 +184,7 @@ test('scores identical and degraded images through the codec worker', async ({
         return {
           identical,
           lowQuality,
+          rescored,
           webpBytes: webp.byteLength,
           sourceBytes: source.data.byteLength,
           mismatch,
@@ -176,5 +206,6 @@ test('scores identical and degraded images through the codec worker', async ({
   expect(result.lowQuality).toBeLessThan(70);
   // A real score, not the -1000 failure sentinel.
   expect(result.lowQuality).toBeGreaterThan(-100);
+  expect(result.rescored).toBeCloseTo(result.lowQuality, 6);
   expect(result.mismatch).toMatch(/equal dimensions/);
 });

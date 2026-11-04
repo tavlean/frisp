@@ -8,10 +8,6 @@
     runWebpEncodeProbe,
     type WebpEncodeProbeResult,
   } from '$lib/webp-encode-probe';
-  import {
-    runWebpPipelineProbe,
-    type WebpPipelineProbeResult,
-  } from '$lib/webp-pipeline-probe';
   import { registerServiceWorker } from '$lib/service-worker-registration';
   import { APP_NAME } from 'shared/brand';
 
@@ -26,11 +22,6 @@
   let encodeProbe = $state<
     | { status: 'checking' }
     | { status: 'ready'; result: WebpEncodeProbeResult }
-    | { status: 'failed'; message: string }
-  >({ status: 'checking' });
-  let pipelineProbe = $state<
-    | { status: 'checking' }
-    | { status: 'ready'; result: WebpPipelineProbeResult }
     | { status: 'failed'; message: string }
   >({ status: 'checking' });
   const selectedJob = $derived(
@@ -87,27 +78,6 @@
       });
     return () => {
       cancelled = true;
-    };
-  });
-
-  $effect(() => {
-    let cancelled = false;
-    const controller = new AbortController();
-    runWebpPipelineProbe(controller.signal)
-      .then((result) => {
-        if (!cancelled) pipelineProbe = { status: 'ready', result };
-      })
-      .catch((error: unknown) => {
-        if (!cancelled) {
-          pipelineProbe = {
-            status: 'failed',
-            message: error instanceof Error ? error.message : String(error),
-          };
-        }
-      });
-    return () => {
-      cancelled = true;
-      controller.abort();
     };
   });
 </script>
@@ -236,64 +206,6 @@
       </dl>
     {:else}
       <p class="error">{encodeProbe.message}</p>
-    {/if}
-  </section>
-
-  <section class="codec-probe" aria-label="WebP single-image pipeline probe">
-    <h2>WebP pipeline probe</h2>
-    {#if pipelineProbe.status === 'checking'}
-      <p>Running local decode, resize, WebP encode, and export metadata.</p>
-    {:else if pipelineProbe.status === 'ready'}
-      <dl>
-        <div>
-          <dt>Source</dt>
-          <dd>
-            {pipelineProbe.result.sourceFileName}
-            ({pipelineProbe.result.detectedSourceMimeType},
-            {pipelineProbe.result.sourceBytes} bytes)
-          </dd>
-        </div>
-        <div>
-          <dt>Decoded</dt>
-          <dd>
-            {pipelineProbe.result.decodedWidth} x
-            {pipelineProbe.result.decodedHeight}
-          </dd>
-        </div>
-        <div>
-          <dt>Processed</dt>
-          <dd>
-            {pipelineProbe.result.processedWidth} x
-            {pipelineProbe.result.processedHeight}
-          </dd>
-        </div>
-        <div>
-          <dt>Output</dt>
-          <dd>
-            {pipelineProbe.result.outputFileName}
-            ({pipelineProbe.result.outputMimeType},
-            {pipelineProbe.result.outputBytes} bytes)
-          </dd>
-        </div>
-        <div>
-          <dt>Change</dt>
-          <dd>{pipelineProbe.result.percentChange}%</dd>
-        </div>
-        <div>
-          <dt>Header</dt>
-          <dd>
-            {pipelineProbe.result.riffHeader}/{pipelineProbe.result
-              .webpSignature}
-          </dd>
-        </div>
-      </dl>
-      <ul class="probe-stages">
-        {#each pipelineProbe.result.stages as stage (stage)}
-          <li>{stage}</li>
-        {/each}
-      </ul>
-    {:else}
-      <p class="error">{pipelineProbe.message}</p>
     {/if}
   </section>
 </main>
@@ -435,12 +347,6 @@
   .notes ul {
     margin-bottom: 0;
     padding-left: 20px;
-  }
-
-  .probe-stages {
-    margin: 16px 0 0;
-    padding-left: 20px;
-    color: #3f3a33;
   }
 
   .codec-probe {

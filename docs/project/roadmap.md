@@ -29,13 +29,10 @@ everything else proceeds). Its trust fixes landed the same day; the
 structural changes below come next. Full reasoning and the execution table:
 [reports/2026-11-02-first-principles-review.md](reports/2026-11-02-first-principles-review.md).
 
-- [ ] **Worker-side pipeline (review change B).** One worker op keeps the
-      decoded source hot and runs every step, returning bytes plus a
-      transferable preview. Closes the 2026-07-07 review's P2(b) and P2(c), and
-      proves one Node operation for the headless core.
-- [ ] **Bulk resource budget (review change C).** Bound thumbnail decodes,
-      cap historical outputs by bytes, budget codec threads against concurrent
-      jobs, and publish a supported batch size.
+- [ ] **Bulk resource budget (review change C), the rest.** Thumbnail
+      decodes are bounded, historical outputs are capped by bytes, and OxiPNG
+      threads are split between the two bulk slots (all 2026-11-04). Left:
+      measure and publish a supported batch size before any format race.
 
 ## Next
 
@@ -189,6 +186,15 @@ conversation.
 ## Done
 
 Newest first. The narrative, with the gotchas, is in [worklog.md](worklog.md).
+
+- [x] **Worker-side pipeline (review change B)** (2026-11-04): one codec-worker
+      op decodes the file in the worker, keeps it hot per worker, runs every
+      step, and transfers back the bytes and the preview; the main thread
+      decodes only SVGs; the per-codec main-thread chain is deleted; the
+      pipeline core is proven in a Node `worker_thread`. Closes the 2026-07-07
+      review's P2(b) and P2(c). Also folded in: the bulk OxiPNG thread budget
+      and the bench baseline re-capture.
+      [specs/2026-11-04-worker-side-pipeline.md](specs/2026-11-04-worker-side-pipeline.md)
 
 - [x] **One recipe and one result owner per image (review change A)**
       (2026-11-04): one typed `ImageRecipe` (rotation, processors, raster or

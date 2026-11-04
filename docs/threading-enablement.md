@@ -39,7 +39,8 @@ thread support — AVIF, JPEG XL, and OxiPNG each call
 (e.g. `src/features/encoders/oxiPNG/worker/oxipngEncode.ts` called
 `initThreadPool(navigator.hardwareConcurrency)`; that per-encoder worker was
 later removed in the codegen retirement — `initThreadPool` now lives in
-`src/worker/codec-worker.ts`). (WebP 2 also shipped a `_mt`
+`src/worker/codec-worker.ts`, sized per worker since 2026-11-04: every core
+for the editor, half per slot for bulk's two concurrent jobs). (WebP 2 also shipped a `_mt`
 build but was removed from the codec surface — see
 [codec-surface-cleanup.md](history/codec-surface-cleanup.md).)
 

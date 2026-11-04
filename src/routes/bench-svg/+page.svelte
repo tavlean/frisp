@@ -1,7 +1,7 @@
 <script lang="ts">
   import { dev } from '$app/environment';
   import { onMount } from 'svelte';
-  import { processSvg } from 'client/lazy-app/image-pipeline-shared';
+  import { processSvg } from 'client/lazy-app/svg-source';
   import { autoSearch } from '$lib/svg/auto-search';
   import { DEFAULT_SVG_OPTIONS } from '$lib/svg/optimize-options';
   import { optimizeSvg } from '$lib/svg/optimizer-client';
