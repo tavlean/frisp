@@ -1,7 +1,8 @@
 import { describe, expect, it, vi } from 'vitest';
 import { optimizeImage } from '$lib/optimize-image';
 import type { BulkRunnerHost } from '../../src/lib/bulk/runtime';
-import { BulkRuntime } from '../../src/lib/bulk/runtime';
+import { BulkRuntime, bulkThreadBudget } from '../../src/lib/bulk/runtime';
+import SvelteKitWorkerBridge from '$lib/sveltekit-worker-bridge';
 import type { ImageJob, ImageOutput } from '../../src/client/lazy-app/bulk';
 import { fakeOutput, job, session } from './fixtures';
 
@@ -9,6 +10,10 @@ vi.mock(
   '$lib/sveltekit-worker-bridge',
   () => ({
     default: class FakeSvelteKitWorkerBridge {
+      static options: unknown[] = [];
+      constructor(options?: unknown) {
+        FakeSvelteKitWorkerBridge.options.push(options);
+      }
       dispose(): void {}
     },
   }),
@@ -227,5 +232,30 @@ describe('bulk runtime', () => {
     await run;
 
     expect(requeueStale).not.toHaveBeenCalled();
+  });
+});
+
+describe('bulk thread budget', () => {
+  it('splits the cores between the two slots, never below one', () => {
+    expect(bulkThreadBudget(12)).toBe(6);
+    expect(bulkThreadBudget(11)).toBe(5);
+    expect(bulkThreadBudget(2)).toBe(1);
+    expect(bulkThreadBudget(1)).toBe(1);
+    expect(bulkThreadBudget(16, 4)).toBe(4);
+  });
+
+  it('builds each slot bridge with that budget', async () => {
+    const fake = SvelteKitWorkerBridge as unknown as { options: unknown[] };
+    fake.options.length = 0;
+    const processor = installControlledProcessor();
+    const host = createHost([job('a'), job('b')]);
+    const runtime = new BulkRuntime();
+    const run = runtime.run(host);
+    await flushMicrotasks();
+    processor.resolve('a');
+    processor.resolve('b');
+    await run;
+    const threads = bulkThreadBudget(navigator.hardwareConcurrency);
+    expect(fake.options).toEqual([{ threads }, { threads }]);
   });
 });

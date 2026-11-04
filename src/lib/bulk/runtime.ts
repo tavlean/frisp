@@ -40,6 +40,19 @@ export interface BulkRunnerHost {
   requeueStale?(): void;
 }
 
+/** The concurrent jobs a bulk run drains at once, one per worker slot. */
+const SLOTS = 2;
+
+/**
+ * OxiPNG threads per bulk worker. Each worker's pool otherwise takes every
+ * core, so two concurrent PNG encodes ran twice as many threads as the
+ * machine has, contending instead of speeding up. AVIF and JPEG XL size their
+ * pools at build time and are not covered.
+ */
+export function bulkThreadBudget(cores: number, slots: number = SLOTS): number {
+  return Math.max(1, Math.floor(cores / slots));
+}
+
 export class BulkRuntime {
   // Two long-lived bridges. Created lazily on the first run and reused for the
   // session's lifetime (warm worker: WASM instantiated, pthread pool spawned).
@@ -59,7 +72,9 @@ export class BulkRuntime {
 
   /** The persistent bridge for a round-robin slot, created on first use. */
   #bridgeFor(slot: 0 | 1): SvelteKitWorkerBridge {
-    return (this.#bridges[slot] ??= new SvelteKitWorkerBridge());
+    return (this.#bridges[slot] ??= new SvelteKitWorkerBridge({
+      threads: bulkThreadBudget(navigator.hardwareConcurrency),
+    }));
   }
 
   /** True while a run() loop is draining the queue. */
