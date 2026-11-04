@@ -202,6 +202,20 @@ function normalizedProcessorRecipe(
   };
 }
 
+/**
+ * Whether these settings change the pixels rather than only the encoding: a
+ * resize that counts, real grain, or a reduced palette. Folds no-op steps out
+ * through the same projection as the recipe hash.
+ */
+export function settingsChangePixels(
+  settings: BulkImageSettings,
+  sourceDimensions?: BulkSourceDimensions,
+): boolean {
+  return Object.values(
+    normalizedProcessorRecipe(settings.processorState, sourceDimensions),
+  ).some((step) => step !== null);
+}
+
 export function normalizedSettingsRecipe(
   settings: BulkImageSettings,
   sourceDimensions?: BulkSourceDimensions,

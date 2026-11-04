@@ -107,6 +107,37 @@ describe('bulk export selectors', () => {
     ]);
   });
 
+  it('never keeps an original that would undo a pixel edit', () => {
+    const base = settings();
+    const grain = settings({
+      processorState: {
+        ...base.processorState,
+        grain: { enabled: true, amount: 40, size: 20 },
+      },
+    });
+    const current = session(
+      [
+        job('a', {
+          fileName: 'photo.jpg',
+          fileSize: 100,
+          status: 'encoded',
+          output: fakeOutput({
+            fileName: 'larger.webp',
+            fileSize: 120,
+            hash: settingsHash(grain),
+          }),
+        }),
+      ],
+      { globalSettings: grain },
+    );
+
+    expect(
+      getBulkExportEntries(current, undefined, {
+        keepOriginalWhenLarger: true,
+      }).map((entry) => [entry.fileName, entry.keptOriginal]),
+    ).toEqual([['photo.webp', false]]);
+  });
+
   it('does not keep originals for equal-size outputs', () => {
     const current = session([
       job('a', {

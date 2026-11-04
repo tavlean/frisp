@@ -1,11 +1,17 @@
 import { getFileNameParts, getSafeFileNameBase } from '../output-filename';
 import { APP_SLUG } from 'shared/brand';
 import {
+  getJobSourceDimensions,
   isJobCurrentExport,
   isJobOutputStale,
   isJobReadyForExport,
   markJobsExported,
 } from './session';
+import {
+  getEffectiveSettings,
+  resolveSettingsForSource,
+  settingsChangePixels,
+} from './settings';
 import type { BulkSession, ImageJob } from './session';
 import { getPercentChange } from './size';
 
@@ -219,6 +225,22 @@ export function getBulkOutputFileName(job: ImageJob): string {
   return extension ? `${safeBaseName}.${extension}` : safeBaseName;
 }
 
+/**
+ * The untouched original may stand in for a larger output only when the user
+ * asked for nothing but a re-encode. A resize, grain, or reduced palette is an
+ * edit the user wants in the file, and the original would silently undo it.
+ */
+function jobChangesPixels(session: BulkSession, job: ImageJob): boolean {
+  const dimensions = getJobSourceDimensions(job);
+  return settingsChangePixels(
+    resolveSettingsForSource(
+      getEffectiveSettings(session.globalSettings, job.overrides),
+      dimensions,
+    ),
+    dimensions,
+  );
+}
+
 export function getBulkExportEntries(
   session: BulkSession,
   jobIds?: Iterable<string>,
@@ -228,7 +250,9 @@ export function getBulkExportEntries(
   return getSelectedExportableJobs(session, jobIds).map((job) => {
     const output = job.output!;
     const keptOriginal =
-      options.keepOriginalWhenLarger === true && output.size > job.originalSize;
+      options.keepOriginalWhenLarger === true &&
+      output.size > job.originalSize &&
+      !jobChangesPixels(session, job);
     const fileName = keptOriginal
       ? job.sourceFile.name
       : getBulkOutputFileName(job);
