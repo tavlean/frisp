@@ -58,6 +58,7 @@
     isVector={bulkStore.selectedFile?.type === 'image/svg+xml'}
     result={null}
     working={false}
+    exportable={false}
     canImport={false}
     downloadName=""
     onFormatChange={applyFormat}

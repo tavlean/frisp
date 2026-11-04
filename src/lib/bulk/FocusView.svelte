@@ -447,6 +447,7 @@
             isVector={focusSession.isVectorSource}
             result={focusSession.runtime[1].result}
             working={focusSession.runtime[1].showSpinner}
+            exportable={focusSession.runtime[1].exportable}
             canImport={focusSession.canImport[1]}
             downloadName={focusSession.downloadName(1)}
             onFormatChange={setRightFormat}

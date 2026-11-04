@@ -310,6 +310,7 @@
             transcodeBlocked={session.transcodeBlocked(0)}
             result={session.runtime[0].result}
             working={session.runtime[0].showSpinner}
+            exportable={session.runtime[0].exportable}
             canImport={session.canImport[0]}
             downloadName={session.downloadName(0)}
             onFormatChange={(f) => session.setFormat(0, f)}
@@ -336,6 +337,7 @@
           transcodeBlocked={session.transcodeBlocked(1)}
           result={session.runtime[1].result}
           working={session.runtime[1].showSpinner}
+          exportable={session.runtime[1].exportable}
           canImport={session.canImport[1]}
           downloadName={session.downloadName(1)}
           onFormatChange={(f) => session.setFormat(1, f)}

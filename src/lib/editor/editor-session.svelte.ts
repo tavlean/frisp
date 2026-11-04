@@ -195,6 +195,11 @@ export class SideRuntime {
   grainPreview = $state.raw<ImageData | null>(null);
   // The delayed-spinner AND-gate: never shows outside a 'working' spell.
   showSpinner = $derived(this.status === 'working' && this.spinnerDelayPassed);
+  // Whether `result` IS the current recipe, so Save and Share may hand it out.
+  // 'working' means the recipe moved on while the old result stays on screen;
+  // 'error' means the new recipe failed. Gating on the delayed spinner instead
+  // let the previous bytes download under the new format's name.
+  exportable = $derived(this.status === 'done' && this.result !== null);
 
   // Non-reactive bookkeeping (see encodeSide).
   displayedSig: string | null = null;

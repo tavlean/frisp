@@ -59,7 +59,7 @@
   const exporting = $derived(session.runtime[1].showSpinner);
   const exportUrl = $derived(session.runtime[1].result?.outputUrl);
   const exportName = $derived(session.downloadName(1));
-  const exportDisabled = $derived(exporting || !exportUrl);
+  const exportDisabled = $derived(!session.runtime[1].exportable);
 </script>
 
 <div class="toolbar">

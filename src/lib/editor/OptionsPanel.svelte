@@ -58,7 +58,10 @@
     /** True when a pixel-changing step on this side rules the transcode out. */
     transcodeBlocked?: boolean;
     result: CompressOutcome | null;
+    /** Shows the Save spinner (delayed, so quick passes never flash it). */
     working: boolean;
+    /** Whether `result` matches the current recipe; gates Save and Share. */
+    exportable: boolean;
     canImport: boolean;
     downloadName: string;
     onFormatChange: (format: SideFormat) => void;
@@ -81,6 +84,7 @@
     transcodeBlocked = false,
     result,
     working,
+    exportable,
     canImport,
     downloadName,
     onFormatChange,
@@ -283,7 +287,7 @@
     {downloadName}
     shareFile={result?.outputFile ?? null}
     loading={working}
-    disabled={!result || working}
+    disabled={!exportable}
   />
 </div>
 
