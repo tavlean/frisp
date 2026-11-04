@@ -1,18 +1,15 @@
 import { untrack } from 'svelte';
 import {
-  compressPreprocessed,
   getDefaultOptions,
   IDENTITY,
   OUTPUT_FORMATS,
-  transcodeJpegToJxl,
-  TranscodeUnsupportedError,
   type CompressOutcome,
   type SideFormat,
 } from '$lib/compress';
+import { optimizeImage } from '$lib/optimize-image';
 import { ResultCache } from '$lib/result-cache';
 import SvelteKitWorkerBridge from '$lib/sveltekit-worker-bridge';
 import type { ResizeOptionsState } from './options/processor-types';
-import type { SvgOptimizeOptions } from '$lib/svg/optimize-options';
 import { isSvgSource } from '$lib/svg/detect';
 import { SVG_FORMAT } from './format-label';
 import { EditorHistory } from './editor-history.svelte';
@@ -24,8 +21,9 @@ import {
   encodeSignature,
   resizeIsReal,
   resizeSignature,
+  unrotatedSource,
 } from './encode-signature';
-import { normalizedRecipe } from 'client/lazy-app/recipe';
+import { normalizedRecipe, recipeChangesPixels } from 'client/lazy-app/recipe';
 import { recipeFromSide } from './side-recipe';
 import { applyGrainToPixels } from 'features/processors/grain/shared/apply';
 import {
@@ -141,28 +139,6 @@ function snapshotProcessorStateForEncode(
       ? $state.snapshot(state.resize)
       : untrack(() => $state.snapshot(state.resize)),
   };
-}
-
-/**
- * True when nothing between the source file and the encoder would change a
- * pixel. The JPEG-to-JXL transcode reuses the source's own DCT coefficients, so
- * it is only honest while rotate, resize, grain and palette reduction are all
- * inert; the UI blocks the combination, but the engine must decide for itself
- * rather than trust it. Folded from the same "is it real" predicates the encode
- * signature uses, so "resize enabled at 100%" stays neutral here too.
- */
-function preprocessingIsNeutral(
-  preprocessorState: PreprocessorState,
-  processorState: ProcessorState,
-  sourceWidth: number,
-  sourceHeight: number,
-): boolean {
-  return (
-    preprocessorState.rotate.rotate === 0 &&
-    !processorState.quantize.enabled &&
-    !grainIsReal(processorState.grain) &&
-    !resizeIsReal(processorState, sourceWidth, sourceHeight)
-  );
 }
 
 function buildInitialSides(): [SideState, SideState] {
@@ -436,22 +412,20 @@ export class EditorSession {
     runtime.status = 'working';
     runtime.error = '';
 
-    // The one recipe that skips the pixel pipeline (see transcodeJpegToJxl).
-    // The flag lives in the options object, so it is already inside `encodeSig`
-    // above: a transcode result and a pixel result can never collide in the
-    // cache. `file.type` is the only "is this a JPEG" test here on purpose:
-    // a renamed or pasted file that lies about its type just fails in the
-    // wrapper and falls back, and two sniffers would be two answers.
-    const wantsTranscode =
-      request.format === 'jxl' &&
-      (request.options as { jpegTranscode?: boolean }).jpegTranscode === true &&
-      current.type === 'image/jpeg' &&
-      preprocessingIsNeutral(
-        request.preprocessorState,
-        request.processorState,
-        srcW,
-        srcH,
-      );
+    // What optimizeImage runs. The lane it picks (SVG, transcode, pixels) is a
+    // function of this recipe and the file, and the JXL transcode flag lives
+    // in the options, so it is already inside `encodeSig` above: a transcode
+    // result and a pixel result can never collide in the cache.
+    const recipe = recipeFromSide(
+      {
+        format: request.format,
+        optionsByFormat: {
+          [request.format]: request.options as Record<string, unknown>,
+        },
+        processorState: request.processorState,
+      },
+      request.preprocessorState,
+    );
 
     const controller = new AbortController();
     const bridge = this.bridgeFor(index);
@@ -469,44 +443,18 @@ export class EditorSession {
         // supplies the natural dimensions the vector lane renders at.
         this.#preparedSource(bridge, request.preprocessorState),
       ).then(async (prepared) => {
-        if (request.format === 'svg') {
-          const [{ optimizeSvgSide }, sourceText] = await Promise.all([
-            import('$lib/svg/optimize'),
-            this.#svgSourceText(),
-          ]);
-          return optimizeSvgSide(
-            sourceText,
-            current.name,
-            request.options as unknown as SvgOptimizeOptions,
-            prepared.preprocessed.width,
-            prepared.preprocessed.height,
-            controller.signal,
+        const outcome = await optimizeImage(prepared, recipe, {
+          signal: controller.signal,
+          bridge,
+          preview: true,
+          svgText: request.format === 'svg' ? this.#svgSourceText() : undefined,
+        });
+        if (outcome.transcodeFellBack) {
+          void snackbar.show(
+            "Couldn't transcode this JPEG losslessly, so it was encoded normally.",
           );
         }
-        if (wantsTranscode) {
-          try {
-            return await transcodeJpegToJxl(
-              prepared,
-              controller.signal,
-              bridge,
-            );
-          } catch (error) {
-            // Only the "libjxl won't take this JPEG" case falls through; a real
-            // failure (or an abort) still propagates. Falling through keeps the
-            // flag true in the signature, so this input deterministically lands
-            // on the same pixel-encoded result every time, cache hit included.
-            if (!(error instanceof TranscodeUnsupportedError)) throw error;
-            void snackbar.show(
-              "Couldn't transcode this JPEG losslessly, so it was encoded normally.",
-            );
-          }
-        }
-        return compressPreprocessed(
-          prepared,
-          request,
-          controller.signal,
-          bridge,
-        );
+        return outcome;
       });
       this.inflight.set(encodeSig, pass);
       const settle = () => {
@@ -1202,14 +1150,17 @@ export class EditorSession {
    * Whether a pixel-changing step rules this side's JPEG-to-JXL transcode out,
    * so the panel can disable the toggle with a reason instead of letting it
    * claim a losslessness the encode would not deliver. The engine repeats this
-   * check for itself (see `encodeSide`) rather than trusting the UI.
+   * check for itself (`chooseLane` in optimize-image.ts) rather than trusting
+   * the UI.
    */
   transcodeBlocked(index: SideIndex): boolean {
-    return !preprocessingIsNeutral(
-      this.preprocessorState,
-      this.sides[index].processorState,
-      this.naturalWidth,
-      this.naturalHeight,
+    return recipeChangesPixels(
+      recipeFromSide(this.sides[index], this.preprocessorState),
+      unrotatedSource(
+        this.preprocessorState,
+        this.naturalWidth,
+        this.naturalHeight,
+      ),
     );
   }
 

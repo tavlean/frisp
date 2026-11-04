@@ -12,7 +12,7 @@ import type {
   PreprocessorState,
   ProcessorState,
 } from 'client/lazy-app/feature-meta';
-import { recipeSignature } from 'client/lazy-app/recipe';
+import { recipeSignature, type SourceDimensions } from 'client/lazy-app/recipe';
 import { recipeFromSide } from './side-recipe';
 
 /**
@@ -38,11 +38,24 @@ export function resizeIsReal(
 }
 
 /**
+ * The unrotated source size, from the PREPROCESSED (already rotated) dims the
+ * editor reads off its results. Recipe functions take the unrotated source and
+ * apply the turn themselves.
+ */
+export function unrotatedSource(
+  preprocessorState: PreprocessorState,
+  sourceWidth: number,
+  sourceHeight: number,
+): SourceDimensions {
+  return preprocessorState.rotate.rotate % 180 !== 0
+    ? { width: sourceHeight, height: sourceWidth }
+    : { width: sourceWidth, height: sourceHeight };
+}
+
+/**
  * The signature of one side's complete encode inputs (the source file aside;
- * callers guard file identity separately). `sourceWidth`/`sourceHeight` are the
- * PREPROCESSED (already rotated) dims the editor reads off its results, while
- * `recipeSignature` takes the unrotated source and applies the turn itself, so
- * a quarter turn is undone here first.
+ * callers guard file identity separately). `sourceWidth`/`sourceHeight` are
+ * the preprocessed dims, as for `unrotatedSource`.
  */
 export function encodeSignature(
   preprocessorState: PreprocessorState,
@@ -52,7 +65,6 @@ export function encodeSignature(
   sourceWidth: number,
   sourceHeight: number,
 ): string {
-  const quarter = preprocessorState.rotate.rotate % 180 !== 0;
   return recipeSignature(
     recipeFromSide(
       {
@@ -64,9 +76,7 @@ export function encodeSignature(
       },
       preprocessorState,
     ),
-    quarter
-      ? { width: sourceHeight, height: sourceWidth }
-      : { width: sourceWidth, height: sourceHeight },
+    unrotatedSource(preprocessorState, sourceWidth, sourceHeight),
   );
 }
 

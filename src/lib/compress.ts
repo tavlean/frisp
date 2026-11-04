@@ -151,6 +151,15 @@ export interface CompressOutcome {
 }
 
 /**
+ * An outcome whose decoded output pixels may be absent: what a caller that
+ * never shows the full-size result (bulk) gets when it passes
+ * `preview = false`, sparing one full decode of every output.
+ */
+export type EncodedOutcome = Omit<CompressOutcome, 'outputImageData'> & {
+  outputImageData?: ImageData;
+};
+
+/**
  * Pair the requested format with its option object. The options come from the UI
  * (each per-encoder panel binds the encoder's own option type), so the
  * discriminated-union cast is the SvelteKit adapter's single typing seam.
@@ -174,12 +183,27 @@ function buildEncoderState(request: CompressRequest): EncoderState {
  * passes reuse a warm worker (WASM already instantiated, pthread pool already
  * spawned) instead of paying full startup on every debounced option tweak.
  */
+export function compressPreprocessed(
+  source: SourceImage,
+  request: CompressRequest,
+  signal: AbortSignal,
+  bridge: SvelteKitWorkerBridge,
+  preview?: true,
+): Promise<CompressOutcome>;
+export function compressPreprocessed(
+  source: SourceImage,
+  request: CompressRequest,
+  signal: AbortSignal,
+  bridge: SvelteKitWorkerBridge,
+  preview: boolean,
+): Promise<EncodedOutcome>;
 export async function compressPreprocessed(
   source: SourceImage,
   request: CompressRequest,
   signal: AbortSignal,
   bridge: SvelteKitWorkerBridge,
-): Promise<CompressOutcome> {
+  preview = true,
+): Promise<EncodedOutcome> {
   const pipelineBridge = bridge as unknown as ImagePipelineWorkerBridge;
   const { file, preprocessed } = source;
 
@@ -218,7 +242,9 @@ export async function compressPreprocessed(
   // Decode the output back to pixels so the editor can show the real codec
   // result (artifacts and all), the way Squoosh does. Same dimensions as the
   // processed source, so the two-up before/after view aligns.
-  const outputImageData = await decodeImage(signal, outputFile, pipelineBridge);
+  const outputImageData = preview
+    ? await decodeImage(signal, outputFile, pipelineBridge)
+    : undefined;
   const outputUrl = URL.createObjectURL(outputFile);
 
   return {
@@ -259,11 +285,24 @@ export class TranscodeUnsupportedError extends Error {
  * everything downstream (cache, preview, download, size readout) is unaware
  * this path exists. Caller owns `outputUrl` and must revoke it when done.
  */
+export function transcodeJpegToJxl(
+  source: SourceImage,
+  signal: AbortSignal,
+  bridge: SvelteKitWorkerBridge,
+  preview?: true,
+): Promise<CompressOutcome>;
+export function transcodeJpegToJxl(
+  source: SourceImage,
+  signal: AbortSignal,
+  bridge: SvelteKitWorkerBridge,
+  preview: boolean,
+): Promise<EncodedOutcome>;
 export async function transcodeJpegToJxl(
   source: SourceImage,
   signal: AbortSignal,
   bridge: SvelteKitWorkerBridge,
-): Promise<CompressOutcome> {
+  preview = true,
+): Promise<EncodedOutcome> {
   const pipelineBridge = bridge as unknown as ImagePipelineWorkerBridge;
   const { file, preprocessed } = source;
   const { extension, mimeType } = encoderMap.jxl.meta;
@@ -284,7 +323,9 @@ export async function transcodeJpegToJxl(
   );
   // The compare view needs pixels for both panes, and the transcode produced
   // only bytes, so decode them back exactly as the encode path does.
-  const outputImageData = await decodeImage(signal, outputFile, pipelineBridge);
+  const outputImageData = preview
+    ? await decodeImage(signal, outputFile, pipelineBridge)
+    : undefined;
   const outputUrl = URL.createObjectURL(outputFile);
 
   return {
