@@ -170,7 +170,7 @@
 
   function resetOverrides(): void {
     if (bulkStore.selectedCount === 0) return;
-    bulkStore.clearSelectedOverrides();
+    bulkStore.resetSelectedToShared();
     onReseed?.();
   }
 

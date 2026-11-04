@@ -1,305 +1,162 @@
 import { describe, expect, it } from 'vitest';
 import {
-  createBulkSession,
-  updateJobOverrides,
+  effectiveRecipe,
+  inheritedRecipe,
+  jobRecipeHash,
 } from '../../src/client/lazy-app/bulk/session';
-import type { BulkImageSettings } from '../../src/client/lazy-app/bulk/settings';
 import {
-  getEffectiveSettings,
-  getSettingsOverridePaths,
-  hasSettingsOverrides,
-  resolveSettingsForSource,
-  settingsHash,
+  applyRecipeChanges,
+  resolveRecipeForSource,
 } from '../../src/client/lazy-app/bulk/settings';
-import { job as settingsJob, settings } from './fixtures';
+import type { ImageRecipe } from '../../src/client/lazy-app/recipe';
+import { job, recipe, resized, session, SVG_OPTIONS } from './fixtures';
 
-describe('bulk settings helpers', () => {
-  it('deep-merges sparse processor overrides without mutating global settings', () => {
-    const globalSettings = settings();
-
-    const effective = getEffectiveSettings(globalSettings, {
-      processorState: {
-        resize: {
-          enabled: true,
-          width: 320,
-        },
-      },
-    });
-
-    expect(effective.processorState.resize).toMatchObject({
-      ...globalSettings.processorState.resize,
-      enabled: true,
-      width: 320,
-    });
-    expect(globalSettings.processorState.resize.enabled).toBe(false);
+const quality = (value: number) =>
+  recipe((r) => {
+    if (r.output.kind === 'raster') {
+      (r.output.encoder.options as { quality: number }).quality = value;
+    }
   });
 
-  it('replaces encoder state when an image override supplies one', () => {
-    const effective = getEffectiveSettings(settings(), {
-      encoderState: {
-        type: 'qoi',
-        options: {},
-      },
-    });
-
-    expect(effective.encoderState?.type).toBe('qoi');
+describe('bulk effective recipes', () => {
+  it('gives a plain job the shared recipe', () => {
+    const shared = quality(60);
+    const current = session([job('a')], { sharedRecipe: shared });
+    expect(effectiveRecipe(current, current.jobs[0])).toEqual(shared);
   });
 
-  it('keeps same-format encoder overrides sparse by control after globals change', () => {
-    const globalSettings = settings();
-    const session = createBulkSession('bulk', globalSettings, [settingsJob()]);
-    const withOverride = updateJobOverrides(session, 'job-1', {
-      encoderState: {
-        type: 'webP',
-        options: {
-          ...globalSettings.encoderState?.options,
-          quality: 60,
-        },
-      } as NonNullable<BulkImageSettings['encoderState']>,
-    });
-
-    const changedGlobal = settings({
-      encoderState: {
-        type: 'webP',
-        options: {
-          ...globalSettings.encoderState?.options,
-          method: 6,
-        },
-      } as NonNullable<BulkImageSettings['encoderState']>,
-    });
-    const effective = getEffectiveSettings(
-      changedGlobal,
-      withOverride.jobs[0].overrides,
-    );
-
-    expect(withOverride.jobs[0].overrides?.encoderControls?.controlIds).toEqual(
-      ['webp.quality'],
-    );
-    expect(effective.encoderState).toMatchObject({
-      type: 'webP',
-      options: {
-        quality: 60,
-        method: 6,
-      },
-    });
+  it('keeps SVG sources on the vector lane with the shared SVG options', () => {
+    const current = session([job('logo', { fileName: 'logo.svg' })]);
+    const effective = effectiveRecipe(current, current.jobs[0]);
+    expect(effective.output).toEqual({ kind: 'svg', options: SVG_OPTIONS });
+    expect(effective.processors).toEqual(current.sharedRecipe.processors);
   });
 
-  it('recomputes sparse controls when a legacy encoder override is rewritten', () => {
-    const globalSettings = settings();
-    const session = createBulkSession('bulk', globalSettings, [settingsJob()]);
-    const withQualityOverride = updateJobOverrides(session, 'job-1', {
-      encoderState: {
-        type: 'webP',
-        options: {
-          ...globalSettings.encoderState?.options,
-          quality: 60,
-        },
-      } as NonNullable<BulkImageSettings['encoderState']>,
+  it("uses a job's own recipe whole, ignoring later shared edits", () => {
+    const own = quality(40);
+    const current = session([job('a', { ownRecipe: own })], {
+      sharedRecipe: quality(90),
     });
-    const withMethodOverride = updateJobOverrides(
-      withQualityOverride,
-      'job-1',
+    expect(effectiveRecipe(current, current.jobs[0])).toBe(own);
+    expect(inheritedRecipe(current, current.jobs[0])).toEqual(quality(90));
+  });
+
+  it('resolves percentage resize presets against each source', () => {
+    const current = session(
+      [job('small', { sourceWidth: 300, sourceHeight: 150 })],
       {
-        ...withQualityOverride.jobs[0].overrides,
-        encoderState: {
-          type: 'webP',
-          options: {
-            ...globalSettings.encoderState?.options,
-            method: 2,
-          },
-        } as NonNullable<BulkImageSettings['encoderState']>,
+        sharedRecipe: resized(500, 250),
+        resizeReference: { width: 1000, height: 500 },
       },
     );
-
     expect(
-      withMethodOverride.jobs[0].overrides?.encoderControls?.controlIds,
-    ).toEqual(['webp.effort']);
+      effectiveRecipe(current, current.jobs[0]).processors.resize,
+    ).toMatchObject({ enabled: true, width: 150, height: 75 });
   });
 
-  it('keeps settings hashes stable regardless of object key insertion order', () => {
-    const left = settings({
-      processorState: {
-        grain: {
-          enabled: true,
-          amount: 12,
-          size: 20,
-        },
-        resize: {
-          enabled: true,
-          width: 640,
-          height: 480,
-          method: 'lanczos3',
-          fitMethod: 'stretch',
-          premultiply: true,
-          linearRGB: true,
-        },
-        quantize: {
-          enabled: false,
-          numColors: 256,
-          dither: 1,
-        },
+  it('applies custom resize sizes as given', () => {
+    const custom = resized(800, 600);
+    expect(
+      resolveRecipeForSource(
+        custom,
+        { width: 1000, height: 500 },
+        { width: 300, height: 150 },
+      ),
+    ).toBe(custom);
+  });
+
+  it('does not resolve an own recipe against the reference', () => {
+    const own = resized(500, 250);
+    const current = session(
+      [job('a', { ownRecipe: own, sourceWidth: 300, sourceHeight: 150 })],
+      { resizeReference: { width: 1000, height: 500 } },
+    );
+    expect(effectiveRecipe(current, current.jobs[0])).toBe(own);
+  });
+});
+
+describe('bulk output hashes', () => {
+  it('is stable regardless of object key insertion order', () => {
+    const left = recipe();
+    const reordered: ImageRecipe = {
+      processors: {
+        resize: left.processors.resize,
+        quantize: left.processors.quantize,
+        grain: left.processors.grain,
       },
-    });
-    const right = {
-      processorState: {
-        quantize: {
-          dither: 1,
-          numColors: 256,
-          enabled: false,
-        },
-        resize: {
-          linearRGB: true,
-          premultiply: true,
-          fitMethod: 'stretch',
-          method: 'lanczos3',
-          height: 480,
-          width: 640,
-          enabled: true,
-        },
-        grain: {
-          amount: 12,
-          size: 20,
-          enabled: true,
-        },
-      },
-      encoderState: left.encoderState,
+      output: left.output,
+      rotate: left.rotate,
     };
-
-    expect(settingsHash(left)).toBe(settingsHash(right));
-  });
-
-  it('collapses disabled processor options out of the settings hash', () => {
-    const left = settings();
-    const right = settings({
-      processorState: {
-        grain: {
-          enabled: false,
-          amount: 80,
-          size: 60,
-        },
-        resize: {
-          enabled: false,
-          width: 999,
-          height: 777,
-          method: 'mitchell',
-          fitMethod: 'contain',
-          premultiply: false,
-          linearRGB: false,
-        },
-        quantize: {
-          enabled: false,
-          numColors: 8,
-          dither: 0.25,
-        },
-      },
-    });
-
-    expect(settingsHash(left, { width: 800, height: 600 })).toBe(
-      settingsHash(right, { width: 800, height: 600 }),
+    expect(jobRecipeHash(session([job()], { sharedRecipe: left }), job())).toBe(
+      jobRecipeHash(session([job()], { sharedRecipe: reordered }), job()),
     );
   });
 
-  it('collapses enabled identity resize out of the per-source settings hash', () => {
-    const resizeOff = settings({
-      processorState: {
-        ...settings().processorState,
-        resize: {
-          ...settings().processorState.resize,
-          enabled: false,
-          width: 800,
-          height: 600,
-        },
-      },
+  it('collapses disabled processor options', () => {
+    const changed = recipe((r) => {
+      r.processors.grain = { enabled: false, amount: 80, size: 60 };
+      r.processors.quantize = { enabled: false, numColors: 8, dither: 0.25 };
+      r.processors.resize = {
+        ...r.processors.resize,
+        enabled: false,
+        width: 999,
+        height: 777,
+        method: 'mitchell',
+      };
     });
-    const resizeIdentity = settings({
-      processorState: {
-        ...settings().processorState,
-        resize: {
-          ...settings().processorState.resize,
-          enabled: true,
-          width: 800,
-          height: 600,
-        },
-      },
-    });
-
-    expect(settingsHash(resizeIdentity, { width: 800, height: 600 })).toBe(
-      settingsHash(resizeOff, { width: 800, height: 600 }),
-    );
+    const sized = job('a', { sourceWidth: 800, sourceHeight: 600 });
+    expect(
+      jobRecipeHash(session([sized], { sharedRecipe: changed }), sized),
+    ).toBe(jobRecipeHash(session([sized]), sized));
   });
 
-  it('resolves percentage resize presets against each job before hashing', () => {
-    const global = settings({
+  it('collapses an enabled identity resize for that source', () => {
+    const sized = job('a', { sourceWidth: 800, sourceHeight: 600 });
+    expect(
+      jobRecipeHash(
+        session([sized], { sharedRecipe: resized(800, 600) }),
+        sized,
+      ),
+    ).toBe(jobRecipeHash(session([sized]), sized));
+  });
+
+  it('hashes a preset-resized job like its resolved recipe', () => {
+    const sized = job('a', { sourceWidth: 300, sourceHeight: 150 });
+    const current = session([sized], {
+      sharedRecipe: resized(500, 250),
       resizeReference: { width: 1000, height: 500 },
-      processorState: {
-        ...settings().processorState,
-        resize: {
-          ...settings().processorState.resize,
-          enabled: true,
-          width: 500,
-          height: 250,
-        },
-      },
     });
+    const direct = session([sized], { sharedRecipe: resized(150, 75) });
+    expect(jobRecipeHash(current, sized)).toBe(jobRecipeHash(direct, sized));
+  });
+});
 
-    const resolved = resolveSettingsForSource(global, {
-      width: 300,
-      height: 150,
-    });
+describe('applyRecipeChanges', () => {
+  it('carries only the changed parts onto another recipe', () => {
+    const before = recipe();
+    const after = quality(55);
+    const target = resized(320, 200, quality(90));
 
-    expect(resolved.processorState.resize).toMatchObject({
-      enabled: true,
-      width: 150,
-      height: 75,
-    });
-    expect(settingsHash(global, { width: 300, height: 150 })).toBe(
-      settingsHash(resolved, { width: 300, height: 150 }),
-    );
+    const next = applyRecipeChanges(target, before, after);
+
+    expect(next.output).toEqual(after.output);
+    expect(next.processors.resize).toEqual(target.processors.resize);
   });
 
-  it('detects only defined override values', () => {
-    expect(hasSettingsOverrides(undefined)).toBe(false);
-    expect(
-      hasSettingsOverrides({
-        processorState: {
-          resize: {
-            width: undefined,
-          },
-        },
-      }),
-    ).toBe(false);
-    expect(
-      hasSettingsOverrides({
-        processorState: {
-          resize: {
-            enabled: false,
-          },
-        },
-      }),
-    ).toBe(true);
+  it('carries a processor change and keeps the target output', () => {
+    const before = recipe();
+    const after = resized(100, 100);
+    const target = quality(30);
+
+    const next = applyRecipeChanges(target, before, after);
+
+    expect(next.output).toEqual(target.output);
+    expect(next.processors.resize).toEqual(after.processors.resize);
+    expect(next.processors.grain).toEqual(target.processors.grain);
   });
 
-  it('returns dot paths for defined overrides', () => {
-    expect(
-      getSettingsOverridePaths({
-        encoderState: {
-          type: 'qoi',
-          options: {},
-        },
-        processorState: {
-          resize: {
-            enabled: true,
-            width: 320,
-          },
-          quantize: {
-            numColors: undefined,
-          },
-        },
-      }),
-    ).toEqual([
-      'encoderState',
-      'processorState.resize.enabled',
-      'processorState.resize.width',
-    ]);
+  it('returns the target unchanged when nothing changed', () => {
+    const target = quality(30);
+    expect(applyRecipeChanges(target, recipe(), recipe())).toEqual(target);
   });
 });

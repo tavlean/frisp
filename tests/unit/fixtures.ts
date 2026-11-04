@@ -9,10 +9,11 @@ import {
   type ImageOutput,
 } from '../../src/client/lazy-app/bulk/session';
 import {
-  type BulkImageOverrides,
-  type BulkImageSettings,
-  settingsHash,
-} from '../../src/client/lazy-app/bulk/settings';
+  recipeSignature,
+  type ImageRecipe,
+  type SvgOutputOptions,
+} from '../../src/client/lazy-app/recipe';
+import type { BulkSourceDimensions } from '../../src/client/lazy-app/bulk/settings';
 
 export function fakeFile(
   name = 'photo.jpg',
@@ -25,43 +26,49 @@ export function fakeFile(
   return new File([new Uint8Array(size)], name, { type, lastModified });
 }
 
-export function settings(
-  overrides: Partial<BulkImageSettings> = {},
-): BulkImageSettings {
-  return {
-    encoderState: {
-      type: 'webP',
-      options: {
-        quality: 75,
-        target_size: 0,
-        target_PSNR: 0,
-        method: 4,
-        sns_strength: 50,
-        filter_strength: 60,
-        filter_sharpness: 0,
-        filter_type: 1,
-        partitions: 0,
-        segments: 4,
-        pass: 1,
-        show_compressed: 0,
-        preprocessing: 0,
-        autofilter: 0,
-        partition_limit: 0,
-        alpha_compression: 1,
-        alpha_filtering: 1,
-        alpha_quality: 100,
-        lossless: 0,
-        exact: 0,
-        image_hint: 0,
-        emulate_jpeg_size: 0,
-        thread_level: 0,
-        low_memory: 0,
-        near_lossless: 100,
-        use_delta_palette: 0,
-        use_sharp_yuv: 0,
+/** The fixture shared recipe: WebP, every processor off. `edit` mutates a
+ *  fresh copy. */
+export function recipe(
+  edit: (recipe: ImageRecipe) => void = () => {},
+): ImageRecipe {
+  const result: ImageRecipe = {
+    rotate: 0,
+    output: {
+      kind: 'raster',
+      encoder: {
+        type: 'webP',
+        options: {
+          quality: 75,
+          target_size: 0,
+          target_PSNR: 0,
+          method: 4,
+          sns_strength: 50,
+          filter_strength: 60,
+          filter_sharpness: 0,
+          filter_type: 1,
+          partitions: 0,
+          segments: 4,
+          pass: 1,
+          show_compressed: 0,
+          preprocessing: 0,
+          autofilter: 0,
+          partition_limit: 0,
+          alpha_compression: 1,
+          alpha_filtering: 1,
+          alpha_quality: 100,
+          lossless: 0,
+          exact: 0,
+          image_hint: 0,
+          emulate_jpeg_size: 0,
+          thread_level: 0,
+          low_memory: 0,
+          near_lossless: 100,
+          use_delta_palette: 0,
+          use_sharp_yuv: 0,
+        },
       },
     },
-    processorState: {
+    processors: {
       grain: {
         enabled: false,
         amount: 12,
@@ -82,8 +89,24 @@ export function settings(
         linearRGB: true,
       },
     },
-    ...overrides,
-  } as BulkImageSettings;
+  } as ImageRecipe;
+  edit(result);
+  return result;
+}
+
+/** Enable a resize to `width` x `height` on a recipe. */
+export function resized(
+  width: number,
+  height: number,
+  base: ImageRecipe = recipe(),
+): ImageRecipe {
+  return {
+    ...base,
+    processors: {
+      ...base.processors,
+      resize: { ...base.processors.resize, enabled: true, width, height },
+    },
+  };
 }
 
 export function fakeOutput({
@@ -104,7 +127,7 @@ export function fakeOutput({
     size: fileSize,
     downloadUrl: url,
     percentChange: originalSize ? (fileSize / originalSize - 1) * 100 : 0,
-    settingsHash: hash ?? settingsHash(settings()),
+    settingsHash: hash ?? recipeSignature(recipe()),
   };
 }
 
@@ -115,7 +138,7 @@ export function job(
     fileSize = 100,
     status = 'queued',
     output,
-    overrides,
+    ownRecipe,
     error,
     previewUrl,
     thumbnailUrl,
@@ -127,7 +150,7 @@ export function job(
     fileSize?: number;
     status?: ImageJobStatus;
     output?: ImageOutput;
-    overrides?: BulkImageOverrides;
+    ownRecipe?: ImageRecipe;
     error?: string;
     previewUrl?: string;
     thumbnailUrl?: string;
@@ -140,7 +163,7 @@ export function job(
     ...createImageJob(id, fakeFile(fileName, { size: fileSize }), relativePath),
     status,
     output,
-    overrides,
+    ownRecipe,
     error,
     previewUrl,
     thumbnailUrl,
@@ -149,20 +172,27 @@ export function job(
   };
 }
 
+export const SVG_OPTIONS: SvgOutputOptions = { mode: 'auto', precision: 3 };
+
 export function session(
   jobs: ImageJob[] = [job()],
   {
     id = 'bulk-session',
-    globalSettings = settings(),
+    sharedRecipe = recipe(),
+    sharedSvgOptions = SVG_OPTIONS,
+    resizeReference,
     selectedJobId,
   }: {
     id?: string;
-    globalSettings?: BulkImageSettings;
+    sharedRecipe?: ImageRecipe;
+    sharedSvgOptions?: SvgOutputOptions;
+    resizeReference?: BulkSourceDimensions;
     selectedJobId?: string;
   } = {},
 ): BulkSession {
   return {
-    ...createBulkSession(id, globalSettings, jobs),
+    ...createBulkSession(id, sharedRecipe, jobs, sharedSvgOptions),
+    resizeReference,
     selectedJobId: selectedJobId ?? jobs[0]?.id,
   };
 }

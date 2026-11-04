@@ -9,9 +9,12 @@
 
   let { focusSession }: Props = $props();
 
+  // The shared recipe is raster: SVG sources keep the vector lane on their own,
+  // so the SVG output is not a choice here.
   const formats = $derived(
     focusSession.availableFormats.filter(
-      (format) => (format.id as string) !== 'identity',
+      (format) =>
+        (format.id as string) !== 'identity' && (format.id as string) !== 'svg',
     ),
   );
 

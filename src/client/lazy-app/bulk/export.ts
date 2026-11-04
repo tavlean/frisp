@@ -7,11 +7,9 @@ import {
   isJobReadyForExport,
   markJobsExported,
 } from './session';
-import {
-  getEffectiveSettings,
-  resolveSettingsForSource,
-  settingsChangePixels,
-} from './settings';
+import { recipeChangesPixels } from '../recipe';
+import { effectiveRecipe } from './session';
+import { hasPositiveDimensions } from './settings';
 import type { BulkSession, ImageJob } from './session';
 import { getPercentChange } from './size';
 
@@ -227,17 +225,15 @@ export function getBulkOutputFileName(job: ImageJob): string {
 
 /**
  * The untouched original may stand in for a larger output only when the user
- * asked for nothing but a re-encode. A resize, grain, or reduced palette is an
- * edit the user wants in the file, and the original would silently undo it.
+ * asked for nothing but a re-encode. A rotation, resize, grain, or reduced
+ * palette is an edit the user wants in the file, and the original would
+ * silently undo it.
  */
 function jobChangesPixels(session: BulkSession, job: ImageJob): boolean {
   const dimensions = getJobSourceDimensions(job);
-  return settingsChangePixels(
-    resolveSettingsForSource(
-      getEffectiveSettings(session.globalSettings, job.overrides),
-      dimensions,
-    ),
-    dimensions,
+  return recipeChangesPixels(
+    effectiveRecipe(session, job, dimensions),
+    hasPositiveDimensions(dimensions) ? dimensions : undefined,
   );
 }
 

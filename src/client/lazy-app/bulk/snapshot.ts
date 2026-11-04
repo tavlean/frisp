@@ -10,7 +10,8 @@ import {
   isActiveImageJobStatus,
   normalizeBulkSessionCounters,
 } from './session';
-import type { BulkImageOverrides, BulkImageSettings } from './settings';
+import type { ImageRecipe, SvgOutputOptions } from '../recipe';
+import type { BulkSourceDimensions } from './settings';
 
 export interface BulkFileSnapshot {
   name: string;
@@ -33,14 +34,16 @@ export interface BulkJobSnapshot {
   status: ImageJobStatus;
   originalSize: number;
   output?: BulkOutputSnapshot;
-  overrides?: BulkImageOverrides;
+  ownRecipe?: ImageRecipe;
   error?: string;
 }
 
 export interface BulkSessionSnapshot {
-  version: 1;
+  version: 2;
   id: string;
-  globalSettings: BulkImageSettings;
+  sharedRecipe: ImageRecipe;
+  sharedSvgOptions: SvgOutputOptions;
+  resizeReference?: BulkSourceDimensions;
   jobs: BulkJobSnapshot[];
   selectedJobId?: string;
   activeJobs: number;
@@ -57,6 +60,17 @@ function isFiniteNumber(value: unknown): value is number {
 
 function isOptionalString(value: unknown): value is string | undefined {
   return value === undefined || typeof value === 'string';
+}
+
+/** Shape check only: a recipe's values are the encoders' to validate. */
+function isRecipe(value: unknown): value is ImageRecipe {
+  return (
+    isRecord(value) &&
+    typeof value.rotate === 'number' &&
+    isRecord(value.processors) &&
+    isRecord(value.output) &&
+    (value.output.kind === 'raster' || value.output.kind === 'svg')
+  );
 }
 
 function isImageJobStatus(value: unknown): value is ImageJobStatus {
@@ -92,7 +106,7 @@ function createJobSnapshot(job: ImageJob): BulkJobSnapshot {
     status: job.status,
     originalSize: job.originalSize,
     output: job.output ? createOutputSnapshot(job.output) : undefined,
-    overrides: job.overrides,
+    ownRecipe: job.ownRecipe,
     error: job.error,
   };
 }
@@ -160,9 +174,7 @@ function parseJobSnapshot(value: unknown): BulkJobSnapshot | undefined {
     status: value.status,
     originalSize: value.originalSize,
     output,
-    overrides: isRecord(value.overrides)
-      ? (value.overrides as BulkImageOverrides)
-      : undefined,
+    ownRecipe: isRecipe(value.ownRecipe) ? value.ownRecipe : undefined,
     error: value.error,
   };
 }
@@ -192,7 +204,7 @@ function restoreJobSnapshot(snapshot: BulkJobSnapshot): ImageJob {
     relativePath: snapshot.relativePath,
     status: getRestoredJobStatus(snapshot.status),
     originalSize: snapshot.originalSize,
-    overrides: snapshot.overrides,
+    ownRecipe: snapshot.ownRecipe,
     error: snapshot.error,
   };
 }
@@ -219,9 +231,11 @@ export function createBulkSessionSnapshot(
   const counters = getBulkSessionCounters(normalizedSession.jobs);
 
   return {
-    version: 1,
+    version: 2,
     id: normalizedSession.id,
-    globalSettings: normalizedSession.globalSettings,
+    sharedRecipe: normalizedSession.sharedRecipe,
+    sharedSvgOptions: normalizedSession.sharedSvgOptions,
+    resizeReference: normalizedSession.resizeReference,
     jobs,
     selectedJobId: normalizedSession.selectedJobId,
     ...counters,
@@ -246,10 +260,12 @@ export function parseBulkSessionSnapshot(
 
   if (!isRecord(parsedSnapshot)) return;
   if (
-    parsedSnapshot.version !== 1 ||
+    parsedSnapshot.version !== 2 ||
     typeof parsedSnapshot.id !== 'string' ||
-    !isRecord(parsedSnapshot.globalSettings) ||
-    !isRecord(parsedSnapshot.globalSettings.processorState) ||
+    !isRecipe(parsedSnapshot.sharedRecipe) ||
+    !isRecord(parsedSnapshot.sharedSvgOptions) ||
+    (parsedSnapshot.resizeReference !== undefined &&
+      !isRecord(parsedSnapshot.resizeReference)) ||
     !Array.isArray(parsedSnapshot.jobs) ||
     !isOptionalString(parsedSnapshot.selectedJobId)
   ) {
@@ -261,10 +277,13 @@ export function parseBulkSessionSnapshot(
   const validJobs = jobs as BulkJobSnapshot[];
 
   return {
-    version: 1,
+    version: 2,
     id: parsedSnapshot.id,
-    globalSettings:
-      parsedSnapshot.globalSettings as unknown as BulkImageSettings,
+    sharedRecipe: parsedSnapshot.sharedRecipe,
+    sharedSvgOptions: parsedSnapshot.sharedSvgOptions,
+    resizeReference: parsedSnapshot.resizeReference as
+      | BulkSourceDimensions
+      | undefined,
     jobs: validJobs,
     selectedJobId: parsedSnapshot.selectedJobId,
     ...getSnapshotCounters(validJobs),
@@ -277,7 +296,9 @@ export function restoreBulkSessionSnapshot(
   const jobs = snapshot.jobs.map(restoreJobSnapshot);
   const session = normalizeBulkSessionCounters({
     id: snapshot.id,
-    globalSettings: snapshot.globalSettings,
+    sharedRecipe: snapshot.sharedRecipe,
+    sharedSvgOptions: snapshot.sharedSvgOptions,
+    resizeReference: snapshot.resizeReference,
     jobs,
     selectedJobId: jobs.some((job) => job.id === snapshot.selectedJobId)
       ? snapshot.selectedJobId

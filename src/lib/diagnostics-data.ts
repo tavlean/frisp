@@ -9,7 +9,7 @@ import {
   encoderMap,
 } from 'client/lazy-app/feature-meta';
 import type { BulkSession } from 'client/lazy-app/bulk/session';
-import type { BulkImageSettings } from 'client/lazy-app/bulk/settings';
+import type { ImageRecipe } from 'client/lazy-app/recipe';
 
 export interface DiagnosticsModel {
   session: BulkSession;
@@ -17,15 +17,19 @@ export interface DiagnosticsModel {
   notes: string[];
 }
 
-const globalSettings: BulkImageSettings = {
-  encoderState: {
-    type: 'webP',
-    options: {
-      ...encoderMap.webP.meta.defaultOptions,
-      quality: 75,
+const sharedRecipe: ImageRecipe = {
+  rotate: 0,
+  output: {
+    kind: 'raster',
+    encoder: {
+      type: 'webP',
+      options: {
+        ...encoderMap.webP.meta.defaultOptions,
+        quality: 75,
+      },
     },
   },
-  processorState: {
+  processors: {
     grain: { ...defaultProcessorState.grain },
     resize: {
       ...defaultProcessorState.resize,
@@ -55,7 +59,7 @@ export function createDiagnosticsModel(): DiagnosticsModel {
   const imported = createImageJobs(sourceFiles);
   let session = createBulkSessionFromImport(
     'sveltekit-diagnostics-batch',
-    globalSettings,
+    sharedRecipe,
     imported,
   );
 
@@ -67,7 +71,7 @@ export function createDiagnosticsModel(): DiagnosticsModel {
     size: 8,
     downloadUrl: 'blob:diagnostics-landing-page',
     percentChange: -58,
-    settingsHash: JSON.stringify(globalSettings),
+    settingsHash: JSON.stringify(sharedRecipe),
   });
 
   return {

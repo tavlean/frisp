@@ -1,13 +1,13 @@
 import {
-  getEffectiveSettings,
-  hasSettingsOverrides,
-  normalizeImageOverrides,
-  settingsHash,
-} from './settings';
-import type {
-  BulkImageOverrides,
-  BulkImageSettings,
-  BulkSourceDimensions,
+  recipeSignature,
+  type ImageRecipe,
+  type SvgOutputOptions,
+} from '../recipe';
+import { isSvgSource } from '../svg-source';
+import {
+  hasPositiveDimensions,
+  resolveRecipeForSource,
+  type BulkSourceDimensions,
 } from './settings';
 
 export type ImageJobStatus =
@@ -55,13 +55,19 @@ export interface ImageJob {
   previewUrl?: string;
   thumbnailUrl?: string;
   output?: ImageOutput;
-  overrides?: BulkImageOverrides;
+  /** The image's own full recipe; absent means it follows the shared one. */
+  ownRecipe?: ImageRecipe;
   error?: string;
 }
 
 export interface BulkSession {
   id: string;
-  globalSettings: BulkImageSettings;
+  /** What every image without an own recipe becomes. Rotation is always 0. */
+  sharedRecipe: ImageRecipe;
+  /** The shared recipe's output for SVG sources, which stay vector. */
+  sharedSvgOptions: SvgOutputOptions;
+  /** Shared resize presets are relative to this size (see settings.ts). */
+  resizeReference?: BulkSourceDimensions;
   jobs: ImageJob[];
   selectedJobId?: string;
   activeJobs: number;
@@ -120,13 +126,15 @@ export function isActiveImageJobStatus(status: ImageJobStatus): boolean {
 
 export function createBulkSession(
   id: string,
-  globalSettings: BulkImageSettings,
+  sharedRecipe: ImageRecipe,
   jobs: ImageJob[] = [],
+  sharedSvgOptions: SvgOutputOptions = {},
 ): BulkSession {
   const counters = getBulkSessionCounters(jobs);
   return {
     id,
-    globalSettings,
+    sharedRecipe,
+    sharedSvgOptions,
     jobs,
     selectedJobId: jobs[0]?.id,
     ...counters,
@@ -318,55 +326,111 @@ export function selectPreviousJob(session: BulkSession): BulkSession {
   return selectJob(session, session.jobs[nextIndex].id);
 }
 
-export function updateGlobalSettings(
+export function updateSharedRecipe(
   session: BulkSession,
-  globalSettings: BulkImageSettings,
+  sharedRecipe: ImageRecipe,
+  resizeReference = session.resizeReference,
 ): BulkSession {
-  return {
-    ...session,
-    globalSettings,
-  };
+  return { ...session, sharedRecipe, resizeReference };
 }
 
-export function updateJobOverrides(
+export function updateSharedSvgOptions(
   session: BulkSession,
-  jobId: string,
-  overrides: BulkImageOverrides,
+  sharedSvgOptions: SvgOutputOptions,
 ): BulkSession {
-  const normalizedOverrides = hasSettingsOverrides(overrides)
-    ? normalizeImageOverrides(session.globalSettings, overrides)
-    : undefined;
-
-  return {
-    ...session,
-    jobs: session.jobs.map((job) =>
-      job.id === jobId ? { ...job, overrides: normalizedOverrides } : job,
-    ),
-  };
+  return { ...session, sharedSvgOptions };
 }
 
-export function clearJobOverrides(
+/** Give a job its own recipe, or with `undefined` return it to the shared one. */
+export function setJobOwnRecipe(
   session: BulkSession,
   jobId: string,
+  ownRecipe: ImageRecipe | undefined,
 ): BulkSession {
   return {
     ...session,
     jobs: session.jobs.map((job) =>
-      job.id === jobId ? { ...job, overrides: undefined } : job,
+      job.id === jobId ? { ...job, ownRecipe } : job,
     ),
   };
+}
+
+/**
+ * What a job would become without an own recipe: the shared recipe, its
+ * output swapped for the SVG lane when the source is an SVG (a batch of SVGs
+ * stays vector, like one SVG in the editor), and its resize preset resolved
+ * against this source.
+ */
+export function inheritedRecipe(
+  session: BulkSession,
+  job: ImageJob,
+  dimensions = getJobSourceDimensions(job),
+): ImageRecipe {
+  if (isSvgSource(job.sourceFile)) {
+    return {
+      ...session.sharedRecipe,
+      output: { kind: 'svg', options: session.sharedSvgOptions },
+    };
+  }
+  return resolveRecipeForSource(
+    session.sharedRecipe,
+    session.resizeReference,
+    dimensions,
+  );
+}
+
+/**
+ * Image-scope edit: apply `edit` to each job's effective recipe and keep the
+ * result as its own recipe, unless it keys the same as what the job would
+ * inherit, in which case the job returns to the shared recipe (no override
+ * dot for an edit that changes nothing).
+ */
+export function editJobRecipes(
+  session: BulkSession,
+  jobIds: Iterable<string>,
+  edit: (recipe: ImageRecipe) => ImageRecipe,
+  dimensionsOf: (job: ImageJob) => BulkSourceDimensions | undefined = (job) =>
+    getJobSourceDimensions(job),
+): BulkSession {
+  let next = session;
+  for (const id of jobIds) {
+    const job = next.jobs.find((item) => item.id === id);
+    if (!job) continue;
+    const dimensions = dimensionsOf(job);
+    const source = hasPositiveDimensions(dimensions) ? dimensions : undefined;
+    const inherited = inheritedRecipe(next, job, dimensions);
+    const edited = edit(structuredClone(job.ownRecipe ?? inherited));
+    const same =
+      recipeSignature(edited, source) === recipeSignature(inherited, source);
+    next = setJobOwnRecipe(next, id, same ? undefined : edited);
+  }
+  return next;
+}
+
+/** The recipe a job is processed with: its own, else the inherited one. */
+export function effectiveRecipe(
+  session: BulkSession,
+  job: ImageJob,
+  dimensions = getJobSourceDimensions(job),
+): ImageRecipe {
+  return job.ownRecipe ?? inheritedRecipe(session, job, dimensions);
+}
+
+/** The output hash a current result for this job must carry. */
+export function jobRecipeHash(
+  session: BulkSession,
+  job: ImageJob,
+  dimensions = getJobSourceDimensions(job),
+): string {
+  return recipeSignature(
+    effectiveRecipe(session, job, dimensions),
+    hasPositiveDimensions(dimensions) ? dimensions : undefined,
+  );
 }
 
 export function isJobOutputStale(session: BulkSession, job: ImageJob): boolean {
   if (!job.output) return true;
-  const effectiveSettings = getEffectiveSettings(
-    session.globalSettings,
-    job.overrides,
-  );
-  return (
-    job.output.settingsHash !==
-    settingsHash(effectiveSettings, getJobSourceDimensions(job))
-  );
+  return job.output.settingsHash !== jobRecipeHash(session, job);
 }
 
 export function isJobReadyForExport(
@@ -419,13 +483,13 @@ export function getSelectedJob(session: BulkSession): ImageJob | undefined {
   return session.jobs.find((job) => job.id === session.selectedJobId);
 }
 
-export function getJobEffectiveSettings(
+export function getJobEffectiveRecipe(
   session: BulkSession,
   jobId: string,
-): BulkImageSettings | undefined {
+): ImageRecipe | undefined {
   const job = session.jobs.find((item) => item.id === jobId);
   if (!job) return;
-  return getEffectiveSettings(session.globalSettings, job.overrides);
+  return effectiveRecipe(session, job);
 }
 
 export function getSelectedJobContext(
@@ -446,7 +510,7 @@ export function getSelectedJobContext(
 }
 
 export function getOverriddenJobs(session: BulkSession): ImageJob[] {
-  return session.jobs.filter((job) => hasSettingsOverrides(job.overrides));
+  return session.jobs.filter((job) => job.ownRecipe !== undefined);
 }
 
 export function getOverrideSummary(session: BulkSession): OverrideSummary {

@@ -1,13 +1,7 @@
 import { imagePipeline } from '../image-pipeline';
 import type { ImagePipelineWorkerBridge, SourceImage } from '../image-pipeline';
-import { defaultPreprocessorState } from 'client/lazy-app/feature-meta/shared';
-import type { PreprocessorState } from 'client/lazy-app/feature-meta/shared';
-import {
-  getEffectiveSettings,
-  resolveSettingsForSource,
-  settingsHash,
-} from './settings';
-import type { BulkImageSettings } from './settings';
+import { recipeSignature, type ImageRecipe } from '../recipe';
+import { hasPositiveDimensions } from './settings';
 import {
   getJobSourceDimensions,
   type ImageJob,
@@ -24,55 +18,36 @@ export interface BulkProcessorPipeline {
 
 export interface BulkProcessJobOptions {
   job: ImageJob;
-  globalSettings: BulkImageSettings;
+  /** The job's effective recipe (see effectiveRecipe). Raster output only:
+   *  the SVG lane lives in $lib (optimizeImage), which the engine never
+   *  imports. */
+  recipe: ImageRecipe;
   workerBridge: ImagePipelineWorkerBridge;
   signal: AbortSignal;
-  preprocessorState?: PreprocessorState;
   pipeline?: BulkProcessorPipeline;
   createDownloadUrl?: (file: File) => string;
 }
 
-export interface BulkProcessPlan {
-  effectiveSettings: BulkImageSettings;
-  encoderState: NonNullable<BulkImageSettings['encoderState']>;
-  settingsHash: string;
-  sourceFileName: string;
-}
-
 const defaultPipeline: BulkProcessorPipeline = imagePipeline;
 
-export function createBulkProcessPlan(
-  job: ImageJob,
-  globalSettings: BulkImageSettings,
-): BulkProcessPlan {
-  const sourceDimensions = getJobSourceDimensions(job);
-  const effectiveSettings = resolveSettingsForSource(
-    getEffectiveSettings(globalSettings, job.overrides),
-    sourceDimensions,
-  );
-
-  if (!effectiveSettings.encoderState) {
-    throw Error('Bulk job requires an encoder');
-  }
-
-  return {
-    effectiveSettings,
-    encoderState: effectiveSettings.encoderState,
-    settingsHash: settingsHash(effectiveSettings, sourceDimensions),
-    sourceFileName: job.sourceFile.name,
-  };
-}
-
+/**
+ * Headless raster processing of one job, for the diagnostics probe and the
+ * engine-level runner. The production bulk runtime goes through optimizeImage
+ * instead, so it gets the SVG and transcode lanes too.
+ */
 export async function processBulkImageJob({
   job,
-  globalSettings,
+  recipe,
   workerBridge,
   signal,
-  preprocessorState = defaultPreprocessorState,
   pipeline = defaultPipeline,
   createDownloadUrl = (file) => URL.createObjectURL(file),
 }: BulkProcessJobOptions): Promise<ImageOutput> {
-  const plan = createBulkProcessPlan(job, globalSettings);
+  const { output } = recipe;
+  if (output.kind !== 'raster') {
+    throw Error('processBulkImageJob encodes raster output only');
+  }
+  const dimensions = getJobSourceDimensions(job);
 
   const decodedSource = await pipeline.decodeSourceImage(
     signal,
@@ -82,7 +57,7 @@ export async function processBulkImageJob({
   const preprocessed = await pipeline.preprocessImage(
     signal,
     decodedSource.decoded,
-    preprocessorState,
+    { rotate: { rotate: recipe.rotate } },
     workerBridge,
   );
   const source: SourceImage = {
@@ -94,14 +69,14 @@ export async function processBulkImageJob({
   const processed = await pipeline.processImage(
     signal,
     source,
-    plan.effectiveSettings.processorState,
+    recipe.processors,
     workerBridge,
   );
   const file = await pipeline.compressImage(
     signal,
     processed,
-    plan.encoderState,
-    plan.sourceFileName,
+    output.encoder,
+    job.sourceFile.name,
     workerBridge,
   );
 
@@ -110,6 +85,9 @@ export async function processBulkImageJob({
     size: file.size,
     downloadUrl: createDownloadUrl(file),
     percentChange: getPercentChange(job.originalSize, file.size),
-    settingsHash: plan.settingsHash,
+    settingsHash: recipeSignature(
+      recipe,
+      hasPositiveDimensions(dimensions) ? dimensions : undefined,
+    ),
   };
 }

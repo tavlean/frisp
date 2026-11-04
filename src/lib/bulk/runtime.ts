@@ -1,8 +1,8 @@
 // Bulk processing driver for the production bulk store.
 //
-// Wraps the framework-neutral engine (start/complete/fail reducers + the
-// headless `processBulkImageJob` from the diagnostics probe) in a small
-// stateful runner the reactive store drives. Two PERSISTENT worker bridges are
+// Wraps the framework-neutral engine's start/complete/fail reducers around
+// `optimizeImage`, the same operation the editor runs, in a small stateful
+// runner the reactive store drives. Two PERSISTENT worker bridges are
 // created (never shared across concurrent jobs — the per-side-bridge pattern
 // from EditorSession), and one AbortController scopes each run so
 // cancelProcessing() tears down cleanly. Every state transition reassigns
@@ -10,18 +10,25 @@
 // exactly the way the probe reassigns.
 
 import { isAbortError } from 'client/lazy-app/abort';
-import type { ImagePipelineWorkerBridge } from 'client/lazy-app/image-pipeline';
+import {
+  decodeSourceImage,
+  preprocessImage,
+  type ImagePipelineWorkerBridge,
+} from 'client/lazy-app/image-pipeline';
 import {
   completeJob,
+  effectiveRecipe,
   failJob,
+  getPercentChange,
   getRunnableJobs,
+  jobRecipeHash,
   startJob,
   cancelActiveJobs,
   defaultBulkConcurrency,
-  processBulkImageJob,
   type ImageJob,
   type ImageOutput,
 } from 'client/lazy-app/bulk';
+import { optimizeImage } from '$lib/optimize-image';
 import SvelteKitWorkerBridge from '$lib/sveltekit-worker-bridge';
 import type { BulkStore } from './store.svelte';
 
@@ -31,10 +38,6 @@ import type { BulkStore } from './store.svelte';
  */
 export interface BulkRunnerHost {
   session: BulkStore['session'];
-  createOutputDownloadUrl(file: File): string;
-  processingGlobalSettingsForJob?(
-    job: ImageJob,
-  ): BulkStore['session']['globalSettings'];
   cachedOutputFor?(job: ImageJob): ImageOutput | undefined;
   rememberOutput?(jobId: string, output: ImageOutput): void;
   settingsHashForJob?(job: ImageJob): string;
@@ -60,9 +63,8 @@ export class BulkRuntime {
   #rerunRequested = false;
 
   /** The persistent bridge for a round-robin slot, created on first use. */
-  #bridgeFor(slot: 0 | 1): ImagePipelineWorkerBridge {
-    const bridge = (this.#bridges[slot] ??= new SvelteKitWorkerBridge());
-    return bridge as unknown as ImagePipelineWorkerBridge;
+  #bridgeFor(slot: 0 | 1): SvelteKitWorkerBridge {
+    return (this.#bridges[slot] ??= new SvelteKitWorkerBridge());
   }
 
   /** True while a run() loop is draining the queue. */
@@ -133,20 +135,46 @@ export class BulkRuntime {
       }
 
       const canonicalSettingsHash =
-        host.settingsHashForJob?.(job) ?? job.output?.settingsHash;
-      const output: ImageOutput = await processBulkImageJob({
-        job,
-        globalSettings:
-          host.processingGlobalSettingsForJob?.(job) ??
-          host.session.globalSettings,
-        workerBridge: this.#bridgeFor(slot),
+        host.settingsHashForJob?.(job) ?? jobRecipeHash(host.session, job);
+      const recipe = effectiveRecipe(host.session, job);
+      const bridge = this.#bridgeFor(slot);
+      const pipelineBridge = bridge as unknown as ImagePipelineWorkerBridge;
+      // Decode and rotate the way EditorSession's #preparedSource does, so
+      // optimizeImage sees the same prepared frame in both surfaces.
+      const decoded = await decodeSourceImage(
         signal,
-        createDownloadUrl: (file) => host.createOutputDownloadUrl(file),
-      });
-      if (signal.aborted) return;
-      const completedOutput = {
-        ...output,
-        settingsHash: canonicalSettingsHash ?? output.settingsHash,
+        job.sourceFile,
+        pipelineBridge,
+      );
+      const preprocessed =
+        recipe.rotate === 0
+          ? decoded.decoded
+          : await preprocessImage(
+              signal,
+              decoded.decoded,
+              { rotate: { rotate: recipe.rotate } },
+              pipelineBridge,
+            );
+      const outcome = await optimizeImage(
+        { ...decoded, preprocessed },
+        recipe,
+        { signal, bridge, preview: false },
+      );
+      // The outcome's URL becomes the output's download URL, so the store's
+      // existing revoke paths own it from here. A cancel that lands after the
+      // encode finished leaves no owner, so it is revoked on the spot.
+      if (signal.aborted) {
+        URL.revokeObjectURL(outcome.outputUrl);
+        return;
+      }
+      // Only the file and its facts are kept: bulk never holds output pixels
+      // (the SVG lane renders previews regardless of `preview`).
+      const completedOutput: ImageOutput = {
+        file: outcome.outputFile,
+        size: outcome.outputSize,
+        downloadUrl: outcome.outputUrl,
+        percentChange: getPercentChange(job.originalSize, outcome.outputSize),
+        settingsHash: canonicalSettingsHash,
       };
       host.session = completeJob(host.session, job.id, completedOutput);
       host.rememberOutput?.(job.id, completedOutput);

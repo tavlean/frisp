@@ -25,7 +25,6 @@ import type { SideState } from '$lib/editor/editor-session.svelte';
 import {
   addBulkImportToSession,
   canExportBulkSession,
-  clearJobOverrides,
   createBulkExportPlan,
   createBulkSessionFromImport,
   createImageJobs,
@@ -33,10 +32,11 @@ import {
   getBulkSelectedJobDetail,
   getBulkSessionSummary,
   getBulkStripItems,
-  getEffectiveSettings,
+  effectiveRecipe,
   getJobSourceDimensions,
   getSelectedJob,
-  getSettingsOverridePaths,
+  editJobRecipes,
+  jobRecipeHash,
   markBulkExportPlanExported,
   normalizeBulkSessionCounters,
   removeJobs,
@@ -47,11 +47,9 @@ import {
   selectJob,
   selectNextJob,
   selectPreviousJob,
-  settingsHash,
-  updateGlobalSettings,
-  updateJobOverrides,
-  type BulkImageOverrides,
-  type BulkImageSettings,
+  setJobOwnRecipe,
+  updateSharedRecipe,
+  updateSharedSvgOptions,
   type BulkSelectedJobDetail,
   type BulkSession,
   type BulkSessionSummary,
@@ -62,18 +60,12 @@ import {
 import {
   defaultProcessorState,
   encoderMap,
-  type EncoderState,
-  type EncoderType,
+  type ProcessorState,
 } from 'client/lazy-app/feature-meta';
-import {
-  getMatchingResizePreset,
-  getResizePresetSize,
-} from 'features/processors/resize/client/preset-state';
+import type { ImageRecipe, SvgOutputOptions } from 'client/lazy-app/recipe';
+import { applyRecipeToSide, recipeFromSide } from '$lib/editor/side-recipe';
+import { DEFAULT_SVG_OPTIONS } from '$lib/svg/optimize-options';
 import { stableStringify } from 'shared/stable-stringify';
-// Bulk is WebP-locked for the first production pass, so use the CONCRETE WebP option type (which has
-// `quality`/`method`) rather than the wide `EncoderOptions` union (whose members
-// share no common keys — it can't be indexed by encoder-specific fields, and
-// `encoderState.options` for `type:'webP'` wants exactly this type).
 import { snackbar } from '$lib/editor/snackbar-store.svelte';
 import type { ImportedFile } from './import-sources';
 import { createLimiter } from './limiter';
@@ -122,61 +114,41 @@ export function deepEqual(a: unknown, b: unknown): boolean {
   return stableStringify(a) === stableStringify(b);
 }
 
-function isProcessorSubEnabled(value: unknown): boolean {
-  return (
-    typeof value === 'object' &&
-    value !== null &&
-    (value as { enabled?: unknown }).enabled === true
-  );
-}
-
 function normalizeProcessorSub<T extends { enabled?: unknown }>(
   value: T,
 ): T | { enabled: false } {
-  if (!isProcessorSubEnabled(value)) return { enabled: false };
-  return structuredClone(value);
+  return value.enabled === true ? value : { enabled: false };
 }
 
-export function normalizeProcessorStateForBulkDiff(
-  processorState: BulkImageSettings['processorState'],
-): BulkImageSettings['processorState'] {
-  return {
-    ...structuredClone(processorState),
-    resize: normalizeProcessorSub(processorState.resize),
-    grain: normalizeProcessorSub(processorState.grain),
-    quantize: normalizeProcessorSub(processorState.quantize),
-  } as BulkImageSettings['processorState'];
-}
-
-function normalizeBulkSettingsForBulkDiff(
-  settings: BulkImageSettings,
-): BulkImageSettings {
-  return {
-    encoderState: settings.encoderState
-      ? structuredClone(settings.encoderState)
-      : undefined,
-    processorState: normalizeProcessorStateForBulkDiff(settings.processorState),
-  };
-}
-
-function bulkSettingsEqualForBulkDiff(
-  left: BulkImageSettings,
-  right: BulkImageSettings,
-): boolean {
-  return deepEqual(
-    normalizeBulkSettingsForBulkDiff(left),
-    normalizeBulkSettingsForBulkDiff(right),
-  );
-}
-
-/** WebP defaults from the codec meta — bulk's first-pass global format. */
-function defaultGlobalSettings(): BulkImageSettings {
-  return {
-    encoderState: {
-      type: 'webP',
-      options: structuredClone(encoderMap.webP.meta.defaultOptions),
+/**
+ * Whether two shared recipes differ in anything the user set, ignoring the
+ * parameters of disabled processors. Seeding a disabled resize's dimensions
+ * must not count as an edit (it would reseed the focus view for nothing).
+ */
+function sameForBulkDiff(left: ImageRecipe, right: ImageRecipe): boolean {
+  const key = (recipe: ImageRecipe) => ({
+    ...recipe,
+    processors: {
+      grain: normalizeProcessorSub(recipe.processors.grain),
+      quantize: normalizeProcessorSub(recipe.processors.quantize),
+      resize: normalizeProcessorSub(recipe.processors.resize),
     },
-    processorState: structuredClone(defaultProcessorState),
+  });
+  return deepEqual(key(left), key(right));
+}
+
+/** WebP defaults from the codec meta: bulk's default shared output. */
+function defaultSharedRecipe(): ImageRecipe {
+  return {
+    rotate: 0,
+    processors: structuredClone(defaultProcessorState),
+    output: {
+      kind: 'raster',
+      encoder: {
+        type: 'webP',
+        options: structuredClone(encoderMap.webP.meta.defaultOptions),
+      },
+    },
   };
 }
 
@@ -186,30 +158,24 @@ function defaultOptionsByFormat(): Record<string, Record<string, unknown>> {
   );
 }
 
-function sideFromSettings(settings: BulkImageSettings): SideState {
-  const optionsByFormat = defaultOptionsByFormat();
-  const encoderState = settings.encoderState;
-  const format = (encoderState?.type ?? 'webP') as SideFormat;
-
-  if (encoderState) {
-    optionsByFormat[encoderState.type] = structuredClone(
-      encoderState.options as Record<string, unknown>,
-    );
-  }
-
-  return {
-    format,
-    optionsByFormat,
-    processorState: structuredClone(settings.processorState),
+/** The OptionsPanel-shaped side the global panel binds, built from a recipe. */
+function sideFromRecipe(recipe: ImageRecipe): SideState {
+  const side: SideState = {
+    format: 'webP',
+    optionsByFormat: defaultOptionsByFormat(),
+    processorState: structuredClone(defaultProcessorState) as ProcessorState,
   };
+  applyRecipeToSide(recipe, side);
+  return side;
 }
 
 function emptySession(): BulkSession {
   sessionCounter += 1;
   return createBulkSessionFromImport(
     `bulk-${sessionCounter}`,
-    defaultGlobalSettings(),
+    defaultSharedRecipe(),
     createImageJobs([]),
+    structuredClone(DEFAULT_SVG_OPTIONS) as unknown as SvgOutputOptions,
   );
 }
 
@@ -227,8 +193,9 @@ export class BulkStore {
   panelScope = $state<BulkPanelScope>('global');
   keepOriginalWhenLarger = $state(true);
   exporting = $state(false);
-  // Production OptionsPanel-compatible pseudo-side for GLOBAL bulk settings.
-  globalSide = $state<SideState>(sideFromSettings(this.session.globalSettings));
+  // OptionsPanel-compatible pseudo-side the global panel edits; it converts to
+  // the shared recipe on apply.
+  globalSide = $state<SideState>(sideFromRecipe(this.session.sharedRecipe));
 
   // Thumbnails + natural dims, keyed by job id. SvelteMap entries are replaced
   // (never deeply mutated) so its shallow reactivity is sufficient.
@@ -281,7 +248,7 @@ export class BulkStore {
     this.session.jobs.filter((job) => this.selectedIds.has(job.id)),
   );
   readonly selectedHasOverrides = $derived(
-    this.selectedJobs.some((job) => this.overridePaths(job.id).length > 0),
+    this.selectedJobs.some((job) => job.ownRecipe !== undefined),
   );
   readonly allJobsSelected = $derived(
     this.session.jobs.length > 0 &&
@@ -308,13 +275,13 @@ export class BulkStore {
 
   // ── Actions ───────────────────────────────────────────────────────────────
   #syncingGlobalSide = false;
-  #globalApplyTimer: ReturnType<typeof setTimeout> | null = null;
+  #sharedApplyTimer: ReturnType<typeof setTimeout> | null = null;
+  #pendingShared: { recipe: ImageRecipe; onApplied?: () => void } | null = null;
   #selectedApplyTimer: ReturnType<typeof setTimeout> | null = null;
-  #pendingSelectedApply: {
+  #pendingSelectedEdit: {
     ids: string[];
     allJobsSelected: boolean;
-    overrides: BulkImageOverrides;
-    onApplied?: () => void;
+    edit: (recipe: ImageRecipe) => ImageRecipe;
   } | null = null;
   #globalResizeSeededJobId: string | null = null;
   #globalResizeReference: {
@@ -440,48 +407,69 @@ export class BulkStore {
     this.#removeJobIds(this.#selectedJobIds());
   }
 
-  /** Clear ALL overrides on a job ("Reset all to global"). */
-  resetAllOverrides(id: string): void {
-    this.#clearJobOverrides(id);
+  /**
+   * Global-scope edit: replace the shared recipe. Coalesced over 200 ms so a
+   * slider drag does not requeue the batch on every input event. `onApplied`
+   * runs only when the change is more than a disabled processor's parameters.
+   */
+  setSharedRecipe(recipe: ImageRecipe, onApplied?: () => void): void {
+    this.#pendingShared = { recipe: structuredClone(recipe), onApplied };
+    if (this.#sharedApplyTimer !== null) clearTimeout(this.#sharedApplyTimer);
+    this.#sharedApplyTimer = setTimeout(() => {
+      this.#sharedApplyTimer = null;
+      this.#flushShared();
+    }, 200);
   }
 
-  applyAnchorOverrides(overrides: BulkImageOverrides): void {
-    const id = this.session.selectedJobId;
-    if (!id) return;
-
-    this.#applyJobOverrides(id, overrides);
-  }
-
-  clearAnchorOverrides(): void {
-    const id = this.session.selectedJobId;
-    if (!id) return;
-
-    this.#clearJobOverrides(id);
-  }
-
-  clearSelectedOverrides(): void {
-    const ids = this.#selectedJobIds();
-    if (ids.length === 0) return;
-
-    let nextSession = this.session;
-    for (const id of ids) {
-      nextSession = clearJobOverrides(nextSession, id);
+  #flushShared(): void {
+    const pending = this.#pendingShared;
+    this.#pendingShared = null;
+    if (!pending) return;
+    const reference = this.#globalResizeReference
+      ? {
+          width: this.#globalResizeReference.width,
+          height: this.#globalResizeReference.height,
+        }
+      : undefined;
+    const current = this.session;
+    if (
+      deepEqual(pending.recipe, current.sharedRecipe) &&
+      deepEqual(reference, current.resizeReference)
+    ) {
+      return;
     }
-    this.#adoptSettingsSession(nextSession);
+    const meaningful = !sameForBulkDiff(pending.recipe, current.sharedRecipe);
+    this.#adoptSettingsSession(
+      updateSharedRecipe(current, pending.recipe, reference),
+    );
+    if (meaningful) pending.onApplied?.();
   }
 
-  queueSelectedOverridesApply(
-    overrides: BulkImageOverrides,
-    onApplied?: () => void,
-  ): void {
+  setSharedSvgOptions(options: SvgOutputOptions): void {
+    if (deepEqual(options, this.session.sharedSvgOptions)) return;
+    this.#adoptSettingsSession(
+      updateSharedSvgOptions(this.session, structuredClone(options)),
+    );
+  }
+
+  /**
+   * Image-scope edit: apply `edit` to each selected job's effective recipe and
+   * store the result as its own recipe; a result equal (by signature) to what
+   * the job would inherit clears the own recipe instead. With every image
+   * selected the edit lands on the shared recipe. Coalesced like
+   * setSharedRecipe; edits queued inside one window compose in order.
+   */
+  editSelected(edit: (recipe: ImageRecipe) => ImageRecipe): void {
     const ids = this.#selectedJobIds();
     if (ids.length === 0) return;
 
-    this.#pendingSelectedApply = {
+    const previous = this.#pendingSelectedEdit;
+    if (previous && !deepEqual(previous.ids, ids)) this.#flushSelectedEdit();
+    const earlier = this.#pendingSelectedEdit?.edit;
+    this.#pendingSelectedEdit = {
       ids,
       allJobsSelected: this.allJobsSelected,
-      overrides: structuredClone(overrides),
-      onApplied,
+      edit: earlier ? (recipe) => edit(earlier(recipe)) : edit,
     };
 
     if (this.#selectedApplyTimer !== null) {
@@ -489,13 +477,13 @@ export class BulkStore {
     }
     this.#selectedApplyTimer = setTimeout(() => {
       this.#selectedApplyTimer = null;
-      this.#flushSelectedApply();
+      this.#flushSelectedEdit();
     }, 200);
   }
 
-  #flushSelectedApply(): void {
-    const pending = this.#pendingSelectedApply;
-    this.#pendingSelectedApply = null;
+  #flushSelectedEdit(): void {
+    const pending = this.#pendingSelectedEdit;
+    this.#pendingSelectedEdit = null;
     if (!pending) return;
 
     const liveIds = new Set(this.session.jobs.map((job) => job.id));
@@ -503,46 +491,64 @@ export class BulkStore {
     if (ids.length === 0) return;
 
     if (pending.allJobsSelected && ids.length === this.session.jobs.length) {
-      const nextSettings = getEffectiveSettings(
-        this.session.globalSettings,
-        pending.overrides,
-      );
-      if (
-        bulkSettingsEqualForBulkDiff(nextSettings, this.session.globalSettings)
-      ) {
-        return;
-      }
-      this.#applyGlobalSettings(nextSettings);
-      pending.onApplied?.();
+      this.#applyEditToShared(pending.edit);
       return;
     }
 
+    this.#adoptSettingsSession(
+      editJobRecipes(this.session, ids, pending.edit, (job) =>
+        this.#jobDimensions(job),
+      ),
+    );
+  }
+
+  /** Every image selected: the image-scope edit becomes a shared edit. An
+   *  SVG output edit (an SVG anchor) lands on the shared SVG options. */
+  #applyEditToShared(edit: (recipe: ImageRecipe) => ImageRecipe): void {
+    const current = this.session.sharedRecipe;
+    const svgBase: ImageRecipe = {
+      ...current,
+      output: { kind: 'svg', options: this.session.sharedSvgOptions },
+    };
+    const editedSvg = edit(structuredClone(svgBase)).output;
+    const edited = edit(structuredClone(current));
+    let nextSession = this.session;
+    if (editedSvg.kind === 'svg') {
+      nextSession = updateSharedSvgOptions(nextSession, editedSvg.options);
+    }
+    const next: ImageRecipe =
+      edited.output.kind === 'svg'
+        ? { ...edited, output: current.output }
+        : edited;
+    if (!sameForBulkDiff(next, current)) {
+      nextSession = updateSharedRecipe(nextSession, next);
+    }
+    if (nextSession !== this.session) this.#adoptSettingsSession(nextSession);
+  }
+
+  /** Return every selected image to the shared recipe. */
+  resetSelectedToShared(): void {
+    const ids = this.#selectedJobIds();
+    if (ids.length === 0) return;
+    // A queued image-scope edit predates the reset; flushing it later would
+    // silently re-create the own recipes just cleared.
+    if (this.#selectedApplyTimer !== null) {
+      clearTimeout(this.#selectedApplyTimer);
+      this.#selectedApplyTimer = null;
+    }
+    this.#pendingSelectedEdit = null;
+
     let nextSession = this.session;
     for (const id of ids) {
-      nextSession = updateJobOverrides(
-        nextSession,
-        id,
-        structuredClone(pending.overrides),
-      );
+      nextSession = setJobOwnRecipe(nextSession, id, undefined);
     }
     this.#adoptSettingsSession(nextSession);
-    pending.onApplied?.();
   }
 
-  #applyGlobalSettings(globalSettings: BulkImageSettings): void {
-    this.#adoptSettingsSession(
-      updateGlobalSettings(this.session, globalSettings),
-    );
-  }
-
-  #applyJobOverrides(jobId: string, overrides: BulkImageOverrides): void {
-    this.#adoptSettingsSession(
-      updateJobOverrides(this.session, jobId, overrides),
-    );
-  }
-
-  #clearJobOverrides(jobId: string): void {
-    this.#adoptSettingsSession(clearJobOverrides(this.session, jobId));
+  effectiveRecipeFor(jobId: string): ImageRecipe | undefined {
+    const job = this.session.jobs.find((item) => item.id === jobId);
+    if (!job) return;
+    return effectiveRecipe(this.session, job, this.#jobDimensions(job));
   }
 
   #adoptSettingsSession(session: BulkSession): void {
@@ -624,7 +630,7 @@ export class BulkStore {
   }
 
   refreshGlobalSideFromSession(): void {
-    const next = sideFromSettings(this.session.globalSettings);
+    const next = sideFromRecipe(this.session.sharedRecipe);
     if (deepEqual($state.snapshot(this.globalSide), next)) return;
 
     this.#syncingGlobalSide = true;
@@ -664,67 +670,26 @@ export class BulkStore {
     };
   }
 
-  processingGlobalSettingsForJob(job: ImageJob): BulkImageSettings {
-    const settings = structuredClone(this.session.globalSettings);
-    const resize = settings.processorState.resize;
-    const reference = this.#globalResizeReference;
-    const thumb = this.thumbs.get(job.id);
-    const hasResizeOverride =
-      job.overrides?.processorState?.resize !== undefined;
-
-    if (!resize.enabled || !reference || !thumb || hasResizeOverride) {
-      return settings;
-    }
-
-    const preset = getMatchingResizePreset(
-      { width: resize.width, height: resize.height },
-      reference.width,
-      reference.height,
-    );
-    if (preset === 'custom') return settings;
-
-    const size = getResizePresetSize(thumb.w, thumb.h, preset);
-    resize.width = size.width;
-    resize.height = size.height;
-    return settings;
-  }
-
   setGlobalFormat(format: SideFormat): void {
-    if (format === 'identity') return;
+    // The shared recipe is raster; SVG sources get the SVG lane on their own.
+    if (format === 'identity' || format === 'svg') return;
     this.globalSide.format = format;
   }
 
+  /** Apply the global panel's side to the shared recipe (see setSharedRecipe). */
   queueGlobalSideApply(onApplied?: () => void): void {
     const snapshot = $state.snapshot(this.globalSide) as SideState;
-    if (this.#syncingGlobalSide || snapshot.format === 'identity') return;
-
-    if (this.#globalApplyTimer !== null) clearTimeout(this.#globalApplyTimer);
-    this.#globalApplyTimer = setTimeout(() => {
-      this.#globalApplyTimer = null;
-      const format = snapshot.format as EncoderType;
-      const nextSettings: BulkImageSettings = {
-        encoderState: {
-          type: format,
-          options: structuredClone(snapshot.optionsByFormat[format] ?? {}),
-        } as EncoderState,
-        processorState: structuredClone(snapshot.processorState),
-        resizeReference: this.#globalResizeReference
-          ? {
-              width: this.#globalResizeReference.width,
-              height: this.#globalResizeReference.height,
-            }
-          : undefined,
-      };
-
-      if (
-        bulkSettingsEqualForBulkDiff(nextSettings, this.session.globalSettings)
-      ) {
-        return;
-      }
-
-      this.#applyGlobalSettings(nextSettings);
-      onApplied?.();
-    }, 200);
+    if (
+      this.#syncingGlobalSide ||
+      snapshot.format === 'identity' ||
+      snapshot.format === 'svg'
+    ) {
+      return;
+    }
+    this.setSharedRecipe(
+      recipeFromSide(snapshot, { rotate: { rotate: 0 } }),
+      onApplied,
+    );
   }
 
   /**
@@ -760,14 +725,6 @@ export class BulkStore {
     const url = URL.createObjectURL(job.sourceFile);
     this.#sourceUrls.set(jobId, url);
     return url;
-  }
-
-  /** All overridden dotted paths for a job (for the corner dot / tooltip). */
-  overridePaths(jobId: string | undefined): string[] {
-    const job = jobId
-      ? this.session.jobs.find((item) => item.id === jobId)
-      : undefined;
-    return getSettingsOverridePaths(job?.overrides);
   }
 
   isSelected(id: string): boolean {
@@ -809,24 +766,16 @@ export class BulkStore {
   }
 
   #settingsHashForJob(session: BulkSession, job: ImageJob): string {
-    return settingsHash(
-      getEffectiveSettings(session.globalSettings, job.overrides),
-      getJobSourceDimensions(job) ?? this.#thumbDimensions(job.id),
-    );
+    return jobRecipeHash(session, job, this.#jobDimensions(job));
   }
 
-  #thumbDimensions(jobId: string):
-    | {
-        width: number;
-        height: number;
-      }
-    | undefined {
-    const thumb = this.thumbs.get(jobId);
-    if (!thumb) return;
-    return {
-      width: thumb.w,
-      height: thumb.h,
-    };
+  #jobDimensions(
+    job: ImageJob,
+  ): { width?: number; height?: number } | undefined {
+    const recorded = getJobSourceDimensions(job);
+    if (recorded) return recorded;
+    const thumb = this.thumbs.get(job.id);
+    return thumb ? { width: thumb.w, height: thumb.h } : undefined;
   }
 
   #pinCurrentOutputs(): void {
@@ -1001,15 +950,16 @@ export class BulkStore {
 
   /** Drop both debounced settings applies (their snapshots are pre-reset/-teardown state). */
   #clearApplyTimers(): void {
-    if (this.#globalApplyTimer !== null) {
-      clearTimeout(this.#globalApplyTimer);
-      this.#globalApplyTimer = null;
+    if (this.#sharedApplyTimer !== null) {
+      clearTimeout(this.#sharedApplyTimer);
+      this.#sharedApplyTimer = null;
     }
+    this.#pendingShared = null;
     if (this.#selectedApplyTimer !== null) {
       clearTimeout(this.#selectedApplyTimer);
       this.#selectedApplyTimer = null;
     }
-    this.#pendingSelectedApply = null;
+    this.#pendingSelectedEdit = null;
   }
 
   /** Tear down the whole bulk session: cancel, revoke every URL, start fresh. */
@@ -1045,14 +995,6 @@ export class BulkStore {
     } finally {
       this.exporting = false;
     }
-  }
-
-  // ── Output URL ownership ──────────────────────────────────────────────────
-  // The engine's processor calls this to mint a download URL for each output;
-  // it is revoked via revokeSessionObjectUrls on reset (output.downloadUrl is
-  // one of the URLs that helper collects).
-  createOutputDownloadUrl(file: File): string {
-    return URL.createObjectURL(file);
   }
 
   #setAnchor(id: string | undefined): void {

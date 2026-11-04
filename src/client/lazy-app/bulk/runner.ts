@@ -3,6 +3,7 @@ import type { ImagePipelineWorkerBridge } from '../image-pipeline';
 import type { BulkSession, ImageJob, ImageOutput } from './session';
 import { completeJob, failJob, getRunnableJobs, startJob } from './queue';
 import { processBulkImageJob } from './processor';
+import { effectiveRecipe } from './session';
 
 export interface BulkRunnerOptions {
   signal: AbortSignal;
@@ -36,7 +37,7 @@ export async function processRunnableBulkJobs(
     processJob = (job, workerBridge) =>
       processBulkImageJob({
         job,
-        globalSettings: session.globalSettings,
+        recipe: effectiveRecipe(session, job),
         workerBridge,
         signal,
       }),

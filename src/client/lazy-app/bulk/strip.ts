@@ -1,7 +1,6 @@
 import { getBulkJobSizeSummary, type BulkJobOutputState } from './export';
 import type { BulkSession, ImageJob, ImageJobStatus } from './session';
 import { getJobStatusGroup, type ImageJobStatusGroup } from './session';
-import { getSettingsOverridePaths } from './settings';
 
 export interface BulkStripItem {
   id: string;
@@ -16,7 +15,6 @@ export interface BulkStripItem {
   originalSize: number;
   outputSize?: number;
   percentChange?: number;
-  overridePaths: string[];
   hasOverrides: boolean;
   error?: string;
 }
@@ -27,7 +25,6 @@ function createBulkStripItem(
   index: number,
 ): BulkStripItem {
   const sizeSummary = getBulkJobSizeSummary(session, job);
-  const overridePaths = getSettingsOverridePaths(job.overrides);
 
   return {
     id: job.id,
@@ -42,8 +39,7 @@ function createBulkStripItem(
     originalSize: sizeSummary.originalSize,
     outputSize: sizeSummary.outputSize,
     percentChange: sizeSummary.percentChange,
-    overridePaths,
-    hasOverrides: overridePaths.length > 0,
+    hasOverrides: job.ownRecipe !== undefined,
     error: job.error,
   };
 }

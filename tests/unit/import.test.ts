@@ -7,7 +7,7 @@ import {
   getBulkImportSummary,
   isSupportedBulkImage,
 } from '../../src/client/lazy-app/bulk/import';
-import { fakeFile, session, settings } from './fixtures';
+import { fakeFile, recipe, session } from './fixtures';
 
 describe('bulk import helpers', () => {
   it('accepts image MIME types and known image extensions', () => {
@@ -114,7 +114,7 @@ describe('bulk import helpers', () => {
 
     const importedSession = createBulkSessionFromImport(
       'imported',
-      settings(),
+      recipe(),
       result,
     );
     const appendedSession = addBulkImportToSession(session([]), result);

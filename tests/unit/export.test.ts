@@ -10,8 +10,8 @@ import {
   getBulkOutputSummary,
   markBulkExportPlanExported,
 } from '../../src/client/lazy-app/bulk/export';
-import { settingsHash } from '../../src/client/lazy-app/bulk/settings';
-import { fakeOutput, job, session, settings } from './fixtures';
+import { recipeSignature } from '../../src/client/lazy-app/recipe';
+import { fakeOutput, job, recipe, resized, session } from './fixtures';
 
 describe('bulk export selectors', () => {
   it('deduplicates duplicate output names case-insensitively while preserving extensions', () => {
@@ -39,25 +39,20 @@ describe('bulk export selectors', () => {
   });
 
   it('filters export entries by requested job ids and skips stale outputs', () => {
-    const freshSettings = settings();
-    const staleSettings = settings({
-      processorState: {
-        ...freshSettings.processorState,
-        resize: { ...freshSettings.processorState.resize, enabled: true },
-      },
-    });
+    const freshSettings = recipe();
+    const staleSettings = resized(0, 0);
     const current = session(
       [
         job('fresh', {
           status: 'encoded',
-          output: fakeOutput({ hash: settingsHash(freshSettings) }),
+          output: fakeOutput({ hash: recipeSignature(freshSettings) }),
         }),
         job('stale', {
           status: 'encoded',
-          output: fakeOutput({ hash: settingsHash(staleSettings) }),
+          output: fakeOutput({ hash: recipeSignature(staleSettings) }),
         }),
       ],
-      { globalSettings: freshSettings },
+      { sharedRecipe: freshSettings },
     );
 
     expect(getBulkExportEntries(current, ['fresh', 'stale'])).toHaveLength(1);
@@ -108,12 +103,8 @@ describe('bulk export selectors', () => {
   });
 
   it('never keeps an original that would undo a pixel edit', () => {
-    const base = settings();
-    const grain = settings({
-      processorState: {
-        ...base.processorState,
-        grain: { enabled: true, amount: 40, size: 20 },
-      },
+    const grain = recipe((r) => {
+      r.processors.grain = { enabled: true, amount: 40, size: 20 };
     });
     const current = session(
       [
@@ -124,11 +115,11 @@ describe('bulk export selectors', () => {
           output: fakeOutput({
             fileName: 'larger.webp',
             fileSize: 120,
-            hash: settingsHash(grain),
+            hash: recipeSignature(grain),
           }),
         }),
       ],
-      { globalSettings: grain },
+      { sharedRecipe: grain },
     );
 
     expect(
@@ -188,19 +179,8 @@ describe('bulk export selectors', () => {
   });
 
   it('summarizes missing, stale, and optimized job sizes', () => {
-    const freshSettings = settings();
-    const staleHash = settingsHash(
-      settings({
-        processorState: {
-          ...freshSettings.processorState,
-          resize: {
-            ...freshSettings.processorState.resize,
-            enabled: true,
-            width: 200,
-          },
-        },
-      }),
-    );
+    const freshSettings = recipe();
+    const staleHash = recipeSignature(resized(200, 0));
     const missing = job('missing', { fileSize: 100 });
     const stale = job('stale', {
       fileSize: 100,
@@ -210,10 +190,13 @@ describe('bulk export selectors', () => {
     const optimized = job('optimized', {
       fileSize: 100,
       status: 'encoded',
-      output: fakeOutput({ fileSize: 50, hash: settingsHash(freshSettings) }),
+      output: fakeOutput({
+        fileSize: 50,
+        hash: recipeSignature(freshSettings),
+      }),
     });
     const current = session([missing, stale, optimized], {
-      globalSettings: freshSettings,
+      sharedRecipe: freshSettings,
     });
 
     expect(getBulkJobSizeSummary(current, missing)).toMatchObject({

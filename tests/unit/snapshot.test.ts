@@ -5,7 +5,7 @@ import {
   restoreBulkSessionSnapshot,
   restoreSerializedBulkSessionSnapshot,
 } from '../../src/client/lazy-app/bulk/snapshot';
-import { fakeOutput, job, session, settings } from './fixtures';
+import { fakeOutput, job, recipe, session } from './fixtures';
 
 function validSerializedSnapshot(): string {
   return JSON.stringify(createBulkSessionSnapshot(session([job('a')])));
@@ -17,13 +17,13 @@ describe('bulk session snapshots', () => {
     ['non-object JSON', 'null'],
     [
       'wrong version',
-      JSON.stringify({ ...JSON.parse(validSerializedSnapshot()), version: 2 }),
+      JSON.stringify({ ...JSON.parse(validSerializedSnapshot()), version: 1 }),
     ],
     [
-      'missing processor state',
+      'missing shared recipe processors',
       JSON.stringify({
         ...JSON.parse(validSerializedSnapshot()),
-        globalSettings: {},
+        sharedRecipe: { rotate: 0, output: { kind: 'raster' } },
       }),
     ],
     [
@@ -102,7 +102,7 @@ describe('bulk session snapshots', () => {
         job('failed', { status: 'failed', error: 'bad' }),
         job('skipped', { status: 'skipped' }),
       ],
-      { globalSettings: settings(), selectedJobId: 'exported' },
+      { sharedRecipe: recipe(), selectedJobId: 'exported' },
     );
 
     const restored = restoreBulkSessionSnapshot(

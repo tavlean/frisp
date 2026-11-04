@@ -1,14 +1,15 @@
 import { describe, expect, it } from 'vitest';
 import {
   addJobs,
-  clearJobOverrides,
+  editJobRecipes,
   getBulkActionState,
   getBulkSessionCounters,
   getDetailedBatchProgress,
-  getJobEffectiveSettings,
+  getJobEffectiveRecipe,
   getOverrideSummary,
   getSelectedJob,
   getSelectedJobContext,
+  isJobOutputStale,
   markJobsExported,
   normalizeBulkSessionCounters,
   removeJobs,
@@ -16,10 +17,10 @@ import {
   selectJob,
   selectNextJob,
   selectPreviousJob,
-  updateGlobalSettings,
-  updateJobOverrides,
+  setJobOwnRecipe,
+  updateSharedRecipe,
 } from '../../src/client/lazy-app/bulk/session';
-import { fakeOutput, job, session, settings } from './fixtures';
+import { fakeOutput, job, recipe, resized, session } from './fixtures';
 
 describe('bulk session reducers and selectors', () => {
   it('normalizes counters from jobs', () => {
@@ -152,28 +153,75 @@ describe('bulk session reducers and selectors', () => {
     );
   });
 
-  it('updates global settings and image overrides', () => {
-    const baseSettings = settings();
-    const nextSettings = settings({
-      processorState: {
-        ...baseSettings.processorState,
-        resize: { ...baseSettings.processorState.resize, enabled: true },
+  it('updates the shared recipe and gives a job its own', () => {
+    let current = updateSharedRecipe(session([job('a')]), resized(640, 480));
+    expect(
+      getJobEffectiveRecipe(current, 'a')?.processors.resize,
+    ).toMatchObject({ enabled: true, width: 640 });
+
+    const own = resized(320, 200);
+    current = setJobOwnRecipe(current, 'a', own);
+
+    expect(getJobEffectiveRecipe(current, 'a')).toBe(own);
+    expect(getOverrideSummary(current)).toEqual({ overridden: 1, total: 1 });
+
+    const reset = setJobOwnRecipe(current, 'a', undefined);
+    expect(reset.jobs[0].ownRecipe).toBeUndefined();
+    expect(getJobEffectiveRecipe(reset, 'a')?.processors.resize).toMatchObject({
+      width: 640,
+    });
+  });
+
+  it('gives edited jobs their own recipe and keeps their other values', () => {
+    const current = session([
+      job('a'),
+      job('b', { ownRecipe: resized(320, 200) }),
+      job('c'),
+    ]);
+    const withGrain = (r: ReturnType<typeof recipe>) => ({
+      ...r,
+      processors: {
+        ...r.processors,
+        grain: { enabled: true, amount: 30, size: 20 },
       },
     });
-    let current = updateGlobalSettings(session([job('a')]), nextSettings);
 
-    current = updateJobOverrides(current, 'a', {
-      processorState: { resize: { width: 320 } },
-    });
+    const next = editJobRecipes(current, ['a', 'b'], withGrain);
 
-    expect(
-      getJobEffectiveSettings(current, 'a')?.processorState.resize,
-    ).toMatchObject({
-      enabled: true,
-      width: 320,
+    expect(next.jobs[0].ownRecipe?.processors.grain.amount).toBe(30);
+    expect(next.jobs[1].ownRecipe?.processors).toMatchObject({
+      grain: { enabled: true, amount: 30 },
+      resize: { enabled: true, width: 320 },
     });
-    expect(getOverrideSummary(current)).toEqual({ overridden: 1, total: 1 });
-    expect(clearJobOverrides(current, 'a').jobs[0].overrides).toBeUndefined();
+    expect(next.jobs[2].ownRecipe).toBeUndefined();
+  });
+
+  it('clears the own recipe when an edit lands back on the shared one', () => {
+    const current = session([job('a', { ownRecipe: resized(320, 200) })]);
+
+    const next = editJobRecipes(current, ['a'], () => recipe());
+    expect(next.jobs[0].ownRecipe).toBeUndefined();
+
+    // Equal by signature is enough: grain enabled at zero changes nothing.
+    const inert = editJobRecipes(current, ['a'], () =>
+      recipe((r) => {
+        r.processors.grain = { enabled: true, amount: 0, size: 20 };
+      }),
+    );
+    expect(inert.jobs[0].ownRecipe).toBeUndefined();
+  });
+
+  it('marks a job stale when its recipe changes and fresh when it changes back', () => {
+    const current = session([
+      job('a', { status: 'encoded', output: fakeOutput() }),
+    ]);
+    expect(isJobOutputStale(current, current.jobs[0])).toBe(false);
+
+    const own = setJobOwnRecipe(current, 'a', resized(10, 10));
+    expect(isJobOutputStale(own, own.jobs[0])).toBe(true);
+
+    const back = setJobOwnRecipe(own, 'a', undefined);
+    expect(isJobOutputStale(back, back.jobs[0])).toBe(false);
   });
 
   it('marks only current encoded jobs as exported', () => {

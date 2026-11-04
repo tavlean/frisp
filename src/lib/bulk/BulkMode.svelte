@@ -5,21 +5,14 @@
     encodeSignature,
     resizeSignature,
   } from '$lib/editor/encode-signature';
-  import type { CompressOutcome, SideFormat } from '$lib/compress';
+  import { applyRecipeToSide, recipeFromSide } from '$lib/editor/side-recipe';
+  import type { CompressOutcome } from '$lib/compress';
   import SvelteKitWorkerBridge from '$lib/sveltekit-worker-bridge';
-  import {
-    bulkStore,
-    deepEqual,
-    normalizeProcessorStateForBulkDiff,
-  } from '$lib/bulk/store.svelte';
+  import { bulkStore, deepEqual } from '$lib/bulk/store.svelte';
   import { fromFileList } from '$lib/bulk/import-sources';
   import Home from '$lib/bulk/Home.svelte';
-  import {
-    getEffectiveSettings,
-    type BulkImageOverrides,
-    type BulkImageSettings,
-    type ImageJob,
-  } from 'client/lazy-app/bulk';
+  import { applyRecipeChanges, type ImageJob } from 'client/lazy-app/bulk';
+  import type { ImageRecipe } from 'client/lazy-app/recipe';
   import {
     decodeImage,
     decodeSourceImage,
@@ -27,11 +20,6 @@
     processImage,
     type ImagePipelineWorkerBridge,
   } from 'client/lazy-app/image-pipeline';
-  import type {
-    EncoderState,
-    EncoderType,
-    ProcessorState,
-  } from 'client/lazy-app/feature-meta';
   import {
     defaultPreprocessorState,
     defaultProcessorState,
@@ -49,6 +37,10 @@
   let seeding = true;
   let pendingSeed = $state<{ jobId: string; loadId: number } | null>(null);
   let seedSerial = 0;
+  // The focus recipe as last seeded or emitted. Each focus edit is sent as the
+  // change from this, so it lands on every selected image without flattening
+  // their other differences.
+  let lastFocusRecipe: ImageRecipe | null = null;
   let focusPreviewBridge: SvelteKitWorkerBridge | null = null;
   let focusPreviewController: AbortController | null = null;
 
@@ -93,7 +85,7 @@
   });
 
   $effect(() => {
-    bulkStore.session.globalSettings;
+    bulkStore.session.sharedRecipe;
     untrack(() => bulkStore.refreshGlobalSideFromSession());
   });
 
@@ -103,27 +95,23 @@
   });
 
   $effect(() => {
-    const side = focusSession.sides[1];
-    const snapshot = {
-      format: side.format,
-      options: $state.snapshot(side.optionsByFormat[side.format] ?? {}),
-      processorState: $state.snapshot(side.processorState) as ProcessorState,
-    };
+    const recipe = currentFocusRecipe();
 
     if (seeding || !bulkStore.selectedId || !bulkStore.selectedJob) return;
 
-    const override = buildOverrideFromFocus(snapshot);
-    const current = bulkStore.selectedJob.overrides ?? {};
-
-    if (isEmptyOverride(override)) {
-      if (!isEmptyOverride(current)) bulkStore.queueSelectedOverridesApply({});
-      return;
-    }
-
-    if (!deepEqual(override, current)) {
-      bulkStore.queueSelectedOverridesApply(override);
-    }
+    const before = lastFocusRecipe;
+    if (!before || deepEqual(before, recipe)) return;
+    lastFocusRecipe = recipe;
+    bulkStore.editSelected((target) =>
+      applyRecipeChanges(target, before, recipe),
+    );
   });
+
+  function currentFocusRecipe(): ImageRecipe {
+    return $state.snapshot(
+      recipeFromSide(focusSession.sides[1], focusSession.preprocessorState),
+    ) as ImageRecipe;
+  }
 
   function seedFocusFromSelected(): void {
     const job = bulkStore.selectedJob;
@@ -134,9 +122,9 @@
     focusPreviewController?.abort();
     const seedId = ++seedSerial;
 
-    const effective = effectiveSettingsForJob(job);
+    const effective = bulkStore.effectiveRecipeFor(job.id);
     if (
-      effective.encoderState &&
+      effective?.output.kind === 'raster' &&
       job.output?.settingsHash === bulkStore.settingsHashForJob(job)
     ) {
       void hydrateFocusFromBulkOutput(job, effective, seedId);
@@ -169,40 +157,15 @@
 
     focusSession.seedResizeDimensions();
 
-    const effective = effectiveSettingsForJob(job);
-    const encoderState = effective.encoderState;
-    if (encoderState) {
-      focusSession.setFormat(1, encoderState.type as SideFormat);
-      focusSession.sides[1].optionsByFormat[encoderState.type] =
-        structuredClone(encoderState.options as Record<string, unknown>);
-    }
-    focusSession.sides[1].processorState = structuredClone(
-      effective.processorState,
-    );
+    const effective = bulkStore.effectiveRecipeFor(job.id);
+    // Bulk recipes carry no rotation yet (no Rotate control), so the returned
+    // preprocessor state is always the unrotated one the load set.
+    if (effective) applyRecipeToSide(effective, focusSession.sides[1]);
     focusSession.history.clear();
-    reconcileSeededOverrides(job);
+    lastFocusRecipe = currentFocusRecipe();
 
     pendingSeed = null;
     seeding = false;
-  }
-
-  function reconcileSeededOverrides(job: ImageJob): void {
-    const seededOverride = buildOverrideFromFocus(snapshotFocusSide());
-    const normalizedCurrent = normalizeExistingOverrides(job, job.overrides);
-    const current = job.overrides ?? {};
-
-    if (
-      isEmptyOverride(seededOverride) &&
-      isEmptyOverride(normalizedCurrent) &&
-      !isEmptyOverride(current)
-    ) {
-      bulkStore.clearAnchorOverrides();
-    } else if (
-      !deepEqual(seededOverride, current) &&
-      deepEqual(seededOverride, normalizedCurrent)
-    ) {
-      bulkStore.applyAnchorOverrides(seededOverride);
-    }
   }
 
   function focusPreviewWorkerBridge(): ImagePipelineWorkerBridge {
@@ -212,12 +175,11 @@
 
   async function hydrateFocusFromBulkOutput(
     job: ImageJob,
-    effective: BulkImageSettings,
+    effective: ImageRecipe,
     seedId: number,
   ): Promise<void> {
     const output = job.output;
-    const encoderState = effective.encoderState;
-    if (!output || !encoderState) {
+    if (!output || effective.output.kind !== 'raster') {
       seedFocusThroughEditor(job);
       return;
     }
@@ -242,7 +204,7 @@
       const processed = await processImage(
         signal,
         { ...decodedSource, preprocessed },
-        effective.processorState,
+        effective.processors,
         bridge,
       );
       const outputImageData = await decodeImage(signal, output.file, bridge);
@@ -275,7 +237,7 @@
 
   function applyHydratedFocus(
     job: ImageJob,
-    effective: BulkImageSettings,
+    effective: ImageRecipe,
     images: {
       sourceImageData: ImageData;
       processedImageData: ImageData;
@@ -283,8 +245,7 @@
     },
   ): void {
     const output = job.output;
-    const encoderState = effective.encoderState;
-    if (!output || !encoderState) {
+    if (!output || effective.output.kind !== 'raster') {
       seedFocusThroughEditor(job);
       return;
     }
@@ -295,13 +256,7 @@
     focusSession.sides[0].processorState = structuredClone(
       defaultProcessorState,
     );
-    focusSession.sides[1].format = encoderState.type as SideFormat;
-    focusSession.sides[1].optionsByFormat[encoderState.type] = structuredClone(
-      encoderState.options as Record<string, unknown>,
-    );
-    focusSession.sides[1].processorState = structuredClone(
-      effective.processorState,
-    );
+    applyRecipeToSide(effective, focusSession.sides[1]);
 
     const loadId = focusSession.loadId + 1;
     const preprocessedWidth = images.sourceImageData.width;
@@ -366,7 +321,7 @@
     seedHydratedRuntime(0, leftOutcome, leftSig, leftResizeSig, loadId);
     seedHydratedRuntime(1, rightOutcome, rightSig, rightResizeSig, loadId);
     focusSession.history.clear();
-    reconcileSeededOverrides(job);
+    lastFocusRecipe = currentFocusRecipe();
     pendingSeed = null;
     seeding = false;
   }
@@ -386,108 +341,6 @@
     runtime.spinnerDelayPassed = false;
     runtime.error = '';
     runtime.status = 'done';
-  }
-
-  function snapshotFocusSide(): {
-    format: SideFormat;
-    options: Record<string, unknown>;
-    processorState: ProcessorState;
-  } {
-    const side = focusSession.sides[1];
-    return {
-      format: side.format,
-      options: $state.snapshot(side.optionsByFormat[side.format] ?? {}),
-      processorState: $state.snapshot(side.processorState) as ProcessorState,
-    };
-  }
-
-  function buildOverrideFromFocus(snapshot: {
-    format: SideFormat;
-    options: Record<string, unknown>;
-    processorState: ProcessorState;
-  }): BulkImageOverrides {
-    const job = bulkStore.selectedJob;
-    return buildOverrideFromSettings(
-      snapshot.format,
-      snapshot.options,
-      snapshot.processorState,
-      job ? bulkStore.processingGlobalSettingsForJob(job) : undefined,
-    );
-  }
-
-  function buildOverrideFromSettings(
-    format: SideFormat,
-    options: Record<string, unknown>,
-    processorStateSnapshot: ProcessorState,
-    globalSettings: BulkImageSettings = bulkStore.session.globalSettings,
-  ): BulkImageOverrides {
-    const override: BulkImageOverrides = {};
-    const normalizedProcessorState = normalizeProcessorStateForBulkDiff(
-      processorStateSnapshot,
-    );
-    const normalizedGlobalProcessorState = normalizeProcessorStateForBulkDiff(
-      globalSettings.processorState,
-    );
-
-    if (
-      format !== 'identity' &&
-      (format !== globalSettings.encoderState?.type ||
-        !deepEqual(options, globalSettings.encoderState?.options ?? {}))
-    ) {
-      override.encoderState = {
-        type: format as EncoderType,
-        options: structuredClone(options),
-      } as EncoderState;
-    }
-
-    const processorState: BulkImageOverrides['processorState'] = {};
-    for (const key of ['grain', 'resize', 'quantize'] as const) {
-      if (
-        !deepEqual(
-          normalizedProcessorState[key],
-          normalizedGlobalProcessorState[key],
-        )
-      ) {
-        processorState[key] = structuredClone(processorStateSnapshot[key]);
-      }
-    }
-
-    if (Object.keys(processorState).length > 0) {
-      override.processorState = processorState;
-    }
-
-    return override;
-  }
-
-  function normalizeExistingOverrides(
-    job: ImageJob,
-    overrides: BulkImageOverrides | undefined,
-  ): BulkImageOverrides {
-    const effective = getEffectiveSettings(
-      bulkStore.processingGlobalSettingsForJob(job),
-      overrides,
-    );
-    const encoderState = effective.encoderState;
-    return buildOverrideFromSettings(
-      (encoderState?.type ?? 'identity') as SideFormat,
-      structuredClone((encoderState?.options ?? {}) as Record<string, unknown>),
-      effective.processorState,
-      bulkStore.processingGlobalSettingsForJob(job),
-    );
-  }
-
-  function effectiveSettingsForJob(job: ImageJob): BulkImageSettings {
-    return getEffectiveSettings(
-      bulkStore.processingGlobalSettingsForJob(job),
-      job.overrides,
-    );
-  }
-
-  function isEmptyOverride(overrides: BulkImageOverrides): boolean {
-    return (
-      !overrides.encoderState &&
-      Object.keys(overrides.processorState ?? {}).length === 0
-    );
   }
 
   function onPick(event: Event) {

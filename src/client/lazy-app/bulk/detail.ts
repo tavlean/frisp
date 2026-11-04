@@ -1,20 +1,18 @@
 import { getBulkJobSizeSummary, type BulkJobSizeSummary } from './export';
+import type { ImageRecipe } from '../recipe';
 import {
-  getJobEffectiveSettings,
+  getJobEffectiveRecipe,
   getSelectedJobContext,
   type BulkSession,
   type ImageJob,
   type SelectedJobContext,
 } from './session';
-import type { BulkImageSettings } from './settings';
-import { getSettingsOverridePaths } from './settings';
 
 export interface BulkSelectedJobDetail {
   job: ImageJob;
   context: SelectedJobContext;
-  effectiveSettings: BulkImageSettings;
+  effectiveRecipe: ImageRecipe;
   size: BulkJobSizeSummary;
-  overridePaths: string[];
   hasOverrides: boolean;
 }
 
@@ -24,17 +22,14 @@ export function getBulkSelectedJobDetail(
   const context = getSelectedJobContext(session);
   if (!context.job) return;
 
-  const effectiveSettings = getJobEffectiveSettings(session, context.job.id);
-  if (!effectiveSettings) return;
-
-  const overridePaths = getSettingsOverridePaths(context.job.overrides);
+  const effectiveRecipe = getJobEffectiveRecipe(session, context.job.id);
+  if (!effectiveRecipe) return;
 
   return {
     job: context.job,
     context,
-    effectiveSettings,
+    effectiveRecipe,
     size: getBulkJobSizeSummary(session, context.job),
-    overridePaths,
-    hasOverrides: overridePaths.length > 0,
+    hasOverrides: context.job.ownRecipe !== undefined,
   };
 }

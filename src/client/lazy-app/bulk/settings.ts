@@ -1,143 +1,20 @@
-import {
-  grainIsReal,
-  type EncoderOptions,
-  type EncoderState,
-  type EncoderType,
-  type ProcessorState,
-} from 'client/lazy-app/feature-meta/shared';
-import { recipeSignature, type ImageRecipe } from '../recipe';
-import { controlsForEncoderType, type BulkControl } from './controls';
+// How bulk turns the shared recipe into each image's recipe. Bulk stores ONE
+// shared recipe plus, per image, either nothing or a full own copy (no
+// per-field inheritance), so the only per-source step left is the resize
+// preset: a shared 25, 50 or 100 percent resize means that fraction of EACH
+// source, not the reference image's pixel size.
 
-export type DeepPartial<T> = {
-  [K in keyof T]?: T[K] extends object ? DeepPartial<T[K]> : T[K];
-};
-
-export interface BulkImageSettings {
-  encoderState?: EncoderState;
-  processorState: ProcessorState;
-  resizeReference?: BulkSourceDimensions;
-}
+import { stableStringify } from 'shared/stable-stringify';
+import type { ImageRecipe } from '../recipe';
 
 export interface BulkSourceDimensions {
   width?: number;
   height?: number;
 }
 
-export interface BulkImageOverrides {
-  encoderState?: EncoderState;
-  encoderControls?: BulkEncoderControlOverrides;
-  processorState?: DeepPartial<ProcessorState>;
-}
-
-export interface BulkEncoderControlOverrides {
-  type: EncoderType;
-  controlIds: string[];
-  values: Record<string, Record<string, unknown>>;
-}
-
 const resizePresets = [0.25, 0.5, 1] as const;
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
-}
-
-function mergeDeep<T>(base: T, override: DeepPartial<T> | undefined | null): T {
-  if (override === undefined || override === null) return base;
-  if (!isRecord(base) || !isRecord(override)) return override as T;
-
-  const result: Record<string, unknown> = { ...base };
-
-  for (const [key, value] of Object.entries(override)) {
-    if (value === undefined) continue;
-    result[key] = mergeDeep(result[key], value);
-  }
-
-  return result as T;
-}
-
-function clone<T>(value: T): T {
-  return structuredClone(value);
-}
-
-function fieldValues<T extends object>(
-  source: T,
-  fields: readonly string[],
-): Record<string, unknown> {
-  const sourceRecord = source as Record<string, unknown>;
-  const values: Record<string, unknown> = {};
-  for (const field of fields) {
-    values[field] = sourceRecord[field];
-  }
-  return values;
-}
-
-function controlEqual<T extends object>(
-  control: BulkControl<T>,
-  a: T,
-  b: T,
-): boolean {
-  return control.equal
-    ? control.equal(a, b)
-    : control.fields.every((field) => a[field] === b[field]);
-}
-
-function toEncoderOptions(options: EncoderOptions): EncoderOptions {
-  return structuredClone(options);
-}
-
-function sparseEncoderControlsFromState(
-  globalEncoderState: EncoderState | undefined,
-  overrideEncoderState: EncoderState | undefined,
-): BulkEncoderControlOverrides | undefined {
-  if (
-    !globalEncoderState ||
-    !overrideEncoderState ||
-    globalEncoderState.type !== overrideEncoderState.type
-  ) {
-    return;
-  }
-
-  const controls = controlsForEncoderType(globalEncoderState.type);
-  if (controls.length === 0) return;
-
-  const controlIds: string[] = [];
-  const values: BulkEncoderControlOverrides['values'] = {};
-  const globalOptions = globalEncoderState.options as EncoderOptions;
-  const overrideOptions = overrideEncoderState.options as EncoderOptions;
-
-  for (const control of controls) {
-    if (controlEqual(control, globalOptions, overrideOptions)) continue;
-    controlIds.push(control.id);
-    values[control.id] = fieldValues(overrideOptions, control.fields);
-  }
-
-  if (controlIds.length === 0) return;
-  return {
-    type: globalEncoderState.type,
-    controlIds,
-    values,
-  };
-}
-
-export function normalizeImageOverrides(
-  globalSettings: BulkImageSettings,
-  overrides: BulkImageOverrides,
-): BulkImageOverrides {
-  if (overrides.encoderState) {
-    const encoderControls = sparseEncoderControlsFromState(
-      globalSettings.encoderState,
-      overrides.encoderState,
-    );
-    if (encoderControls) return { ...overrides, encoderControls };
-
-    const { encoderControls: _dropped, ...rest } = overrides;
-    return rest;
-  }
-
-  return overrides;
-}
-
-function hasPositiveDimensions(
+export function hasPositiveDimensions(
   dimensions: BulkSourceDimensions | undefined,
 ): dimensions is Required<BulkSourceDimensions> {
   if (!dimensions) return false;
@@ -169,235 +46,82 @@ function getMatchingResizePreset(
   return 'custom';
 }
 
-function resizeCounts(
-  resize: ProcessorState['resize'],
-  sourceDimensions?: BulkSourceDimensions,
-): boolean {
-  if (!resize.enabled) return false;
-  if (!hasPositiveDimensions(sourceDimensions)) return true;
-  return (
-    resize.width !== sourceDimensions.width ||
-    resize.height !== sourceDimensions.height
-  );
-}
-
-function normalizedProcessorRecipe(
-  processorState: ProcessorState,
-  sourceDimensions?: BulkSourceDimensions,
-): {
-  grain: ProcessorState['grain'] | null;
-  quantize: ProcessorState['quantize'] | null;
-  resize: ProcessorState['resize'] | null;
-} {
-  return {
-    grain: grainIsReal(processorState.grain)
-      ? clone(processorState.grain)
-      : null,
-    quantize: processorState.quantize.enabled
-      ? clone(processorState.quantize)
-      : null,
-    resize: resizeCounts(processorState.resize, sourceDimensions)
-      ? clone(processorState.resize)
-      : null,
-  };
-}
-
 /**
- * Whether these settings change the pixels rather than only the encoding: a
- * resize that counts, real grain, or a reduced palette. Folds no-op steps out
- * through the same projection as the recipe hash.
+ * The shared recipe for one source: a resize that matches a preset of the
+ * reference size is rescaled to the same preset of this source. Custom sizes
+ * apply as given. Returns the input untouched when nothing needs resolving.
  */
-export function settingsChangePixels(
-  settings: BulkImageSettings,
-  sourceDimensions?: BulkSourceDimensions,
-): boolean {
-  return Object.values(
-    normalizedProcessorRecipe(settings.processorState, sourceDimensions),
-  ).some((step) => step !== null);
-}
-
-export function getEffectiveSettings(
-  globalSettings: BulkImageSettings,
-  overrides: BulkImageOverrides = {},
-): BulkImageSettings {
-  const hasResizeOverride = overrides.processorState?.resize !== undefined;
-  const encoderState = getEffectiveEncoderState(globalSettings, overrides);
-  return {
-    encoderState,
-    processorState: mergeDeep(
-      globalSettings.processorState,
-      overrides.processorState,
-    ),
-    resizeReference: hasResizeOverride
-      ? undefined
-      : globalSettings.resizeReference,
-  };
-}
-
-function getEffectiveEncoderState(
-  globalSettings: BulkImageSettings,
-  overrides: BulkImageOverrides,
-): EncoderState | undefined {
-  if (!globalSettings.encoderState) return overrides.encoderState;
+export function resolveRecipeForSource(
+  recipe: ImageRecipe,
+  resizeReference: BulkSourceDimensions | undefined,
+  sourceDimensions: BulkSourceDimensions | undefined,
+): ImageRecipe {
+  const resize = recipe.processors.resize;
   if (
-    overrides.encoderState &&
-    overrides.encoderState.type !== globalSettings.encoderState.type
-  ) {
-    return overrides.encoderState;
-  }
-
-  const sparse =
-    overrides.encoderControls ??
-    sparseEncoderControlsFromState(
-      globalSettings.encoderState,
-      overrides.encoderState,
-    );
-  if (!sparse || sparse.type !== globalSettings.encoderState.type) {
-    return globalSettings.encoderState;
-  }
-
-  const controls = controlsForEncoderType(sparse.type);
-  if (controls.length === 0)
-    return overrides.encoderState ?? globalSettings.encoderState;
-
-  const targetOptions = toEncoderOptions(
-    globalSettings.encoderState.options as EncoderOptions,
-  );
-  for (const controlId of sparse.controlIds) {
-    const control = controls.find((item) => item.id === controlId);
-    const values = sparse.values[controlId];
-    if (!control || !values) continue;
-    const sourceOptions = {
-      ...(targetOptions as Record<string, unknown>),
-      ...values,
-    } as EncoderOptions;
-    control.apply(sourceOptions, targetOptions);
-  }
-
-  return {
-    type: globalSettings.encoderState.type,
-    options: targetOptions,
-  } as EncoderState;
-}
-
-export function hasSettingsOverrides(
-  overrides: BulkImageOverrides | undefined,
-): boolean {
-  if (!overrides) return false;
-  return Boolean(
-    overrides.encoderState ||
-    hasDefinedOverride(overrides.encoderControls?.values) ||
-    hasDefinedOverride(overrides.processorState),
-  );
-}
-
-function hasDefinedOverride(value: unknown): boolean {
-  if (value === undefined) return false;
-  if (!isRecord(value)) return true;
-  return Object.values(value).some(hasDefinedOverride);
-}
-
-function collectDefinedOverridePaths(
-  value: unknown,
-  parentPath: string,
-  paths: string[],
-): void {
-  if (value === undefined) return;
-  if (!isRecord(value)) {
-    if (parentPath) paths.push(parentPath);
-    return;
-  }
-
-  for (const [key, childValue] of Object.entries(value)) {
-    collectDefinedOverridePaths(
-      childValue,
-      parentPath ? `${parentPath}.${key}` : key,
-      paths,
-    );
-  }
-}
-
-export function getSettingsOverridePaths(
-  overrides: BulkImageOverrides | undefined,
-): string[] {
-  if (!overrides) return [];
-  const paths: string[] = [];
-  if (overrides.encoderState) paths.push('encoderState');
-  if (!overrides.encoderState && overrides.encoderControls) {
-    paths.push(...overrides.encoderControls.controlIds);
-  }
-  collectDefinedOverridePaths(
-    overrides.processorState,
-    'processorState',
-    paths,
-  );
-  return paths;
-}
-
-export function resolveSettingsForSource(
-  settings: BulkImageSettings,
-  sourceDimensions?: BulkSourceDimensions,
-): BulkImageSettings {
-  if (
-    !settings.processorState.resize.enabled ||
-    !hasPositiveDimensions(settings.resizeReference) ||
+    !resize.enabled ||
+    !hasPositiveDimensions(resizeReference) ||
     !hasPositiveDimensions(sourceDimensions)
   ) {
-    return settings;
+    return recipe;
   }
 
-  const resize = settings.processorState.resize;
   const preset = getMatchingResizePreset(
     resize.width,
     resize.height,
-    settings.resizeReference.width,
-    settings.resizeReference.height,
+    resizeReference.width,
+    resizeReference.height,
   );
-  if (preset === 'custom') return settings;
-  const size = {
-    width: Math.round(sourceDimensions.width * preset),
-    height: Math.round(sourceDimensions.height * preset),
-  };
+  if (preset === 'custom') return recipe;
 
   return {
-    ...settings,
-    processorState: {
-      ...settings.processorState,
+    ...recipe,
+    processors: {
+      ...recipe.processors,
       resize: {
         ...resize,
-        width: size.width,
-        height: size.height,
+        width: Math.round(sourceDimensions.width * preset),
+        height: Math.round(sourceDimensions.height * preset),
       },
     },
   };
 }
 
-/**
- * The ImageRecipe these (already effective) settings describe. Bulk has no
- * rotation yet, so it is always 0. Undefined without an encoder: such a job
- * cannot be processed, so no output can ever match it.
- */
-export function bulkSettingsRecipe(
-  settings: BulkImageSettings,
-): ImageRecipe | undefined {
-  if (!settings.encoderState) return;
-  return {
-    rotate: 0,
-    processors: settings.processorState,
-    output: { kind: 'raster', encoder: settings.encoderState },
-  };
-}
+const sameValue = (a: unknown, b: unknown) =>
+  stableStringify(a) === stableStringify(b);
 
-export function settingsHash(
-  settings: BulkImageSettings,
-  sourceDimensions?: BulkSourceDimensions,
-): string {
-  const recipe = bulkSettingsRecipe(
-    resolveSettingsForSource(settings, sourceDimensions),
-  );
-  if (!recipe) return 'no-encoder';
-  return recipeSignature(
-    recipe,
-    hasPositiveDimensions(sourceDimensions) ? sourceDimensions : undefined,
-  );
+/**
+ * Carry what changed between two versions of one image's recipe onto another
+ * recipe, part by part (rotation, output, each processor), keeping everything
+ * else of the target. This is how one edit lands on several selected images
+ * without flattening their other differences, and how an edit lands on the
+ * shared recipe when every image is selected.
+ */
+export function applyRecipeChanges(
+  target: ImageRecipe,
+  before: ImageRecipe,
+  after: ImageRecipe,
+): ImageRecipe {
+  const pick = <T>(was: T, now: T, kept: T): T =>
+    sameValue(was, now) ? kept : now;
+  return {
+    rotate: pick(before.rotate, after.rotate, target.rotate),
+    output: pick(before.output, after.output, target.output),
+    processors: {
+      grain: pick(
+        before.processors.grain,
+        after.processors.grain,
+        target.processors.grain,
+      ),
+      quantize: pick(
+        before.processors.quantize,
+        after.processors.quantize,
+        target.processors.quantize,
+      ),
+      resize: pick(
+        before.processors.resize,
+        after.processors.resize,
+        target.processors.resize,
+      ),
+    },
+  };
 }

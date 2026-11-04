@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
-import { processBulkImageJob } from 'client/lazy-app/bulk';
+import { decodeSourceImage } from 'client/lazy-app/image-pipeline';
+import { optimizeImage } from '$lib/optimize-image';
 import type { BulkRunnerHost } from '../../src/lib/bulk/runtime';
 import { BulkRuntime } from '../../src/lib/bulk/runtime';
 import type { ImageJob, ImageOutput } from '../../src/client/lazy-app/bulk';
@@ -15,54 +16,72 @@ vi.mock(
   { virtual: true },
 );
 
-vi.mock('client/lazy-app/bulk', async () => {
-  const actual = await vi.importActual<typeof import('client/lazy-app/bulk')>(
-    'client/lazy-app/bulk',
-  );
-  return {
-    ...actual,
-    processBulkImageJob: vi.fn(),
-  };
-});
+vi.mock('client/lazy-app/image-pipeline', async () => ({
+  ...(await vi.importActual<typeof import('client/lazy-app/image-pipeline')>(
+    'client/lazy-app/image-pipeline',
+  )),
+  decodeSourceImage: vi.fn(),
+  preprocessImage: vi.fn(),
+}));
+
+vi.mock('$lib/optimize-image', () => ({ optimizeImage: vi.fn() }));
 
 type ResolveJob = (output?: ImageOutput) => void;
 
 function createHost(jobs: ImageJob[]): BulkRunnerHost {
-  return {
-    session: session(jobs),
-    createOutputDownloadUrl: (file) => `blob:${file.name}`,
-  };
+  return { session: session(jobs) };
 }
 
 async function flushMicrotasks(): Promise<void> {
-  await Promise.resolve();
-  await Promise.resolve();
+  for (let i = 0; i < 6; i++) await Promise.resolve();
 }
 
+/**
+ * A job "starts" when the runtime asks to decode its source (synchronously
+ * inside run()), and finishes when the test resolves it: the encode the
+ * runtime then awaits from optimizeImage is that job's pending promise.
+ */
 function installControlledProcessor(starts: string[] = []) {
   const resolvers = new Map<string, ResolveJob>();
   const rejecters = new Map<string, (error: unknown) => void>();
+  const passes = new Map<string, Promise<unknown>>();
+  const idOf = (file: File) => file.name.replace(/\.jpg$/, '');
 
-  vi.mocked(processBulkImageJob).mockImplementation(({ job, signal }) => {
-    starts.push(job.id);
-    return new Promise<ImageOutput>((resolve, reject) => {
+  vi.mocked(decodeSourceImage).mockImplementation((signal, file) => {
+    const id = idOf(file);
+    starts.push(id);
+    const pass = new Promise((resolve, reject) => {
       const onAbort = () => {
         reject(new DOMException('AbortError', 'AbortError'));
       };
       signal.addEventListener('abort', onAbort, { once: true });
       resolvers.set(
-        job.id,
-        (output = fakeOutput({ fileName: `${job.id}.webp` })) => {
+        id,
+        (output = fakeOutput({ fileName: `${id}.webp` })) => {
           signal.removeEventListener('abort', onAbort);
-          resolve(output);
+          resolve({
+            outputFile: output.file,
+            outputUrl: output.downloadUrl,
+            outputSize: output.size,
+          });
         },
       );
-      rejecters.set(job.id, (error) => {
+      rejecters.set(id, (error) => {
         signal.removeEventListener('abort', onAbort);
         reject(error);
       });
     });
+    // A pass cancelled before the runtime reached its encode has no awaiter.
+    pass.catch(() => {});
+    passes.set(id, pass);
+    const pixels = { width: 1, height: 1 } as ImageData;
+    return Promise.resolve({ file, decoded: pixels });
   });
+  vi.mocked(optimizeImage).mockImplementation((source, _recipe, { signal }) =>
+    signal.aborted
+      ? Promise.reject(new DOMException('AbortError', 'AbortError'))
+      : (passes.get(idOf(source.file)) as ReturnType<typeof optimizeImage>),
+  );
 
   return {
     starts,

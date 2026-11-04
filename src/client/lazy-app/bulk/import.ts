@@ -1,6 +1,6 @@
 import { addJobs, createBulkSession, createImageJob } from './session';
 import type { BulkSession, ImageJob } from './session';
-import type { BulkImageSettings } from './settings';
+import type { ImageRecipe, SvgOutputOptions } from '../recipe';
 
 export type BulkImportRejectionReason = 'unsupported-type' | 'unreadable';
 
@@ -171,10 +171,11 @@ export function getBulkImportSummary(
 
 export function createBulkSessionFromImport(
   id: string,
-  globalSettings: BulkImageSettings,
+  sharedRecipe: ImageRecipe,
   result: BulkImportResult,
+  sharedSvgOptions?: SvgOutputOptions,
 ): BulkSession {
-  return createBulkSession(id, globalSettings, result.accepted);
+  return createBulkSession(id, sharedRecipe, result.accepted, sharedSvgOptions);
 }
 
 export function addBulkImportToSession(

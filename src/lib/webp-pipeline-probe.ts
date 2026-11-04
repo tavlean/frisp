@@ -2,11 +2,7 @@ import { sniffMimeType } from 'client/lazy-app/image-decode';
 import { canvasEncode } from 'client/lazy-app/util/canvas';
 import { getPercentChange } from 'client/lazy-app/bulk/size';
 import { processBulkImageJob } from 'client/lazy-app/bulk/processor';
-import {
-  getEffectiveSettings,
-  settingsHash,
-  type BulkImageSettings,
-} from 'client/lazy-app/bulk/settings';
+import { recipeSignature, type ImageRecipe } from 'client/lazy-app/recipe';
 import { createImageJob } from 'client/lazy-app/bulk/session';
 import tinyAvifUrl from 'sw/tiny.avif?url';
 import {
@@ -78,16 +74,20 @@ export interface WebpPipelineProbeResult {
 
 const sourceFileName = 'sveltekit-pipeline-source.png';
 
-const pipelineSettings: BulkImageSettings = {
-  encoderState: {
-    type: 'webP',
-    options: {
-      ...encoderMap.webP.meta.defaultOptions,
-      quality: 80,
-      method: 4,
+const pipelineRecipe: ImageRecipe = {
+  rotate: 90,
+  output: {
+    kind: 'raster',
+    encoder: {
+      type: 'webP',
+      options: {
+        ...encoderMap.webP.meta.defaultOptions,
+        quality: 80,
+        method: 4,
+      },
     },
   },
-  processorState: {
+  processors: {
     grain: { ...defaultProcessorState.grain },
     resize: {
       ...defaultProcessorState.resize,
@@ -108,7 +108,7 @@ const pipelineSettings: BulkImageSettings = {
 
 const pipelinePreprocessorState = {
   ...defaultPreprocessorState,
-  rotate: { rotate: 90 as const },
+  rotate: { rotate: pipelineRecipe.rotate },
 };
 
 function createSourceImageData(): ImageData {
@@ -152,8 +152,8 @@ export async function runWebpPipelineProbe(
 ): Promise<WebpPipelineProbeResult> {
   const sourceFile = await createSourceFile();
   const detectedSourceMimeType = await sniffMimeType(sourceFile);
-  const effectiveSettings = getEffectiveSettings(pipelineSettings);
-  const encoderState = effectiveSettings.encoderState;
+  const { output } = pipelineRecipe;
+  const encoderState = output.kind === 'raster' ? output.encoder : undefined;
 
   if (!encoderState || encoderState.type !== 'webP') {
     throw new Error('WebP pipeline probe requires WebP encoder settings.');
@@ -177,7 +177,7 @@ export async function runWebpPipelineProbe(
   const processed = await processImage(
     signal,
     source,
-    effectiveSettings.processorState,
+    pipelineRecipe.processors,
     pipelineWorkerBridge,
   );
   let outputFile: File;
@@ -256,10 +256,9 @@ export async function runWebpPipelineProbe(
     });
     bulkOutput = await processBulkImageJob({
       job: createImageJob('sveltekit-bulk-pipeline-source', sourceFile),
-      globalSettings: pipelineSettings,
+      recipe: pipelineRecipe,
       workerBridge: pipelineWorkerBridge,
       signal,
-      preprocessorState: pipelinePreprocessorState,
       createDownloadUrl: (file) => `diagnostics://${file.name}`,
     });
   } finally {
@@ -288,7 +287,7 @@ export async function runWebpPipelineProbe(
     outputBytes: outputFile.size,
     percentChange:
       Math.round(getPercentChange(sourceFile.size, outputFile.size) * 10) / 10,
-    settingsHash: settingsHash(effectiveSettings),
+    settingsHash: recipeSignature(pipelineRecipe),
     riffHeader: ascii.decode(outputBytes.slice(0, 4)),
     webpSignature: ascii.decode(outputBytes.slice(8, 12)),
     webpDecodedWidth: webpDecoded.width,

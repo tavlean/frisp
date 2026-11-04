@@ -9,8 +9,8 @@ import {
   requeueStaleJobs,
   startJob,
 } from '../../src/client/lazy-app/bulk/queue';
-import { settingsHash } from '../../src/client/lazy-app/bulk/settings';
-import { fakeOutput, job, session, settings } from './fixtures';
+import { recipeSignature } from '../../src/client/lazy-app/recipe';
+import { fakeOutput, job, recipe, resized, session } from './fixtures';
 
 describe('bulk queue reducers', () => {
   it('keeps active counters correct when jobs start, complete, and fail', () => {
@@ -61,27 +61,18 @@ describe('bulk queue reducers', () => {
   });
 
   it('requeues stale outputs and preserves fresh ones', () => {
-    const initialSettings = settings();
-    const changedSettings = settings({
-      processorState: {
-        ...initialSettings.processorState,
-        resize: {
-          ...initialSettings.processorState.resize,
-          enabled: true,
-          width: 640,
-        },
-      },
-    });
+    const initialSettings = recipe();
+    const changedSettings = resized(640, 0);
     const stale = job('stale', {
       status: 'exported',
-      output: fakeOutput({ hash: settingsHash(initialSettings) }),
+      output: fakeOutput({ hash: recipeSignature(initialSettings) }),
     });
     const fresh = job('fresh', {
       status: 'encoded',
-      output: fakeOutput({ hash: settingsHash(changedSettings) }),
+      output: fakeOutput({ hash: recipeSignature(changedSettings) }),
     });
     const current = session([stale, fresh], {
-      globalSettings: changedSettings,
+      sharedRecipe: changedSettings,
     });
 
     const next = requeueStaleJobs(current);
@@ -97,19 +88,8 @@ describe('bulk queue reducers', () => {
   });
 
   it('does not requeue mixed-size jobs when global resize resolves to 100%', () => {
-    const base = settings();
-    const resize100 = settings({
-      resizeReference: { width: 800, height: 600 },
-      processorState: {
-        ...base.processorState,
-        resize: {
-          ...base.processorState.resize,
-          enabled: true,
-          width: 800,
-          height: 600,
-        },
-      },
-    });
+    const base = recipe();
+    const resize100 = resized(800, 600);
     const current = session(
       [
         job('a', {
@@ -117,7 +97,7 @@ describe('bulk queue reducers', () => {
           sourceWidth: 800,
           sourceHeight: 600,
           output: fakeOutput({
-            hash: settingsHash(base, { width: 800, height: 600 }),
+            hash: recipeSignature(base, { width: 800, height: 600 }),
           }),
         }),
         job('b', {
@@ -125,11 +105,11 @@ describe('bulk queue reducers', () => {
           sourceWidth: 1024,
           sourceHeight: 768,
           output: fakeOutput({
-            hash: settingsHash(base, { width: 1024, height: 768 }),
+            hash: recipeSignature(base, { width: 1024, height: 768 }),
           }),
         }),
       ],
-      { globalSettings: resize100 },
+      { sharedRecipe: resize100, resizeReference: { width: 800, height: 600 } },
     );
 
     const next = requeueStaleJobs(current);
@@ -142,19 +122,8 @@ describe('bulk queue reducers', () => {
   });
 
   it('requeues mixed-size jobs once when global resize resolves to 50%', () => {
-    const base = settings();
-    const resize50 = settings({
-      resizeReference: { width: 800, height: 600 },
-      processorState: {
-        ...base.processorState,
-        resize: {
-          ...base.processorState.resize,
-          enabled: true,
-          width: 400,
-          height: 300,
-        },
-      },
-    });
+    const base = recipe();
+    const resize50 = resized(400, 300);
     const current = session(
       [
         job('a', {
@@ -162,7 +131,7 @@ describe('bulk queue reducers', () => {
           sourceWidth: 800,
           sourceHeight: 600,
           output: fakeOutput({
-            hash: settingsHash(base, { width: 800, height: 600 }),
+            hash: recipeSignature(base, { width: 800, height: 600 }),
           }),
         }),
         job('b', {
@@ -170,11 +139,11 @@ describe('bulk queue reducers', () => {
           sourceWidth: 1024,
           sourceHeight: 768,
           output: fakeOutput({
-            hash: settingsHash(base, { width: 1024, height: 768 }),
+            hash: recipeSignature(base, { width: 1024, height: 768 }),
           }),
         }),
       ],
-      { globalSettings: resize50 },
+      { sharedRecipe: resize50, resizeReference: { width: 800, height: 600 } },
     );
 
     const next = requeueStaleJobs(current);
