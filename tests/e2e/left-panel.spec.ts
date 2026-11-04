@@ -28,7 +28,7 @@ async function chooseCompareAs(page: Page, label: string): Promise<void> {
   const options = page.locator(`${LEFT_INFO} .compare-option`);
   // The popover renders OUTPUT_FORMATS one for one (`src/lib/compress.ts`), so
   // this count moves whenever a codec is added or removed.
-  await expect(options).toHaveCount(6);
+  await expect(options).toHaveCount(5);
   await options.filter({ hasText: label }).dispatchEvent('click');
 }
 
