@@ -97,6 +97,24 @@ this doc holds the cross-cutting ones that no single file owns.
 - **Svelte 5 flushes class bindings asynchronously.** A `getComputedStyle` sweep
   taken immediately after a state change reads the previous frame.
 
+- **A codec-worker step must never write to its input frame.** The worker
+  keeps the decoded source between calls (`src/worker/pipeline-op.ts`), so a
+  step that edits its input in place corrupts every later encode of that file,
+  and the first encode still looks right. The WASM resize's contain-fit `crop`
+  did exactly that with `copyWithin` until 2026-11-04; it was harmless only
+  while each step got its own structured clone. `pipeline-core.test.ts` pins
+  the rule for crop and grain.
+- **Spreading a request object drops its Comlink transfer marker.**
+  `transfer(obj, list)` remembers `obj` itself, so a bridge override that
+  builds `{ ...request, urls }` sends the pixels as a structured clone and
+  nothing fails. That is why the codec URLs and thread count travel as a
+  separate `WorkerContext` argument. `tests/e2e/worker-pipeline.spec.ts`
+  catches a regression.
+- **Aborting an encode terminates its worker, cache included.** WASM cannot be
+  interrupted, so the bridge kills the worker; the next call decodes the file
+  again. Cheap for a JPEG, but each rapid slider change during a long encode
+  costs a decode, and an SVG source has to resend its pixels (`needs-source`).
+
 - **Anything placed in an `EditorSession` `ResultCache` must use a URL the cache
   owns.** The cache revokes an entry's object URL on eviction and on `clear()`
   (every new file). Handing it another owner's URL, such as a bulk output's
@@ -122,9 +140,7 @@ this doc holds the cross-cutting ones that no single file owns.
   method 4 to 6) and AVIF threading engaging (`e9b1be6c`) without being
   re-captured, so the next run looked like WebP had regressed 6 to 22 percent
   when nothing had regressed at all. Re-capture the baseline in the same commit
-  that changes a default, a codec build, or the harness. The WebP default moved
-  again on 2026-11-04 (method 6 back to 4, `555def1c`), so the WebP rows need a
-  re-capture.
+  that changes a default, a codec build, or the harness.
 - **The `photo-large` bench fixture is a single cold run.** Treat it as a
   regression signal, never as a timing measurement.
 - **The SVG auto gate deliberately upscales small sources.** Precision loss that
@@ -158,6 +174,12 @@ this doc holds the cross-cutting ones that no single file owns.
   additional input from stdin".
 - **A sandboxed shell cannot bind the Playwright preview-server port.** Run e2e
   outside the sandbox.
+- **The older `*_node_*` codec artifacts do not load from plain ESM Node.**
+  Their Emscripten glue reads `require` and `__dirname` as free variables and
+  tries `fetch` on a file path, which Node's fetch rejects. Pass the WASM bytes
+  as `wasmBinary` and define global `require` and `__dirname` around the
+  factory call, as `tests/node/pipeline-worker.ts` does. Only the WebP node
+  artifacts are new enough to need neither.
 - **Playwright's Chromium headless shell must be installed for e2e.** Without
   it (`npx playwright install chromium`), every Chromium test fails at browser
   launch, which reads like a broken app rather than a missing browser.
@@ -183,8 +205,3 @@ this doc holds the cross-cutting ones that no single file owns.
   startup.** After a rebuild it serves HTML that points at deleted chunks: a
   blank page with 404s on `entry/start` and `entry/app`. Restart the preview
   after every build.
-- **Bulk runtime test mocks must reject when the signal is already aborted.**
-  The runtime awaits a decode before it calls `optimizeImage`, so a run
-  cancelled mid-decode still reaches the encode call with an aborted signal. A
-  mock that returns a pending promise there never settles, and the cancelled
-  run never unwinds (the test times out).

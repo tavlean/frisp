@@ -48,7 +48,7 @@ Shapes: `src/features/processors/resize/shared/meta.ts`,
   (shown as 25% / 50% / 100%), plus `custom`. Shrink-only by design — no enlarge
   presets (Frisp is an optimizer, not an upscaler); enlarging is reachable only
   by typing larger Width/Height values via `custom`.
-- **Identity resize is skipped.** `processImage` only calls the resampler when the
+- **Identity resize is skipped.** `encodeFrame` only calls the resampler when the
   target dims differ from the (preprocessed) source — at 100% the default
   interpolating filters are a mathematical no-op. `editor-session.svelte.ts`
   mirrors this: a resize counts toward the encode signature / "Resizing" badge only
@@ -66,8 +66,8 @@ Applied by `grain/shared/apply.ts` — pure JS over RGBA bytes, no WASM/codec.
 | `amount` | 0–100 (default 12) | yes | "Amount" slider — grain strength (σ ≈ 0.44·amount at mid-gray).      |
 | `size`   | 1–100 (default 20) | yes | Advanced "Grain size" slider — 20 units = 1px; ≤20 finest, 40 ≈ 2px. |
 
-- **Runs after resize, before quantize** (`image-pipeline-shared.ts`
-  `processImage`: resize → grain → quantize), so grain is applied at output
+- **Runs after resize, before quantize** (`pipeline-core.ts`
+  `encodeFrame`: resize, grain, quantize), so grain is applied at output
   resolution and a palette-reduction pass dithers it into the palette.
 - **Baked into pixels, not codec-native** — identical for every output format
   (JPEG/WebP/PNG have no native grain; AVIF FGS and JXL photon-noise were rejected

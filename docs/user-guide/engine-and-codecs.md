@@ -10,9 +10,9 @@ A **codec** (short for _coder–decoder_) is the piece of software that knows ho
 
 ### Everything runs on your device
 
-When you drop an image into Frisp, it travels through a four-step pipeline — **decode → preprocess → process → encode** — and the heavy WASM work runs client-side inside a background **Web Worker** so the interface can stay responsive. No server is involved and no image data is sent over the network. This is what "local-first" means in practice: the picture you compress never leaves the computer or phone you're using.
+When you drop an image into Frisp, it travels through a four-step pipeline (**decode, rotate, process, encode**), and all four steps run client-side inside a background **Web Worker** so the interface can stay responsive. No server is involved and no image data is sent over the network. This is what "local-first" means in practice: the picture you compress never leaves the computer or phone you're using.
 
-(Source of truth: `src/lib/compress.ts`, which drives `decode → preprocess → process → compressImage`; engine notes in `docs/user-guide/reference/engine-and-codecs.md`.)
+(Source of truth: `src/lib/optimize-image.ts`, which sends each encode to the codec worker in `src/worker/pipeline-op.ts`; engine notes in `docs/user-guide/reference/engine-and-codecs.md`.)
 
 ### It picks the fastest build your browser allows
 

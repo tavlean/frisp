@@ -73,7 +73,7 @@ Not 4.0.0 — 4.0.1 fixes an XML entity-expansion DoS. Alternatives ruled out:
 ### Phase 1 — the vector lane (ImageOptim parity, nano-competitive)
 
 Frisp **already imports SVG** (rasterizes via `<img>` — `processSvg` in
-[image-pipeline-shared.ts:222](../src/client/lazy-app/image-pipeline-shared.ts);
+[svg-source.ts](../src/client/lazy-app/svg-source.ts);
 bulk accepts `.svg`; the Vector resize method re-renders from source). The
 shipped SVG **output** lane (stages S1–S6):
 

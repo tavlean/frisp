@@ -1,7 +1,36 @@
 # Spec: the worker-side pipeline (review change B)
 
 Last updated: 2026-11-04.
-Status: in progress 2026-11-04.
+Status: done 2026-11-04, in seven code commits after this spec
+(`45f84244`): `0233c3a2` (neutral core and lane, `crop` fix), `2f4a726c`
+(the worker ops), `27f551a7` (editor and bulk switch), `30f28b9a` (bulk
+thread budget), `e09cefae` (Node proof), `f01aac28` (no-clone e2e),
+`e86298cb` (the dead main-thread chain deleted, 1,857 lines), then the bench
+and docs commits.
+
+## Deviations
+
+Decided during execution:
+
+- **No `src/lib/worker-pipeline.ts` or `client/lazy-app/worker-op.ts`.** The
+  op types live with their implementation in `src/worker/pipeline-op.ts`
+  (testable with a fake codec host), and the `needs-source` retry is
+  `encodeSvgPixels` in `src/lib/optimize-image.ts`, its only caller.
+- **The request carries `file: { type, name }`** for lane choice, since a
+  cache hit on a pixel source arrives without a `File`.
+- **Codec URLs and the thread count are a second argument** (`WorkerContext`),
+  not request fields: Comlink's transfer marker sits on the request object, and
+  a bridge that spread `{ ...request, urls }` would silently clone the pixels.
+- **`processSvg` moved into `src/client/lazy-app/svg-source.ts`**, and
+  `image-pipeline-shared.ts`, `image-pipeline.ts`, `feature-meta/encoders.ts`,
+  and `resize/client/runtime.ts` were deleted whole. Vector resize lives in
+  `src/lib/svg/raster.ts` and now honors rotation (it ignored it before).
+- **The `/diagnostics` WebP pipeline probe was removed**, not ported: it
+  existed to exercise the per-codec bridge methods this change deletes, and the
+  e2e suite encodes through every codec. Its codec-asset and WebP encode probes
+  stay.
+- **The SVG lane no longer renders the source** for an unused
+  `sourceImageData`, one SVG render fewer per pass.
 
 Change B of [../reports/2026-11-02-first-principles-review.md](../reports/2026-11-02-first-principles-review.md)
 (July's open items P2(b), one composite worker op, and P2(c), decode in the

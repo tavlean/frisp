@@ -1,8 +1,9 @@
 # First-principles review, 2026-11-02
 
 Last updated: 2026-11-04.
-Status: trust fixes and low-risk cuts executed 2026-11-04 (see Execution);
-structural changes A to F and auto-quality open.
+Status: trust fixes, low-risk cuts, and changes A and B executed 2026-11-04
+(see Execution); change C is done except the supported batch size; D to F and
+auto-quality open.
 
 The maintainer asked for the app to be questioned from scratch: if we built
 Frisp today, what would we remove, change, and add? This is the second such
@@ -40,6 +41,19 @@ observable, unit tests for pure logic), and each fix has its own commit.
 | Dead code | `compressFile` and the WebP-era bulk store API, 267 lines. | `76140ac3` |
 | Side slots | Copy/save/import buttons gone from production; session methods stay for the labs. | `d49552d0` |
 | `/diagnostics` | Stripped from production with its probe workers. | `1de9e651` |
+
+Change A landed the same day per
+[../specs/2026-11-04-one-recipe-per-image.md](../specs/2026-11-04-one-recipe-per-image.md),
+and change B per
+[../specs/2026-11-04-worker-side-pipeline.md](../specs/2026-11-04-worker-side-pipeline.md)
+(commits `0233c3a2` to `e86298cb`). Change B's measured outcome: zero
+full-frame structured clones on the encode path (enforced by
+`tests/e2e/worker-pipeline.spec.ts`), 1,857 lines deleted against the
+review's estimate of 600 to 800 (the rest was the `/diagnostics` pipeline
+probe and the engine-level bulk runner, which only that chain served), bench
+sizes byte-identical, and bench times flat (the bench runs no processor
+steps, and its measured side now decodes the source in its own worker instead
+of reusing the main thread's decode).
 
 Corrections to this review, found while executing: the AVIF and WebP WASM
 decoders were already skipped from precache on browsers with native decode,

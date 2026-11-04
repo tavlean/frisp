@@ -1,6 +1,6 @@
 # Editor parity audit & deviation log
 
-Last updated: 2026-07-12.
+Last updated: 2026-11-04.
 
 Goal: the Svelte editor must not **lose** any feature or gain any bug relative
 to the original Preact Squoosh editor. This doc tracks (a) deliberate deviations
@@ -182,10 +182,10 @@ behavior parity is preserved.
       `editor-session.svelte.ts` (commit `059251c5`).
     - **Resize at 100% is a true no-op.** Squoosh always ran the resampler when
       resize was enabled. Frisp skips it when the target equals the source size:
-      `processImage` skips the identity resample, and `editor-session` skips the
+      `encodeFrame` skips the identity resample, and `editor-session` skips the
       whole re-encode when the effective request is unchanged — so enabling Resize
       (or toggling Premultiply/Linear RGB, or switching method, Mitchell included)
-      at 100% does nothing. `image-pipeline-shared.ts`, `editor-session.svelte.ts`
+      at 100% does nothing. `pipeline-core.ts`, `editor-session.svelte.ts`
       (commit `4a2a4af6`). Browser-verified; `svelte-check` 0/0.
 
 11. **Integer-only Quality + magnetic round-number snapping on wide sliders

@@ -39,9 +39,10 @@ is on the `preact` branch).
   manifest (logical keys → physical assets → precache), plus a wrapper-patch step
   so Vite did not emit duplicate WASM. The manifest and worker modules are now
   committed source; only wrapper patching remains generated.
-- **One pipeline for single-image and bulk.** Both go through
-  `imagePipeline.compressImage` via the shared worker bridge, so there's no
-  per-format branching. (`src/lib/compress.ts`, `history/bulk-image-architecture`.)
+- **One pipeline for single-image and bulk.** Both went through
+  `imagePipeline.compressImage` via the shared worker bridge, so there was no
+  per-format branching. (Since 2026-11-04 both call `optimizeImage`, which is
+  one op in the codec worker.)
 - **Cross-origin isolation got dropped in the root move.** Commit `b6abdea0`
   ("Promote SvelteKit app to root") deleted `serve.json`, silently disabling
   `SharedArrayBuffer` (and therefore all WASM threading). This became the seed of
