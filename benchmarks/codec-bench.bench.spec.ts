@@ -75,11 +75,12 @@ const FIXTURES = [
   { name: 'photo-large', file: 'photo-large.jpg', runs: 1, warmUp: false },
 ];
 
+// MozJPEG left the picker on 2026-11-04 (jpegli is the one JPEG), and the
+// bench drives the picker, so it is no longer measured here.
 const CODECS = [
   { id: 'webP', label: 'WebP' },
   { id: 'avif', label: 'AVIF' },
   { id: 'jxl', label: 'JPEG XL' },
-  { id: 'mozJPEG', label: 'MozJPEG' },
   { id: 'jpegli', label: 'jpegli' },
   { id: 'oxiPNG', label: 'OxiPNG' },
 ];
