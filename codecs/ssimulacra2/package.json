@@ -1,0 +1,6 @@
+{
+  "name": "ssimulacra2",
+  "scripts": {
+    "build": "../build-cpp.sh"
+  }
+}
