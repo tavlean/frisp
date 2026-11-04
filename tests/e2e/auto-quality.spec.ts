@@ -40,7 +40,7 @@ async function runAuto(page: Page, target: string) {
   // its Cancel button.
   await expect(page.getByRole('button', { name: 'Cancel' })).toBeFocused();
   const message = page.locator('.snackbar .message');
-  await expect(message).toHaveText(/^(Auto: |Best WebP)/, { timeout: 60_000 });
+  await expect(message).toHaveText(/^(Auto|Best WebP)/, { timeout: 60_000 });
   return { text: (await message.textContent())!, ms: Date.now() - started };
 }
 
@@ -115,7 +115,7 @@ test('Auto High completes on a transparent image', async ({
   expect(errors).toEqual([]);
 });
 
-test('Auto stays within its budget on a 12 MP photo', async ({
+test('Auto on a 12 MP photo meets the target or leaves quality alone', async ({
   page,
   browserName,
 }) => {
@@ -126,9 +126,26 @@ test('Auto stays within its budget on a 12 MP photo', async ({
   console.log(
     `[auto-quality ${browserName}] photo-large.jpg Balanced: ${text} in ${ms} ms`,
   );
-  // The 8 s budget stops new probes, so the search ends within the budget
-  // plus the one probe in flight when it ran out.
-  expect(ms).toBeLessThan(30_000);
+  // The 12 MP budget is 18 s; the search ends within it plus the one probe
+  // in flight when it ran out.
+  expect(ms).toBeLessThan(40_000);
+  const met = /^Auto: Balanced met at quality (\d+) /.exec(text);
+  if (met) {
+    expect(Number(met[1])).toBeLessThan(100);
+    await expect(qualityInput(page)).toHaveValue(met[1]);
+  } else {
+    // Never a guess committed by the budget: either the honest no-time
+    // message with the slider untouched, or a pass found below 100 in time.
+    const stopped = /^Auto: stopped after \d+ s at quality (\d+) /.exec(text);
+    if (stopped) {
+      expect(Number(stopped[1])).toBeLessThan(100);
+    } else {
+      expect(text).toBe(
+        'Auto ran out of time on this large image; quality unchanged.',
+      );
+      await expect(qualityInput(page)).toHaveValue('80');
+    }
+  }
   expect(errors).toEqual([]);
 });
 

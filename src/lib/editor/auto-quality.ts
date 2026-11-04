@@ -43,8 +43,36 @@ export const AUTO_QUALITY_BOUNDS: Readonly<
   webP: { lo: 0, hi: 100 },
 };
 
-/** Stop starting new probes once a search has run this long. */
+/** Stop starting new probes once a search has run this long. The default;
+ *  the editor scales it with image size (autoQualityBudgetMs). */
 export const AUTO_QUALITY_BUDGET_MS = 8000;
+const BUDGET_MS_PER_EXTRA_MEGAPIXEL = 1000;
+const BUDGET_FREE_MEGAPIXELS = 2;
+const MAX_BUDGET_MS = 20000;
+
+/** The search budget for a frame of this size: 8 s, plus 1 s per megapixel
+ *  above 2, capped at 20 s. Every probe encodes the full frame, so a larger
+ *  image needs longer to fit the same number of probes. An unknown size (0)
+ *  gets the base budget. */
+export function autoQualityBudgetMs(width: number, height: number): number {
+  const megapixels = (width * height) / 1_000_000;
+  const extra = Math.max(0, megapixels - BUDGET_FREE_MEGAPIXELS);
+  return Math.min(
+    MAX_BUDGET_MS,
+    AUTO_QUALITY_BUDGET_MS + extra * BUDGET_MS_PER_EXTRA_MEGAPIXEL,
+  );
+}
+
+/** True when a search result is only a guess: the budget stopped it before
+ *  any probe below the ceiling passed, so the ceiling quality was never
+ *  chosen by the target. The editor commits nothing in that case. A ceiling
+ *  that FAILED within budget is not a guess: it is the honest best. */
+export function isBudgetGuess(
+  result: Pick<SearchQualityResult<QualityProbe>, 'timedOut' | 'quality'>,
+  hi: number,
+): boolean {
+  return result.timedOut && result.quality === hi;
+}
 
 /** 1 ceiling probe plus at most 7 bisection steps. */
 const MAX_BISECTION_STEPS = 7;

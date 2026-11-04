@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest';
 import {
   AUTO_QUALITY_BOUNDS,
   AUTO_QUALITY_TARGETS,
+  autoQualityBudgetMs,
+  isBudgetGuess,
   searchQuality,
 } from '../../src/lib/editor/auto-quality';
 
@@ -169,5 +171,26 @@ describe('searchQuality', () => {
       timedOut: true,
       probes: 1,
     });
+  });
+});
+
+describe('autoQualityBudgetMs', () => {
+  it('gives 8 s up to 2 MP, then 1 s per megapixel, capped at 20 s', () => {
+    expect(autoQualityBudgetMs(0, 0)).toBe(8000);
+    expect(autoQualityBudgetMs(1024, 683)).toBe(8000);
+    expect(autoQualityBudgetMs(2000, 1000)).toBe(8000);
+    expect(autoQualityBudgetMs(4000, 3000)).toBe(18000);
+    expect(autoQualityBudgetMs(3000, 2000)).toBe(12000);
+    expect(autoQualityBudgetMs(8000, 6000)).toBe(20000);
+  });
+});
+
+describe('isBudgetGuess', () => {
+  it('flags a timeout that never got below the ceiling', () => {
+    expect(isBudgetGuess({ timedOut: true, quality: 100 }, 100)).toBe(true);
+    // A pass below the ceiling is a real answer, even out of time.
+    expect(isBudgetGuess({ timedOut: true, quality: 75 }, 100)).toBe(false);
+    // A ceiling that failed within budget is the honest best, not a guess.
+    expect(isBudgetGuess({ timedOut: false, quality: 100 }, 100)).toBe(false);
   });
 });

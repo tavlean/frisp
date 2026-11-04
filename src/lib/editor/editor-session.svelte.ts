@@ -37,6 +37,8 @@ import {
   AUTO_QUALITY_BOUNDS,
   AUTO_QUALITY_LABELS,
   AUTO_QUALITY_TARGETS,
+  autoQualityBudgetMs,
+  isBudgetGuess,
   searchQuality,
   type AutoQualityTarget,
 } from './auto-quality';
@@ -719,12 +721,23 @@ export class EditorSession {
 
     const started = performance.now();
     try {
+      // The budget follows the size every probe encodes: the resize target
+      // when a real resize runs, else the prepared source.
+      const [srcW, srcH] = untrack(() => [
+        this.naturalWidth,
+        this.naturalHeight,
+      ]);
+      const resized = resizeIsReal(processorState, srcW, srcH);
       const found = await searchQuality({
         probe,
         lo: bounds.lo,
         hi: bounds.hi,
         target: AUTO_QUALITY_TARGETS[target],
         signal,
+        budgetMs: autoQualityBudgetMs(
+          resized ? processorState.resize.width : srcW,
+          resized ? processorState.resize.height : srcH,
+        ),
         discard: ({ outcome }) => URL.revokeObjectURL(outcome.outputUrl),
       });
       const { outcome } = found.result;
@@ -737,12 +750,24 @@ export class EditorSession {
       this.#autoQuality[index] = null;
       this.autoQualityRunning[index] = false;
 
+      // Never commit a guess: when time ran out before anything below the
+      // ceiling passed, the ceiling was not chosen by the target.
+      if (isBudgetGuess(found, bounds.hi)) {
+        URL.revokeObjectURL(outcome.outputUrl);
+        void snackbar.show(
+          'Auto ran out of time on this large image; quality unchanged.',
+        );
+        return;
+      }
+
       const committed = withQuality(found.quality);
       const key = encodeSignature(
         preprocessorState,
         format,
         committed,
         processorState,
+        // Read now, not at search start: the first result may have landed
+        // since, and encodeSide will key on the current size.
         untrack(() => this.naturalWidth),
         untrack(() => this.naturalHeight),
       );
