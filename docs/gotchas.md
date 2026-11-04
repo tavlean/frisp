@@ -1,6 +1,6 @@
 # Gotchas
 
-Last updated: 2026-08-09.
+Last updated: 2026-11-04.
 
 Traps that fail **silently**: the build stays green, the tests stay green, and
 the damage shows up later. Loud failures are deliberately absent because the
@@ -24,11 +24,19 @@ this doc holds the cross-cutting ones that no single file owns.
 - **`wasm-bindgen` bakes Rust crate names into the `.wasm` import strings.** The
   `squoosh_*` codec artifacts cannot be renamed without a rebuild, and a green
   build proves nothing here. Only the e2e suite catches it.
-- **Adding an output format breaks a hard-coded count in the e2e suite.**
-  `tests/e2e/left-panel.spec.ts` asserts how many `.compare-option` buttons the
-  left panel's "Compare as…" popover renders, and that is `OUTPUT_FORMATS.length`.
+- **Adding or removing an output format breaks a hard-coded count in the e2e
+  suite.** The left panel's "Compare as…" popover renders `OUTPUT_FORMATS` one
+  for one, and `tests/e2e/left-panel.spec.ts` asserts the number of
+  `.compare-option` buttons (5 since jpegli became the one JPEG on 2026-11-04).
   It is a loud failure once you run e2e, but it is nowhere near the codec you
-  changed, and `check` plus unit tests both stay green.
+  changed, and `check` plus unit tests both stay green. Update the count in the
+  same commit.
+- **Importing a `?worker&url` module from a module the production bundle
+  imports emits that worker into every build.** Putting a dev-only probe URL in
+  a shared module such as `src/lib/codec-assets.ts` ships the probe worker to
+  production even though nothing there runs it. Keep dev-only probe URLs inside
+  the probe module itself; `audit:static-output` fails if a probe worker is
+  emitted.
 - **Markdown is never auto-formatted.** The Prettier globs and the pre-commit
   hook glob both exclude `*.md` on purpose, and `proseWrap: always` is banned.
   Adding Markdown back reflows every hand-wrapped doc in one commit.
@@ -55,8 +63,22 @@ this doc holds the cross-cutting ones that no single file owns.
 - **`$lib/svg/optimize` must only ever be dynamic-imported.** A static import
   pulls SVGO into the main bundle. An audit tripwire asserts it stays
   worker-side.
-- **SvelteKit emits hash-only chunk names**, so service-worker exclusions must
-  key on the stable `workers/<name>-` path segment, never on a full filename.
+- **SvelteKit's service-worker `build` list omits the worker chunks Vite emits
+  for `new Worker(new URL(...))`** (codec worker, SVG optimizer worker, OxiPNG
+  thread helper). The codec WASM was precached but no worker could load it, so a
+  first offline encode of any image failed until an online encode had fetched the
+  worker, and an old SVG-worker exclusion keyed on `build` never matched
+  anything. Fixed 2026-11-04: the `app-worker-precache-manifest` plugin in
+  `vite.config.ts` writes `_app/worker-precache.json`, the service worker
+  precaches it at install, and `audit:static-output` fails if the list and the
+  emitted workers disagree. Chunk names are hash-only, so anything that matches
+  a worker must key on the stable `workers/<name>-` path segment.
+- **Changing a codec default does not reach existing users.** `app:settings:v3`
+  stores each side's full options object, so a side autosaved under the old
+  default keeps the old value until the user changes it. Seen with WebP Effort:
+  the default went from 6 back to 4 on 2026-11-04, and autosaved sides stay at 6.
+  The storage format is frozen, so this cannot be fixed by rewriting stored
+  values; account for it when reasoning about what users actually run.
 - **WebKit hands out drop items whose `webkitGetAsEntry().file()` rejects** with
   `NotFoundError` even when `getAsFile()` works. Read plain files synchronously
   via `getAsFile`; use the async entry walk for directories only. An entry-first
@@ -87,7 +109,9 @@ this doc holds the cross-cutting ones that no single file owns.
   method 4 to 6) and AVIF threading engaging (`e9b1be6c`) without being
   re-captured, so the next run looked like WebP had regressed 6 to 22 percent
   when nothing had regressed at all. Re-capture the baseline in the same commit
-  that changes a default, a codec build, or the harness.
+  that changes a default, a codec build, or the harness. The WebP default moved
+  again on 2026-11-04 (method 6 back to 4, `555def1c`), so the WebP rows need a
+  re-capture.
 - **The `photo-large` bench fixture is a single cold run.** Treat it as a
   regression signal, never as a timing measurement.
 - **The SVG auto gate deliberately upscales small sources.** Precision loss that
@@ -121,6 +145,18 @@ this doc holds the cross-cutting ones that no single file owns.
   additional input from stdin".
 - **A sandboxed shell cannot bind the Playwright preview-server port.** Run e2e
   outside the sandbox.
+- **Playwright's Chromium headless shell must be installed for e2e.** Without
+  it (`npx playwright install chromium`), every Chromium test fails at browser
+  launch, which reads like a broken app rather than a missing browser.
+- **Playwright `context.setOffline(true)` does not cut the network for
+  dedicated workers in Chromium.** A worker's fetch still succeeds, so an
+  "offline" test passes even when offline is broken. Also abort every request
+  with `context.route('**/*', (r) => r.abort('internetdisconnected'))`, as
+  `tests/e2e/export-contract.spec.ts` does.
+- **In zsh, an unquoted `grep --include=*.svelte` matches nothing.** zsh expands
+  the glob itself or errors with "no matches found", so the search returns
+  nothing and looks like proof a symbol is unused. Quote the glob:
+  `--include='*.svelte'`.
 - **Cloudflare's Browser Cache TTL must stay on "Respect Existing Headers".**
   Anything else overrides the app's own cache headers and serves stale assets.
 - **Workers static assets serve the SPA fallback via `not_found_handling`**

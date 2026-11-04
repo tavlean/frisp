@@ -34,9 +34,9 @@ The panel changes shape depending on the **Lossless** toggle. Two controls are a
 #### Effort
 
 - **What it does:** Controls how hard the encoder works. Higher effort searches more compression options for a smaller and/or better-looking file, but takes longer to encode.
-- **Range & default:** 0–6, step 1, default **6** — the highest effort, for the best compression (`method`). The slider label reads "Effort:".
-- **How to choose:** Raising it makes files a little smaller or better at the cost of encoding time; lowering it is faster but slightly worse. Since Frisp runs in your browser, very high effort on large images can feel slow — but WebP stays quick even at 6 for typical web images.
-- **Recommended starting point:** **6** (the default — maximum compression). Lower it only if you're compressing very large images and want a faster encode.
+- **Range & default:** 0–6, step 1, default **4**, libwebp's own default (`method`). The slider label reads "Effort:". The default was 6 until 2026-11-04; if your browser autosaved your settings while it was 6, you keep 6 until you change it.
+- **How to choose:** Raising it makes files a little smaller or better at the cost of encoding time; lowering it is faster but slightly worse. On photos, 6 saves about 3 to 5% over 4. On images with transparency, 6 can be dramatically slower (about 50x on one test image: 2880 ms vs 57 ms) and the file came out slightly larger, which is why the default is 4.
+- **Recommended starting point:** **4** (the default). Raise it to **6** for a photo you will publish once and serve many times, if the wait is acceptable.
 
 #### Quality
 
@@ -171,7 +171,7 @@ These live behind the **Advanced settings** expander, which only appears in loss
 
 | Use case                                    | Suggested settings                                                   | Why                                                                                                                                                                 |
 | ------------------------------------------- | -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Web photo (lossy)**                       | Quality **75–80**, Effort **6**                                      | `q80` at max effort is the canonical "set and forget" web recipe — artifacts are imperceptible at normal viewing while files run ~25–35% under JPEG.                |
+| **Web photo (lossy)**                       | Quality **75–80**, Effort **4** (or **6**)                           | `q80` is the canonical "set and forget" web recipe; artifacts are imperceptible at normal viewing while files run ~25–35% under JPEG. Effort 6 trims 3 to 5% more on photos at a large time cost. |
 | **Graphics / screenshots / line art**       | **Lossless** on (Effort 6); or near-lossless via **Slight loss ~40** | Lossless is ~26% smaller than PNG and avoids the ringing lossy WebP creates around text and hard edges. Near-lossless trades invisible exactness for smaller files. |
 | **Sharp-edged content you must keep lossy** | Quality **≥ 90**                                                     | At q90+ the edge ringing that plagues lower-quality lossy WebP on text/logos largely disappears.                                                                    |
 | **Transparency / alpha cutouts**            | Lossy Quality **~90**, **Alpha quality 100**                         | Alpha is encoded separately, so you can hold the mask lossless while the color stays lossy. Higher base quality prevents halos against varied backgrounds.          |
@@ -179,7 +179,7 @@ These live behind the **Advanced settings** expander, which only appears in loss
 
 **Community tips**
 
-- **Effort costs time, not quality.** Method/Effort 6 is the slowest but most efficient setting; it never hurts how the image looks, so it's worth maxing for anything you publish once and serve many times.
+- **Effort costs time, not quality.** Method/Effort 6 is the slowest setting and usually the most efficient on photos, so it can be worth it for an image you publish once and serve many times. It is not always a win: on images with transparency it can be about 50x slower and slightly larger than 4, the default.
 - **WebP is 8-bit only** — no HDR or wide-gamut. That's a hard ceiling versus AVIF/JPEG XL that surprises photographers; for archival, prefer JPEG XL or PNG.
 - **The "JPEG → lossless WebP" footgun.** Turning Lossless on while transcoding a JPEG produces a _bigger_ file. It's the single most common automation mistake with WebP.
 - **OS/viewer support is patchy.** Some desktop image viewers and "Save image as" flows still don't handle `.webp` well, which can frustrate end users downloading the file.

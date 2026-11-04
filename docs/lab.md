@@ -1,6 +1,6 @@
 # Lab registry
 
-Last updated: 2026-07-25.
+Last updated: 2026-11-04.
 
 Every lab experiment, its route, and whether its code is still wanted. **Dead-code
 and hygiene audits MUST read this file first**: anything marked _ongoing_ or
@@ -8,7 +8,8 @@ _kept for reference_ is deliberate and must never be flagged or deleted.
 
 All lab routes are dev-only. They are stripped from production builds by the
 `app-strip-dev-only-routes` Vite plugin and the removal is enforced by
-`npm run audit:static-output`. Run `npm run dev` and open `/lab`, a two-door
+`npm run audit:static-output`. Since 2026-11-04 the same plugin also strips
+`/diagnostics` and its probe workers, which had been shipping to production. Run `npm run dev` and open `/lab`, a two-door
 index (main ui / intro page) with a thin tab bar that flips variants in place.
 Skins auto-load the last file used in any skin, else a bundled sample, via
 `src/lib/lab/lab-source.ts`, so switching tabs keeps the image being judged.
@@ -33,6 +34,16 @@ primaries, and one shared Nucleo icon set is specced in
 Shared lab chrome lives in `src/lib/lab/LabIcon.svelte`, `LabTabs.svelte`,
 `Logomark.svelte`, and `icons/` (27 pure-stroke 18px Nucleo glyphs on
 `currentColor`).
+
+**Production code kept alive only for these skins.** On 2026-11-04 the
+production editor dropped its per-side Copy settings, Save side settings, and
+Import saved side settings buttons. `EditorSession` still has `copyToOther`,
+`saveSide`, `importSide`, and `canImport` (and the `app:side-settings:*`
+storage behind them) only because the three skins call them
+(`src/routes/lab/{porcelain,darkroom,hybrid}/+page.svelte` and the darkroom and
+hybrid `Inspector.svelte`). When the skins are retired or the winner is
+promoted without those buttons, delete the methods with them; until then a
+dead-code audit must not flag them.
 
 ## Crop tool
 

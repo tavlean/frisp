@@ -41,6 +41,17 @@ settings, so you can tell what no longer matches the global recipe.
 
 Selecting every image is the same as editing the global settings.
 
+If you change settings while an image is still compressing, Frisp finishes that
+pass and then compresses the image again with the new settings, so no image is
+left on old settings. Removing an image while it is compressing does not hold up
+the rest of the batch.
+
+The bulk focus view has **no Rotate button**. A batch has no rotation setting,
+so rotating only changed the preview, never the exported file, and the button
+was removed on 2026-11-04. To rotate an image, open it on its own in the
+single-image editor. Rotation in bulk is planned with a future model where bulk
+and the single editor share one recipe.
+
 ## Selecting images
 
 Click an image in the strip to inspect it. Use **Cmd/Ctrl-click** to add or
@@ -86,6 +97,12 @@ original file in the ZIP instead. That keeps the batch from accidentally shippin
 a larger file for that image. Turn it off only if you want the chosen format and
 settings to be used even when the result grows.
 
+The toggle only swaps in the original when the image's settings are a pure
+re-encode. If **Resize**, **Film grain**, or **Reduce palette** changes the
+pixels, the original is not what you asked for, so Frisp exports the encoded
+result even when it is larger (since 2026-11-04; before that, a larger result
+could silently undo your resize).
+
 ## Remove and Undo
 
 Use the remove button on an image to take it out of the batch. Frisp shows a
@@ -102,5 +119,9 @@ message disappears.
 - **Keep originals when larger protects the ZIP, not the preview.** You may
   still see that an optimized result is larger; the toggle decides what gets put
   into the ZIP.
+- **SVGs in a batch become raster images.** Two or more SVGs opened together
+  are rasterized to the batch format (WebP by default), not optimized as SVG.
+  Open a single SVG on its own to keep it vector. This is a known gap, planned
+  with the shared-recipe model.
 - **Folder import is for reading, not saving back.** Frisp downloads a ZIP; it
   does not overwrite files in the folder you imported.

@@ -29,7 +29,7 @@ When you change a setting, Frisp rebuilds that side's preview through three step
 2. **Preprocess** — optional adjustments applied _before_ re-saving: **Resize** (scale the image down or up), **Film grain** (bake in filmic noise), and **Quantize** (reduce the number of colors), applied in that order (resize → grain → quantize). If you don't touch these, the image passes through unchanged.
 3. **Encode** — the pixels are handed to the codec (the compressor) for your chosen format, which produces the final compressed file.
 
-> **Jargon check — "codec":** short for _coder/decoder_ — the engine that knows how to write (and read) a particular image format. Frisp bundles one codec per format (for example MozJPEG for JPEG, OxiPNG for PNG).
+> **Jargon check, "codec":** short for _coder/decoder_, the engine that knows how to write (and read) a particular image format. Frisp bundles one codec per format (for example jpegli for JPEG, OxiPNG for PNG).
 
 Heavy codecs run in the background (in Web Workers / WebAssembly) so the app stays responsive while it works. The full per-format settings are documented in the format-specific pages; the engines behind each format are listed in the [engine & codecs reference](reference/engine-and-codecs.md).
 

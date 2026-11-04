@@ -1,6 +1,6 @@
 # Spec — SVG Optimization: vector lane + auto candidate search + benchmark
 
-Last updated: 2026-07-12. Status: **in progress** (stage states below).
+Last updated: 2026-11-04. Status: **in progress** (stage states below).
 Decision record: [../svg-optimization-analysis.md](../../svg-optimization-analysis.md).
 Maintainer priority: above the codec batch. Phases 1+2 of the analysis ship
 together here; bulk SVG preservation and font subsetting are OUT of scope.
@@ -225,6 +225,11 @@ ladder: for p of [3, 2, 1, 0]:
   if p == 3 and gate FAILS: try p=4; if that fails too → manual preset-default
     p=3 result WITHOUT gate demotion is still shown, but winner = 'p3!' and
     the UI marks it "verify visually" (never silently ship a gate failure).
+    [Changed 2026-11-04, 4b4d878b: Auto now keeps the ORIGINAL SVG instead,
+    winner id 'original!', badge "original kept, no smaller version looked
+    identical (Manual can trade precision for size)". An automatic mode must
+    not deliver output that failed its own acceptance test; Manual is the way
+    to trade precision for size.]
   if gate fails at p < 3: stop descending (keep last passing).
 P* = lowest passing precision.
 addons: try 'reusePaths' and 'convertStyleToAttrs' each alone at P*;
@@ -363,7 +368,9 @@ died, just rerun it — it is deterministic and self-contained.
    contract) — count them separately, not as losses. Frisp-auto's visual
    gate means its lossy candidates are verified; nano/ImageOptim outputs get
    NO visual verification in this protocol — note that asymmetry. Report the
-   `p3!` (gate-failed, unverified) count. State plainly where Frisp wins,
+   `p3!` (gate-failed, unverified) count. (Since 2026-11-04 those files keep
+   the original, winner id `original!`, so report the `original!` count
+   instead; Frisp's numbers for gate-failing files change accordingly.) State plainly where Frisp wins,
    ties, and loses; the goal is a true picture, not a marketing number.
 6. Flip S7/S8 stage states above, add the RESULTS.md headline to the project
    brief and the worklog, and update the user guide's svg page only if claims

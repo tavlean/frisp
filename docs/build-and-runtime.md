@@ -72,10 +72,19 @@ Behavior (variant-aware precache, 2026-06-10 — first-visit payload
   `selectCodecPrecacheUrls()` in `src/sw/cache-plan.ts` (e.g. threads+SIMD
   Chromium gets `avif_enc_mt` + `jxl_enc_mt_simd` + `webp_enc_simd` +
   oxipng-MT and skips the single-thread/baseline builds and the natively
-  decodable AVIF/WebP WASM decoders);
-- the shell is everything in `build` except the codec variants, the diagnostics
-  probe workers, and the SVG optimizer worker (heavy SVGO + fflate, runtime-cached
-  on first SVG use), plus the prerendered paths and every static file except the
+  decodable AVIF/WebP WASM decoders). The QOI and MozJPEG encoders are never
+  precached: neither is a selectable output (MozJPEG left the picker on
+  2026-11-04), so they stay runtime-cacheable only;
+- install also fetches `/_app/worker-precache.json` and precaches every worker
+  chunk it lists (codec worker, SVG optimizer worker, OxiPNG thread helper).
+  SvelteKit's `$service-worker` `build` list omits the chunks Vite emits for
+  `new Worker(new URL(...))`, so before 2026-11-04 the codec WASM was cached but
+  no worker could load it, and a first offline encode failed until an online
+  encode had fetched the worker. The `app-worker-precache-manifest` plugin in
+  `vite.config.ts` writes the list at build time; a missing list (dev or partial
+  build) degrades to runtime caching, never a failed install;
+- the shell is everything in `build` except the codec variants and the
+  diagnostics probe workers, plus the prerendered paths and every static file except the
   crawler-only ones (`robots.txt`, `sitemap.xml`, `social-card.png`: the app never
   requests them and the card alone is ~42 kB) and the manifest install icons
   (`icon-192.png`, `icon-512.png`: fetched by the browser only when the user
@@ -103,7 +112,12 @@ control indefinitely):
   already waiting from a previous visit (`registration.waiting`) — and fires
   `onUpdateReady`. `+page.svelte` surfaces it as a persistent (`timeout: null`)
   snackbar: "A new version of Frisp is available — Refresh".
-- Clicking **Refresh** calls `applyServiceWorkerUpdate()`, which posts
+- Activating the new worker reloads every controlled tab, so since 2026-11-04
+  clicking **Refresh** first asks the other open Frisp tabs over a
+  `BroadcastChannel` (`'app:tabs'`, in `sw-bridge/runtime.ts`) whether they have
+  images open. If one does, the prompt warns and offers **Refresh anyway**;
+  otherwise it proceeds.
+- Accepting the update calls `applyServiceWorkerUpdate()`, which posts
   `SKIP_WAITING` to the waiting worker. It activates, `clients.claim()` swaps
   the controller, and a one-time `controllerchange` listener reloads the tab
   onto the new build (guarded by `container.controller` so a first-time
@@ -144,7 +158,11 @@ worker runtimes or Emscripten `locateFile`.
 per logical asset, that the service worker references the expected assets and
 carries the variant-aware precache machinery, and that the service-worker
 build emits **no** duplicate worker chunks of its own (top-level
-`assets/*.js`).
+`assets/*.js`). It also fails if `_app/worker-precache.json` disagrees with the
+app workers actually emitted, if the service worker does not read that list, or
+if a diagnostics probe worker reaches the build: `/diagnostics` and its probes
+are stripped from production by `app-strip-dev-only-routes`, like `/lab`, and
+remain available under `npm run dev`.
 
 **Multithreading is enabled** (2026-06-03): the committed worker and codec-asset
 modules wire the threaded variants and real thread detection, so AVIF / JXL
@@ -172,7 +190,9 @@ prod build unaffected). Details in
 - `npm run check` — static gate (`typecheck`, production build, static-output audit).
 - `npm run test:e2e` — Playwright browser regression (`tests/e2e/`): boots the
   production preview, asserts cross-origin isolation, encodes through every
-  codec asserting valid output magic bytes, and tests SW offline reload. The
+  codec asserting valid output magic bytes, and tests SW offline reload and a
+  first offline encode (`export-contract.spec.ts`). Needs the Chromium headless
+  shell installed (`npx playwright install chromium`). The
   webServer builds + previews automatically. **Run after any codec/build change.**
 - `npm test` runs `check`, `test:unit`, and `test:e2e`.
 - `npm run bench` / `npm run bench:compare` — codec benchmark (`benchmarks/`):

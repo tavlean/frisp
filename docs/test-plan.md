@@ -1,6 +1,6 @@
 # Test strategy & plan
 
-**Status: in progress. Last updated: 2026-08-11.**
+**Status: in progress. Last updated: 2026-11-04.**
 
 Frisp's test strategy protects the browser-local image pipeline: import, decode,
 process, encode, preview, export, and offline reload. The current suite has three
@@ -32,8 +32,30 @@ by hand.
   `jxl-transcode.spec.ts` is the guard for the one encode path that bypasses the
   pixel pipeline: the codec-encode suite would stay green with the whole branch
   broken, because it only ever exercises the pixel encoder.
+- `export-contract.spec.ts` (2026-11-04) guards the export contract: whatever
+  Save, Share, or the bulk ZIP hands out must be the result of the recipe on
+  screen. It covers Save never offering the previous result under a new format's
+  name, bulk showing no Rotate its export would ignore, settings changed during
+  the first bulk pass leaving no job stale, removing an image mid-encode not
+  stalling the batch, and the first SVG and first raster encode working offline
+  with no prior online encode (Chromium only; WebKit's `setOffline` + reload is
+  a harness limitation). The offline cases abort every request with
+  `context.route`, because `setOffline` alone does not reach dedicated workers in
+  Chromium (see [gotchas.md](gotchas.md)). Two tests are `test.fixme` pending the
+  one-recipe model: rotating an image in bulk rotates its exported file, and a
+  batch of SVGs gets the same vector optimization as one SVG.
+- The e2e suite needs Playwright's Chromium headless shell installed
+  (`npx playwright install chromium`); without it every Chromium test fails at
+  launch.
 - Vitest unit tests in `tests/unit/`, focused on pure bulk-engine/helper logic
-  plus shared utility contracts.
+  plus shared utility contracts. Additions on 2026-11-04: `runtime.test.ts`
+  (a run requested right after a cancel restarts the drain; a job that finished
+  under superseded settings is requeued, one whose settings held is not),
+  `tab-presence.test.ts` (the `'app:tabs'` BroadcastChannel check behind the
+  update prompt), a keep-original case in `export.test.ts` (never keep an
+  original that would undo a pixel edit), and two `svg-integration.test.ts` cases
+  (Auto keeps the original when no candidate passed the visual gate; a saved
+  MozJPEG side loads as jpegli at the same quality).
 - A benchmark harness (`benchmarks/`) with a fixture corpus and before/after
   comparison for codec changes.
 - `npm run audit:static-output`, which checks emitted codec assets,
@@ -84,7 +106,7 @@ mocking.
 | File | ~Cases | Status | Covers (highest-value contracts) |
 |---|---|---|---|
 | `queue.test.ts` | ~16 | **Implemented: 10 cases** | Scheduler gate (`getRunnableJobs`) + **counter integrity** across `startJob`/`completeJob`/`failJob`/`requeue*`. Includes stale stored-counter normalization, source-dimension-aware no-op resize staleness, mixed-size 50% resize requeue, stale requeue, incomplete requeue, exported-job requeue, and queue-state math. `cancelActiveJobs` remains planned. |
-| `export.test.ts` | ~14 | **Implemented: 6 cases** | `getBulkExportEntries` **duplicate-name dedup** (case-insensitive, extension-preserving), size/export/output summaries, stale-output export gate, archive/output filename derivation, and marking export-plan entries exported. |
+| `export.test.ts` | ~14 | **Implemented: 11 cases** | `getBulkExportEntries` **duplicate-name dedup** (case-insensitive, extension-preserving), size/export/output summaries, stale-output export gate, archive/output filename derivation, marking export-plan entries exported, and (2026-11-04) never keeping an original that would undo a resize, grain, or palette edit. |
 | `snapshot.test.ts` | ~10 | **Implemented: 5 cases** | `parseBulkSessionSnapshot` rejection matrix (malformed JSON, wrong version, missing settings, bad job/status/file/output) + restore **status demotion** (active/encoded/exported → queued, counters zeroed, selection fallback). |
 | `import.test.ts` | ~9 | **Implemented: 5 cases** | `isSupportedBulkImage`, sync vs MIME-sniffed partition (sniffer throws → `unreadable`; non-image → `unsupported-type`), import summary, session creation, and append-to-session. |
 | `settings.test.ts` | ~8 | **Implemented: 8 cases** | Deep override merging, encoder override replacement, `settingsHash` stability, disabled processor normalization, identity-resize collapse, per-job percentage-resize resolution, override detection, and override-path reporting. |

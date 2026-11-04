@@ -1,6 +1,6 @@
-# JPEG
+# MozJPEG (no longer offered)
 
-> The universal lossy "photo" format — a smarter JPEG encoder that squeezes the most quality out of every kilobyte, with a full bag of advanced tricks if you want them. Encoded with **MozJPEG** (shown as **JPEG** in the menu; the encoder name appears as a hover tooltip).
+> **Not in the format picker since 2026-11-04.** JPEG output is now encoded with jpegli; see the [JPEG page](./jpegli.md). On Frisp's benchmark images jpegli was faster on every file and about 7% smaller on photos at the default settings. Settings you saved with MozJPEG load as jpegli at the same quality number. The MozJPEG codec is still in the build until its retirement lands, so this page is kept for reference; none of the controls below can be reached in the app.
 
 ## Overview / When to use it
 

@@ -6,6 +6,8 @@ SVG is a vector format: it stores shapes, paths, styles, and text instead of a f
 
 Auto is the default. Frisp tries several precision levels and optional clean-ups, renders every candidate at several sizes on light and dark backgrounds, and rejects candidates that do not visually match the original. It then keeps the smallest verified result. The **Auto:** badge names the winning candidate.
 
+If no candidate passes the visual check, Auto keeps your original SVG unchanged and the badge reads "original kept, no smaller version looked identical (Manual can trade precision for size)". Auto never hands you a file that failed its own check. Before 2026-11-04 it shipped the precision-3 version anyway with a "verify preview" note. If you are willing to accept a small visual change for a smaller file, switch to Manual and lower **Precision** yourself.
+
 Visual verification is a strong safety check, but it cannot understand every semantic use of an SVG. Check the preview and retain your source file, especially when an SVG contains scripts, external resources, unusual fonts, or metadata used by another tool.
 
 ## Manual controls
@@ -22,10 +24,14 @@ The last four controls are advanced because they can change document structure o
 
 ## Sizes, limits, and downloads
 
-Frisp shows both the raw SVG byte size and a **gzip** comparison. Raw size is the file you download; gzip is a useful estimate for SVG served by a correctly configured web server. Frisp never replaces your source with a larger optimized file: when optimization grows the file, it keeps the original SVG bytes instead.
+Frisp shows both the raw SVG byte size and a **gzip** comparison. Raw size is the file you download; gzip is a useful estimate for SVG served by a correctly configured web server. Frisp never replaces your source with a larger optimized file: when optimization grows the file, or when Auto finds no visually identical candidate, it keeps the original SVG bytes instead.
 
-SVG optimization accepts files up to **5 MB**. The optimizer is deliberately loaded on first SVG use instead of with the initial app shell. Once you have successfully optimized one SVG, those files are cached and SVG optimization is offline-ready for that version of Frisp.
+SVG optimization accepts files up to **5 MB**. The optimizer is loaded on first SVG use rather than at startup, but since 2026-11-04 its worker is cached with the app on your first visit, so SVG optimization works offline even if you have never optimized an SVG online.
 
 ## Raster exports still work
 
 Choosing WebP, AVIF, JPEG XL, JPEG, or PNG for an SVG source works as before: Frisp rasterizes the vector artwork and sends those pixels to the selected image codec. Resize controls, including the **Vector** resize method, apply to those raster exports. An SVG output itself is text-optimized and is never resized.
+
+## SVGs in a batch
+
+Vector optimization is a single-image feature for now. If you open **two or more** SVGs at once, bulk mode rasterizes each of them to the batch's format (WebP by default) instead of optimizing them as SVG. This is a known gap, planned together with a future change that gives bulk and the single editor one shared recipe. To keep an SVG as SVG today, open it on its own.

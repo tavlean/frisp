@@ -17,7 +17,7 @@ First, two words you'll see everywhere:
 | -------------------------------------------------- | --------------------------------------------------- | --------------------------------------------------------------- |
 | Vector artwork already stored as SVG               | **SVG**                                             | Keeps shapes resolution-independent while optimizing the markup |
 | A photograph (lots of color, soft gradients)       | **AVIF**, or **WebP** for wider reach               | Modern lossy codecs beat JPEG noticeably at the same quality    |
-| A photo that must open _everywhere_ with zero risk | **JPEG (jpegli)**, or **JPEG** to hand-tune         | The universal lossy format; opens in everything. Two encoders, same `.jpg` |
+| A photo that must open _everywhere_ with zero risk | **JPEG**                                            | The universal lossy format; opens in everything                 |
 | A logo, icon, flat-color illustration, or chart    | **PNG** (or **WebP lossless**)                      | Lossless keeps edges and text crisp                             |
 | A screenshot                                       | **PNG**, or **WebP** if it has photographic content | Crisp UI text stays sharp losslessly; mixed content can go WebP |
 | Anything needing **transparency**                  | **WebP**, **AVIF**, **JPEG XL**, or **PNG**         | All support an alpha channel; JPEG does not                     |
@@ -61,24 +61,17 @@ The format chooser is the dropdown at the top of each side's **Compress** panel.
 ### JPEG XL
 
 - **What it does:** A modern format designed to replace JPEG, with excellent quality-per-byte, true lossless, transparency, and even lossless re-compression of existing JPEGs. Encoded with **libjxl** (shown as **JPEG XL** in the menu; the encoder name appears as a hover tooltip).
-- **Range & default:** id `jxl`, extension `.jxl`, MIME `image/jxl`. Supports both lossy and lossless. Its label is read from the codec, hence "JPEG XL". (MozJPEG and OxiPNG are instead overridden to the plain format names **JPEG** and **PNG**, with the encoder shown in the tooltip.)
+- **Range & default:** id `jxl`, extension `.jxl`, MIME `image/jxl`. Supports both lossy and lossless. Its label is read from the codec, hence "JPEG XL". (jpegli and OxiPNG are instead overridden to the plain format names **JPEG** and **PNG**, with the encoder shown in the tooltip.)
 - **How to choose:** Excellent compression and quality, but browser support is the catch: as of 2026 it ships in Safari, while Chrome and Firefox do not enable it by default. Treat output as great for archiving or supported pipelines, not for general web delivery yet. (src: caniuse.com — jpegxl)
 - **One thing no other format here can do:** load a JPEG and tick **Lossless transcode**, and JPEG XL repacks that JPEG smaller with no quality change at all, keeping enough information to rebuild your original `.jpg` exactly. See [the JPEG XL page](formats/jpeg-xl.md#lossless-transcode).
 - **Recommended starting point:** **Use for archival, experiments, or Safari-targeted delivery.** Deviate to WebP/AVIF when you need broad browser support today.
 
 ### JPEG
 
-- **What it does:** A highly tuned JPEG encoder. Produces standard `.jpg` files that open literally everywhere, but smaller than a typical JPEG at the same quality. Lossy only; no transparency. Encoded with **MozJPEG** (shown as **JPEG** in the menu; the encoder name appears as a hover tooltip).
-- **Range & default:** id `mozJPEG`, extension `.jpg`, MIME `image/jpeg`. Lossy only.
-- **How to choose:** The universal-compatibility choice for photos. Pick it when the file must open on any device, browser, or old software with zero risk, and you don't need transparency. It can't match AVIF/WebP on size, but nothing beats it on reach.
+- **What it does:** A modern JPEG encoder. Produces standard `.jpg` files that open literally everywhere, but smaller than a typical JPEG at the same quality. Lossy only; no transparency. Encoded with **jpegli** (shown as **JPEG** in the menu; the encoder name appears as a hover tooltip).
+- **Range & default:** id `jpegli`, extension `.jpg`, MIME `image/jpeg`. Lossy only. Since 2026-11-04 this is the only JPEG entry: the older MozJPEG encoder is no longer offered, because jpegli was faster on every benchmark image and about 7% smaller on photos at the defaults. Settings saved with MozJPEG load as jpegli at the same quality number.
+- **How to choose:** The universal-compatibility choice for photos. Pick it when the file must open on any device, browser, or old software with zero risk, and you don't need transparency. It can't match AVIF/WebP on size, but nothing beats it on reach. Its quality slider runs on jpegli's own scale, so compare in the preview rather than reading numbers across from another JPEG tool.
 - **Recommended starting point:** **JPEG for photos that must be maximally compatible.** Deviate to WebP/AVIF when your audience's browsers are modern and you want smaller files.
-
-### JPEG (jpegli)
-
-- **What it does:** The same `.jpg` file as above, from a newer encoder. jpegli applies JPEG XL's techniques to the plain JPEG bitstream, which buys around 30% better quality-per-byte at high quality without changing the format. Lossy only; no transparency. Encoded with **jpegli**.
-- **Range & default:** id `jpegli`, extension `.jpg`, MIME `image/jpeg`. Lossy only. This is the one entry whose menu label names its encoder, because "JPEG" alone would not tell it apart from the MozJPEG entry.
-- **How to choose:** Same reach as JPEG, since the output is an ordinary JPEG. Pick jpegli when you want a JPEG and would rather not tune anything; pick MozJPEG when you want its deep advanced panel, or need grayscale or RGB output, which jpegli does not offer. Its quality slider runs on jpegli's own scale, so **do not read across from a MozJPEG quality number**; compare in the preview instead.
-- **Recommended starting point:** **jpegli when you want a well-compressed JPEG with no fiddling.** Deviate to MozJPEG when you need its extra controls, and to WebP/AVIF when your audience's browsers are modern.
 
 ### PNG
 

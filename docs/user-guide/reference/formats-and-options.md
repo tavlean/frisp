@@ -39,22 +39,25 @@ Notes that apply throughout:
 | WebP               | `webP`        | `webp`     | `image/webp`  | both               | yes                                       |
 | AVIF               | `avif`        | `avif`     | `image/avif`  | both               | yes                                       |
 | JPEG XL            | `jxl`         | `jxl`      | `image/jxl`   | both               | yes                                       |
-| JPEG               | `mozJPEG`     | `jpg`      | `image/jpeg`  | lossy              | yes                                       |
-| JPEG (jpegli)      | `jpegli`      | `jpg`      | `image/jpeg`  | lossy              | yes                                       |
+| JPEG               | `jpegli`      | `jpg`      | `image/jpeg`  | lossy              | yes                                       |
 | PNG                | `oxiPNG`      | `png`      | `image/png`   | lossless           | yes                                       |
 | SVG                | `svg`         | `svg`      | `image/svg+xml` | optimizer (gated) | yes (`SvgOptions.svelte`)                 |
 
 - The label/ext for `jxl` are read from `encoderMap.jxl.meta` so they stay in
   sync (hence "JPEG XL"). `webP` and `avif` use hard-coded labels in
-  `OUTPUT_FORMATS`. `mozJPEG` and `oxiPNG` are overridden to the plain format
-  names **JPEG** and **PNG** (rather than the encoder names MozJPEG/OxiPNG); the
+  `OUTPUT_FORMATS`. `jpegli` and `oxiPNG` are overridden to the plain format
+  names **JPEG** and **PNG** (rather than the encoder names jpegli/OxiPNG); the
   underlying encoder is surfaced as a hover tooltip (title attribute) on the
-  picker — JPEG→MozJPEG, PNG→OxiPNG, JPEG XL→libjxl, WebP→libwebp, AVIF→libaom.
-- **`jpegli` is the one format whose label names its encoder**, because it is the
-  second encoder for a format that already has an entry: `mozJPEG` and `jpegli`
-  both emit `image/jpeg` `.jpg`, so "JPEG" alone would not distinguish them. Its
-  tooltip carries the reason to pick it rather than the engine name ("Same JPEG
-  format, around 30% better compression").
+  picker: JPEG→jpegli, PNG→OxiPNG, JPEG XL→libjxl, WebP→libwebp, AVIF→libaom.
+- **One JPEG entry since 2026-11-04.** Until then the picker offered two JPEG
+  encoders, "JPEG" (`mozJPEG`) and "JPEG (jpegli)". MozJPEG is no longer
+  selectable: jpegli is faster on every bench fixture and about 7% smaller on
+  photos at the shipped defaults. A saved side that chose `mozJPEG` loads as
+  `jpegli` at the same quality (`migrateRetiredFormat` in
+  `src/lib/editor/settings-storage.ts`). The MozJPEG codec and its panel are still
+  in the build, but the service worker no longer precaches its encoder; its
+  retirement is pending. The old jpegli tooltip claim "around 30% better
+  compression" was removed because no measurement supports it.
 - **Every raster output format is an always-available WASM codec** — there is no
   runtime feature detection. (QOI and the canvas/browser encoders were removed from
   the picker on 2026-06-27; QOI's decoder remains for import.)
@@ -97,7 +100,7 @@ struct. Lossless vs lossy splits the whole panel.
 
 | UI label | key       | control | range           | default |
 | -------- | --------- | ------- | --------------- | ------- |
-| Effort   | `method`  | range   | 0–6, step 1     | 6       |
+| Effort   | `method`  | range   | 0–6, step 1     | 4       |
 | Quality  | `quality` | range   | 0–100, step 1   | 80      |
 
 **Lossy → Advanced settings** (Revealer toggle, UI-only)
@@ -125,6 +128,12 @@ struct. Lossless vs lossy splits the whole panel.
 | Effort              | `method`+`quality` preset | range    | 0–9, step 1, picks a `[method, quality]` preset pair from `kLosslessPresets` | preset 6 = `[4, 75]` |
 | Slight loss         | `near_lossless`           | range    | 0–100, **inverted** (`100 − value`)                                          | 100 → bubble shows 0 |
 | Discrete tone image | `image_hint`              | checkbox | sets 3 (`WEBP_HINT_GRAPH`) vs 0 (`WEBP_HINT_DEFAULT`)                        | 0                    |
+
+Lossy Effort defaults to 4, libwebp's own default (it was 6 until 2026-11-04).
+Method 6 saved 3 to 5% on photos but ran about 50x slower on alpha content for a
+slightly larger file (transparent.png: 2880 ms vs 57 ms). The slider still reaches
+6. A side already autosaved at 6 keeps 6, because `app:settings:v3` stores the full
+options object.
 
 **Hidden WebP options** — present in `EncodeOptions`/`defaultOptions` but never in the UI:
 `target_size` (0), `target_PSNR` (0), `show_compressed` (0), `partition_limit` (0),
@@ -232,9 +241,12 @@ engine re-checks the preconditions before routing).
 
 ---
 
-## JPEG (`mozJPEG`)
+## MozJPEG (`mozJPEG`), no longer offered
 
-Menu label is **JPEG**; encoded with **MozJPEG** (shown as a hover tooltip on the picker).
+Not in the picker since 2026-11-04 (see the roster notes above); a saved MozJPEG
+side loads as jpegli. The panel and codec below still exist in the code until the
+codec's retirement lands, so the table records what the panel renders, not what a
+user can reach today.
 
 Panel: `MozjpegOptions.svelte`. Always lossy. Booleans bind directly. Channels select
 uses the `MozJpegColorSpace` enum (GRAYSCALE 1 / RGB 2 / YCbCr 3).
@@ -270,10 +282,10 @@ codec `EncodeOptions` and `meta.defaultOptions` but is **never rendered in the p
 
 ---
 
-## JPEG (jpegli) (`jpegli`)
+## JPEG (`jpegli`)
 
-Menu label is **JPEG (jpegli)**; encoded with **jpegli** (google/jpegli, pinned by
-commit; see `docs/codec-provenance.md`).
+Menu label is **JPEG**; encoded with **jpegli** (google/jpegli, pinned by
+commit; see `docs/codec-provenance.md`), shown as a hover tooltip on the picker.
 
 Panel: `JpegliOptions.svelte`. Always lossy. Booleans bind directly. The chroma
 select uses the `JpegliChromaSubsample` enum (AUTO 0 / FULL 1 / HALF 2).
@@ -311,7 +323,7 @@ Behaviours that are not options, and are worth knowing when comparing against
   (`JCS_EXT_RGBA` input, fourth channel ignored). The two JPEG encoders are
   deliberately identical here so their outputs are comparable.
 - **No `color_space` equivalent.** jpegli output is always YCbCr; there is no
-  grayscale or RGB mode. `mozJPEG` is the encoder to use for those.
+  grayscale or RGB mode. MozJPEG had those, but it is no longer offered.
 
 ---
 
@@ -354,7 +366,11 @@ ladder (p3 → p2/p1/p0, or p4 if p3 fails the gate) plus `reusePaths` /
 `convertStyleToAttrs` add-on trials, admitting a candidate only after multi-scale
 pixel checks (`visual-gate.ts`, pixelmatch, normalized by painted pixels) at
 64/256/natural px over transparent + light + dark backgrounds. Auto respects
-`keepTitleDesc` but ignores the other manual toggles.
+`keepTitleDesc` but ignores the other manual toggles. When no candidate passes the
+gate, Auto keeps the original SVG (0% change) and the winner line reads "original
+kept, no smaller version looked identical (Manual can trade precision for size)"
+(winner id `original!`). Before 2026-11-04 it shipped the precision-3 candidate
+with a "verify preview" note instead.
 
 **Manual mode**
 
@@ -375,8 +391,9 @@ pixel checks (`visual-gate.ts`, pixelmatch, normalized by painted pixels) at
 
 Notes: transform precision is derived as `min(precision + 2, 5)` (matrix math needs
 headroom); `removeDimensions` is manual-only (not searched by Auto). The output never
-regresses — `keepOriginalSvg` reverts to the source text (0% change) when the
-optimized bytes aren't smaller — and sources above 5 MB are rejected. Results carry a
+regresses: `keepOriginalSvg` reverts to the source text (0% change) when the
+optimized bytes aren't smaller or Auto's gate rejected every candidate. Sources
+above 5 MB are rejected. Results carry a
 `svg` block (`optimizedText`, `rawBytes`, `gzipBytes`, `originalGzipBytes`, `winner`)
 that drives the Results panel's second "gzip: <n> · was <n>" line.
 
@@ -406,6 +423,7 @@ gated by `processorState.resize.enabled`), a **Film grain** section
 palette** section (`QuantizeOptions.svelte`, gated by
 `processorState.quantize.enabled`). The pipeline applies them resize → grain →
 quantize. Film grain exposes an **Amount** slider (0–100, default 12) plus an
-Advanced **Grain size** slider (1–100, default 20; 20 units = 1px). Per-side
-title-bar buttons: **Copy settings to other side**, **Save side settings**, **Import
-saved side settings** (import disabled until something is saved).
+Advanced **Grain size** slider (1–100, default 20; 20 units = 1px). The Edit header
+has no per-side buttons: the Squoosh-era **Copy settings to other side**, **Save side
+settings**, and **Import saved side settings** buttons were removed on 2026-11-04
+(autosave already restores both sides).

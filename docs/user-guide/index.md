@@ -23,7 +23,7 @@ Once you've picked a format, jump to that format's page below to understand its 
 | Page                                              | What it covers                                                                                                                                                     |
 | ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | [Overview](./overview.md)                         | What Frisp is, the local-first promise, and the basic compress-and-compare workflow.                                                                               |
-| [Editor features](./editor-features.md)           | Loading and replacing images, the two-up before/after compare, zoom/pan/rotate, smoothing and background toggles, copy/save/import side settings, and downloading. |
+| [Editor features](./editor-features.md)           | Loading and replacing images, the two-up before/after compare, zoom/pan/rotate, smoothing and background toggles, undo/redo, and downloading.                      |
 | [Bulk optimization](./bulk-optimization.md)       | Importing several images or a folder, batch settings, per-image tweaks, strip sizes, Save all as ZIP, keep-originals, and remove+Undo.                             |
 | [Choosing a format](./choosing-a-format.md)       | How to decide between formats for photos, illustrations, transparency, animation, and browser support.                                                             |
 | [Recommended settings](./recommended-settings.md) | A per-codec cheat sheet of community best-practice settings (in Frisp's controls), with notes on which could become app defaults or presets later.                 |
@@ -38,8 +38,8 @@ Each output format has its own page covering what it's good at and what every op
 | [WebP](./formats/webp.md)       | A great all-round default — good compression, broad browser support, lossy and lossless modes. |
 | [AVIF](./formats/avif.md)       | Excellent compression for photos; modern browsers.                                             |
 | [JPEG XL](./formats/jpeg-xl.md) | High-quality, flexible format with a lossless mode; limited browser support today.             |
-| [JPEG](./formats/mozjpeg.md)    | A finely tuned JPEG encoder (MozJPEG) — maximum compatibility for photographs.                 |
-| [JPEG (jpegli)](./formats/jpegli.md) | The same `.jpg`, from a newer encoder with better quality-per-byte and only three controls. |
+| [JPEG](./formats/jpegli.md)     | Maximum compatibility for photographs, encoded with jpegli (three controls).                   |
+| [MozJPEG](./formats/mozjpeg.md) | The previous JPEG encoder, no longer offered since 2026-11-04 (kept for reference).            |
 | [PNG](./formats/oxipng.md)      | Lossless PNG optimisation (OxiPNG) for graphics, screenshots, and transparency.                |
 
 ## Editing

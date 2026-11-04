@@ -126,10 +126,15 @@ never applies to this lane.
   add-on trials, each admitted only after a multi-scale visual gate
   (`visual-gate.ts`, pixelmatch, mismatch normalized by painted pixels) renders at
   64/256/natural px over transparent + light + dark backgrounds. `pickWinner` keeps
-  the smallest gzip that passed. Manual mode applies the knobs directly.
+  the smallest gzip that passed. If no candidate passes, Auto keeps the original SVG
+  (winner id `original!`, described as "original kept, no smaller version looked
+  identical (Manual can trade precision for size)"); before 2026-11-04 it shipped
+  the precision-3 candidate with a "verify preview" note. Manual mode applies the
+  knobs directly.
 - **Config** (`svgo-config.ts`): one `preset-default` override point; transform
-  precision = `min(precision + 2, 5)`. Never ships a regression — `keepOriginalSvg`
-  reverts to the source text when the optimized bytes aren't smaller; sources above
+  precision = `min(precision + 2, 5)`. Never ships a regression: `keepOriginalSvg`
+  reverts to the source text when the optimized bytes aren't smaller or Auto's gate
+  rejected every candidate; sources above
   5 MB are rejected. Preview rasterisation reuses the shared SVG import path
   (`render.ts` → `processSvg`).
 - Libraries: **svgo `^4.0.1`**, **pixelmatch `^7.2.0`** (visual gate), **fflate
@@ -145,8 +150,8 @@ JS/WASM artifacts). Each codec is wired through `src/features/{encoders,decoders
 | WebP enc/dec           | libwebp (webmproject/libwebp)    | `v1.6.0`                                                        | no                    | yes (`webp_enc_simd`)   | enc+dec, `image/webp`                                                                         |
 | AVIF enc/dec           | libavif + libaom (+ libsharpyuv) | libavif `v1.4.2`, libaom `v3.12.1`, libwebp `v1.6.0` (sharpyuv) | yes (`avif_enc_mt`)   | no                      | enc+dec, `image/avif`; engages multi-core, single-thread fallback                             |
 | JPEG XL enc/dec        | libjxl                           | `v0.12.0`                                                       | yes (`jxl_enc_mt`)    | yes (`jxl_enc_mt_simd`) | enc+dec, menu "JPEG XL", `image/jxl`; engages multi-core, single-thread fallback              |
-| MozJPEG enc            | mozilla/mozjpeg                  | `v4.1.5` (built `--with-build-date=squoosh`)                    | no                    | no                      | enc, menu "JPEG" (encoder in tooltip), `image/jpeg`                                           |
-| jpegli enc             | google/jpegli                    | commit `031a0077f5799a6041004267fc12b956c1f52a20` (no upstream tags) | no                | no                      | enc, menu "JPEG (jpegli)", `image/jpeg`; second encoder for the same format as MozJPEG        |
+| MozJPEG enc            | mozilla/mozjpeg                  | `v4.1.5` (built `--with-build-date=squoosh`)                    | no                    | no                      | enc still wired but not in the picker since 2026-11-04 (saved MozJPEG sides load as jpegli); not precached by the service worker; retirement pending |
+| jpegli enc             | google/jpegli                    | commit `031a0077f5799a6041004267fc12b956c1f52a20` (no upstream tags) | no                | no                      | enc, menu "JPEG" (encoder in tooltip), `image/jpeg`; the one JPEG encoder offered since 2026-11-04 |
 | OxiPNG enc             | oxipng (crates.io)               | `10.1.1` (normal + parallel wasm-pack)                          | parallel build exists | no                      | enc, menu "PNG" (encoder in tooltip), `image/png`; engages multi-core, single-thread fallback |
 | imagequant (quantize)  | libimagequant (ImageOptim)       | `2.18.0` (`--disable-sse`)                                      | no                    | no                      | quantize processor                                                                            |
 | resize (worker resize) | `resize` crate (crates.io)       | `0.8.9` (wrapper `squoosh-resize` 0.1.0)                        | no                    | no                      | resize processor                                                                              |
@@ -174,10 +179,23 @@ removed (encoder + decoder); its `codecs/wp2/` tree and all wiring are gone.
   `app-${version}`. On `install` it precaches `build + files + prerendered +
 serviceWorkerCodecAssetUrls` (codec WASM/JS via
   `src/lib/service-worker-codec-assets.ts`, merged from generated
-  committed `src/shared/codec-assets/service-worker.ts` records + local probe workers). Strategy:
+  committed `src/shared/codec-assets/service-worker.ts` records + local probe workers),
+  plus the app's worker chunks (codec worker, SVG optimizer worker, OxiPNG thread
+  helper). SvelteKit's `build` list omits the chunks Vite emits for
+  `new Worker(new URL(...))`, so the `app-worker-precache-manifest` Vite plugin
+  writes `_app/worker-precache.json` and the service worker fetches it at install;
+  `audit:static-output` fails if that list and the emitted workers disagree. Before
+  2026-11-04 a first offline encode failed until an online encode had fetched the
+  worker. The QOI and MozJPEG encoders are not precached (neither is selectable);
+  they stay runtime-cacheable. Strategy:
   **cache-first for known asset pathnames, network-first (with cache fallback)**
   for everything else. On `activate` it deletes stale caches and claims clients.
-  Result: offline reload on the deployed origin once cached.
+  Result: offline reload and offline encoding on the deployed origin once cached.
+- **Update prompt**: a new build waits until the page's "new version available"
+  prompt is accepted. Accepting "Refresh" first asks other open Frisp tabs over a
+  `BroadcastChannel` (`'app:tabs'`) whether they have images open; if one does, the
+  prompt warns and offers "Refresh anyway" (since 2026-11-04), because activating
+  the new worker reloads every controlled tab.
 - **Registration** (`src/lib/service-worker-registration.ts`): registers the SW
   **only on the real deployed origin**. In dev, and on any
   loopback/localhost-style origin running a production build, it instead

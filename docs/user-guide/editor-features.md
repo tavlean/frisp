@@ -1,10 +1,10 @@
 # Editor features
 
-> Everything you can do once an image is open: compare before vs. after, zoom and pan, rotate, inspect pixels, step backward and forward through your changes (undo/redo), copy settings between the two sides, save your favourite settings, download, and load or replace images by drag-and-drop.
+> Everything you can do once an image is open: compare before vs. after, zoom and pan, rotate, inspect pixels, step backward and forward through your changes (undo/redo), download, and load or replace images by drag-and-drop.
 
 ## Overview / When to use it
 
-Frisp is an in-browser image compressor — you pick an image, it stays on your device, and you tune how it is saved to make the file smaller. The editor shows a single **two-up** view: the same picture split down the middle, with your _original_ on one side and the _compressed result_ on the other, so you can judge the trade-off between quality and file size before you download. This page covers the interactive parts of that view — the compare slider, the zoom/rotate/inspect controls, and the per-side settings actions in each panel's header. (The encoder-specific quality settings live in their own format docs.)
+Frisp is an in-browser image compressor: you pick an image, it stays on your device, and you tune how it is saved to make the file smaller. The editor shows a single **two-up** view: the same picture split down the middle, with your _original_ on one side and the _compressed result_ on the other, so you can judge the trade-off between quality and file size before you download. This page covers the interactive parts of that view: the compare slider, the zoom/rotate/inspect controls, undo/redo, and downloading. (The encoder-specific quality settings live in their own format docs.)
 
 The screen has three parts: the big image area in the middle, an information panel in the bottom-left corner, and the compression panel in the bottom-right corner. The **left half of the image is "side 0"** (accented coral, the _before_ by default), and the **right half is "side 1"** (accented azure, the _after_). By default the left panel shows the source image at a glance — name, original format, file size, dimensions, and aspect — while the right panel starts as **WebP**.
 
@@ -60,24 +60,14 @@ The two **preview-only** display toggles live together behind a single **View op
 - **Background:** Turns the dark backdrop behind the image on or off — the row reads _Dark_ (default) → _Light_, and it fades over about half a second. Useful for judging how a result, especially one with transparency, looks against a light vs. dark background — flip it when checking edges, halos, or transparent areas that might look fine on one background but bad on the other.
 - **Recommended starting point:** Leave both at their defaults for normal viewing. Open **View options** to switch Smoothing to Pixelated when zoomed in to inspect pixels, or Background to Light to check transparency and edge fringing.
 
-### Copy settings to the other side
+### No per-side copy, save, or import buttons
 
-- **What it does:** Copies this panel's complete settings (its format, that format's options, and its Resize/Film-grain/Reduce-palette state) onto the _other_ side in one click. The button is an arrow that points toward the side it will copy to.
-- **Range & default:** Action button; lives in the **Edit** header (so it is hidden on a side set to "Original Image"). After copying, a "Settings copied across" message appears with an **Undo** option for a few seconds.
-- **How to choose:** Use it to A/B two encoders from the same baseline — set one side up the way you like, copy it across, then change just the format on the other side to compare them fairly.
-- **Recommended starting point:** Use whenever you want both sides to start from identical settings.
-
-### Save side settings / Import saved side settings
-
-- **What it does:** **Save** (the gear button) remembers this side's full setup — format, that format's options, and the Resize/Film-grain/Reduce-palette state — in your browser so it survives reloads and future images. **Import** (the gear-with-arrow button) applies your saved setup back onto this side.
-- **Range & default:** Two action buttons in the **Edit** header (hidden on the "Original Image" side). Saving confirms with a "<Left/Right> side settings saved" message. Importing confirms with a "<Left/Right> side settings imported" message and offers **Undo**. **Import is greyed out until a valid saved setup exists** for that side — and it only enables if the stored data actually passes validation, not merely because something was saved.
-- **How to choose:** Save the encoder + options you reach for most (your house WebP or AVIF recipe), then Import it on any new image instead of re-dialling every slider. Save is stored separately per side (left vs. right).
-- **Recommended starting point:** Save once you've found settings you like; Import them on each new image.
+The Edit header used to carry three buttons: **Copy settings to other side**, **Save side settings**, and **Import saved side settings**. They were removed on 2026-11-04. Frisp already remembers both sides' format and encoder options in your browser and restores them on the next image, so a separate save slot was redundant. To compare two encoders from the same starting point, set both sides by hand; **Undo** reverses any change.
 
 ### Download
 
 - **What it does:** Downloads that side's result. The **Save** pill button in the panel footer is a real download link pointing at the freshly encoded file.
-- **Range & default:** One download button per side, in the panel footer next to the result size and the size-change badge. It is **disabled** (dimmed, no link) while that side is still encoding or before its first result exists. A spinner appears over it while encoding — but only after a short delay, so quick encodes don't flash it.
+- **Range & default:** One download button per side, in the panel footer next to the result size and the size-change badge. It is **disabled** (dimmed, no link) whenever the result on screen does not match the side's current settings: while a new encode is pending (for example right after you change the format), after an encode fails, and before the first result exists. **Share** follows the same rule. This guarantees the file you save is the one your current settings produced; before 2026-11-04, Save could briefly hand out the previous result under the new format's name. A spinner appears over it while encoding, but only after a short delay, so quick encodes don't flash it.
 - **How to choose:** The filename uses your original name with the new format's extension swapped in (for example `photo.webp`). The **Original** side downloads the untouched original file under its original name.
 - **Recommended starting point:** Compare both sides first, then download the side with the best size/quality balance for you.
 
@@ -109,11 +99,10 @@ The two **preview-only** display toggles live together behind a single **View op
 - **Smoothing and background are preview-only.** Both live under the **View options** button (the sliders icon next to Rotate). Toggling them changes what _you_ see, not the saved file — don't worry about leaving "pixelated" on before you download. The dot on the View options button just means one of them is away from its default.
 - **The hidden 1 / 2 / 3 split shortcut is suppressed while typing.** If a number field (like the zoom % or a resize input) has focus, those keys type digits instead of moving the split — click the image area first.
 - **Rotate affects both sides and your resize numbers.** A quarter-turn swaps width/height in the Resize fields automatically, so don't be surprised to see those values flip.
-- **Copy and Import both offer Undo, but only for a few seconds.** If you overwrite a side by mistake, grab the snackbar Undo before the message disappears — or just use the main **Undo** button, which also reverses a copy or import.
 - **Undo/Redo is per-image and instant.** Stepping back never re-compresses — it replays a result Frisp already has. But loading or replacing the image clears the history, so undo can't reach across to a previous image (a replace itself can't be undone).
-- **Import stays greyed until you've Saved a valid setup** for that side — and Save/Import are per-side and per-browser; clearing site data forgets them.
 - **The left panel is image info until you ask for comparison.** Use **Compare as…** when you want the old two-encoder workflow; return with **Original Image** or the **✕** close button.
-- **The Original ("Original Image") side has no Edit header**, so Copy/Save/Import aren't shown there, and its download is the raw, unchanged file.
+- **The Original ("Original Image") side has no Edit header**, and its download is the raw, unchanged file.
+- **Save waits for the current settings.** If Save looks greyed out, the side is still encoding your latest change, or that encode failed. It enables as soon as a result matching your settings is ready.
 - **Wheel zoom works even over the drag handle.** Scrolling always zooms the image; only click-dragging on the handle moves the split.
 - **Auto-fit only re-runs on real changes** — a new file, a dimension/orientation change, or a window resize. Re-compressing at the same size keeps your current zoom and pan.
 

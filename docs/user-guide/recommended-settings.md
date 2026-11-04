@@ -8,23 +8,23 @@ Each codec section links to its full page for the reasoning, ranges, and sources
 
 ---
 
-## WebP — [full page](./formats/webp.md)
+## WebP ([full page](./formats/webp.md))
 
 | Use case                          | Recommended (Frisp controls)                                 |
 | --------------------------------- | ------------------------------------------------------------ |
-| Web photo (lossy)                 | Quality 75–80, Effort 6                                      |
+| Web photo (lossy)                 | Quality 75–80, Effort 4 (6 for the last 3–5%, much slower)   |
 | Graphics / screenshots / line art | Lossless on (Effort 6), or near-lossless via Slight loss ~40 |
 | Sharp content kept lossy          | Quality ≥ 90                                                 |
 | Transparency / alpha              | Lossy Quality ~90, Alpha quality 100                         |
 | Re-encoding an existing JPEG      | Lossy Quality ~80 (never Lossless)                           |
 
-**Current Frisp default:** lossy, Quality 80, Effort 6 (updated 2026-06-03 from the upstream-Squoosh 75/4 — the "Web photo" recommendation below is now the shipped default).
+**Current Frisp default:** lossy, Quality 80, Effort 4. Quality moved from the upstream-Squoosh 75 to 80 on 2026-06-03. Effort was raised to 6 on the same day and returned to libwebp's own default of 4 on 2026-11-04: Effort 6 saved 3 to 5% on photos but was about 50x slower on images with transparency, for a slightly larger file (transparent.png: 2880 ms vs 57 ms). Pick 6 on the Effort slider when the last few percent on a photo is worth the wait. Settings your browser autosaved at Effort 6 keep 6 until you change it.
 
-**Could become a default/preset:** auto-suggesting **Lossless** when the source is a PNG or has an alpha channel or looks like a flat-color screenshot, since lossy WebP visibly hurts that material. (The earlier "Quality 80 / Effort 6 preset" suggestion is now the default.)
+**Could become a default/preset:** auto-suggesting **Lossless** when the source is a PNG or has an alpha channel or looks like a flat-color screenshot, since lossy WebP visibly hurts that material.
 
 ---
 
-## AVIF — [full page](./formats/avif.md)
+## AVIF ([full page](./formats/avif.md))
 
 | Use case                      | Recommended (Frisp controls)                                     |
 | ----------------------------- | ---------------------------------------------------------------- |
@@ -39,7 +39,7 @@ Each codec section links to its full page for the reasoning, ranges, and sources
 
 ---
 
-## JPEG XL — [full page](./formats/jpeg-xl.md)
+## JPEG XL ([full page](./formats/jpeg-xl.md))
 
 | Use case                | Recommended (Frisp controls)           |
 | ----------------------- | -------------------------------------- |
@@ -55,25 +55,23 @@ Each codec section links to its full page for the reasoning, ranges, and sources
 
 ---
 
-## JPEG — [full page](./formats/mozjpeg.md)
+## JPEG ([full page](./formats/jpegli.md))
 
-Encoded with **MozJPEG** (shown as **JPEG** in the menu; the encoder name appears as a hover tooltip).
+Encoded with **jpegli** (shown as **JPEG** in the menu; the encoder name appears as a hover tooltip). Until 2026-11-04 this section covered MozJPEG, which is no longer offered.
 
-| Use case                          | Recommended (Frisp controls)                                             |
-| --------------------------------- | ------------------------------------------------------------------------ |
-| General web photography (default) | Quality 80–85, Progressive on, Trellis multipass on, chroma auto (4:2:0) |
-| Thumbnails / retina (2×)          | Quality 60–70, Progressive on, 4:2:0                                     |
-| Text / screenshots / sharp edges  | Quality 90+, Auto subsample off + Subsample chroma by 1 (4:4:4)          |
-| Max-quality / archival            | Quality 92–95, 4:4:4, full trellis, Trellis passes 2                     |
-| Smallest file (slow)              | Quality 72–80, full trellis, Progressive on, 4:2:0                       |
+| Use case                          | Recommended (Frisp controls)                        |
+| --------------------------------- | --------------------------------------------------- |
+| General web photography (default) | Quality 75–80, Progressive on, Chroma Auto (4:2:0)  |
+| Hero images, text, sharp edges    | Quality 80–85; Chroma 4:4:4 if colour edges smear   |
+| Thumbnails / backgrounds          | Quality 60–70, Progressive on                       |
 
-**Current Frisp default:** Quality 75, Progressive on, Trellis multipass off, quant table ImageMagick.
+**Current Frisp default:** Quality 75, Progressive on, Chroma subsampling Auto.
 
-**Could become a default/preset:** raise the default Quality from 75 to ~80 and turn **Trellis multipass** on by default — trellis is the whole reason to use MozJPEG over plain libjpeg, so leaving it off ships a weaker default. Optionally auto-switch to 4:4:4 when Quality ≥ 90.
+**Could become a default/preset:** nothing pressing; jpegli's tuned defaults are the reason it is the one JPEG encoder.
 
 ---
 
-## PNG — [full page](./formats/oxipng.md)
+## PNG ([full page](./formats/oxipng.md))
 
 Encoded with **OxiPNG** (shown as **PNG** in the menu; the encoder name appears as a hover tooltip).
 
@@ -89,7 +87,7 @@ Encoded with **OxiPNG** (shown as **PNG** in the menu; the encoder name appears 
 
 ---
 
-## Image Resize — [full page](./resize.md)
+## Image Resize ([full page](./resize.md))
 
 | Use case                      | Recommended (Frisp controls)                               |
 | ----------------------------- | ---------------------------------------------------------- |
@@ -104,7 +102,7 @@ Encoded with **OxiPNG** (shown as **PNG** in the menu; the encoder name appears 
 
 ---
 
-## Reduce palette (libimagequant) — [full page](./reduce-palette.md)
+## Reduce palette (libimagequant) ([full page](./reduce-palette.md))
 
 | Use case                           | Recommended (Frisp controls)             |
 | ---------------------------------- | ---------------------------------------- |
@@ -122,10 +120,10 @@ Encoded with **OxiPNG** (shown as **PNG** in the menu; the encoder name appears 
 
 | Codec / tool   | Default already optimal?                                                                       |
 | -------------- | ---------------------------------------------------------------------------------------------- |
-| WebP           | **Yes (since 2026-06-03)** — default is now Quality 80 / Effort 6, matching the web consensus. |
+| WebP           | **Yes**: Quality 80 / Effort 4 (Effort back to 4 on 2026-11-04 for speed on transparent images). |
 | AVIF           | Quality 50 is conservative; community leans ~60–70 for photos. Effort under-surfaced.          |
 | JPEG XL        | **Yes** — Effort 7 is the Pareto-front sweet spot; Quality 75 is reasonable.                   |
-| JPEG           | Quality 75 is a touch low; Trellis off is the notable gap vs the codec's whole point.          |
+| JPEG           | **Yes**: jpegli at Quality 75 with tuned defaults (the one JPEG encoder since 2026-11-04).     |
 | PNG            | **Yes** — Effort 2 matches OxiPNG's own default and suits interactive use.                     |
 | Image Resize   | **Yes** — Lanczos3 + Linear RGB + Premultiply is the recommended photographic default.         |
 | Reduce palette | Partly — Colors 256 is a safe default; Dithering 1.0 hurts the flat-graphic common case.       |

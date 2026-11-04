@@ -38,11 +38,10 @@ The versions below come straight from the project's build recipes, recorded in `
 | **WebP**                     | libwebp (`webmproject/libwebp`)  | `v1.6.0`                           | SIMD          | Broadly supported modern format; great all-rounder.                      |
 | **AVIF**                     | libavif + libaom (+ libsharpyuv) | libavif `v1.4.2`, libaom `v3.12.1` | Threads       | Excellent compression for photos; slower to encode.                      |
 | **JPEG XL**                  | libjxl                           | `v0.12.0`                          | Threads, SIMD | Newer high-efficiency format.                                            |
-| **JPEG**                     | `mozilla/mozjpeg`                | `v4.1.5`                           | —             | Highly optimized classic JPEG encoder (MozJPEG; encoder in the tooltip). |
-| **JPEG (jpegli)**            | `google/jpegli`                  | pinned commit (no upstream tags)   | none          | The same `.jpg` from a newer encoder with better quality-per-byte.       |
+| **JPEG**                     | `google/jpegli`                  | pinned commit (no upstream tags)   | none          | Modern JPEG encoder (jpegli; encoder in the tooltip).                    |
 | **PNG**                      | `oxipng` (crates.io)             | `10.1.1`                           | Threads       | Lossless PNG optimizer (OxiPNG; encoder in the tooltip).                 |
 
-All six output codecs are bundled WebAssembly and **always available**; there is nothing to feature-detect. **JPEG** and **JPEG (jpegli)** both write ordinary `.jpg` files: two encoders for one format, not two formats.
+All five output codecs are bundled WebAssembly and **always available**; there is nothing to feature-detect. Until 2026-11-04 the menu also offered a second JPEG encoder, MozJPEG (`mozilla/mozjpeg` `v4.1.5`). It is no longer selectable, because jpegli was faster on every benchmark image and about 7% smaller on photos at the defaults; settings saved with MozJPEG load as jpegli at the same quality number. The MozJPEG codec is still in the build, but no longer cached for offline use, until its retirement lands.
 
 ### Input formats (what you can open)
 
@@ -69,9 +68,10 @@ These are documented in their own guides; they're listed here so you can see the
 
 Frisp uses a background **service worker** (`src/service-worker.ts`) so the deployed site can reload and keep working offline after the first successful load:
 
-- The first time you visit the deployed site, it quietly **caches** the app shell and codec files your browser needs.
+- The first time you visit the deployed site, it quietly **caches** the app shell, the background workers that run the codecs and the SVG optimizer, and the codec files your browser needs. (Before 2026-11-04 the workers were missed, so the very first offline compression failed unless you had already compressed something online.)
 - After that, the app loads from that cache, so it opens fast and **keeps working with no connection**. Because the codecs are stored locally too, you can compress images on a plane or in a tunnel with no loss of capability.
 - The cache is versioned (named `app-${version}`), so when a new release ships, stale files are cleaned up automatically.
+- When a new version is ready, Frisp asks before switching. Accepting **Refresh** reloads every open Frisp tab, so Frisp first checks whether another tab has images open; if one does, the prompt warns you and offers **Refresh anyway**.
 
 The service worker only activates on the **real deployed site**. During development, or on local "localhost"-style addresses, Frisp deliberately _unregisters_ the worker and clears its cache so a leftover copy can't hijack another app sharing the same port. This is purely a developer safeguard and doesn't affect normal users (details in `src/lib/service-worker-registration.ts`).
 
