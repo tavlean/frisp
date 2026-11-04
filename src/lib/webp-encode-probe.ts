@@ -1,8 +1,7 @@
-import {
-  webpEncoderSimdWasmUrl,
-  webpEncoderWasmUrl,
-  webpEncodeProbeWorkerUrl,
-} from './codec-assets';
+// Imported here, not in codec-assets.ts: the production worker bridge imports
+// that module, and a probe URL there emits the probe worker into every build.
+import webpEncodeProbeWorkerUrl from './webp-encode-probe.worker.ts?worker&url';
+import { webpEncoderSimdWasmUrl, webpEncoderWasmUrl } from './codec-assets';
 
 export interface WebpEncodeProbeResult {
   outputBytes: number;

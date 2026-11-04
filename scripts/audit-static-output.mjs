@@ -236,15 +236,10 @@ const serviceWorkerDuplicateWorkerAssets = files.filter((file) =>
 const workerHelperAssets = files
   .filter((file) => file.includes('workerHelpers') && file.endsWith('.js'))
   .sort();
-const immutableWorkerAsset = files.find(
-  (file) =>
-    file.includes('_app/immutable/workers/codec-asset-probe.worker') &&
-    file.endsWith('.js'),
-);
-const immutableEncodeWorkerAsset = files.find(
-  (file) =>
-    file.includes('_app/immutable/workers/webp-encode-probe.worker') &&
-    file.endsWith('.js'),
+// The diagnostics route and its probe workers are dev-only (stripped by the
+// app-strip-dev-only-routes plugin), so no probe may reach production.
+const probeWorkerAssets = files.filter((file) =>
+  /^_app\/immutable\/workers\/[^/]*probe\.worker[^/]*\.js$/.test(file),
 );
 const immutableFeaturesWorkerAsset = files.find(
   (file) =>
@@ -434,12 +429,8 @@ assert(
   `Expected OxiPNG parallel worker helper assets now that the SvelteKit app wires the threaded (wasm-bindgen-rayon) runtime, found ${workerHelperAssets.length}.`,
 );
 assert(
-  immutableWorkerAsset,
-  'Missing app-emitted immutable module worker asset from the worker probe.',
-);
-assert(
-  immutableEncodeWorkerAsset,
-  'Missing app-emitted immutable module worker asset from the WebP encode probe.',
+  probeWorkerAssets.length === 0,
+  `Diagnostics probe workers reached the production build: ${probeWorkerAssets.join(', ')}.`,
 );
 assert(
   immutableFeaturesWorkerAsset,
@@ -749,8 +740,6 @@ console.log(
     ...hqxWasmAssets.map((asset) => `  - ${asset}`),
     `OxiPNG parallel worker helper assets: ${workerHelperAssets.length}`,
     ...workerHelperAssets.map((asset) => `  - ${asset}`),
-    `App worker asset: ${immutableWorkerAsset}`,
-    `App encode worker asset: ${immutableEncodeWorkerAsset}`,
     `App codec worker asset: ${immutableFeaturesWorkerAsset}`,
     `App SVG optimizer worker asset: ${svgOptimizerWorkerAssets[0]}`,
   ].join('\n'),

@@ -1,5 +1,3 @@
-import codecAssetProbeWorkerUrl from './codec-asset-probe.worker.ts?worker&url';
-import webpEncodeProbeWorkerUrl from './webp-encode-probe.worker.ts?worker&url';
 import svelteKitFeaturesWorkerUrl from '../worker/codec-worker.ts?worker&url';
 import {
   avifCodecAssetUrls,
@@ -61,7 +59,6 @@ export {
   avifDecoderWasmUrl,
   avifEncoderWasmUrl,
   type CodecAssetRecord,
-  codecAssetProbeWorkerUrl,
   hqxWasmUrl,
   imagequantCodecAssetUrls,
   imagequantWasmUrl,
@@ -87,14 +84,6 @@ export {
   svelteKitCodecAssetRecords,
   webpCodecAssetUrls,
   webpDecoderWasmUrl,
-  webpEncodeProbeWorkerUrl,
   webpEncoderSimdWasmUrl,
   webpEncoderWasmUrl,
 };
-
-export const codecAssetUrls = [
-  codecAssetProbeWorkerUrl,
-  webpEncodeProbeWorkerUrl,
-  svelteKitFeaturesWorkerUrl,
-  ...precacheCodecAssetUrls,
-];

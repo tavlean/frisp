@@ -90,7 +90,7 @@ const rawThreadedCodecWorkers: Plugin = {
   },
 };
 
-// The /lab and /bench-svg routes are dev-only tools. Their +page.svelte files
+// The /lab, /bench-svg, and /diagnostics routes are dev-only tools. Their +page.svelte files
 // guard on `dev` and render "Not found" in production — but that is a RUNTIME
 // check, so the route component and its heavy `$lib/lab` deps are still emitted
 // as client chunks and precached by the service worker (build.filter in
@@ -102,7 +102,8 @@ const rawThreadedCodecWorkers: Plugin = {
 // with a tiny "Not found" stub, so none of the lab/bench UI (or its $lib/lab
 // code, which nothing else imports) is bundled, emitted, or precached. `vite dev`
 // is untouched, so the lab stays fully usable while developing.
-const DEV_ONLY_PAGE_RE = /\/src\/routes\/(?:lab|bench-svg)\/.*\+page\.svelte$/;
+const DEV_ONLY_PAGE_RE =
+  /\/src\/routes\/(?:lab|bench-svg|diagnostics)\/.*\+page\.svelte$/;
 // Layouts under those trees (the lab tab bar) become bare pass-throughs: a
 // layout must still render its children or every stubbed page under it would
 // disappear from the build output.
