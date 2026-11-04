@@ -1,3 +1,4 @@
+import { transfer } from 'comlink';
 import { createWorkerBridgeRuntime } from 'client/lazy-app/worker-bridge/runtime';
 import { getCodecAssetUrl } from 'shared/codec-assets';
 import type { EncodeOptions as AvifEncodeOptions } from 'features/encoders/avif/shared/meta';
@@ -12,7 +13,15 @@ import type { Options as QuantizeOptions } from 'features/processors/quantize/sh
 import type { WorkerResizeOptions } from 'features/processors/resize/shared/meta';
 import type { Options as RotateOptions } from 'features/preprocessors/rotate/shared/meta';
 import type {
+  OptimizeReply,
+  OptimizeRequest,
+  PrepareReply,
+  PrepareRequest,
+} from '../worker/pipeline-op';
+import type {
   AvifWasmUrls,
+  CodecUrls,
+  WorkerContext,
   ImagequantWasmUrls,
   JpegliWasmUrls,
   JxlWasmUrls,
@@ -45,9 +54,22 @@ const methodNames = [
   'quantize',
   'resize',
   'oxipngEncode',
+  'optimize',
+  'prepare',
+  'decodeOutput',
 ] as const;
 
 export interface SvelteKitWorkerBridgeApi {
+  /** One encode: the worker decodes or reuses the source and runs every step.
+   *  A pixel source in the request is transferred (the caller loses it). */
+  optimize(
+    signal: AbortSignal,
+    request: OptimizeRequest,
+  ): Promise<OptimizeReply>;
+  /** The rotated source frame, decoded in the worker and transferred out. */
+  prepare(signal: AbortSignal, request: PrepareRequest): Promise<PrepareReply>;
+  /** An encoded file decoded for display. */
+  decodeOutput(signal: AbortSignal, blob: Blob): Promise<ImageData>;
   avifDecode(signal: AbortSignal, blob: Blob): Promise<ImageData>;
   avifEncode(
     signal: AbortSignal,
@@ -119,6 +141,21 @@ export interface SvelteKitWorkerBridgeApi {
 }
 
 interface SvelteKitWorkerBridgeWorkerApi {
+  optimize(
+    signal: AbortSignal,
+    request: OptimizeRequest,
+    context: WorkerContext,
+  ): Promise<OptimizeReply>;
+  prepare(
+    signal: AbortSignal,
+    request: PrepareRequest,
+    context: WorkerContext,
+  ): Promise<PrepareReply>;
+  decodeOutput(
+    signal: AbortSignal,
+    blob: Blob,
+    context: WorkerContext,
+  ): Promise<ImageData>;
   avifDecode(
     signal: AbortSignal,
     blob: Blob,
@@ -278,10 +315,69 @@ const rotateWasmUrls = {
   preprocessor: codecAssetUrl('rotate:preprocessor:default'),
 } satisfies RotateWasmUrls;
 
+const codecUrls = {
+  avif: avifWasmUrls,
+  webp: webpWasmUrls,
+  qoi: qoiWasmUrls,
+  jxl: jxlWasmUrls,
+  mozjpeg: mozjpegWasmUrls,
+  jpegli: jpegliWasmUrls,
+  oxipng: oxipngWasmUrls,
+  imagequant: imagequantWasmUrls,
+  resize: resizeWasmUrls,
+  rotate: rotateWasmUrls,
+} satisfies CodecUrls;
+
+/** Pixels the main thread hands to the worker, for Comlink's transfer list. */
+function sourceTransfers(request: { source?: OptimizeRequest['source'] }) {
+  return request.source?.kind === 'pixels'
+    ? [request.source.image.data.buffer]
+    : [];
+}
+
+export interface SvelteKitWorkerBridgeOptions {
+  /** OxiPNG thread-pool size for this bridge's worker. Defaults to every
+   *  core; bulk splits the cores between its concurrent slots. */
+  threads?: number;
+}
+
 export default class SvelteKitWorkerBridge
   extends SvelteKitWorkerBridgeBase
   implements SvelteKitWorkerBridgeApi
 {
+  readonly #context: WorkerContext;
+
+  constructor({ threads }: SvelteKitWorkerBridgeOptions = {}) {
+    super();
+    this.#context = {
+      urls: codecUrls,
+      threads: Math.max(1, threads ?? navigator.hardwareConcurrency),
+    };
+  }
+
+  optimize(
+    signal: AbortSignal,
+    request: OptimizeRequest,
+  ): Promise<OptimizeReply> {
+    return super.optimize(
+      signal,
+      transfer(request, sourceTransfers(request)),
+      this.#context,
+    );
+  }
+
+  prepare(signal: AbortSignal, request: PrepareRequest): Promise<PrepareReply> {
+    return super.prepare(
+      signal,
+      transfer(request, sourceTransfers(request)),
+      this.#context,
+    );
+  }
+
+  decodeOutput(signal: AbortSignal, blob: Blob): Promise<ImageData> {
+    return super.decodeOutput(signal, blob, this.#context);
+  }
+
   avifDecode(signal: AbortSignal, blob: Blob): Promise<ImageData> {
     return super.avifDecode(signal, blob, avifWasmUrls);
   }

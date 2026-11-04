@@ -48,6 +48,17 @@ import initHqxWasm, {
 } from 'app-generated/codecs/hqx/pkg/squooshhqx';
 import { createRotate } from 'features/preprocessors/rotate/worker/runtime';
 import type { Options as RotateOptions } from 'features/preprocessors/rotate/shared/meta';
+import type { EncoderState } from 'client/lazy-app/feature-meta/shared';
+import type { PipelineSteps } from 'client/lazy-app/pipeline-core';
+import {
+  createPipelineOps,
+  replyTransfers,
+  type OptimizeReply,
+  type OptimizeRequest,
+  type PrepareReply,
+  type PrepareRequest,
+} from './pipeline-op';
+import { nativeDecode, pixelatedResize } from './offscreen';
 
 export interface AvifWasmUrls {
   decoder: string;
@@ -103,6 +114,30 @@ export interface ResizeWasmUrls {
 
 export interface RotateWasmUrls {
   preprocessor: string;
+}
+
+/** Every WASM URL group, sent with each pipeline op so whichever codec the
+ *  recipe reaches can locate its module. */
+export interface CodecUrls {
+  avif: AvifWasmUrls;
+  webp: WebpWasmUrls;
+  qoi: QoiWasmUrls;
+  jxl: JxlWasmUrls;
+  mozjpeg: MozjpegWasmUrls;
+  jpegli: JpegliWasmUrls;
+  oxipng: OxipngWasmUrls;
+  imagequant: ImagequantWasmUrls;
+  resize: ResizeWasmUrls;
+  rotate: RotateWasmUrls;
+}
+
+/** What every pipeline op needs besides its request. A separate argument so
+ *  the request object the caller marked for transfer reaches Comlink as is. */
+export interface WorkerContext {
+  urls: CodecUrls;
+  /** OxiPNG thread-pool size. The pool is built once per worker, so the
+   *  first threaded OxiPNG encode in a worker's life fixes it. */
+  threads: number;
 }
 
 // Threaded (Emscripten pthread) codec glue URLs, stashed by locateCodecWasm so
@@ -235,7 +270,7 @@ const encodeOxipng = createOxiPngEncoderRuntime({
       optimise: optimiseOxipngMt,
     } = await import('app-generated/codecs/oxipng/pkg-parallel/squoosh_oxipng');
     await initOxipngMtWasm(wasmUrl);
-    await initThreadPool(navigator.hardwareConcurrency);
+    await initThreadPool(oxipngThreads);
     return optimiseOxipngMt;
   },
   async loadSingleThread(wasmUrl) {
@@ -243,6 +278,8 @@ const encodeOxipng = createOxiPngEncoderRuntime({
     return optimiseOxipng;
   },
 });
+// Set from each op's WorkerContext; read once, when OxiPNG's pool is built.
+let oxipngThreads = navigator.hardwareConcurrency;
 const quantize = createQuantizeRuntime({
   loadQuantizer: async () => imagequant,
 });
@@ -259,6 +296,58 @@ function rotateWith(wasmUrls: RotateWasmUrls): ReturnType<typeof createRotate> {
   return rotate;
 }
 
+// The URLs of the op in progress. Ops run one at a time per worker (the
+// bridge queues them), so the steps below can read this instead of threading
+// URLs through PipelineSteps, which Node implements without URLs at all.
+let currentUrls: CodecUrls | undefined;
+const urls = (): CodecUrls => {
+  if (!currentUrls) throw Error('No codec URLs for this operation.');
+  return currentUrls;
+};
+
+type EncodeFn = (image: ImageData, options: unknown) => Promise<ArrayBuffer>;
+const encoders: Record<EncoderState['type'], EncodeFn> = {
+  avif: encodeAvif as EncodeFn,
+  jpegli: encodeJpegli as EncodeFn,
+  jxl: ((image, options) =>
+    jxl.encode(image, options as JxlEncodeOptions)) as EncodeFn,
+  mozJPEG: encodeMozjpeg as EncodeFn,
+  oxiPNG: ((image, options) =>
+    encodeOxipng(image, options as OxipngEncodeOptions, {
+      wasmUrls: urls().oxipng,
+    })) as EncodeFn,
+  qoi: encodeQoi as EncodeFn,
+  webP: encodeWebp as EncodeFn,
+};
+
+const steps: PipelineSteps = {
+  rotate: (image, rotate) => rotateWith(urls().rotate)(image, { rotate }),
+  resize: async (image, options) =>
+    options.method === 'browser-pixelated'
+      ? pixelatedResize(image, options)
+      : resize(image, options, urls().resize),
+  quantize: (image, options) => quantize(image, options),
+  encode: (image, encoder) => encoders[encoder.type](image, encoder.options),
+};
+
+const pipeline = createPipelineOps({
+  steps,
+  nativeDecode,
+  wasmDecode: {
+    'image/avif': decodeAvif,
+    'image/webp': decodeWebp,
+    'image/jxl': decodeJxl,
+    'image/qoi': decodeQoi,
+  },
+  transcodeJpeg: (jpeg) => jxl.transcodeJpeg(jpeg),
+});
+
+function enter(context: WorkerContext): void {
+  currentUrls = context.urls;
+  oxipngThreads = context.threads;
+  locateCodecWasm(context.urls);
+}
+
 const transferBuffer = async (p: Promise<ArrayBuffer>) => {
   const b = await p;
   return transfer(b, [b]);
@@ -270,6 +359,29 @@ const transferImage = async (p: Promise<ImageData>) => {
 };
 
 const workerApi = {
+  /** Decode (or reuse) the source, run the recipe, encode, and optionally
+   *  decode the output back. See pipeline-op.ts. */
+  async optimize(
+    request: OptimizeRequest,
+    context: WorkerContext,
+  ): Promise<OptimizeReply> {
+    enter(context);
+    const reply = await pipeline.optimize(request);
+    return transfer(reply, replyTransfers(reply));
+  },
+  async prepare(
+    request: PrepareRequest,
+    context: WorkerContext,
+  ): Promise<PrepareReply> {
+    enter(context);
+    const reply = await pipeline.prepare(request);
+    return transfer(reply, replyTransfers(reply));
+  },
+  async decodeOutput(blob: Blob, context: WorkerContext): Promise<ImageData> {
+    enter(context);
+    const image = await pipeline.decodeOutput(blob);
+    return transfer(image, replyTransfers(image));
+  },
   avifDecode(blob: Blob, wasmUrls: AvifWasmUrls): Promise<ImageData> {
     locateCodecWasm({ avif: wasmUrls });
     return transferImage(decodeAvif(blob));
