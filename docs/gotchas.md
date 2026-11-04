@@ -155,6 +155,12 @@ this doc holds the cross-cutting ones that no single file owns.
   Scoring now runs on a box-shrunk pair above 4 MP
   (`src/worker/score-scale.ts`); anything new that scores large frames
   should go through `scorePair` too.
+- **Auto probes substitute `quality` alone, not what the panel would
+  write.** A panel's `apply()` can couple other fields to quality (JXL forces
+  `lossyModular` below 7). A probe in that zone scores an encode the slider
+  never produces, so `AUTO_QUALITY_BOUNDS` must stop short of every such
+  coupling, the same way it stops short of a lossless switch at 100. Check
+  the panel's `apply()` before adding a codec's bounds.
 - **The `photo-large` bench fixture is a single cold run.** Treat it as a
   regression signal, never as a timing measurement.
 - **The SVG auto gate deliberately upscales small sources.** Precision loss that

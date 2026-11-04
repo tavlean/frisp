@@ -19,6 +19,11 @@ jpegli's argument is that you should not need a bag of tuning knobs, because its
 - **How to choose:** The number is on jpegli's own quality scale, not libjpeg's, so **a jpegli 75 is not the same picture as a 75 in another JPEG tool** (including MozJPEG settings you saved before 2026-11-04, which now load at the same number). Judge it in the preview rather than by matching numbers across encoders. As with any JPEG the top of the range is expensive: 95 to 100 costs a lot of bytes for very little you can see.
 - **Recommended starting point:** **75**. Try **80–85** for hero images or anything with text and sharp edges; drop to **60–70** for thumbnails and backgrounds.
 
+### Auto
+
+- **What it does:** Picks the Quality value for you from a target (Visually lossless, High, Balanced, Compact), searching the full 0 to 100. How it works and how long it takes: [Auto quality](../editor-features.md#auto-quality).
+- **Recommended starting point:** **Balanced** for web photos.
+
 ### Chroma subsampling
 
 - **What it does:** Chooses how much the _colour_ detail is compressed relative to the brightness detail. Human eyes are far more sensitive to brightness than to colour, so JPEG can store colour at a lower resolution with little visible loss.

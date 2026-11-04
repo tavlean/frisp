@@ -36,13 +36,12 @@ structural changes below come next. Full reasoning and the execution table:
 
 ## Next
 
-- [ ] **Auto-quality on the other lossy codecs, then outcome-first defaults
-      (review change D).** WebP Auto shipped 2026-11-04 with both gaps fixed:
-      alpha is scored (worst of dark and bright backgrounds), and a size-scaled
-      latency budget never commits a guess. Next: AVIF, JPEG XL, and jpegli
-      (one bounds entry plus the panel row each, keeping AVIF and JXL below
-      their lossless switch at 100). Then named targets become the primary
-      control and codec knobs move under Advanced. As built:
+- [ ] **Outcome-first defaults (review change D, second half).** Auto quality
+      now runs on every lossy codec in the picker (WebP, AVIF, JPEG XL, JPEG;
+      all shipped 2026-11-04), with alpha scored and a size-scaled budget
+      that never commits a guess. Next: named targets become the primary
+      control and codec knobs move under Advanced. This is a UI decision, so
+      it waits for the maintainer's UI revisit. As built:
       [specs/2026-07-11-auto-quality-mode.md](specs/2026-07-11-auto-quality-mode.md).
 - [ ] **Retire the MozJPEG codec and the QOI encoder.** Neither is selectable
       (MozJPEG since 2026-11-04, QOI encode since 2026-06-27) and neither is
@@ -77,8 +76,8 @@ batch landed on 2026-08-08, so every item below is unblocked; run them in this
 order. Each spec is executable by an agent with no access to the deciding
 conversation.
 
-- [ ] **Auto-quality mode.** WebP done 2026-11-04; the other lossy panels are
-      tracked under Next. A one-shot Auto action on every lossy panel that
+- [x] **Auto-quality mode.** Done 2026-11-04 on WebP, AVIF, JPEG XL, and JPEG.
+      A one-shot Auto action on every lossy panel that
       bisects quality until the output meets an SSIMULACRA2 target, powered by a
       new `codecs/ssimulacra2` module. This is the app-level intelligence layer on
       top of the codecs, and per the 2026-08-08 product thesis in

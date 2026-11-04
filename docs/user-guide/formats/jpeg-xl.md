@@ -50,6 +50,13 @@ _(Only shown when Lossless is off.)_
 - **How to choose:** JPEG XL's quality scale is tuned so that high values are close to visually lossless. Around **90** typically "looks identical to the original" for most photos, while values approaching 100 balloon in size for gains you can't see. Dropping below ~70 starts to show visible artifacts on detailed images (src: github.com/libjxl/libjxl). Use the live preview to find the lowest number that still looks clean to you. Note: setting Quality below **7** automatically forces "Alternative lossy mode" on (see below).
 - **Recommended starting point:** **75** (the default) is a good balance for general photos. Bump toward **85–90** when fidelity matters (faces, fine textures, product shots); pull down toward **60–70** when file size is the priority and the image is simple.
 
+### Auto
+
+_(Only shown when Lossless and Lossless transcode are off.)_
+
+- **What it does:** Picks the Quality value for you from a target (Visually lossless, High, Balanced, Compact). It searches 7 to 99: 100 is Lossless, and below 7 the panel forces Alternative lossy mode, a different encoder. How it works and how long it takes: [Auto quality](../editor-features.md#auto-quality).
+- **Recommended starting point:** **Balanced** for web photos; **High** or **Visually lossless** when fidelity matters (faces, fine textures, product shots).
+
 ### Alternative lossy mode
 
 _(Only shown when Lossless is off.)_

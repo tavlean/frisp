@@ -139,7 +139,7 @@ steps). Budget: 8 s plus 1 s per megapixel above 2, capped at 20 s; above 4 MP t
 score is taken on a box-shrunk pair (long edge at most 2048 px). A budget stop with a
 pass keeps the pass; a budget stop with nothing passing below 100 commits nothing. A
 ceiling that fails within budget commits 100. Shown only in lossy mode and only in the
-single-image editor (bulk and the labs omit it). Source: `src/lib/editor/auto-quality.ts`,
+single-image editor (bulk and the labs omit it). The same row (`AutoQualityRow.svelte`) serves AVIF, JPEG XL, and JPEG with their own bounds. Source: `src/lib/editor/auto-quality.ts`,
 `EditorSession.autoQuality`.
 
 Lossy Effort defaults to 4, libwebp's own default (it was 6 until 2026-11-04).
@@ -170,6 +170,8 @@ means "use main quality" (separate alpha off).
 | Lossless | (derived: sets quality/subsample) | checkbox | on → quality 100, subsample 3            | off                |
 | Quality  | `quality`                         | range    | 0–99 (`MAX_QUALITY−1`) (only when lossy) | 50                 |
 | Effort   | `speed`                           | range    | 0–10 (UI = `10 − speed`)                 | speed 6 → effort 4 |
+
+**Auto** (an action, not a stored option): the shared Auto row under Quality, searching `quality` 0–99 (100 is the Lossless state); only when lossy. Search rules as in WebP's Lossy → Auto above; bounds in `AUTO_QUALITY_BOUNDS` (`src/lib/editor/auto-quality.ts`).
 
 **Advanced settings** (Revealer). Subsection in `{#if !lossless}`:
 
@@ -244,6 +246,8 @@ transcode lane.
 | Optimise for decoding speed (worse compression) | `decodingSpeedTier` | range    | 0–4, step 1                                       | 0                                  |
 | Noise equivalent to ISO                         | `photonNoiseIso`    | range    | 0–50000, step 100                                 | 0                                  |
 
+**Auto** (an action, not a stored option): the shared Auto row under Quality, searching `quality` 7–99 (100 is Lossless; below 7 the panel forces `lossyModular`); only when lossy and not transcoding. Search rules as in WebP's Lossy → Auto above; bounds in `AUTO_QUALITY_BOUNDS` (`src/lib/editor/auto-quality.ts`).
+
 **Hidden / quirks** — all `EncodeOptions` fields are exposed. `lossyModular` is
 coerced to `true` whenever `quality < 7` (apply() override, checkbox also disabled).
 `lossyPalette` only takes effect in lossless mode (`apply()` sets it false otherwise).
@@ -308,6 +312,8 @@ select uses the `JpegliChromaSubsample` enum (AUTO 0 / FULL 1 / HALF 2).
 | UI label | key       | control | range         | default |
 | -------- | --------- | ------- | ------------- | ------- |
 | Quality  | `quality` | range   | 0–100, step 1 | 75      |
+
+**Auto** (an action, not a stored option): the shared Auto row under Quality, searching `quality` 0–100. Search rules as in WebP's Lossy → Auto above; bounds in `AUTO_QUALITY_BOUNDS` (`src/lib/editor/auto-quality.ts`).
 
 **Advanced settings** (Revealer)
 

@@ -4,6 +4,32 @@ Short session-by-session build log: what changed, why, and the gotchas a future
 session must know. Newest first. (Live project state stays in
 [the project brief](brief.md); this is the narrative trail.)
 
+## 2026-11-04 (Opus, executor) - Auto quality on AVIF, JPEG XL, and JPEG
+
+- `c1274a2a`: the Auto row moved out of `WebpOptions.svelte` into a shared
+  `AutoQualityRow.svelte`, now also under the Quality slider of AVIF, JPEG
+  XL, and JPEG. `AUTO_QUALITY_BOUNDS` gained `avif` 0 to 99, `jxl` 7 to 99,
+  and `jpegli` 0 to 100. The session code needed no change: it was already
+  generic over the bounds table.
+- Why JXL starts at 7: the panel's `apply()` forces `lossyModular` below
+  quality 7, but the probe substitutes `quality` alone, so a probe at 5 would
+  score a VarDCT encode the slider can never produce. Quality 7 is distance
+  13.2, far below any target, so nothing is lost.
+- The JXL row is hidden while the lossless transcode runs; the worker
+  refuses to score a transcode, and there is no quality to choose.
+- Measured on photo.jpg, Balanced (Chromium / WebKit): AVIF 57 / 57 in
+  3.9 s, JPEG XL 63 / 64 in 2.9 to 3.9 s, JPEG 54 / 55 in 1.9 s.
+- Measured on photo-large.jpg (12 MP), Balanced, Chromium, one cold run:
+  AVIF stopped at the budget after 25 s with quality 49 (score 72.7), JPEG XL
+  stopped after 22 s with quality 30 (75.3), JPEG met it at quality 24 (70.4)
+  in 11 s. AVIF and JXL encodes at 12 MP take several seconds each, so the
+  budget ends the search with a passing but loose result, as designed. JPEG
+  24 is suspiciously low: the score runs on a 2x box-shrunk pair above 4 MP,
+  which halves JPEG's 8x8 blocking before the metric sees it. Logged as an
+  open question in the spec.
+- Gates: `npm run check` exit 0, 240 unit tests, `auto-quality.spec.ts` 20
+  of 20 in Chromium and WebKit.
+
 ## 2026-11-04 (Opus, executor) - Auto quality for WebP (review change D, first codec)
 
 Branch `feat/auto-quality`, in three phases:

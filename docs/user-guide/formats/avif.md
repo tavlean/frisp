@@ -22,6 +22,13 @@ AVIF (AV1 Image File Format) is a newer image format built on the AV1 video code
 - **How to choose:** AVIF holds up well at lower quality settings than JPEG, so you can often go lower than you would expect. Around 50–70 is a good range for web photos; below ~40 you start to see smearing and loss of fine texture; above ~80 the file grows quickly for little visible gain. Always watch the live preview rather than trusting the number alone.
 - **Recommended starting point:** **50** (the default) is a sensible starting point for web photos — raise toward 60–70 for hero images, lower toward 40 for thumbnails.
 
+### Auto
+
+_(Only shown when Lossless is off.)_
+
+- **What it does:** Picks the Quality value for you from a target (Visually lossless, High, Balanced, Compact). It searches 0 to 99 and never reaches 100, which is Lossless. How it works and how long it takes: [Auto quality](../editor-features.md#auto-quality).
+- **Recommended starting point:** **Balanced** for web photos. AVIF encodes more slowly than WebP, so expect the search to take a few seconds longer.
+
 ### Effort
 
 - **What it does:** Tells the encoder how hard to try. More effort means it searches harder for ways to compress, producing a **smaller file at the same quality** — but it takes longer.

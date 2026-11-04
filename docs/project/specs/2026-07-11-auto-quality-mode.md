@@ -1,6 +1,6 @@
 # Spec: Auto-quality mode (SSIMULACRA2-targeted quality search)
 
-Last updated: 2026-11-04. Status: **WebP shipped 2026-11-04; other codecs pending.**
+Last updated: 2026-11-04. Status: **Shipped 2026-11-04 for WebP, AVIF, JPEG XL, and JPEG (jpegli).**
 Origin: maintainer decision 2026-07-11 (codec guidance session). Related:
 [2026-07-11-frisp-cli-analysis](../../frisp-cli-analysis.md) (the same engine is
 the planned core of a future CLI), [codec-options-model.md](../../codec-options-model.md)
@@ -49,11 +49,27 @@ is kept as the history of the decision.
   computes after the commit, so the displayed result is a cache hit.
 - **Cancel.** A new search, any change to the side's recipe (not only
   Quality), a format change, or a new or closed file cancels the running one.
-- **WebP only.** Bounds exist for `webP` alone; AVIF, JPEG XL, and jpegli are
-  next (one bounds entry plus the panel row each). MozJPEG left the picker.
-- **Measured (2026-11-04, Balanced):** photo.jpg meets the target at quality
-  74 in about 2 s in Chromium and WebKit; photo-large.jpg (12 MP) meets it at
-  quality 37 to 38 in 13 to 15 s.
+- **Formats and bounds.** `AUTO_QUALITY_BOUNDS` covers every lossy encoder in
+  the picker: WebP 0 to 100, AVIF 0 to 99, JPEG XL 7 to 99, jpegli 0 to 100.
+  AVIF and JXL stop at 99 because their panels spell lossless as 100. JXL
+  starts at 7 because its panel forces `lossyModular` below 7 and the probe
+  substitutes `quality` alone, so a lower probe would score an encode the
+  slider cannot produce (quality 7 is distance 13.2; no target lands there).
+  MozJPEG left the picker; PNG has no quality. One `AutoQualityRow.svelte`
+  serves all four panels, shown only in lossy mode and, for JXL, not while
+  the lossless transcode runs (the worker refuses to score a transcode).
+- **Measured (2026-11-04, Balanced):** on photo.jpg, Chromium and WebKit:
+  WebP 74 in about 2 s, AVIF 57 in 3.9 s, JPEG XL 63 to 64 in 2.9 to 3.9 s,
+  JPEG 54 to 55 in 1.9 s. On photo-large.jpg (12 MP): WebP 37 to 38 in 13 to
+  21 s; in Chromium, AVIF stopped at the budget with 49 (score 72.7) after
+  25 s, JPEG XL stopped with 30 (75.3) after 22 s, JPEG met it at 24 in 11 s.
+- **Open question: downscaled scoring flatters blocky codecs.** JPEG at
+  quality 24 on the 12 MP photo is lower than WebP's 37 on the same image.
+  Above 4 MP the score runs on a box-shrunk pair (2x at 12 MP), which halves
+  JPEG's 8x8 block edges before the metric sees them. A full-resolution
+  centre crop of the same pixel count, or a crop scored alongside the
+  shrunk pair (worse score counts), would judge artifacts at the size people
+  view. Not built; needs a visual check of the 12 MP JPEG at 24 first.
 
 ## Objective
 
