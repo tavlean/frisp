@@ -1,6 +1,6 @@
 # Codec build notes — engineering log
 
-Last updated: 2026-08-11.
+Last updated: 2026-11-04.
 
 > **STATUS: all codecs rebuilt natively (no Docker) and committed on branch
 > `codec-rebuilds`.** imagequant 2.18.0, libwebp v1.6.0, libavif v1.4.2 +
@@ -501,6 +501,62 @@ wasm-ld strips everything the wrapper never reaches. That is expected here, not
 the "a whole library got dropped" symptom from the AVIF saga: the jpegli error
 strings (`Unsupported color transform`, `Invalid sampling factor`) are present in
 the `.wasm`, which is the cheap way to prove the library actually linked.
+
+### ssimulacra2
+
+Done 2026-11-04 with emcc 3.1.0: cloudinary/ssimulacra2 `81feacf6`, Highway
+1.0.2 (`f670ea58`), lcms2 `lcms2.16`. This is the SSIMULACRA 2.1 metric
+behind auto-quality, not a codec: one export, `score(ref, dist, width,
+height)` on RGBA8 bytes, and one single-threaded variant used everywhere. The
+pins and licenses are in [codec-provenance.md](codec-provenance.md).
+
+Build it with the toolchain from "Native build setup" above, using the emsdk
+at `~/Development/emsdk`:
+
+```sh
+cd ~/Development/emsdk && ./emsdk activate 3.1.0 && source ./emsdk_env.sh
+cd <repo>/codecs/ssimulacra2
+export CFLAGS="-O3 -flto"
+export CXXFLAGS="-O3 -flto -std=c++17"
+export LDFLAGS="-O3 -flto -s FILESYSTEM=0 -s ALLOW_MEMORY_GROWTH=1 -s TEXTDECODER=2 -s NODEJS_CATCH_EXIT=0 -s NODEJS_CATCH_REJECTION=0"
+emmake make
+```
+
+What would cost time to rediscover:
+
+1. **No CMake.** Upstream's CMake wants a system Highway and lcms2 and builds
+   image loaders the wrapper never calls. The Makefile compiles the metric,
+   its vendored libjxl slice, two Highway files, and lcms2 (as its own C
+   archive) directly.
+2. **`include/jxl/jxl_export.h` is a hand-written stub.** libjxl's CMake
+   generates that header (GenerateExportHeader). Everything here links into
+   one static WASM module, so the export macros are empty.
+3. **The source lists are globbed in the shell, not with `$(wildcard)`.**
+   make expands a `$(wildcard)` when it reads the Makefile, before the fetch
+   rules have populated `node_modules/`, so on a clean build the list comes
+   back empty. The backtick `ls` runs at recipe time, after the fetch.
+4. **lcms2, not skcms.** The slice's `enc_color_management.cc` has a skcms
+   branch, but it needs a header the slice does not ship, so the build sets
+   `-DJPEGXL_ENABLE_SKCMS=0`.
+5. **Pass byte views, never strings.** `score` takes `std::string` in C++,
+   and embind accepts a `Uint8Array` or `Uint8ClampedArray` for it. A JS
+   string gets UTF-8 encoded, which changes its length, and the length check
+   then returns -1000.
+
+The Node build (`ssimulacra2_node.js`) is for checking scores outside the
+browser. Two traps on Node 24:
+
+- **Emscripten 3.1.0's Node glue tries the global `fetch` on a file path**,
+  because Node now has a global `fetch` and the glue only checks that one
+  exists. Read the `.wasm` yourself and pass it as `wasmBinary` to the
+  factory.
+- **The ES module build still calls `require` and reads `__dirname`.** Define
+  both before importing it: `globalThis.require =
+  createRequire(<codec dir>)` from `node:module`, and `globalThis.__dirname`
+  set to the codec directory.
+
+With both in place, identical inputs score 100 and a 4x4 input returns
+-1000 (checked on Node 24.12.0).
 
 ### Rust codecs (oxipng ✅, resize ✅, hqx) — emsdk clang for the C deps
 Need `rustup` + nightly (`-Z build-std` for the parallel/threaded variant) +
