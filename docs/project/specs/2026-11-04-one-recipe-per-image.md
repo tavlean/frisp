@@ -1,11 +1,50 @@
 # Spec: one recipe and one result owner per image
 
 Last updated: 2026-11-04.
-Status: ready to execute.
+Status: done 2026-11-04, in five commits: `bb934039` (recipe module and
+signature unification), `71cb2a7c` (`optimizeImage`), `581029ea` (bulk
+engine and store on recipes), `4a848c00` (focus-view binding, Rotate, SVG
+lane in bulk), and the docs commit that follows them.
 
 Change A of [../reports/2026-11-02-first-principles-review.md](../reports/2026-11-02-first-principles-review.md),
 approved by the maintainer on 2026-11-04 ("proceed"; keep the lab skins
 working; the recommended override model).
+
+## Deviations
+
+Decided during execution and accepted by the maintainer on 2026-11-04:
+
+- **Unknown source size counts a resize as real.** `recipeSignature` keys an
+  enabled resize when the size is 0 or missing, as the spec says. The old
+  editor signature folded it away there, which let a resized and an unresized
+  result share a cache key. `resizeIsReal` keeps the old meaning for the
+  "Resizing" badge and the grain preview.
+- **A disabled palette folds out of the signature.** Changing palette options
+  while palette reduction is off no longer makes a new cache key or undo step.
+- **SVG output ignores rotation.** The vector lane never rotates its text, so
+  rotation is dropped from SVG signatures. Production hides Rotate for SVG
+  sources; the lab skins still offer it.
+- **The transcode lane uses the real decoded size.** `chooseLane` decides the
+  JPEG to JXL transcode from the prepared source's own size, not the editor's
+  last result size, which can be 0 or stale right after a rotate.
+  `transcodeBlocked` in the UI reads the editor's size and reports blocked
+  when the size is unknown and a resize is on.
+- **Image-scope edits are sent as changes.** The focus view sends
+  `editSelected(t => applyRecipeChanges(t, before, after))` rather than
+  `() => recipe`, so a multi-selection gets the changed part (rotation,
+  output, or one processor) and keeps its other differences. With one image
+  selected the result is the same.
+- **Adoption goes through the in-flight map.** `EditorSession.adoptResult`
+  registers the bulk output as an in-flight pass under the key `encodeSide`
+  computes, so the encode effect piggybacks on it and the outcome lands in the
+  `ResultCache`. The cache mints its own object URL. SVG outputs are not
+  adopted: the focus view runs the vector lane itself.
+- **Rotation with every image selected becomes own recipes.** An image-scope
+  edit with the whole batch selected normally edits the shared recipe; a
+  rotation instead gives each image its own recipe, so the shared recipe
+  never rotates.
+- **Bulk snapshots moved to version 2** (`sharedRecipe`, `sharedSvgOptions`,
+  `resizeReference`, `ownRecipe`). Nothing in the app persists them.
 
 ## Objective
 

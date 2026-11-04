@@ -29,13 +29,6 @@ everything else proceeds). Its trust fixes landed the same day; the
 structural changes below come next. Full reasoning and the execution table:
 [reports/2026-11-02-first-principles-review.md](reports/2026-11-02-first-principles-review.md).
 
-- [ ] **One recipe and one result owner per image (review change A).** One
-      typed recipe covering rotation, processors, and output kind (raster
-      codec, SVG optimize, or JPEG to JXL transcode), and one source-aware
-      operation that runs it. Bulk schedules recipes; the focused editor
-      previews the same result; the seeding bridge in `BulkMode.svelte` stops
-      translating between two models. Lifts the two `fixme` tests in
-      `tests/e2e/export-contract.spec.ts` (rotation in bulk, SVG batches).
 - [ ] **Worker-side pipeline (review change B).** One worker op keeps the
       decoded source hot and runs every step, returning bytes plus a
       transferable preview. Closes the 2026-07-07 review's P2(b) and P2(c), and
@@ -63,12 +56,16 @@ structural changes below come next. Full reasoning and the execution table:
 - [ ] **Pick an editor re-style direction.** Three finished skins wait on a
       look-and-choose decision; the maintainer revisits the UI soon. Registry:
       [../lab.md](../lab.md).
-- [ ] **Codec options model, minimal slice.** Shrinks once auto-quality makes
-      targets primary: only the Advanced controls need the registry. Analysis
-      in [../codec-options-model.md](../codec-options-model.md).
-- [ ] **Bulk Phase 3, overrides polish.** Lands inside change A's recipe
-      rather than on today's sparse per-leaf overrides. Control tables:
-      [specs/2026-07-07-ws-g-control-inventory.md](specs/2026-07-07-ws-g-control-inventory.md).
+- [ ] **Codec options model, panel half.** Describing each codec's controls
+      as data to simplify the single-image panels. Shrinks once auto-quality
+      makes targets primary: only the Advanced controls would need it. The
+      bulk half (registry and per-control overrides) was removed with change
+      A. Analysis in [../codec-options-model.md](../codec-options-model.md).
+- [ ] **Bulk focus polish under the own-copy model.** What remains of the old
+      "overrides polish": show which settings differ from the shared ones on
+      an image with its own settings (a diff view, not per-control
+      inheritance), and decide whether Reset needs a confirm for images with
+      many changes.
 - [ ] **Keyboard control.** Figma-style single-key actions plus Photoshop-style
       digit entry for Quality. The proposal at
       [../keyboard-control.md](../keyboard-control.md) has five open decisions.
@@ -193,6 +190,15 @@ conversation.
 
 Newest first. The narrative, with the gotchas, is in [worklog.md](worklog.md).
 
+- [x] **One recipe and one result owner per image (review change A)**
+      (2026-11-04): one typed `ImageRecipe` (rotation, processors, raster or
+      SVG output) and one `recipeSignature` for the editor cache, history, and
+      bulk hashes; one `optimizeImage` dispatching the SVG, transcode, and
+      pixel lanes for both surfaces; bulk stores a shared recipe plus optional
+      full own copies (sparse overrides and the control registry are gone);
+      the focus view adopts the current bulk output instead of re-encoding;
+      bulk gained Rotate and keeps SVGs vector.
+      [specs/2026-11-04-one-recipe-per-image.md](specs/2026-11-04-one-recipe-per-image.md)
 - [x] **Export-contract trust fixes and low-risk cuts** (2026-11-04), from the
       2026-11-02 review: Save and Share only hand out a result matching the
       current recipe; bulk jobs never settle under replaced settings and a

@@ -1,6 +1,17 @@
 # Codec Options Model (design proposal)
 
-Last updated: 2026-07-07.
+Last updated: 2026-11-04.
+
+> **Update 2026-11-04: the registry and sparse overrides are gone.** Change A
+> ([project/specs/2026-11-04-one-recipe-per-image.md](project/specs/2026-11-04-one-recipe-per-image.md))
+> removed the per-codec control registry (`src/client/lazy-app/bulk/controls/`)
+> and the sparse per-control engine merge. Bulk now stores one shared
+> `ImageRecipe` plus, per image, nothing or a full own copy, so there is no
+> per-control inheritance to diff and no per-control override dots to drive.
+> What still stands below is the panel half: describing each codec's
+> user-facing controls as data (one toggle to many fields, inversions, mode
+> coupling) to simplify the single-image panels. Any revival must build on
+> the own-copy model, not on per-control overrides.
 
 Status: **Minimal slice started.** The full model remains a standalone project
 to pick up after the post-migration cleanup

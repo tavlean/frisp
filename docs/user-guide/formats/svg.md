@@ -1,5 +1,7 @@
 # SVG
 
+Last updated: 2026-11-04.
+
 SVG is a vector format: it stores shapes, paths, styles, and text instead of a fixed grid of pixels. When you open an SVG, Frisp can optimize that source as SVG text, keeping the result sharp at every zoom level. The optimizer is **SVGO v4**, running locally in a dedicated browser worker; the file is never uploaded.
 
 ## Auto mode
@@ -34,4 +36,4 @@ Choosing WebP, AVIF, JPEG XL, JPEG, or PNG for an SVG source works as before: Fr
 
 ## SVGs in a batch
 
-Vector optimization is a single-image feature for now. If you open **two or more** SVGs at once, bulk mode rasterizes each of them to the batch's format (WebP by default) instead of optimizing them as SVG. This is a known gap, planned together with a future change that gives bulk and the single editor one shared recipe. To keep an SVG as SVG today, open it on its own.
+SVGs in a batch stay vector, optimized exactly like a single SVG, and export as `.svg`. In a batch of only SVGs, the global panel shows these SVG options and they apply to every SVG. In a mixed batch, the global panel shows the raster settings for the other images, with a note that SVGs keep vector optimization. To turn one SVG into a raster image, open it in the batch and pick a raster format; **Reset to global** returns it to SVG. See [Bulk optimization](../bulk-optimization.md).

@@ -4,6 +4,55 @@ Short session-by-session build log: what changed, why, and the gotchas a future
 session must know. Newest first. (Live project state stays in
 [the project brief](brief.md); this is the narrative trail.)
 
+## 2026-11-04 (Opus, executor) - one recipe per image (review change A)
+
+Executed [specs/2026-11-04-one-recipe-per-image.md](specs/2026-11-04-one-recipe-per-image.md)
+in five commits, each reviewed by the driver before it landed.
+
+- `bb934039`: `src/client/lazy-app/recipe.ts` defines `ImageRecipe` and the
+  one `recipeSignature`; the editor's encode signature, its undo dedupe, and
+  bulk's output hash all build on it. A temporary harness compared old and new
+  signatures over 1,440 editor states and 288 bulk states: bulk groups
+  identically, and the editor differs only in the three intended ways (an
+  enabled resize counts when the size is unknown, a disabled palette folds,
+  SVG output ignores rotation).
+- `71cb2a7c`: `src/lib/optimize-image.ts` is the single dispatch for the SVG
+  lane, the JPEG to JXL transcode, and the pixel encode; `encodeSide` calls it.
+  `preview: false` skips the output decode for bulk.
+- `581029ea`: bulk stores a shared recipe plus optional full own copies
+  (`ownRecipe`); the sparse overrides, `DeepPartial`, and the control registry
+  are deleted. The runtime runs `optimizeImage`, so SVGs in a batch stay
+  vector. Image-scope edits are sent as changes, so a multi-selection keeps
+  its other differences.
+- `4a848c00`: the hydration bridge in `BulkMode.svelte` is gone (497 to 242
+  lines). The focus view loads the job and its recipe into `EditorSession`,
+  and `adoptResult` offers a current bulk output as an in-flight pass under
+  the encode effect's own key, so the editor lands on it instead of encoding
+  again (a 12 MP photo shows in about 0.3 s against 1.3 s for its encode).
+  Rotate is back in bulk as a per-image edit; the global panel shows SVG
+  options for an all-SVG batch. The two `fixme` tests in
+  `export-contract.spec.ts` now pass, plus a mixed PNG and SVG batch and a
+  rotate-then-Reset test.
+
+Gates on the last commit: `npm run check` 0 errors (57 `corner-shape`
+warnings), 198 unit tests, full e2e 108 passed and 4 skipped (WebKit offline)
+in Chromium and WebKit. The lab skins load and encode in `npm run dev`.
+
+Gotchas (in [../gotchas.md](../gotchas.md)):
+
+- `ResultCache` revokes entry URLs on evict and clear, so anything adopted
+  into it needs a URL the cache owns.
+- `page.setInputFiles` cannot mix paths and buffers.
+- A long-running `vite preview` serves a stale manifest after a rebuild.
+- In a minified build, check bundle membership against a baseline build, not
+  by identifier names.
+- Once the bulk runtime awaits a decode first, test mocks must reject on an
+  already-aborted signal.
+
+Found and logged, not fixed: bulk strip thumbnails for SVG sources are blank
+(`createImageBitmap` cannot decode an SVG blob); see
+[issue-list.md](issue-list.md).
+
 ## 2026-11-04 (Opus, driver) - export-contract trust fixes and low-risk cuts
 
 Executed the first stage of

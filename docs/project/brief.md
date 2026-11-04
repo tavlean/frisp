@@ -74,8 +74,12 @@ images live; images never travel to Frisp.
 - Editor state: `src/lib/editor/editor-session.svelte.ts` (`EditorSession` plus
   two `SideRuntime`s), `editor-history.svelte.ts` for undo/redo,
   `src/lib/result-cache.ts` (LRU signature to result), `settings-storage.ts` for
-  localStorage persistence. Signature and cache-key logic lives ONLY in
-  `src/lib/editor/encode-signature.ts`.
+  localStorage persistence. Every image is one `ImageRecipe`; its signature
+  and folding rules live ONLY in `src/client/lazy-app/recipe.ts`
+  (`recipeSignature`), which the editor reaches through
+  `src/lib/editor/encode-signature.ts` and `side-recipe.ts` and bulk through
+  its output hashes. `src/lib/optimize-image.ts` runs a recipe for both
+  surfaces (SVG lane, JPEG to JXL transcode, or pixel encode).
 - Framework-neutral headless pipeline under `src/client/lazy-app/image-pipeline*`,
   with a complete pure-reducer bulk engine in `src/client/lazy-app/bulk/` and its
   production store and UI in `src/lib/bulk/`.
@@ -100,6 +104,13 @@ the multi-threaded runtime is verified in Chromium and WebKit. Gates are green:
 
 Shipped since then, newest first:
 
+- **One recipe per image (2026-11-04, review change A).** The editor and bulk
+  share one `ImageRecipe`, one signature, and one `optimizeImage`. Bulk keeps
+  a shared recipe plus optional full own copies per image (the sparse
+  overrides and the control registry are gone), gained Rotate, keeps SVGs
+  vector, and its focus view adopts the current bulk output instead of
+  re-encoding. Spec:
+  [specs/2026-11-04-one-recipe-per-image.md](specs/2026-11-04-one-recipe-per-image.md).
 - **Export-contract trust fixes (2026-11-04).** The 2026-11-02
   first-principles review found paths where the saved file disagreed with
   what the user asked for; each was reproduced and fixed with a regression
@@ -172,9 +183,10 @@ later phase. Do not delete it.
 Set by the 2026-11-02 review and confirmed by the maintainer on 2026-11-04.
 The full ordered plan is [roadmap.md](roadmap.md).
 
-1. **One recipe and one result owner per image.** Single and bulk stop
-   translating between two editing models; rotation and the SVG lane work in
-   bulk because the recipe carries them.
+1. ~~**One recipe and one result owner per image.**~~ Done 2026-11-04
+   (change A): single and bulk share one `ImageRecipe` and one
+   `optimizeImage`; rotation and the SVG lane work in bulk because the recipe
+   carries them.
 2. **The worker-side pipeline and a bulk resource budget.** Performance,
    memory, and the honest headless boundary.
 3. **Auto-quality on one codec, then outcome-first defaults.** The feature
@@ -194,11 +206,10 @@ The lab skins and the desktop-shell direction stay (maintainer, 2026-11-04).
   fixed dimensions.
 - **Memory ceiling for N images.** Decode-on-demand, thumbnail strategy, LRU.
   Review change C measures and sets a supported batch size.
-- **Overrides inside the one recipe.** Keep per-leaf inheritance (a global
-  edit flows into every value an image did not touch), or "an image follows
-  the shared recipe or owns a full copy" (300 to 400 lines simpler, but a
-  global edit stops reaching touched images). The review recommends the
-  simpler model plus "apply to selected"; decide in change A's spec.
+- ~~**Overrides inside the one recipe.**~~ Decided 2026-11-04: the own-copy
+  model. An image follows the shared recipe or owns a full copy; a global
+  edit stops reaching images with their own copy; multi-select edits carry
+  the changed setting to each selected image.
 - **A usage signal.** Nothing measures what anyone uses, so questions like
   "does anyone use the two-sided compare" have no answer. A cookieless
   counter (Cloudflare Web Analytics) would fit the privacy stance, but it is

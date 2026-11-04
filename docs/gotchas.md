@@ -41,6 +41,13 @@ this doc holds the cross-cutting ones that no single file owns.
   hook glob both exclude `*.md` on purpose, and `proseWrap: always` is banned.
   Adding Markdown back reflows every hand-wrapped doc in one commit.
 
+- **In a minified build, identifier names do not prove bundle membership.**
+  The main page chunk keeps the string `optimizeSvgSide` at the dynamic-import
+  call site, and option names such as `cleanupNumericValues` appear in a small
+  main-bundle helper chunk, while SVGO itself stays in its lazy chunk. To check
+  what a change pulled into the main bundle, build the previous commit too and
+  compare chunk hashes and sizes, or fingerprint library-only strings.
+
 ## Runtime
 
 - **A codec can silently change the output's resolution.** libjxl downsamples 2x
@@ -89,6 +96,12 @@ this doc holds the cross-cutting ones that no single file owns.
   `File`.
 - **Svelte 5 flushes class bindings asynchronously.** A `getComputedStyle` sweep
   taken immediately after a state change reads the previous frame.
+
+- **Anything placed in an `EditorSession` `ResultCache` must use a URL the cache
+  owns.** The cache revokes an entry's object URL on eviction and on `clear()`
+  (every new file). Handing it another owner's URL, such as a bulk output's
+  `downloadUrl`, silently breaks that owner's download later. Mint a fresh
+  URL for the cache, as `adoptResult` does.
 
 ## Measurement
 
@@ -162,3 +175,16 @@ this doc holds the cross-cutting ones that no single file owns.
 - **Workers static assets serve the SPA fallback via `not_found_handling`**
   returning `/index.html`, so the adapter's `200.html` ships unused. `_headers`
   and `_redirects` work as they did on Pages.
+- **`page.setInputFiles` cannot mix file paths and buffers in one call.** It
+  throws "File paths cannot be mixed with buffers". For a batch that needs an
+  inline buffer (an SVG string, say), read the path fixtures with
+  `readFileSync` and pass everything as buffers.
+- **A long-running `vite preview` keeps the SvelteKit manifest it loaded at
+  startup.** After a rebuild it serves HTML that points at deleted chunks: a
+  blank page with 404s on `entry/start` and `entry/app`. Restart the preview
+  after every build.
+- **Bulk runtime test mocks must reject when the signal is already aborted.**
+  The runtime awaits a decode before it calls `optimizeImage`, so a run
+  cancelled mid-decode still reaches the encode call with an aborted signal. A
+  mock that returns a pending promise there never settles, and the cancelled
+  run never unwinds (the test times out).

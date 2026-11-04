@@ -1,6 +1,17 @@
 # Bulk UI — design options & feature roadmap
 
-Last updated: 2026-07-03.
+Last updated: 2026-11-04.
+
+> **Update 2026-11-04: the override model changed.** Change A
+> ([project/specs/2026-11-04-one-recipe-per-image.md](project/specs/2026-11-04-one-recipe-per-image.md))
+> replaced per-field sparse overrides with an own-copy model: an image
+> follows the shared settings or has its own full recipe, with Reset to global
+> returning it. Untouched fields of an image with its own recipe no longer
+> follow later shared edits, per-control override dots and per-control resets
+> are no longer possible, bulk gained Rotate (image scope), and SVGs in a
+> batch keep the vector lane. Sections below that describe sparse overrides,
+> `getEffectiveSettings`, or `getSettingsOverridePaths` are design history;
+> the current engine is [bulk-image-architecture.md](bulk-image-architecture.md).
 
 > **DESIGN PHASE COMPLETE (2026-07-02).** Every open question is decided and
 > implemented in the dev-only `/lab/bulk` prototype, which is the reference

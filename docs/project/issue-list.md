@@ -1,6 +1,6 @@
 # Issue List
 
-Last updated: 2026-08-11.
+Last updated: 2026-11-04.
 
 Small backlog seed. The big tracks live in their own plans — see
 [README.md](../README.md) for the map. Product work belongs in
@@ -9,6 +9,10 @@ Small backlog seed. The big tracks live in their own plans — see
 
 ## Done
 
+- The coarse bulk override paths (`getSettingsOverridePaths` reporting
+  `encoderState` instead of per-control ids) are gone with the override model
+  itself: change A (2026-11-04) replaced sparse overrides with full own
+  recipes, so an image either follows the shared settings or has its own.
 - `landing.spec.ts` drop and paste flake fixed 2026-08-11 (commit `e0c58f50`):
   `dispatchDrag` raced the Intro mount; the helper now waits for the Intro
   before dispatching. Verified 60 of 60 under `--repeat-each=3`.
@@ -53,13 +57,7 @@ Small backlog seed. The big tracks live in their own plans — see
    constructor-local PointerTrackers on disconnect (upstream Squoosh behaves
    the same). Worst case is one stray callback after a mid-drag unmount. Fix
    opportunistically if these files are touched for other reasons.
-7. **`session.ts` override paths stay coarse until Phase 3.** Same-format
-   overrides keep the wholesale `encoderState` alongside the sparse
-   `encoderControls` companion, so `getSettingsOverridePaths` reports
-   `encoderState` rather than per-control ids — intentional interim seam (the
-   production UI still writes legacy full option objects); resolves with the
-   WS-G UI half.
-8. **`hqx` + `contain` resize crops the wrong region (correctness).** In
+7. **`hqx` + `contain` resize crops the wrong region (correctness).** In
    `src/features/processors/resize/worker/runtime.ts` (the `fitMethod === 'contain'`
    block, ~L140), the contain-crop box is computed from the ORIGINAL source
    dimensions — `getContainOffsets(data.width, data.height, …)` — but then applied
@@ -70,7 +68,7 @@ Small backlog seed. The big tracks live in their own plans — see
    while upscaling (hqx is a no-op at factor 1); also present in upstream Squoosh.
    Fix: pass `input.width`/`input.height` to `getContainOffsets` (or crop before
    hqx). Found in the 2026-07-21 xhigh code review.
-9. **SVG auto-optimize picks by gzip but reverts by raw bytes (SVG lane).**
+8. **SVG auto-optimize picks by gzip but reverts by raw bytes (SVG lane).**
    `autoSearch` (`src/lib/svg/auto-search.ts`) ranks candidates by gzip transfer
    size, but `keepOriginalSvg` (`src/lib/svg/optimize.ts`, ~L28) reverts to the
    original when `optimized.rawBytes >= source.rawBytes`. A candidate that is
@@ -81,6 +79,13 @@ Small backlog seed. The big tracks live in their own plans — see
    arguably a deliberate "never ship a larger file" policy, so confirm intent before
    changing. See [specs/2026-07-12-svg-optimization.md](specs/2026-07-12-svg-optimization.md).
    Found in the 2026-07-21 xhigh code review.
+9. **Bulk strip thumbnails for SVG sources are blank.** The store's thumbnail
+   path (`#ensureThumb` in `src/lib/bulk/store.svelte.ts`) decodes with
+   `createImageBitmap(file)`, which cannot decode an SVG blob, so the strip
+   shows a placeholder for every SVG and records no source size for it. The
+   exported `.svg` and the focus view are fine. Pre-existing; seen 2026-11-04
+   while verifying bulk SVG batches. Fix: draw SVG sources through an `<img>`
+   (or the pipeline's SVG decode) before thumbnailing.
 
 ## Pointers (not tracked here)
 

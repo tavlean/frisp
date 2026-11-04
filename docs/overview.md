@@ -1,6 +1,6 @@
 # Frisp Project Overview
 
-Last updated: 2026-07-07.
+Last updated: 2026-11-04.
 
 Frisp is a browser-local image optimizer. Users import one image or a batch,
 it decodes and processes pixels in the browser, and exports files or a ZIP
@@ -46,18 +46,31 @@ path.
 ## Image Flow
 
 1. `src/routes/+page.svelte` accepts picker, drag/drop, and paste imports.
-2. `EditorSession` owns single-image side state, saved settings, undo/redo,
-   decoded-source reuse, and the shared result cache.
-3. Raster sources: `src/lib/compress.ts` delegates decode/preprocess/process/
-   encode work to the shared image pipeline and codec worker bridge.
-4. `src/lib/sveltekit-worker-bridge.ts` calls `src/worker/codec-worker.ts` for
-   codec and processor work.
-5. Vector (SVG) sources take a separate lane: `EditorSession` defaults the
-   output side to `'svg'` and dispatches to `src/lib/svg/optimize.ts`, which
-   runs SVGO in a lazy worker with a deterministic auto-search, gates each
-   candidate on a multi-scale pixel diff, keeps the smaller of optimized vs
-   original, and returns the SVG file plus raw/gzip sizes. Raster output formats
-   stay available for SVG sources through steps 3–4.
+2. Every image becomes the result of one `ImageRecipe`
+   (`src/client/lazy-app/recipe.ts`): rotation, processors (resize, grain,
+   palette), and an output (a raster encoder or SVG optimizer options).
+   `recipeSignature` over it keys the editor's result cache and undo dedupe
+   and the bulk output hashes, so both surfaces agree on "same result".
+3. `EditorSession` owns single-image side state, saved settings, undo/redo,
+   decoded-source reuse, and the shared result cache. Each side converts to a
+   recipe through `src/lib/editor/side-recipe.ts`.
+4. `src/lib/optimize-image.ts` runs one recipe on one prepared source and is
+   the single dispatch point for three lanes, for the editor and bulk alike:
+   - the pixel pipeline: `src/lib/compress.ts` delegates process and encode
+     work to the shared image pipeline, and
+     `src/lib/sveltekit-worker-bridge.ts` calls `src/worker/codec-worker.ts`;
+   - the JPEG to JXL transcode, when the JXL transcode flag is on, the source
+     is a JPEG, and nothing changes pixels;
+   - the SVG lane, for SVG output on an SVG source: `src/lib/svg/optimize.ts`
+     runs SVGO in a lazy worker with a deterministic auto-search, gates each
+     candidate on a multi-scale pixel diff, keeps the smaller of optimized vs
+     original, and returns the SVG file plus raw/gzip sizes. It is reached
+     only through a dynamic import. Raster outputs stay available for SVG
+     sources through the pixel pipeline.
+5. Bulk keeps one shared recipe plus, per image, an optional own recipe; its
+   runtime runs `optimizeImage` per job, and its focus view is an
+   `EditorSession` that adopts a current bulk output instead of encoding again
+   ([bulk-image-architecture.md](bulk-image-architecture.md)).
 6. Output components render before/after comparison from object URLs.
 7. Single-image export downloads a file; bulk export writes a client ZIP.
 

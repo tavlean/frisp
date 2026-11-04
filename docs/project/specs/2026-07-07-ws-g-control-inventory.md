@@ -1,5 +1,17 @@
 # WS-G Control Inventory (appendix to 2026-07-07-first-principles-execution.md)
 
+Last updated: 2026-11-04.
+
+> **Update 2026-11-04: superseded for bulk.** Change A
+> ([2026-11-04-one-recipe-per-image.md](2026-11-04-one-recipe-per-image.md))
+> deleted the per-encoder registry files this inventory fed
+> (`src/client/lazy-app/bulk/controls/`) and the sparse per-control
+> overrides. Bulk images now keep either the shared recipe or a full own copy,
+> so the overridable-control directives below no longer bind any code. The
+> tables remain a correct inventory of each panel's controls and raw fields,
+> useful if the single-image panels are ever made data-driven
+> ([../../codec-options-model.md](../../codec-options-model.md)).
+
 Produced 2026-07-07 by a read-only Codex sweep of the option panels + codec
 meta files. These tables are the direct input for the per-encoder registry
 files (`src/client/lazy-app/bulk/controls/<codec>.ts`). Reviewer directives
