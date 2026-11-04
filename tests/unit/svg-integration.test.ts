@@ -62,4 +62,22 @@ describe('SVG lane integration', () => {
     expect(result.gzipBytes).toBe(40);
     expect(result.keptOriginal).toBe(true);
   });
+
+  it('keeps the original when no candidate passed the visual gate', () => {
+    const source = {
+      text: '<svg>original</svg>',
+      rawBytes: 100,
+      gzipBytes: 80,
+    };
+    const unverified = { text: '<svg>x</svg>', rawBytes: 40, gzipBytes: 30 };
+
+    expect(keepOriginalSvg(source, unverified, false)).toEqual({
+      ...source,
+      keptOriginal: true,
+    });
+    expect(keepOriginalSvg(source, unverified, true)).toEqual({
+      ...unverified,
+      keptOriginal: false,
+    });
+  });
 });

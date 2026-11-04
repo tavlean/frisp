@@ -10,7 +10,11 @@ import type { SvgOptimizeOptions } from './optimize-options';
 import { autoSearch } from './auto-search';
 import { optimizeSvg } from './optimizer-client';
 import { renderSvgToImageData } from './render';
-import { buildSvgoConfig, type SvgCandidate } from './svgo-config';
+import {
+  buildSvgoConfig,
+  UNVERIFIED_WINNER,
+  type SvgCandidate,
+} from './svgo-config';
 
 const MAX_SVG_BYTES = 5 * 1024 * 1024;
 
@@ -21,12 +25,17 @@ export interface SvgTextStats {
 }
 
 /**
- * Never ship a larger "optimized" file: below the threshold the optimizer's
- * output wins, at or above it the outcome silently reverts to the original
- * text (the size panel then shows 0% rather than a regression).
+ * Never ship a larger "optimized" file, nor one that failed Auto's own visual
+ * gate: in either case the outcome reverts to the original text (the size
+ * panel then shows 0% rather than a regression or an unchecked change).
+ * Accepting visual changes for size is what Manual mode is for.
  */
-export function keepOriginalSvg(source: SvgTextStats, optimized: SvgTextStats) {
-  return optimized.rawBytes >= source.rawBytes
+export function keepOriginalSvg(
+  source: SvgTextStats,
+  optimized: SvgTextStats,
+  verified = true,
+) {
+  return !verified || optimized.rawBytes >= source.rawBytes
     ? { ...source, keptOriginal: true }
     : { ...optimized, keptOriginal: false };
 }
@@ -51,6 +60,7 @@ export async function optimizeSvgSide(
 
   let winner: string | undefined;
   let optimized: SvgTextStats;
+  let verified = true;
   if (options.mode === 'auto') {
     const searched = await autoSearch(
       sourceText,
@@ -61,6 +71,7 @@ export async function optimizeSvgSide(
     );
     optimized = searched;
     winner = searched.winner;
+    verified = searched.verified;
   } else {
     const addons: SvgCandidate['addons'] = [];
     if (options.reusePaths) addons.push('reusePaths');
@@ -80,12 +91,10 @@ export async function optimizeSvgSide(
     );
     optimized = { text: result.svg, ...result };
   }
-  const final = keepOriginalSvg(source, {
-    ...optimized,
-  });
+  const final = keepOriginalSvg(source, { ...optimized }, verified);
   // The badge must describe the file the user gets: when the original wins,
-  // no candidate id applies.
-  if (final.keptOriginal) winner = undefined;
+  // no candidate id applies, except to say the visual gate turned them down.
+  if (final.keptOriginal) winner = verified ? undefined : UNVERIFIED_WINNER;
   const [sourceImageData, outputImageData] = await Promise.all([
     renderSvgToImageData(sourceText, naturalWidth, naturalHeight, null, signal),
     renderSvgToImageData(final.text, naturalWidth, naturalHeight, null, signal),

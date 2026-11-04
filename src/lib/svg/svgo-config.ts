@@ -20,8 +20,12 @@ export function buildCandidateId(
   return [`p${precision}`, ...addons].join('+');
 }
 
+/** The winner id when every Auto candidate failed the visual gate. */
+export const UNVERIFIED_WINNER = 'original!';
+
 export function describeWinner(id: string): string {
-  if (id === 'p3!') return 'precision 3 — verify preview (auto gate failed)';
+  if (id === UNVERIFIED_WINNER)
+    return 'original kept, no smaller version looked identical (Manual can trade precision for size)';
   return id
     .split('+')
     .map((part) => {

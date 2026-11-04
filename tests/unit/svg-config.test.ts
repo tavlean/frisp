@@ -31,8 +31,8 @@ describe('SVG optimization configuration', () => {
     expect(describeWinner('p2+reusePaths+convertStyleToAttrs')).toBe(
       'precision 2 · reused paths · styles → attributes',
     );
-    expect(describeWinner('p3!')).toBe(
-      'precision 3 — verify preview (auto gate failed)',
+    expect(describeWinner('original!')).toBe(
+      'original kept, no smaller version looked identical (Manual can trade precision for size)',
     );
   });
 
