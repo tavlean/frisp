@@ -14,8 +14,16 @@
   import Checkbox from './Checkbox.svelte';
   import AdvancedSection from './AdvancedSection.svelte';
   import Select from './Select.svelte';
+  import AutoQualityRow from './AutoQualityRow.svelte';
+  import type { AutoQualityControl } from '../auto-quality';
 
-  let { options }: { options: EncodeOptions } = $props();
+  interface Props {
+    options: EncodeOptions;
+    /** Offers the Auto row when the host runs auto-quality searches. */
+    autoQuality?: AutoQualityControl;
+  }
+
+  let { options, autoQuality }: Props = $props();
 
   const MAX_QUALITY = 100;
   const MAX_EFFORT = 10;
@@ -83,6 +91,9 @@
         }}>Quality:</Range
       >
     </div>
+    {#if autoQuality}
+      <AutoQualityRow control={autoQuality} />
+    {/if}
   {/if}
 
   <div class="option-one-cell">

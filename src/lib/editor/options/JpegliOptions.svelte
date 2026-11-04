@@ -12,14 +12,25 @@
   import Select from './Select.svelte';
   import OptionRow from './OptionRow.svelte';
   import ToggleRow from './ToggleRow.svelte';
+  import AutoQualityRow from './AutoQualityRow.svelte';
+  import type { AutoQualityControl } from '../auto-quality';
 
-  let { options }: { options: EncodeOptions } = $props();
+  interface Props {
+    options: EncodeOptions;
+    /** Offers the Auto row when the host runs auto-quality searches. */
+    autoQuality?: AutoQualityControl;
+  }
+
+  let { options, autoQuality }: Props = $props();
 </script>
 
 <form class="options-section" onsubmit={(e) => e.preventDefault()}>
   <OptionRow>
     <Range min={0} max={100} bind:value={options.quality}>Quality:</Range>
   </OptionRow>
+  {#if autoQuality}
+    <AutoQualityRow control={autoQuality} />
+  {/if}
 
   <AdvancedSection>
     <label class="option-text-first">

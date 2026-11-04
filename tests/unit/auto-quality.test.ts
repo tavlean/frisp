@@ -6,6 +6,7 @@ import {
   isBudgetGuess,
   searchQuality,
 } from '../../src/lib/editor/auto-quality';
+import { OUTPUT_FORMATS } from '../../src/lib/compress';
 
 interface Probe {
   quality: number;
@@ -86,8 +87,33 @@ describe('searchQuality', () => {
     expect(Math.max(...h.probed)).toBeLessThanOrEqual(99);
   });
 
-  it('bounds WebP to 0..100', () => {
-    expect(AUTO_QUALITY_BOUNDS.webP).toEqual({ lo: 0, hi: 100 });
+  it('bounds each format to its slider, short of any mode switch', () => {
+    expect(AUTO_QUALITY_BOUNDS).toEqual({
+      webP: { lo: 0, hi: 100 },
+      // 100 is lossless in the AVIF and JXL panels.
+      avif: { lo: 0, hi: 99 },
+      // Below 7 the JXL panel forces the modular lossy mode.
+      jxl: { lo: 7, hi: 99 },
+      jpegli: { lo: 0, hi: 100 },
+    });
+  });
+
+  it('offers Auto only on real output formats', () => {
+    const ids = OUTPUT_FORMATS.map((format) => format.id);
+    for (const format of Object.keys(AUTO_QUALITY_BOUNDS)) {
+      expect(ids).toContain(format);
+    }
+  });
+
+  it('resolves every bounded range to a single quality within the probe cap', async () => {
+    for (const { lo, hi } of Object.values(AUTO_QUALITY_BOUNDS)) {
+      for (const target of [lo, Math.round((lo + hi) / 2), hi]) {
+        const h = harness(linear);
+        const result = await searchQuality({ ...h, lo, hi, target });
+        expect(result.quality).toBe(target);
+        expect(result.probes).toBeLessThanOrEqual(8);
+      }
+    }
   });
 
   it('discards every probe except the one it returns', async () => {

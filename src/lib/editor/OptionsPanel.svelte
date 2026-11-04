@@ -188,19 +188,26 @@
             {autoQuality}
           />
         {:else if format === 'avif'}
-          <AvifOptions options={options as unknown as AvifEncodeOptions} />
+          <AvifOptions
+            options={options as unknown as AvifEncodeOptions}
+            {autoQuality}
+          />
         {:else if format === 'jxl'}
           <JxlOptions
             options={options as unknown as JxlEncodeOptions}
             {sourceType}
             {transcodeBlocked}
+            {autoQuality}
           />
         {:else if format === 'mozJPEG'}
           <MozjpegOptions
             options={options as unknown as MozjpegEncodeOptions}
           />
         {:else if format === 'jpegli'}
-          <JpegliOptions options={options as unknown as JpegliEncodeOptions} />
+          <JpegliOptions
+            options={options as unknown as JpegliEncodeOptions}
+            {autoQuality}
+          />
         {:else if format === 'oxiPNG'}
           <OxipngOptions options={options as unknown as OxipngEncodeOptions} />
         {:else if typeof options.quality === 'number'}

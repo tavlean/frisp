@@ -33,14 +33,23 @@ export const AUTO_QUALITY_LABELS: Record<AutoQualityTarget, string> = {
 };
 
 /** Quality range the search may probe, per encoder. A format absent here has
- *  no Auto action. `hi` must stay below any value that flips the encoder into
- *  a lossless mode (AVIF and JXL at 100), since that is a different encoder
- *  with different semantics, not a higher quality. WebP proves the feature
- *  first; adding a codec is one entry. */
+ *  no Auto action. Each range is the one the panel's Quality slider offers,
+ *  and stays inside a single encoder mode: a value that switches modes is a
+ *  different encoder with different semantics, not a higher quality.
+ *  - AVIF and JXL stop at 99, because their panels spell lossless as 100.
+ *  - JXL starts at 7, because below that its panel forces the alternative
+ *    (modular) lossy mode. The probe substitutes `quality` alone, so a probe
+ *    under 7 would measure an encode the slider can never produce. No target
+ *    lands that low anyway: quality 7 is a butteraugli distance near 13.
+ *  - WebP and JPEG cover the full slider; lossless WebP is a separate toggle
+ *    that hides the Auto row. */
 export const AUTO_QUALITY_BOUNDS: Readonly<
   Record<string, { lo: number; hi: number }>
 > = {
   webP: { lo: 0, hi: 100 },
+  avif: { lo: 0, hi: 99 },
+  jxl: { lo: 7, hi: 99 },
+  jpegli: { lo: 0, hi: 100 },
 };
 
 /** Stop starting new probes once a search has run this long. The default;

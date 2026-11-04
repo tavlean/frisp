@@ -8,6 +8,8 @@
   import Range from './Range.svelte';
   import Checkbox from './Checkbox.svelte';
   import AdvancedSection from './AdvancedSection.svelte';
+  import AutoQualityRow from './AutoQualityRow.svelte';
+  import type { AutoQualityControl } from '../auto-quality';
 
   interface Props {
     options: EncodeOptions;
@@ -17,9 +19,17 @@
     /** True when a pixel-changing step (rotate, resize, grain, palette) is
      *  active, which makes coefficient reuse impossible. */
     transcodeBlocked?: boolean;
+    /** Offers the Auto row when the host runs auto-quality searches. It
+     *  shows only for a lossy pixel encode: a transcode has no quality. */
+    autoQuality?: AutoQualityControl;
   }
 
-  let { options, sourceType = '', transcodeBlocked = false }: Props = $props();
+  let {
+    options,
+    sourceType = '',
+    transcodeBlocked = false,
+    autoQuality,
+  }: Props = $props();
 
   // Seed the editable UI state from the incoming options once; the panel writes
   // changes back through apply() and never reassigns `options`.
@@ -116,6 +126,9 @@
           }}>Quality:</Range
         >
       </div>
+      {#if autoQuality}
+        <AutoQualityRow control={autoQuality} />
+      {/if}
     {/if}
 
     <div class="option-one-cell">
