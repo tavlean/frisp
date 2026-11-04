@@ -24,8 +24,9 @@ import {
   encodeSignature,
   resizeIsReal,
   resizeSignature,
-  sideRecipe,
 } from './encode-signature';
+import { normalizedRecipe } from 'client/lazy-app/recipe';
+import { recipeFromSide } from './side-recipe';
 import { applyGrainToPixels } from 'features/processors/grain/shared/apply';
 import {
   decodeSourceImage,
@@ -395,7 +396,7 @@ export class EditorSession {
 
     // The signature of this pass's inputs (file identity aside — that's guarded
     // by fileChanged). It both (a) detects a redundant pass and (b) keys the
-    // result cache. Built from the SAME sideRecipe projection as docSig, so a
+    // result cache. Built from the SAME recipe projection as docSig, so a
     // history restore always recomputes to a cache-hitting key.
     const encodeSig = encodeSignature(
       request.preprocessorState,
@@ -855,27 +856,21 @@ export class EditorSession {
 
   /**
    * A fingerprint of the document's OUTPUT-AFFECTING fields, used to dedupe undo
-   * steps. Deliberately narrower than the raw snapshot: only the active format's
-   * options matter (inactive formats can't be edited from the UI), and a disabled
-   * resize folds to null so seeding its width/height — which doesn't change the
-   * output — never spawns a phantom undo step.
+   * steps: each side's normalized recipe, the same projection the encode path
+   * keys its cache on, so a restored step always recomputes to a cache-hitting
+   * key. A disabled resize folds to null, so seeding its width/height (which
+   * doesn't change the output) never spawns a phantom undo step.
    */
   private docSig(doc: DocSnapshot): string {
-    // resizeCounts = `enabled` here (not the encode path's "real resize"):
-    // history can't know the source dims, and an enabled-at-100% step is still
-    // a document state the user can undo to. The encode path folds it to the
-    // same key as resize-off anyway, so the restore still lands on a cache hit.
-    return stableStringify({
-      preprocessor: doc.preprocessorState,
-      sides: doc.sides.map((side) =>
-        sideRecipe(
-          side.format,
-          side.optionsByFormat[side.format] ?? {},
-          side.processorState,
-          side.processorState.resize.enabled,
-        ),
+    // No source dims here, so an enabled resize always counts: history can't
+    // know the source size, and an enabled-at-100% step is still a document
+    // state the user can undo to. The encode path folds it to the same key as
+    // resize-off anyway, so the restore still lands on a cache hit.
+    return stableStringify(
+      doc.sides.map((side) =>
+        normalizedRecipe(recipeFromSide(side, doc.preprocessorState)),
       ),
-    });
+    );
   }
 
   /**

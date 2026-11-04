@@ -5,7 +5,7 @@ import {
   type EncoderType,
   type ProcessorState,
 } from 'client/lazy-app/feature-meta/shared';
-import { stableStringify } from 'shared/stable-stringify';
+import { recipeSignature, type ImageRecipe } from '../recipe';
 import { controlsForEncoderType, type BulkControl } from './controls';
 
 export type DeepPartial<T> = {
@@ -216,30 +216,6 @@ export function settingsChangePixels(
   ).some((step) => step !== null);
 }
 
-export function normalizedSettingsRecipe(
-  settings: BulkImageSettings,
-  sourceDimensions?: BulkSourceDimensions,
-): {
-  encoderState: {
-    type: EncoderState['type'];
-    options: EncoderState['options'];
-  } | null;
-  processorState: ReturnType<typeof normalizedProcessorRecipe>;
-} {
-  return {
-    encoderState: settings.encoderState
-      ? {
-          type: settings.encoderState.type,
-          options: clone(settings.encoderState.options),
-        }
-      : null,
-    processorState: normalizedProcessorRecipe(
-      settings.processorState,
-      sourceDimensions,
-    ),
-  };
-}
-
 export function getEffectiveSettings(
   globalSettings: BulkImageSettings,
   overrides: BulkImageOverrides = {},
@@ -396,14 +372,32 @@ export function resolveSettingsForSource(
   };
 }
 
+/**
+ * The ImageRecipe these (already effective) settings describe. Bulk has no
+ * rotation yet, so it is always 0. Undefined without an encoder: such a job
+ * cannot be processed, so no output can ever match it.
+ */
+export function bulkSettingsRecipe(
+  settings: BulkImageSettings,
+): ImageRecipe | undefined {
+  if (!settings.encoderState) return;
+  return {
+    rotate: 0,
+    processors: settings.processorState,
+    output: { kind: 'raster', encoder: settings.encoderState },
+  };
+}
+
 export function settingsHash(
   settings: BulkImageSettings,
   sourceDimensions?: BulkSourceDimensions,
 ): string {
-  return stableStringify(
-    normalizedSettingsRecipe(
-      resolveSettingsForSource(settings, sourceDimensions),
-      sourceDimensions,
-    ),
+  const recipe = bulkSettingsRecipe(
+    resolveSettingsForSource(settings, sourceDimensions),
+  );
+  if (!recipe) return 'no-encoder';
+  return recipeSignature(
+    recipe,
+    hasPositiveDimensions(sourceDimensions) ? sourceDimensions : undefined,
   );
 }

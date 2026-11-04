@@ -1,64 +1,27 @@
-// The canonical fingerprint of an encode pass's inputs, shared by every
-// consumer that must agree on "same recipe": EditorSession's cache/encode
-// signature and history signature, and BulkMode's focus-view hydration (which
-// pre-seeds a hydrated result under the signature the editor's own encode
-// effect will recompute — if the two ever disagreed, hydration would silently
-// degrade into a redundant re-encode). Change the projection here and nowhere
-// else.
+// The editor's view of the one recipe signature (client/lazy-app/recipe.ts):
+// EditorSession keys its result cache, redundant-pass check, and history dedupe
+// on it, and bulk hashes its outputs with the same `recipeSignature`. BulkMode's
+// focus view pre-seeds a result under the key the editor's own encode effect
+// will recompute, so if these ever disagreed, hydration would silently degrade
+// into a redundant re-encode and undo into re-encodes. Change the projection in
+// recipe.ts and nowhere else.
 
 import { stableStringify } from 'shared/stable-stringify';
 import type { SideFormat } from '$lib/compress';
-import {
-  grainIsReal,
-  type PreprocessorState,
-  type ProcessorState,
+import type {
+  PreprocessorState,
+  ProcessorState,
 } from 'client/lazy-app/feature-meta';
-
-/**
- * The canonical OUTPUT-AFFECTING projection of one side's document state: only
- * the active format's options matter (inactive formats can't be edited from
- * the UI), and a resize that doesn't change the output folds to null (disabled
- * resize in the history path; identity resize in the encode path). BOTH the
- * cache/encode signature and the history signature are built from this one
- * projection — that shared origin is what guarantees "undo lands on a cache
- * hit". If the two ever disagreed about what matters, undo would silently
- * degrade into re-encodes.
- */
-export function sideRecipe(
-  format: SideFormat,
-  options: unknown,
-  processorState: ProcessorState,
-  resizeCounts: boolean,
-) {
-  // The SVG lane's output depends ONLY on its optimizer options: raster
-  // processors/preprocessors never touch it, so they must not be able to
-  // cause a miss (or a stale-state false edit in history).
-  if (format === 'svg') {
-    return {
-      format,
-      options: options ?? {},
-      grain: null,
-      quantize: null,
-      resize: null,
-    };
-  }
-  return {
-    format,
-    options: options ?? {},
-    // Grain folds to null unless it actually changes pixels (enabled at a
-    // non-zero amount), so toggling it on at 0 stays a cache hit.
-    grain: grainIsReal(processorState.grain) ? processorState.grain : null,
-    quantize: processorState.quantize,
-    resize: resizeCounts ? processorState.resize : null,
-  };
-}
+import { recipeSignature } from 'client/lazy-app/recipe';
+import { recipeFromSide } from './side-recipe';
 
 /**
  * A resize only counts as a *real* resize when it targets a size different
  * from the (preprocessed) source. At the source's own dimensions the default
  * interpolating filters are an identity pass, so "enabled at 100%" changes
- * nothing — it shouldn't run, nor read as "Resizing". Unknown source dims
- * (0 before the first result lands) also fold to "not real".
+ * nothing; it shouldn't run, nor read as "Resizing". Unknown source dims
+ * (0 before the first result lands) fold to "not real" here, unlike the
+ * signature, which must never let a resized and an unresized output collide.
  */
 export function resizeIsReal(
   processorState: ProcessorState,
@@ -75,10 +38,11 @@ export function resizeIsReal(
 }
 
 /**
- * The signature of one side's complete encode inputs (the source file aside —
- * callers guard file identity separately): the preprocessor plus the canonical
- * side recipe, with the resize folded in only when it actually changes the
- * image. Keys the result cache and detects redundant passes.
+ * The signature of one side's complete encode inputs (the source file aside;
+ * callers guard file identity separately). `sourceWidth`/`sourceHeight` are the
+ * PREPROCESSED (already rotated) dims the editor reads off its results, while
+ * `recipeSignature` takes the unrotated source and applies the turn itself, so
+ * a quarter turn is undone here first.
  */
 export function encodeSignature(
   preprocessorState: PreprocessorState,
@@ -88,22 +52,29 @@ export function encodeSignature(
   sourceWidth: number,
   sourceHeight: number,
 ): string {
-  return stableStringify({
-    preprocessor: preprocessorState,
-    recipe: sideRecipe(
-      format,
-      options,
-      processorState,
-      resizeIsReal(processorState, sourceWidth, sourceHeight),
+  const quarter = preprocessorState.rotate.rotate % 180 !== 0;
+  return recipeSignature(
+    recipeFromSide(
+      {
+        format,
+        optionsByFormat: {
+          [format]: (options ?? {}) as Record<string, unknown>,
+        },
+        processorState,
+      },
+      preprocessorState,
     ),
-  });
+    quarter
+      ? { width: sourceHeight, height: sourceWidth }
+      : { width: sourceWidth, height: sourceHeight },
+  );
 }
 
 /**
  * Fingerprint of the *effective* resize recipe, for diffing what a pass
  * changed (the "Resizing" vs "Optimizing" badge label). Collapsing "no real
- * resize" to a constant means toggling resize on at 100% — or flipping
- * Premultiply/Linear RGB, which only matter while actually scaling — never
+ * resize" to a constant means toggling resize on at 100%, or flipping
+ * Premultiply/Linear RGB (which only matter while actually scaling), never
  * masquerades as a resize edit.
  */
 export function resizeSignature(

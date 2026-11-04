@@ -1,7 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { defaultProcessorState } from '../../src/client/lazy-app/feature-meta/shared';
+import {
+  defaultPreprocessorState,
+  defaultProcessorState,
+} from '../../src/client/lazy-app/feature-meta/shared';
 import { getDefaultOptions } from '../../src/lib/compress';
-import { sideRecipe } from '../../src/lib/editor/encode-signature';
+import { encodeSignature } from '../../src/lib/editor/encode-signature';
 import {
   parseSavedSide,
   sanitizeSavedOptions,
@@ -18,8 +21,24 @@ describe('SVG lane integration', () => {
     changed.resize.enabled = true;
     changed.resize.width = 320;
 
-    expect(sideRecipe('svg', DEFAULT_SVG_OPTIONS, changed, true)).toEqual(
-      sideRecipe('svg', DEFAULT_SVG_OPTIONS, defaultProcessorState, false),
+    expect(
+      encodeSignature(
+        defaultPreprocessorState,
+        'svg',
+        DEFAULT_SVG_OPTIONS,
+        changed,
+        640,
+        480,
+      ),
+    ).toBe(
+      encodeSignature(
+        defaultPreprocessorState,
+        'svg',
+        DEFAULT_SVG_OPTIONS,
+        defaultProcessorState,
+        640,
+        480,
+      ),
     );
   });
 
