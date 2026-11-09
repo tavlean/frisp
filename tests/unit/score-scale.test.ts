@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import {
   boxDownscale,
-  scorePair,
+  cropRegion,
+  scorePairs,
   scoreScaleFactor,
+  scoreTiles,
 } from '../../src/worker/score-scale';
 
 globalThis.ImageData ??= class {
@@ -72,13 +74,95 @@ describe('boxDownscale', () => {
   });
 });
 
-describe('scorePair', () => {
-  it('shrinks both frames by the same factor above 4 MP only', () => {
-    const [a, b] = scorePair(blank(4000, 3000), blank(4000, 3000));
-    expect([a.width, a.height, b.width, b.height]).toEqual([
-      2000, 1500, 2000, 1500,
-    ]);
+describe('cropRegion', () => {
+  it('copies a rectangle at full resolution without touching its input', () => {
+    const image = blank(4, 3);
+    // Each pixel's red channel holds its index.
+    for (let i = 0; i < 12; i++) image.data[i * 4] = i;
+    const before = image.data.slice();
+    const out = cropRegion(image, { x: 1, y: 1, width: 2, height: 2 });
+    expect([out.width, out.height]).toEqual([2, 2]);
+    expect([0, 1, 2, 3].map((p) => out.data[p * 4])).toEqual([5, 6, 9, 10]);
+    expect(image.data).toEqual(before);
+  });
+});
+
+describe('scoreTiles', () => {
+  it('scores frames up to 4 MP whole', () => {
+    expect(scoreTiles(2000, 2000)).toBeNull();
+  });
+
+  it('places four in-bounds tiles, one centred in each quadrant', () => {
+    for (const [w, h] of [
+      [4000, 3000],
+      [3000, 4000],
+      [6000, 4000],
+      [8192, 5464],
+    ]) {
+      const tiles = scoreTiles(w, h)!;
+      expect(tiles).toHaveLength(4);
+      const factor = scoreScaleFactor(w, h);
+      for (const [i, tile] of tiles.entries()) {
+        expect(tile.x).toBeGreaterThanOrEqual(0);
+        expect(tile.y).toBeGreaterThanOrEqual(0);
+        expect(tile.x + tile.width).toBeLessThanOrEqual(w);
+        expect(tile.y + tile.height).toBeLessThanOrEqual(h);
+        // Centred in its own quadrant (row-major order).
+        const cx = tile.x + tile.width / 2;
+        const cy = tile.y + tile.height / 2;
+        expect(Math.abs(cx - ((i % 2) + 0.5) * (w / 2))).toBeLessThanOrEqual(1);
+        expect(
+          Math.abs(cy - (Math.floor(i / 2) + 0.5) * (h / 2)),
+        ).toBeLessThanOrEqual(1);
+      }
+      // Together they cost what the frame shrunk by `factor` would.
+      const pixels = tiles.reduce((sum, t) => sum + t.width * t.height, 0);
+      expect(pixels).toBeLessThanOrEqual((w / factor) * (h / factor));
+      expect(pixels).toBeGreaterThan(
+        0.95 * (w / factor) * (h / factor) - 4 * (w + h),
+      );
+    }
+    expect(scoreTiles(4000, 3000)![0]).toEqual({
+      x: 500,
+      y: 375,
+      width: 1000,
+      height: 750,
+    });
+  });
+
+  it('gives up on a frame too thin for useful tiles', () => {
+    expect(scoreTiles(40000, 120)).toBeNull();
+  });
+});
+
+describe('scorePairs', () => {
+  it('scores a small frame as itself', () => {
     const small = blank(1024, 683);
-    expect(scorePair(small, small)[0]).toBe(small);
+    const pairs = scorePairs(small, small);
+    expect(pairs).toHaveLength(1);
+    expect(pairs[0][0]).toBe(small);
+  });
+
+  it('scores a large frame as four matching full-resolution tiles', () => {
+    const ref = blank(4000, 3000);
+    const dist = blank(4000, 3000);
+    const pairs = scorePairs(ref, dist);
+    expect(pairs).toHaveLength(4);
+    for (const [a, b] of pairs) {
+      expect([a.width, a.height, b.width, b.height]).toEqual([
+        1000, 750, 1000, 750,
+      ]);
+    }
+  });
+
+  it('shrinks a thin large frame alike instead', () => {
+    const ref = blank(40000, 120);
+    const [[a, b], ...rest] = scorePairs(ref, blank(40000, 120));
+    expect(rest).toHaveLength(0);
+    const factor = scoreScaleFactor(40000, 120);
+    expect([a.width, b.width]).toEqual([
+      Math.floor(40000 / factor),
+      Math.floor(40000 / factor),
+    ]);
   });
 });

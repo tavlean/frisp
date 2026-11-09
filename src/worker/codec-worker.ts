@@ -52,7 +52,7 @@ import { nativeDecode, pixelatedResize } from './offscreen';
 import type { Ssimulacra2Module } from 'codecs/ssimulacra2/ssimulacra2';
 import ssimulacra2 from 'app-generated/codecs/ssimulacra2/ssimulacra2';
 import { initEmscriptenModule } from 'features/worker-utils';
-import { scorePair } from './score-scale';
+import { scorePairs } from './score-scale';
 
 export interface AvifWasmUrls {
   decoder: string;
@@ -305,9 +305,13 @@ async function scoreFrames(ref: ImageData, dist: ImageData): Promise<number> {
   }
   ssimulacra2Module ??= initEmscriptenModule(ssimulacra2);
   const module = await ssimulacra2Module;
-  // Above 4 MP both frames are box-shrunk alike first (score-scale.ts).
-  const [a, b] = scorePair(ref, dist);
-  return module.score(a.data, b.data, a.width, a.height);
+  // Above 4 MP the metric scores four full-resolution tiles and the worst
+  // counts (score-scale.ts). The failure sentinel (-1000) wins a min too.
+  let worst = Infinity;
+  for (const [a, b] of scorePairs(ref, dist)) {
+    worst = Math.min(worst, module.score(a.data, b.data, a.width, a.height));
+  }
+  return worst;
 }
 
 function rotateWith(wasmUrls: RotateWasmUrls): ReturnType<typeof createRotate> {
