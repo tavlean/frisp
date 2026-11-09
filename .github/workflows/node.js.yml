@@ -81,8 +81,11 @@ jobs:
   # One runner (ubuntu-latest) is deliberate — this job's coverage is browser
   # ENGINE (chromium + webkit, the JavaScriptCore vs V8 split the WASM codecs
   # care about), not the OS. OS coverage is the build matrix's job.
+  # Pinned to 24.04 rather than ubuntu-latest: on 2026-11-09 ubuntu-latest
+  # was Ubuntu 26.04, where `playwright install` refuses Chromium. Move to
+  # ubuntu-latest again once the Playwright release in use supports it.
   e2e:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
 
     steps:
