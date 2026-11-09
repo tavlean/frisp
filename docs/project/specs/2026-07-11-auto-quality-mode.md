@@ -30,10 +30,14 @@ is kept as the history of the decision.
   alone, and a resize can never cause a size mismatch. The decoded output is
   also the preview, so nothing decodes twice. Scored requests are pixel-lane
   only; a JXL transcode is refused.
-- **Downscaled scoring.** Above 4 MP both frames are box-filtered by the same
-  whole factor until the long edge is at most 2048 px (`src/worker/score-scale.ts`).
-  At 12 MP the full-size metric took about 3 s per probe, more than the WebP
-  encode.
+- **Tiled scoring.** Above 4 MP the metric scores four full-resolution tiles,
+  one centred in each quadrant, and the worst tile counts (`scorePairs` in
+  `src/worker/score-scale.ts`). Together the tiles hold as many pixels as the
+  frame shrunk to a 2048 px long edge, so a probe costs what a 2048 px frame
+  does. At 12 MP the full-size metric took about 3 s per probe, more than the
+  WebP encode. A frame too thin for 64 px tiles falls back to both frames
+  box-shrunk alike. Changed 2026-11-09 from the shrunk pair, which hid codec
+  artifacts (see below).
 - **Search.** `searchQuality` in `src/lib/editor/auto-quality.ts`: a ceiling
   probe, then at most 7 bisection steps with lo starting one below the range
   (so the bottom of the range can win), so at most 8 encodes.
@@ -60,17 +64,30 @@ is kept as the history of the decision.
   the lossless transcode runs (the worker refuses to score a transcode).
 - **Measured (2026-11-04, Balanced):** on photo.jpg, Chromium and WebKit:
   WebP 74 in about 2 s, AVIF 57 in 3.9 s, JPEG XL 63 to 64 in 2.9 to 3.9 s,
-  JPEG 54 to 55 in 1.9 s. On photo-large.jpg (12 MP): WebP 37 to 38 in 13 to
-  21 s; in Chromium, AVIF stopped at the budget with 49 (score 72.7) after
-  25 s, JPEG XL stopped with 30 (75.3) after 22 s, JPEG met it at 24 in 11 s.
-  WebKit agreed: AVIF 49, JPEG XL 24, JPEG 23.
-- **Open question: downscaled scoring flatters blocky codecs.** JPEG at
-  quality 24 on the 12 MP photo is lower than WebP's 37 on the same image.
-  Above 4 MP the score runs on a box-shrunk pair (2x at 12 MP), which halves
-  JPEG's 8x8 block edges before the metric sees them. A full-resolution
-  centre crop of the same pixel count, or a crop scored alongside the
-  shrunk pair (worse score counts), would judge artifacts at the size people
-  view. Not built; needs a visual check of the 12 MP JPEG at 24 first.
+  JPEG 54 to 55 in 1.9 s. photo.jpg is under 4 MP, so the tiling change of
+  2026-11-09 does not touch these.
+- **Measured (2026-11-09, Balanced, tiled scoring):** on photo-large.jpg
+  (12 MP), Chromium / WebKit: WebP 82 / 83, JPEG 53 / 53, JPEG XL stopped at
+  the budget at 76 / 65. AVIF encodes too slowly at 12 MP to narrow the
+  search within 20 s, so it commits nothing and says so.
+- **Resolved 2026-11-09: shrunk scoring flattered every codec.** The shrunk
+  pair (2x at 12 MP) produced the earlier 12 MP results (WebP 37 to 38, JPEG
+  23 to 24, AVIF 49, JPEG XL 24 to 30), and at 100% the JPEG at 24 showed
+  block ringing and lost texture. Scored four ways in Node on the 12 MP
+  photo:
+
+  | Encode | Full size | Shrunk 2x | Worst of 4 tiles |
+  |---|---|---|---|
+  | JPEG 24 | 55.3 | 70.4 | 55.6 |
+  | JPEG 55 | 72.0 | 80.6 | 71.9 |
+  | WebP 37 | 50.0 | 70.0 | 44.1 |
+  | WebP 82 | 71.3 | 82.3 | 70.7 |
+
+  The shrunk pair overrated by 8 to 20 points. The worst tile tracks full
+  size within 1.6 points on JPEG and errs strict on WebP. Rejected: a single
+  centre crop (judges only the middle, within 3 points) and one mosaic of
+  the four tiles (pools them toward their average, up to 4.5 points over
+  full size, so a clean region hides a damaged one).
 
 ## Objective
 

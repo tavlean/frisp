@@ -4,6 +4,32 @@ Short session-by-session build log: what changed, why, and the gotchas a future
 session must know. Newest first. (Live project state stays in
 [the project brief](brief.md); this is the narrative trail.)
 
+## 2026-11-09 (Opus, executor) - Auto quality scores large images on full-size tiles
+
+- `142556ed`: above 4 MP, SSIMULACRA2 now scores four full-resolution tiles,
+  one centred in each quadrant, and the worst tile counts (`scorePairs` in
+  `src/worker/score-scale.ts`; `scoreFrames` in `codec-worker.ts` keeps the
+  minimum). The tiles hold as many pixels as the old 2048 px shrunk pair, so
+  a probe costs the same. Frames too thin for 64 px tiles fall back to the
+  shrunk pair.
+- Why: the 2026-11-04 open question was right and understated. Scoring the
+  12 MP photo four ways in Node, the shrunk pair overrated by 8 to 20 points
+  (JPEG 24: 70.4 shrunk vs 55.3 full size; WebP 37: 70.0 vs 50.0), and the
+  JPEG at 24 that Auto chose showed block ringing at 100%. The worst tile
+  tracks full size within 1.6 points on JPEG and errs strict on WebP. A
+  centre crop judged only the middle; a mosaic of the tiles pooled toward
+  their average. Table in the spec.
+- Measured on photo-large.jpg (12 MP), Balanced, Chromium / WebKit: WebP
+  82 / 83 (was 37 to 38), JPEG 53 / 53 (was 23 to 24), JPEG XL stopped at
+  the budget at 76 / 65. AVIF encodes too slowly to narrow the search in
+  20 s, so it now commits nothing and says so, where before it kept 49 on a
+  score the shrunk pair had inflated.
+- Gotchas (in `docs/gotchas.md`): never judge codec artifacts on a shrunk
+  frame; when one score covers several regions, keep the worst region, not
+  an average.
+- Gates: `npm run check` exit 0, 246 unit tests, `auto-quality.spec.ts` and
+  the scorer e2e 30 of 30 in Chromium and WebKit.
+
 ## 2026-11-04 (Opus, executor) - Auto quality on AVIF, JPEG XL, and JPEG
 
 - `c1274a2a`: the Auto row moved out of `WebpOptions.svelte` into a shared

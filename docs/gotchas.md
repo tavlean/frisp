@@ -152,9 +152,15 @@ this doc holds the cross-cutting ones that no single file owns.
 - **SSIMULACRA2 at full size costs more than the encode it judges.** At
   12 MP the metric took about 3 s per call in the worker against a 0.9 to
   1.4 s WebP encode, so a time-boxed auto-quality search fit two probes.
-  Scoring now runs on a box-shrunk pair above 4 MP
-  (`src/worker/score-scale.ts`); anything new that scores large frames
-  should go through `scorePair` too.
+  Above 4 MP the metric now scores four full-resolution tiles and keeps the
+  worst (`src/worker/score-scale.ts`); anything new that scores large frames
+  should go through `scorePairs` too.
+- **Never judge codec artifacts on a shrunk frame.** Box-shrinking both
+  frames alike looks fair but averages blocking and ringing away before the
+  metric sees them: jpegli at quality 24 on the 12 MP fixture scored 70.4
+  shrunk 2x against 55.3 at full size, so Auto chose visibly blocky JPEGs.
+  Sample at full resolution instead (tiles), and keep the worst tile rather
+  than pooling them into a mosaic, which scores near their average.
 - **Auto probes substitute `quality` alone, not what the panel would
   write.** A panel's `apply()` can couple other fields to quality (JXL forces
   `lossyModular` below 7). A probe in that zone scores an encode the slider

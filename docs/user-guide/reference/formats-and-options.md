@@ -136,7 +136,9 @@ Compact (60). Choosing one runs a search for the lowest `quality` (0–100) whos
 scores at least the target against the processed frame, then writes that quality like
 a slider move. At most 8 encodes (a ceiling probe at 100, then up to 7 bisection
 steps). Budget: 8 s plus 1 s per megapixel above 2, capped at 20 s; above 4 MP the
-score is taken on a box-shrunk pair (long edge at most 2048 px). A budget stop with a
+score is the worst of four full-resolution tiles, one centred in each quadrant,
+together the size of the frame shrunk to a 2048 px long edge (`scorePairs` in
+`src/worker/score-scale.ts`). A budget stop with a
 pass keeps the pass; a budget stop with nothing passing below 100 commits nothing. A
 ceiling that fails within budget commits 100. Shown only in lossy mode and only in the
 single-image editor (bulk and the labs omit it). The same row (`AutoQualityRow.svelte`) serves AVIF, JPEG XL, and JPEG with their own bounds. Source: `src/lib/editor/auto-quality.ts`,

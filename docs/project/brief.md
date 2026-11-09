@@ -116,11 +116,13 @@ Shipped since then, newest first:
   worker inside the `optimize` op against the processed frame, from a new
   `codecs/ssimulacra2` module (precached, so it works offline). At most 8
   encodes; a budget of 8 s plus 1 s per megapixel above 2 (capped at 20 s);
-  scoring on a box-shrunk pair above 4 MP; and no commit when time runs out
-  before anything below the top of the range passes. Bounds stay inside one
-  encoder mode (AVIF and JXL stop at 99; JXL starts at 7). On photo.jpg,
-  Balanced lands at WebP 74, AVIF 57, JPEG XL 63 to 64, and JPEG 54 to 55,
-  each in 2 to 4 s. As built:
+  above 4 MP, the worst of four full-resolution tiles is the score; and no
+  commit when time runs out before anything below the top of the range
+  passes. Bounds stay inside one encoder mode (AVIF and JXL stop at 99; JXL
+  starts at 7). On photo.jpg, Balanced lands at WebP 74, AVIF 57, JPEG XL 63
+  to 64, and JPEG 54 to 55, each in 2 to 4 s. On the 12 MP photo, WebP 82 to
+  83 and JPEG 53; JPEG XL stops at the budget and AVIF leaves quality
+  unchanged. As built:
   [specs/2026-07-11-auto-quality-mode.md](specs/2026-07-11-auto-quality-mode.md).
 
 - **The worker-side pipeline (2026-11-04, review change B).** Every raster
