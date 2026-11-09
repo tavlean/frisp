@@ -17,7 +17,9 @@ Vite as a static SPA. The retired Preact/Rollup app is preserved only on the
 
 `npm run check` runs:
 
-1. `npm run typecheck` (`npm run sync`, `svelte-kit sync`, `svelte-check --tsconfig ./tsconfig.json`)
+1. `npm run typecheck` (`npm run sync`, `svelte-kit sync`, `svelte-check --tsconfig ./tsconfig.json`,
+   then `tsc -p tsconfig.service-worker.json` for the service worker, which is
+   its own TypeScript project because it needs WebWorker types)
 2. `vite build`
 3. `npm run audit:static-output`
 
@@ -26,12 +28,26 @@ Vite as a static SPA. The retired Preact/Rollup app is preserved only on the
 ## SvelteKit Config
 
 - `src/routes/+layout.ts` exports `ssr = false` and `prerender = true`.
-- `svelte.config.js` uses `@sveltejs/adapter-static` with `fallback: '200.html'`.
+- SvelteKit 3: there is no `svelte.config.js`. The config is passed to the
+  `sveltekit()` plugin in `vite.config.ts`: `@sveltejs/adapter-static` with
+  `fallback: '200.html'`, and `version.pollInterval: 0` so SvelteKit does not
+  poll `_app/version.json` (updates arrive through the service worker).
 - Service-worker auto-registration is disabled so `src/lib/service-worker-registration.ts`
   can handle dev cleanup and production registration explicitly.
-- `vite.config.ts` and `svelte.config.js` define aliases for `client`,
+- `appAliases` in `vite.config.ts` is the one alias map: `$lib`, `client`,
   `features`, `shared`, `sw`, `codecs`, `worker-shared`, and `app-generated`
-  (now only patched codec wrappers).
+  (now only patched codec wrappers). It feeds SvelteKit's `alias` option (which
+  also writes the TypeScript paths), Vite's `resolve.alias`, and
+  `vitest.config.ts`. SvelteKit 3 no longer provides `$lib` itself and marks
+  `alias` deprecated in favour of `package.json` subpath imports, so every
+  build prints `config_option_deprecated_alias`; moving to `#lib`-style
+  imports is a separate follow-up.
+- `tsconfig.json` extends `$app/tsconfig` (generated into `node_modules/$app/`),
+  not `.svelte-kit/tsconfig.json`.
+- `src/service-worker.ts` reads its lists from `$app/manifest`, `$app/env` and
+  `$app/paths` (`$service-worker` is gone in SvelteKit 3). It drops
+  `static/_headers` from the precache itself, since the old
+  `serviceWorker.files` config filter no longer exists.
 
 ## Runtime Source And Patched Wrappers
 
@@ -86,8 +102,9 @@ Every raster encode is one `optimize` call (since 2026-11-04,
 
 ## Service Worker
 
-`src/service-worker.ts` imports `{ build, files, prerendered, version }` from
-`$service-worker` plus the curated codec-asset records from
+`src/service-worker.ts` builds its `build`, `files` and `prerendered` lists from
+`$app/manifest` (`immutable`, `assets`, `prerendered`), takes `version` from
+`$app/env`, and imports the curated codec-asset records from
 `src/lib/service-worker-codec-assets.ts` (a re-export of
 `src/shared/codec-assets/service-worker.ts`).
 
@@ -106,7 +123,7 @@ Behavior (variant-aware precache, 2026-06-10 — first-visit payload
   2026-11-04), so they stay runtime-cacheable only;
 - install also fetches `/_app/worker-precache.json` and precaches every worker
   chunk it lists (codec worker, SVG optimizer worker, OxiPNG thread helper).
-  SvelteKit's `$service-worker` `build` list omits the chunks Vite emits for
+  SvelteKit's `build` list (`immutable` in `$app/manifest`) omits the chunks Vite emits for
   `new Worker(new URL(...))`, so before 2026-11-04 the codec WASM was cached but
   no worker could load it, and a first offline encode failed until an online
   encode had fetched the worker. The `app-worker-precache-manifest` plugin in
@@ -163,7 +180,7 @@ set to **"Respect Existing Headers"** (Caching → Configuration). The default
 worker behind a 4 h cache and caps the content-hashed `/_app/immutable/*` assets
 at 4 h instead of the year-long `immutable` cache `_headers` grants them. Leave
 Pages **Build cache** (Beta) off — it caches build *outputs* between CI builds
-and can resurface stale-artifact confusion given SvelteKit `$service-worker` generation and codec wrapper patching; it has no effect on what users are served.
+and can resurface stale-artifact confusion given SvelteKit's service-worker manifest generation and codec wrapper patching; it has no effect on what users are served.
 
 `version` (hence `cacheName`) defaults to SvelteKit's build timestamp, so the
 worker bytes change every build and the update check always fires.

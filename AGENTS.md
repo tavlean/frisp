@@ -1,4 +1,4 @@
-Frisp is a privacy-first, fully client-side image optimizer: a maintained modern fork of Squoosh on SvelteKit 2 and Svelte 5, shipped as a static SPA. Start with [docs/README.md](docs/README.md) (the docs index) and [docs/project/brief.md](docs/project/brief.md) (what this is and where it stands). Read the docs related to your task BEFORE working and update the ones you invalidated after; the index routes you, so load only what the task needs.
+Frisp is a privacy-first, fully client-side image optimizer: a maintained modern fork of Squoosh on SvelteKit 3 and Svelte 5, shipped as a static SPA. Start with [docs/README.md](docs/README.md) (the docs index) and [docs/project/brief.md](docs/project/brief.md) (what this is and where it stands). Read the docs related to your task BEFORE working and update the ones you invalidated after; the index routes you, so load only what the task needs.
 
 ## Style tie-breakers
 

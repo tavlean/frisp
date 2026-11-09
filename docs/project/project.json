@@ -4,7 +4,7 @@
   "team": "Tavlean",
   "client": null,
   "aliases": ["Frisp"],
-  "purpose": "Frisp is a privacy-first, fully client-side image optimizer at [frisp.app](https://frisp.app): a maintained modern fork of GoogleChromeLabs' Squoosh, rebuilt on SvelteKit 2 and Svelte 5 as a static SPA under Apache-2.0.",
+  "purpose": "Frisp is a privacy-first, fully client-side image optimizer at [frisp.app](https://frisp.app): a maintained modern fork of GoogleChromeLabs' Squoosh, rebuilt on SvelteKit 3 and Svelte 5 as a static SPA under Apache-2.0.",
   "status": "started",
   "linear": {
     "project_id": "6b096e7d-8fd3-4b25-bf23-0f46a2a5347c",

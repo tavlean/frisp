@@ -82,8 +82,8 @@ seams audits. This plan closes it out.
      `preview`.
    - Production: `adapter-static` emits files, so headers are set at the **host**.
      `static/_headers` carries the same pair into the static output for
-     Netlify/Cloudflare-style hosts (`svelte.config.js` excludes it from the SW
-     precache manifest so it does not 404 in `cache.addAll`). If a host cannot set
+     Netlify/Cloudflare-style hosts (`src/service-worker.ts` excludes it from the SW
+     precache so it does not 404 in `cache.addAll`). If a host cannot set
      headers, fall back to the `coi-serviceworker` shim, but prefer real headers
      since the app already runs its own service worker.
 2. **Verify isolation. — ✅ DONE & TEST-PROTECTED.** Verified in the production

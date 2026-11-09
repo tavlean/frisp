@@ -1,6 +1,6 @@
 # Project brief: Frisp
 
-Last updated: 2026-11-04.
+Last updated: 2026-11-10.
 
 Intent, where things stand, and what is still undecided. Read this and
 [../README.md](../README.md) (the docs index) before starting work.
@@ -9,7 +9,7 @@ Intent, where things stand, and what is still undecided. Read this and
 
 Frisp is a privacy-first, fully client-side image optimizer at
 [frisp.app](https://frisp.app): a maintained modern fork of GoogleChromeLabs'
-Squoosh, rebuilt on SvelteKit 2 and Svelte 5 as a static SPA under Apache-2.0.
+Squoosh, rebuilt on SvelteKit 3 and Svelte 5 as a static SPA under Apache-2.0.
 Users drop, pick, or paste an image; the browser decodes, resizes, adds grain,
 quantizes, and encodes locally through WASM codecs in workers, multi-core where
 the browser allows. Nothing is ever uploaded. It installs as a PWA and works
@@ -70,7 +70,8 @@ images live; images never travel to Frisp.
 
 ## Architecture in brief
 
-- SvelteKit 2.70 + Svelte 5.55 runes, Vite 8, adapter-static, `ssr = false`.
+- SvelteKit 3.1 + Svelte 5.57 runes, Vite 8.3, adapter-static 4, `ssr = false`.
+  No `svelte.config.js`; the SvelteKit config lives in `vite.config.ts`.
 - Editor state: `src/lib/editor/editor-session.svelte.ts` (`EditorSession` plus
   two `SideRuntime`s), `editor-history.svelte.ts` for undo/redo,
   `src/lib/result-cache.ts` (LRU signature to result), `settings-storage.ts` for
@@ -99,15 +100,26 @@ images live; images never travel to Frisp.
 - Service worker and PWA: `src/service-worker.ts`, variant-aware precache,
   prompt-to-refresh.
 
-## Current state (2026-11-04)
+## Current state (2026-11-10)
 
 The SvelteKit migration is concluded and `main` is the production app. All seven
 WASM codecs were rebuilt from source natively in 2026-06, closing 14 CVEs, and
 the multi-threaded runtime is verified in Chromium and WebKit. Gates are green:
-`npm run check` reports 0 errors (57 warnings, all the same unknown CSS
-`corner-shape` property), the unit suite passes, and Prettier is clean.
+`npm run check` reports 0 errors and 0 warnings, the unit suite passes, and
+Prettier is clean.
 
 Shipped since then, newest first:
+
+- **Dependency audit and SvelteKit 3 (2026-11-10).** `npm audit fix`, Vite
+  8.3.7, then SvelteKit 3.1.1 with adapter-static 4, vite-plugin-svelte 7.3
+  and Svelte 5.57. The SvelteKit config moved into `vite.config.ts`; the
+  service worker reads `$app/manifest` and drops `_headers` from its precache
+  itself; the editor's shallow-route entry goes through
+  `src/lib/editor/editor-route.svelte.ts` because `pushState` is now async.
+  `npm audit` still reports 4 low findings, all one advisory in `deepmerge`
+  (GHSA-gcqx-w48m-w2h4) with no patched release, so the CI audit job at
+  `--audit-level=low` stays red until upstream ships a fix or the policy
+  changes. Write-up in the 2026-11-10 worklog entry.
 
 - **Auto quality (2026-11-04, review change D).** An Auto select under
   the Quality slider of WebP, AVIF, JPEG XL, and JPEG (Visually lossless 90,

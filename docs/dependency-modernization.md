@@ -1,6 +1,6 @@
 # Dependency Modernization
 
-Last updated: 2026-06-10.
+Last updated: 2026-11-10.
 
 The `svelte` branch now uses the SvelteKit/Vite dependency graph at the repo
 root. The previous Rollup/Preact dependency modernization notes are historical
@@ -9,10 +9,10 @@ and no longer describe this branch.
 ## Current Baseline
 
 - Svelte 5
-- SvelteKit 2
+- SvelteKit 3 (config in `vite.config.ts`, no `svelte.config.js`)
 - Vite 8
 - TypeScript 6
-- adapter-static
+- adapter-static 4
 - Comlink
 - pointer-tracker
 - wasm-feature-detect

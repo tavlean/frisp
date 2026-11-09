@@ -1,6 +1,6 @@
 # Gotchas
 
-Last updated: 2026-11-04.
+Last updated: 2026-11-10.
 
 Traps that fail **silently**: the build stays green, the tests stay green, and
 the damage shows up later. Loud failures are deliberately absent because the
@@ -49,6 +49,27 @@ this doc holds the cross-cutting ones that no single file owns.
   compare chunk hashes and sizes, or fingerprint library-only strings.
 
 ## Runtime
+
+- **`static/_headers` must stay out of the service-worker precache, and no
+  local test can tell you it slipped in.** The host consumes the file and
+  answers 404 for it, so a precache that lists it makes `cache.addAll` reject
+  and the worker never installs: the deployed app silently loses offline.
+  `vite preview` serves `_headers` like any file, so check, unit and the whole
+  e2e suite stay green. SvelteKit 2 filtered it through the
+  `serviceWorker.files` config option; SvelteKit 3 removed that option and
+  lists every static file in `$app/manifest`, so `src/service-worker.ts` now
+  drops it itself (`isHostOnlyFile`). Keep that filter through any SvelteKit
+  upgrade.
+- **Never read `page.state.editor` directly to decide whether the editor is
+  open; ask `isEditorOpen()` in `src/lib/editor/editor-route.svelte.ts`.**
+  SvelteKit 3 made `pushState` async: it resolves the route first and writes
+  `page.state` a few microtasks later. In that gap the route-sync effects in
+  `src/routes/+page.svelte` saw an image with no editor state, took it for
+  Back, and closed the image the moment it opened (and tore down a restored
+  batch). Check, unit tests and the build all stayed green; only e2e caught
+  it. `pushEditorRoute()` counts a push in flight as open. The same applies
+  to `goto(..., { shallow: true })`, which `sv migrate sveltekit-3` offers as
+  the replacement for the deprecated `pushState`.
 
 - **A codec can silently change the output's resolution.** libjxl downsamples 2x
   on its own once the requested butteraugli distance crosses a threshold, and

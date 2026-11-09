@@ -4,6 +4,50 @@ Short session-by-session build log: what changed, why, and the gotchas a future
 session must know. Newest first. (Live project state stays in
 [the project brief](brief.md); this is the narrative trail.)
 
+## 2026-11-10 (Opus, executor) - Dependency audit: npm audit fix, Vite 8.3.7, SvelteKit 3
+
+- `b6bf58ab`: `npm audit fix` (devalue, source-map-js, svgo 4.1.0, vitest
+  4.1.12). `24086845`: Vite 8.3.7. `a3bf2455`: SvelteKit 3.1.1,
+  adapter-static 4.0.1, vite-plugin-svelte 7.3.1, Svelte 5.57.3.
+- Why: the CI `audit` job (`npm audit --audit-level=low`) was red. Every
+  advisory with a published fix is now fixed.
+- Left open: 4 low findings, all one advisory, deepmerge GHSA-gcqx-w48m-w2h4
+  (prototype poisoning in `mergeObject()`). deepmerge has no patched release
+  and vite-plugin-svelte 7.3.1, the latest, still depends on `^4.3.1`;
+  kit and adapter-static are only listed because they depend on it. npm's
+  offered "fix" installs `@sveltejs/kit@0.0.30`, which is not a fix. It runs
+  at build time on Frisp's own config, never on user input or in the shipped
+  app. The CI audit job stays red at `--audit-level=low` until upstream ships
+  a fix or the job's level or an allowlist changes; that is the maintainer's
+  call.
+- SvelteKit 3 changes made by hand (the `sv migrate sveltekit-3` tool
+  reprinted unrelated code and rewrote `pushState` as `goto`, so none of its
+  edits were kept): the config moved into `sveltekit({...})` in
+  `vite.config.ts` and `svelte.config.js` is gone; `$lib` joined the shared
+  `appAliases` map; `$app/environment` became `$app/env`; tsconfig extends
+  `$app/tsconfig` and the service worker has its own tsc project; the
+  service worker reads `$app/manifest` and filters `_headers` itself;
+  `version.pollInterval: 0` keeps SvelteKit 2's no-polling behavior.
+- Gotchas (in `docs/gotchas.md`): `pushState` is async in SvelteKit 3, so
+  `page.state.editor` lagged the push and the route-sync effects closed
+  every image as it opened (117 of 138 e2e tests failed while check, unit
+  and build stayed green); `src/lib/editor/editor-route.svelte.ts` now owns
+  the editor entry. `_headers` must stay out of the precache, and no local
+  test would notice if it slipped back in. Also: SvelteKit 3's boot script
+  loads `start.js` and then `app.js` in sequence instead of together, so
+  the page can mount after the `load` event; one e2e test that pasted right
+  after `goto` now waits for the intro.
+- Gates: `npm run check` exit 0 (0 errors, 0 warnings), 246 unit tests,
+  e2e 133 passed / 4 skipped / 1 failed in Chromium and WebKit. The one
+  failure was a WebKit `page.goto` timeout on `svg.spec.ts`, which passed
+  in the run before and 4 of 4 times on repeat. Offline after first load
+  checked by hand on `vite preview`: the worker precaches 66 entries
+  including `/` and `/diagnostics`, leaves `_headers` out, and an offline
+  reload boots with no console errors.
+- Follow-ups: move the aliases to `package.json` subpath imports (`#lib`;
+  the `alias` option is deprecated and warns on every build); replace the
+  deprecated `pushState` inside `editor-route.svelte.ts` only.
+
 ## 2026-11-09 (Opus, executor) - Auto quality scores large images on full-size tiles
 
 - `142556ed`: above 4 MP, SSIMULACRA2 now scores four full-resolution tiles,
