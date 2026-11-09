@@ -34,7 +34,9 @@ session must know. Newest first. (Live project state stays in
   passed locally first (134 passed, 4 offline checks skipped in WebKit by
   design). CI on the push failed in two jobs, neither from this work: e2e
   could not install Chromium on `ubuntu-latest`, now Ubuntu 26.04 (pinned to
-  `ubuntu-24.04` in `4f8ee31b`), and `npm audit` reports advisories that
+  `ubuntu-24.04` in `4f8ee31b`; once it ran, the per-format Auto test
+  rejected a valid budget stop on WebKit JXL, fixed in `b31d0675`, and e2e
+  is green), and `npm audit` reports advisories that
   appeared since 2026-08-14 (SvelteKit, Vite, vitest, devalue, svgo,
   source-map-js; some fixes need SvelteKit 3). The audit job stays red until
   those dependencies move.
