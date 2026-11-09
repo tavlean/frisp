@@ -29,6 +29,15 @@ session must know. Newest first. (Live project state stays in
   an average.
 - Gates: `npm run check` exit 0, 246 unit tests, `auto-quality.spec.ts` and
   the scorer e2e 30 of 30 in Chromium and WebKit.
+- Pushed `main` (49 commits) and deployed frisp.app by hand as Worker
+  version `d113012a`, the first deploy since 2026-08-14. The full e2e suite
+  passed locally first (134 passed, 4 offline checks skipped in WebKit by
+  design). CI on the push failed in two jobs, neither from this work: e2e
+  could not install Chromium on `ubuntu-latest`, now Ubuntu 26.04 (pinned to
+  `ubuntu-24.04` in `4f8ee31b`), and `npm audit` reports advisories that
+  appeared since 2026-08-14 (SvelteKit, Vite, vitest, devalue, svgo,
+  source-map-js; some fixes need SvelteKit 3). The audit job stays red until
+  those dependencies move.
 
 ## 2026-11-04 (Opus, executor) - Auto quality on AVIF, JPEG XL, and JPEG
 

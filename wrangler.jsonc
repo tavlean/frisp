@@ -1,6 +1,7 @@
 // Cloudflare Worker (static assets only — no Worker script).
-// Deployed by Workers Builds: `npm run build` → `npx wrangler deploy` (main)
-// / `npx wrangler versions upload` (preview branches).
+// Workers Builds is not connected yet, so a push deploys nothing: deploy by
+// hand with `npm run build` then `npx wrangler deploy`. Once connected, it
+// runs those on main and `npx wrangler versions upload` on other branches.
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "frisp",
