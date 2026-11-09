@@ -6,7 +6,7 @@
   // production import path); only the editor handoff is stubbed. No production
   // file is touched; +page.ts opts this subtree out of prerender/SSR and we
   // hard-guard on `dev` below.
-  import { dev } from '$app/environment';
+  import { dev } from '$app/env';
   import { resolve } from '$app/paths';
   import { APP_NAME } from 'shared/brand';
   import { IntroDropDemo } from '$lib/lab/intro/drop-demo.svelte';

@@ -7,7 +7,7 @@
   // history-state / service-worker parts (in the lab, "Back" just clears the
   // file).
   import { onMount } from 'svelte';
-  import { dev } from '$app/environment';
+  import { dev } from '$app/env';
   import Output from '$lib/editor/output/Output.svelte';
   import Snackbar from '$lib/editor/Snackbar.svelte';
   import ImageInfoRows from '$lib/editor/ImageInfoRows.svelte';

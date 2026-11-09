@@ -192,6 +192,9 @@ test.describe('landing', () => {
   }) => {
     await page.goto('/');
     const file = await transferFile(photo, 'photo.jpg', 'image/jpeg');
+    // The window paste listener belongs to the mounted intro, and SvelteKit 3
+    // can mount after the load event `goto` waits for.
+    await expect(page.getByRole('button', { name: 'paste' })).toBeVisible();
 
     // ⌘/Ctrl+V lands as a window paste event carrying files in clipboardData
     // (the synchronous path — no async clipboard, no permission prompt).

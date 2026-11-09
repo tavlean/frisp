@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { dev } from '$app/environment';
+  import { dev } from '$app/env';
   import { APP_NAME } from 'shared/brand';
   import { IntroDropDemo } from '$lib/lab/intro/drop-demo.svelte';
   import Brand from '$lib/lab/intro/Brand.svelte';

@@ -10,7 +10,7 @@
   // other labs but drops route/history-state/service-worker parts (here "Back"
   // just clears the file, and the gallery is the batch stepping-stone).
   import { onMount } from 'svelte';
-  import { dev } from '$app/environment';
+  import { dev } from '$app/env';
   import Output from '$lib/editor/output/Output.svelte';
   import Snackbar from '$lib/editor/Snackbar.svelte';
   import ImageInfoRows from '$lib/editor/ImageInfoRows.svelte';

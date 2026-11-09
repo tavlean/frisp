@@ -4,8 +4,8 @@ import {
   anotherTabIsBusy,
   answerBusyQueries,
 } from 'client/lazy-app/sw-bridge/runtime';
-import { base } from '$app/paths';
-import { browser, dev } from '$app/environment';
+import { resolve } from '$app/paths';
+import { browser, dev } from '$app/env';
 
 export { applyServiceWorkerUpdate, anotherTabIsBusy, answerBusyQueries };
 
@@ -90,7 +90,9 @@ export async function registerServiceWorker({
     return undefined;
   }
 
-  return registerServiceWorkerUrl(`${base}/service-worker.js`, {
+  // `resolve('/')` is the base path plus a trailing slash (SvelteKit 3 dropped
+  // the `base` export); the worker always sits at the base root.
+  return registerServiceWorkerUrl(`${resolve('/')}service-worker.js`, {
     isProduction: true,
     onUpdateReady,
   });

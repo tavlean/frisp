@@ -6,7 +6,7 @@
   // only the editor handoff is stubbed. AuroraIntro themes itself off the OS
   // (prefers-color-scheme), so — unlike the token-based variants — this page
   // has no theme toggle. Guarded on `dev`; +page.ts opts out of prerender/SSR.
-  import { dev } from '$app/environment';
+  import { dev } from '$app/env';
   import { IntroDropDemo } from '$lib/lab/intro/drop-demo.svelte';
   import AuroraIntro from '$lib/lab/intro/AuroraIntro.svelte';
   import '$lib/lab/intro/intro-lab.css';

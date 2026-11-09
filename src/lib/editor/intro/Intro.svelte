@@ -11,7 +11,7 @@
   // over the intro routes exactly once (here, not the global) and never triggers
   // the global pink overlay — the viewfinder is our drag feedback instead.
   import { onMount } from 'svelte';
-  import { dev } from '$app/environment';
+  import { dev } from '$app/env';
   import { resolve } from '$app/paths';
   import type { Attachment } from 'svelte/attachments';
   import {

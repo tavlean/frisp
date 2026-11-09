@@ -7,7 +7,7 @@
   // the editor handoff is stubbed. Guarded on `dev`; +page.ts opts the subtree
   // out of prerender/SSR.
   import { onMount } from 'svelte';
-  import { dev } from '$app/environment';
+  import { dev } from '$app/env';
   import { APP_NAME } from 'shared/brand';
   import { IntroDropDemo } from '$lib/lab/intro/drop-demo.svelte';
   import Brand from '$lib/lab/intro/Brand.svelte';

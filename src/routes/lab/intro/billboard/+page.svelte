@@ -5,7 +5,7 @@
   // picks are REAL (IntroDropDemo runs the production import path); only the
   // editor handoff is stubbed. No production file is touched; +page.ts opts
   // this subtree out of prerender/SSR and we hard-guard on `dev` below.
-  import { dev } from '$app/environment';
+  import { dev } from '$app/env';
   import { APP_NAME } from 'shared/brand';
   import { IntroDropDemo } from '$lib/lab/intro/drop-demo.svelte';
   import Brand from '$lib/lab/intro/Brand.svelte';

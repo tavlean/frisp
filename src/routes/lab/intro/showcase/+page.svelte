@@ -9,7 +9,7 @@
   // sizes. No production file is touched; +page.ts opts this subtree out of
   // prerender/SSR and we hard-guard on `dev` below.
   import { onMount, tick } from 'svelte';
-  import { dev } from '$app/environment';
+  import { dev } from '$app/env';
   import { APP_NAME } from 'shared/brand';
   import { fromDataTransfer } from '$lib/bulk/import-sources';
   import { EditorSession } from '$lib/editor/editor-session.svelte';

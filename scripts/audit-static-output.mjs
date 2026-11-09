@@ -619,8 +619,10 @@ assert(
   serviceWorker.includes(pageCssAsset),
   `Service-worker build manifest does not include ${pageCssAsset}.`,
 );
+// SvelteKit 3's `$app/manifest` lists prerendered pages base-relative
+// (`diagnostics`, resolved at runtime), not as `/diagnostics`.
 assert(
-  serviceWorker.includes('/diagnostics'),
+  /[`'"]\/?diagnostics[`'"]/.test(serviceWorker),
   'Service worker does not pre-cache prerendered route HTML.',
 );
 assert(

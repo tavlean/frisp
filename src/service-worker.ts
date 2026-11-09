@@ -1,9 +1,14 @@
-/// <reference types="@sveltejs/kit" />
-/// <reference no-default-lib="true" />
-/// <reference lib="esnext" />
-/// <reference lib="webworker" />
+// Type-checked by its own project (tsconfig.service-worker.json) so it gets
+// WebWorker types instead of the app's DOM ones.
 
-import { build, files, prerendered, version } from '$service-worker';
+import { version } from '$app/env';
+import {
+  assets as staticAssets,
+  immutable,
+  prerendered as pages,
+} from '$app/manifest';
+import { asset, resolve } from '$app/paths';
+import { self as worker } from '$app/service-worker';
 import { simd, threads } from 'wasm-feature-detect';
 import { serviceWorkerCodecAssetRecords } from '$lib/service-worker-codec-assets';
 import {
@@ -12,8 +17,24 @@ import {
   type CodecPrecacheSupport,
 } from 'sw/cache-plan';
 
-const worker = self as unknown as ServiceWorkerGlobalScope;
 const cacheName = `app-${version}`;
+
+// `$app/manifest` paths are base-relative; turn them into the root-relative
+// URLs the rest of this file matches against. `resolve('/')` is the base path
+// plus a trailing slash; it only accepts typed app paths, and the Vite output
+// paths in `immutable` are plain strings.
+const basePrefix = resolve('/');
+const build = immutable.map(({ path }) => basePrefix + path);
+// `static/_headers` is a host-side config file (Cloudflare reads it to set the
+// COOP/COEP cross-origin-isolation headers), not a fetchable asset, so it must
+// stay out of the precache or `cache.addAll` rejects on its 404. SvelteKit 3
+// dropped the `serviceWorker.files` config filter that used to do this.
+const isHostOnlyFile = (path: string) =>
+  path === '_headers' || path.endsWith('.DS_Store');
+const files = staticAssets
+  .filter(({ path }) => !isHostOnlyFile(path))
+  .map(({ path }) => asset(path));
+const prerendered = pages.map(({ path }) => resolve(path));
 
 const codecAssetUrls = dedupeUrls(
   serviceWorkerCodecAssetRecords.map((record) => record.url),

@@ -2,7 +2,9 @@ import { readFileSync } from 'node:fs';
 import type { ServerResponse } from 'node:http';
 import { join, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import adapter from '@sveltejs/adapter-static';
 import { sveltekit } from '@sveltejs/kit/vite';
+import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 import { defineConfig, type Connect, type Plugin } from 'vite';
 
 const repoRoot = fileURLToPath(new URL('.', import.meta.url));
@@ -176,7 +178,24 @@ export default defineConfig({
     crossOriginIsolation,
     stripDevOnlyRoutesInProd,
     workerPrecacheManifest,
-    sveltekit(),
+    // SvelteKit 3 reads its config here; svelte.config.js is gone.
+    sveltekit({
+      preprocess: vitePreprocess(),
+      // `alias` also generates the TypeScript paths. SvelteKit 3 no longer
+      // provides `$lib` itself, so it rides in the same map as the others.
+      alias: appAliases,
+      adapter: adapter({
+        pages: 'build',
+        assets: 'build',
+        fallback: '200.html',
+        strict: false,
+      }),
+      serviceWorker: { register: false },
+      // SvelteKit 3 polls `_app/version.json` hourly by default. Updates
+      // here come through the service worker's waiting-worker prompt, so
+      // keep SvelteKit 2's behavior of not polling.
+      version: { pollInterval: 0 },
+    }),
   ],
   optimizeDeps: {
     // Only imported inside lazily-spawned codec workers (and the SW), so Vite's

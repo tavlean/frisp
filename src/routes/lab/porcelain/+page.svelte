@@ -5,7 +5,7 @@
   // Only the chrome is new. No production file is modified; the +page.ts opts
   // this subtree out of prerender/SSR and we hard-guard on `dev` below.
   import { onMount } from 'svelte';
-  import { dev } from '$app/environment';
+  import { dev } from '$app/env';
   import Output from '$lib/editor/output/Output.svelte';
   import Snackbar from '$lib/editor/Snackbar.svelte';
   import { snackbar } from '$lib/editor/snackbar-store.svelte';

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { dev } from '$app/environment';
+  import { dev } from '$app/env';
   import { onMount } from 'svelte';
   import { processSvg } from 'client/lazy-app/svg-source';
   import { autoSearch } from '$lib/svg/auto-search';

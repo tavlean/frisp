@@ -1,24 +1,10 @@
 {
-  "extends": "./.svelte-kit/tsconfig.json",
+  "extends": "$app/tsconfig",
   "compilerOptions": {
-    "allowJs": true,
-    "checkJs": true,
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-    "moduleResolution": "bundler",
-    "resolveJsonModule": true,
-    "skipLibCheck": true,
     "sourceMap": true,
-    "strict": true,
-    "verbatimModuleSyntax": true
+    "strict": true
   },
-  "//": "We can't simply inherit the generated .svelte-kit/tsconfig.json `include` (which would pull in vite.config.ts and crash svelte-check with 'forEachResolvedModule is not a function'). So we curate `include` — but crucially we add the generated SvelteKit `ambient.d.ts`/`non-ambient.d.ts`/`$types`, which carry `/// <reference types=\"@sveltejs/kit\" />` and thus the REAL $app/* + $env/* + route types (no hand-written shim needed).",
-  "include": [
-    ".svelte-kit/ambient.d.ts",
-    ".svelte-kit/non-ambient.d.ts",
-    ".svelte-kit/types/**/*.d.ts",
-    "src/**/*.js",
-    "src/**/*.ts",
-    "src/**/*.svelte"
-  ]
+  "//": "`include` is curated rather than SvelteKit's suggested `src`, `test`, `*`: pulling in vite.config.ts crashes svelte-check with 'forEachResolvedModule is not a function'. The service worker is its own project (tsconfig.service-worker.json) because it needs WebWorker types, not DOM ones.",
+  "include": ["src/**/*.js", "src/**/*.ts", "src/**/*.svelte"],
+  "exclude": ["src/service-worker.ts"]
 }

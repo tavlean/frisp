@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { dev } from '$app/environment';
+  import { dev } from '$app/env';
   import ThemeToggle, {
     type ThemeMode,
   } from '$lib/lab/intro/ThemeToggle.svelte';

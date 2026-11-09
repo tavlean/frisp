@@ -14,8 +14,7 @@
 // rendered by a real EditorSession in the route.
 
 import { SvelteMap, SvelteSet } from 'svelte/reactivity';
-import { pushState } from '$app/navigation';
-import { page } from '$app/state';
+import { pushEditorRoute } from '$lib/editor/editor-route.svelte';
 import {
   getDefaultOptions,
   OUTPUT_FORMATS,
@@ -910,7 +909,7 @@ export class BulkStore {
     // editor history entry. Restore that shallow-route state before jobs come
     // back, or its next effect pass sees hasJobs without editor state and
     // immediately resets the restored batch.
-    if (!page.state.editor) pushState('', { editor: true });
+    pushEditorRoute();
 
     let nextSession = this.session;
     for (const { job, index } of pending.items) {

@@ -1,7 +1,6 @@
 <script lang="ts">
   import { onMount, untrack } from 'svelte';
-  import { dev } from '$app/environment';
-  import { pushState } from '$app/navigation';
+  import { dev } from '$app/env';
   import { resolve } from '$app/paths';
   import { page } from '$app/state';
   import {
@@ -21,6 +20,10 @@
   import { snackbar } from '$lib/editor/snackbar-store.svelte';
   import { fileDrop } from '$lib/editor/file-drop';
   import { EditorSession } from '$lib/editor/editor-session.svelte';
+  import {
+    isEditorOpen,
+    pushEditorRoute,
+  } from '$lib/editor/editor-route.svelte';
   import type { AutoQualityControl } from '$lib/editor/auto-quality';
   import { IDENTITY, type CompressOutcome } from '$lib/compress';
   import { isSupportedBulkImage } from 'client/lazy-app/bulk';
@@ -99,13 +102,13 @@
   // The per-side encode + spinner effects now live inside EditorSession (set up
   // in its constructor, disposed in dispose()); the page keeps only the effects
   // that depend on page/route state or write back to shared session state.
-  $effect(() => session.syncRouteState(!!page.state.editor));
+  $effect(() => session.syncRouteState(isEditorOpen()));
   // Bulk mirror of syncRouteState: leaving the editor history state while a
   // batch is open tears the batch down (browser back = exit bulk); an editor
   // history state left behind after the batch emptied (last image removed) is
   // unwound so the intro doesn't sit on a stale entry.
   $effect(() => {
-    const editorOpen = !!page.state.editor;
+    const editorOpen = isEditorOpen();
     const hasJobs = bulkStore.hasJobs;
     const hasFile = !!session.file;
     untrack(() => {
@@ -130,7 +133,7 @@
   });
 
   function pickFiles(list: ArrayLike<File> | null | undefined) {
-    session.pickFiles(list, () => pushState('', { editor: true }));
+    session.pickFiles(list, pushEditorRoute);
   }
 
   function routeFiles(imported: ImportedFile[]): void {
@@ -149,7 +152,7 @@
       // reuse its editor history entry rather than stacking a second one, so
       // one Back press exits bulk cleanly.
       if (session.file) session.clearFile();
-      if (!page.state.editor) pushState('', { editor: true });
+      pushEditorRoute();
       return;
     }
     pickFiles([files[0].file]);
