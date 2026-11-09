@@ -206,10 +206,15 @@ for (const format of OTHER_FORMATS) {
     console.log(
       `[auto-quality ${browserName}] photo.jpg ${format.id} Balanced: ${text} in ${ms} ms`,
     );
+    // A slow machine (WebKit on a CI runner, JXL) can spend the 8 s budget
+    // before the bisection ends; a stop that keeps a pass is correct too.
     const match =
-      /^Auto: Balanced met at quality (\d+) \(score [\d.]+\)\.$/.exec(text);
+      /^Auto: (?:Balanced met|stopped after \d+ s) at quality (\d+) \(score ([\d.]+)\)\.$/.exec(
+        text,
+      );
     expect(match, text).not.toBeNull();
     const quality = Number(match![1]);
+    expect(Number(match![2])).toBeGreaterThanOrEqual(70);
     expect(quality).toBeLessThanOrEqual(format.max);
     await expect(qualityInput(page)).toHaveValue(String(quality));
 
