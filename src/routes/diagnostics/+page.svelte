@@ -3,27 +3,13 @@
   import { resolve } from '$app/paths';
   import { runCodecAssetProbe } from '$lib/codec-asset-probe';
   import { createDiagnosticsModel } from '$lib/diagnostics-data';
-  import type { CodecAssetProbeResult } from '$lib/codec-asset-probe';
-  import {
-    runWebpEncodeProbe,
-    type WebpEncodeProbeResult,
-  } from '$lib/webp-encode-probe';
+  import { runWebpEncodeProbe } from '$lib/webp-encode-probe';
   import { registerServiceWorker } from '$lib/service-worker-registration';
   import { APP_NAME } from 'shared/brand';
 
   const model = createDiagnosticsModel();
 
   let selectedJobId = $state(model.session.selectedJobId ?? '');
-  let codecProbe = $state<
-    | { status: 'checking' }
-    | { status: 'ready'; result: CodecAssetProbeResult }
-    | { status: 'failed'; message: string }
-  >({ status: 'checking' });
-  let encodeProbe = $state<
-    | { status: 'checking' }
-    | { status: 'ready'; result: WebpEncodeProbeResult }
-    | { status: 'failed'; message: string }
-  >({ status: 'checking' });
   const selectedJob = $derived(
     model.session.jobs.find((job) => job.id === selectedJobId) ??
       model.session.jobs[0],
@@ -39,47 +25,12 @@
     });
   });
 
-  // Each probe runs once on mount in its own effect (no reactive reads), with a
-  // per-probe cancel guard + cleanup so a late resolution after navigating away
-  // can't write stale state. Replaces the single onMount that shared one
-  // `cancelled` flag across all three.
-  $effect(() => {
-    let cancelled = false;
-    runCodecAssetProbe()
-      .then((result) => {
-        if (!cancelled) codecProbe = { status: 'ready', result };
-      })
-      .catch((error: unknown) => {
-        if (!cancelled) {
-          codecProbe = {
-            status: 'failed',
-            message: error instanceof Error ? error.message : String(error),
-          };
-        }
-      });
-    return () => {
-      cancelled = true;
-    };
-  });
-
-  $effect(() => {
-    let cancelled = false;
-    runWebpEncodeProbe()
-      .then((result) => {
-        if (!cancelled) encodeProbe = { status: 'ready', result };
-      })
-      .catch((error: unknown) => {
-        if (!cancelled) {
-          encodeProbe = {
-            status: 'failed',
-            message: error instanceof Error ? error.message : String(error),
-          };
-        }
-      });
-    return () => {
-      cancelled = true;
-    };
-  });
+  // Each probe runs once per page visit; {#await} drops a resolution that
+  // lands after the page is gone.
+  const codecProbe = runCodecAssetProbe();
+  const encodeProbe = runWebpEncodeProbe();
+  const errorMessage = (error: unknown) =>
+    error instanceof Error ? error.message : String(error);
 </script>
 
 <svelte:head>
@@ -161,52 +112,52 @@
 
   <section class="codec-probe" aria-label="Worker and WASM probe">
     <h2>Worker/WASM probe</h2>
-    {#if codecProbe.status === 'checking'}
+    {#await codecProbe}
       <p>Checking WebP codec asset from a module worker.</p>
-    {:else if codecProbe.status === 'ready'}
+    {:then result}
       <dl>
         <div>
           <dt>WASM bytes</dt>
-          <dd>{codecProbe.result.wasmBytes}</dd>
+          <dd>{result.wasmBytes}</dd>
         </div>
         <div>
           <dt>Magic bytes</dt>
-          <dd>{codecProbe.result.wasmMagic}</dd>
+          <dd>{result.wasmMagic}</dd>
         </div>
         <div>
           <dt>Asset URL</dt>
-          <dd>{codecProbe.result.wasmUrl}</dd>
+          <dd>{result.wasmUrl}</dd>
         </div>
       </dl>
-    {:else}
-      <p class="error">{codecProbe.message}</p>
-    {/if}
+    {:catch error}
+      <p class="error">{errorMessage(error)}</p>
+    {/await}
   </section>
 
   <section class="codec-probe" aria-label="WebP encode probe">
     <h2>WebP encode probe</h2>
-    {#if encodeProbe.status === 'checking'}
+    {#await encodeProbe}
       <p>
         Encoding a synthetic 2x2 image through the existing WebP worker path.
       </p>
-    {:else if encodeProbe.status === 'ready'}
+    {:then result}
       <dl>
         <div>
           <dt>Output bytes</dt>
-          <dd>{encodeProbe.result.outputBytes}</dd>
+          <dd>{result.outputBytes}</dd>
         </div>
         <div>
           <dt>RIFF header</dt>
-          <dd>{encodeProbe.result.riffHeader}</dd>
+          <dd>{result.riffHeader}</dd>
         </div>
         <div>
           <dt>Magic bytes</dt>
-          <dd>{encodeProbe.result.magicBytes}</dd>
+          <dd>{result.magicBytes}</dd>
         </div>
       </dl>
-    {:else}
-      <p class="error">{encodeProbe.message}</p>
-    {/if}
+    {:catch error}
+      <p class="error">{errorMessage(error)}</p>
+    {/await}
   </section>
 </main>
 
