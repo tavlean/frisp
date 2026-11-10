@@ -23,9 +23,16 @@ session must know. Newest first. (Live project state stays in
 - Wording: "Nothing uploads" became "Your images never leave your device" on
   the landing, in the meta description and in the README, which gained a
   Privacy section.
-- Known test data in the dataset: one `format:avif` and three
-  `visit:installed`, country IN, 2026-11-10 about 07:39 UTC, from the build
-  agent's preview check. They expire in three months.
+- Deployed 2026-11-10 at `4f7772f7` with `npm run deploy` (its first real
+  run). Checked on `frisp.app` in Chromium and WebKit: opening a photo,
+  choosing AVIF and saving sent `visit`, `session`, `open`, `source`,
+  `format` and `download`, each answered 204, and `npm run stats` showed them
+  about a minute later.
+- Known test data in the dataset, all 2026-11-10: from the build agent's
+  preview check, one `format:avif` and three `visit:installed` (country IN);
+  from the production check, two sessions with their `visit:browser`, `open`,
+  `source:pick`, `format:avif` and `download:avif`. Real use starts after
+  that. Test data expires in three months.
 - The global never-push rule was removed the same day (in `~/.agents`).
 
 ## 2026-11-10 (Fable, driver) - Agents push and deploy on their own
