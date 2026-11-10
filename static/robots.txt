@@ -1,11 +1,6 @@
-# Frisp is a single public page. Everything else in the build is either an
-# internal probe or a hashed build asset, and neither belongs in an index.
+# Frisp is a single public page. Everything else in the build is a hashed
+# build asset, which does not belong in an index.
 User-agent: *
 Allow: /
-
-# The codec/runtime probe page. It is prerendered and reachable, but it is a
-# maintenance tool with no reader value, and its numbers look alarming out of
-# context. The prefix also covers /diagnostics.html.
-Disallow: /diagnostics
 
 Sitemap: https://frisp.app/sitemap.xml

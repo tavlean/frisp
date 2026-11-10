@@ -9,6 +9,7 @@ import {
 } from '$app/manifest';
 import { asset, resolve } from '$app/paths';
 import { self as worker } from '$app/service-worker';
+import type { AssetPath } from '$app/types';
 import { simd, threads } from 'wasm-feature-detect';
 import { serviceWorkerCodecAssetRecords } from '$lib/service-worker-codec-assets';
 import {
@@ -29,8 +30,9 @@ const build = immutable.map(({ path }) => basePrefix + path);
 // COOP/COEP cross-origin-isolation headers), not a fetchable asset, so it must
 // stay out of the precache or `cache.addAll` rejects on its 404. SvelteKit 3
 // dropped the `serviceWorker.files` config filter that used to do this.
-const isHostOnlyFile = (path: string) =>
-  path === '_headers' || path.endsWith('.DS_Store');
+const HEADERS_FILE = '_headers' satisfies AssetPath;
+const isHostOnlyFile = (path: AssetPath) =>
+  path === HEADERS_FILE || path.endsWith('.DS_Store');
 const files = staticAssets
   .filter(({ path }) => !isHostOnlyFile(path))
   .map(({ path }) => asset(path));
@@ -50,17 +52,22 @@ const isProbeWorkerUrl = (url: string) => /probe\.worker[^/]*\.js$/.test(url);
 // visitor's install for the benefit of robots that bypass the service worker
 // entirely. Excluded from the shell only; they stay in `assets` so a direct hit
 // still resolves.
-const CRAWLER_FILES = ['/robots.txt', '/sitemap.xml', '/social-card.png'];
-const isCrawlerFileUrl = (url: string) =>
-  CRAWLER_FILES.some((name) => url.endsWith(name));
+const CRAWLER_FILES = [
+  'robots.txt',
+  'sitemap.xml',
+  'social-card.png',
+] as const satisfies readonly AssetPath[];
+const crawlerFileUrls = new Set(CRAWLER_FILES.map((file) => asset(file)));
 
 // Manifest install icons are in the same category: the browser fetches them
 // only when the user installs the app, the app itself never does. The
 // manifest stays in the shell; it is a few hundred bytes and is what keeps
 // the installed app's identity resolvable offline.
-const INSTALL_ICON_FILES = ['/icon-192.png', '/icon-512.png'];
-const isInstallIconUrl = (url: string) =>
-  INSTALL_ICON_FILES.some((name) => url.endsWith(name));
+const INSTALL_ICON_FILES = [
+  'icon-192.png',
+  'icon-512.png',
+] as const satisfies readonly AssetPath[];
+const installIconUrls = new Set(INSTALL_ICON_FILES.map((file) => asset(file)));
 
 // The app shell: everything needed to boot offline, minus the
 // variant-selected codec assets (`build` lists every emitted file, including
@@ -71,7 +78,9 @@ const appShellUrls = [
   ...build.filter(
     (url) => !codecAssetUrlSet.has(url) && !isProbeWorkerUrl(url),
   ),
-  ...files.filter((url) => !isCrawlerFileUrl(url) && !isInstallIconUrl(url)),
+  ...files.filter(
+    (url) => !crawlerFileUrls.has(url) && !installIconUrls.has(url),
+  ),
   ...prerendered,
 ];
 
@@ -141,11 +150,23 @@ async function detectCodecSupport(): Promise<CodecPrecacheSupport> {
   };
 }
 
-async function fetchAndCache(request: Request): Promise<Response> {
-  const response = await fetch(request);
-  if (response.ok) {
-    const cache = await caches.open(cacheName);
-    await cache.put(request, response.clone());
+// The cache write runs after the response is returned, and a failed write (a
+// full quota) is dropped: the network already answered, so the request must
+// not fail because the copy could not be kept. waitUntil keeps the worker
+// alive until the write settles.
+async function fetchAndCache(event: FetchEvent): Promise<Response> {
+  const response = await fetch(event.request);
+  if (
+    response.status === 200 &&
+    !response.headers.get('cache-control')?.includes('no-store')
+  ) {
+    const copy = response.clone();
+    event.waitUntil(
+      caches
+        .open(cacheName)
+        .then((cache) => cache.put(event.request, copy))
+        .catch(() => {}),
+    );
   }
   return response;
 }
@@ -227,11 +248,11 @@ worker.addEventListener('fetch', (event) => {
           (await cache.match(url.pathname)) ??
           (await cache.match(url.href));
         if (cached) return cached;
-        return fetchAndCache(event.request);
+        return fetchAndCache(event);
       }
 
       try {
-        return await fetchAndCache(event.request);
+        return await fetchAndCache(event);
       } catch (error) {
         const cached = await cache.match(event.request);
         if (cached) return cached;
