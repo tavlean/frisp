@@ -9,6 +9,7 @@ build
 .playwright-cli
 .claude
 test-results
+.wrangler
 playwright-report
 blob-report
 .last-run.json
