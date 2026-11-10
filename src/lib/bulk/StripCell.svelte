@@ -83,9 +83,7 @@
   <div class="thumb-wrap">
     <button
       type="button"
-      class="thumb"
-      class:selected
-      class:anchor
+      class={['thumb', { selected, anchor }]}
       role="option"
       aria-selected={selected}
       title={item.fileName}

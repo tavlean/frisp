@@ -150,9 +150,7 @@
   <span class="label-text">{@render children?.()}</span>
   <div class="range-wc-container">
     <div
-      class="range-input"
-      class:active
-      class:disabled
+      class={['range-input', { active, disabled }]}
       style="--value-percent: {percent}%"
     >
       <input

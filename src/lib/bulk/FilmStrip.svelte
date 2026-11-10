@@ -23,9 +23,7 @@
 
 <div
   {@attach fades}
-  class="filmstrip"
-  class:fade-left={fadeLeft}
-  class:fade-right={fadeRight}
+  class={['filmstrip', { 'fade-left': fadeLeft, 'fade-right': fadeRight }]}
   role="listbox"
   aria-label="Images"
   tabindex="-1"

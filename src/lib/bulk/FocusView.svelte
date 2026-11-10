@@ -245,8 +245,10 @@
 
 <div class="compress editor-root" style="--strip-height: {stripHeight}px;">
   <div
-    class="stage-region"
-    class:alt-background={showStack && stackAltBackground}
+    class={[
+      'stage-region',
+      { 'alt-background': showStack && stackAltBackground },
+    ]}
   >
     {#if !showFocus}
       <!-- Stage deselect: clicking the open backdrop (not a card, toolbar
@@ -345,9 +347,10 @@
     {/if}
 
     <aside
-      class="options options-1"
-      class:phone-sheet={isPhone}
-      class:open={isPhone && phoneSheet === 'info'}
+      class={[
+        'options options-1',
+        { 'phone-sheet': isPhone, open: isPhone && phoneSheet === 'info' },
+      ]}
       aria-hidden={isPhone && phoneSheet !== 'info' ? 'true' : undefined}
     >
       {#if isPhone}
@@ -380,30 +383,32 @@
     </aside>
 
     <aside
-      class="options options-2"
-      class:scope-global={!imageScopeActive}
-      class:scope-image={imageScopeActive}
-      class:phone-sheet={isPhone}
-      class:open={isPhone && phoneSheet === 'settings'}
+      class={[
+        'options options-2',
+        {
+          'scope-global': !imageScopeActive,
+          'scope-image': imageScopeActive,
+          'phone-sheet': isPhone,
+          open: isPhone && phoneSheet === 'settings',
+        },
+      ]}
       aria-hidden={isPhone && phoneSheet !== 'settings' ? 'true' : undefined}
     >
       <div class="scope-tabs" role="tablist" aria-label="Settings scope">
         <button
           type="button"
-          class="tab-global"
+          class={['tab-global', { active: bulkStore.panelScope === 'global' }]}
           role="tab"
           aria-selected={bulkStore.panelScope === 'global'}
-          class:active={bulkStore.panelScope === 'global'}
           onclick={() => setPanelScope('global')}
         >
           Global
         </button>
         <button
           type="button"
-          class="tab-image"
+          class={['tab-image', { active: imageScopeActive }]}
           role="tab"
           aria-selected={imageScopeActive}
-          class:active={imageScopeActive}
           disabled={!selectedId}
           title={selectedId ? undefined : 'Select an image first'}
           onclick={() => setPanelScope('image')}
@@ -441,7 +446,7 @@
       <!-- Phone summary bar: the batch result stays reachable at a glance,
            replacing the full left panel. Tap the figures to expand the full
            info sheet; Save all sits on the right. -->
-      <div class="phone-summary" class:dimmed={phoneSheet !== 'none'}>
+      <div class={['phone-summary', { dimmed: phoneSheet !== 'none' }]}>
         <button
           type="button"
           class="summary-facts"
@@ -484,8 +489,7 @@
            selected (it opens THIS-image settings by default then). -->
       <button
         type="button"
-        class="settings-fab"
-        class:image={selectedId}
+        class={['settings-fab', { image: selectedId }]}
         aria-label="Open settings"
         aria-expanded={phoneSheet === 'settings'}
         onclick={() => openPhoneSettings(selectedId ? 'image' : 'global')}
@@ -573,9 +577,10 @@
          pairs beside it the SAME way. It never overlaps the strip
          (it sits inside the stage region, above the strip) nor the toolbar. -->
     <div
-      class="view-picker-dock"
-      class:with-toolbar={showFocus || showStack}
-      class:phone={isPhone}
+      class={[
+        'view-picker-dock',
+        { 'with-toolbar': showFocus || showStack, phone: isPhone },
+      ]}
     >
       <ViewModePicker />
     </div>

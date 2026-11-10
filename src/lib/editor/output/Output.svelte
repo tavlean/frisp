@@ -289,7 +289,7 @@
   </button>
 {/snippet}
 
-<div class="output" class:alt-background={altBackground}>
+<div class={['output', { 'alt-background': altBackground }]}>
   <two-up
     class="two-up"
     legacy-clip-compat
@@ -316,8 +316,7 @@
            leftDraw/rightDraw fall back to the other side's image while a side
            awaits its own result (see above). -->
       <canvas
-        class="pinch-target"
-        class:pixelated
+        class={['pinch-target', { pixelated }]}
         width={leftDraw?.width}
         height={leftDraw?.height}
         style:width={boxWidth}
@@ -341,8 +340,7 @@
     </pinch-zoom>
     <pinch-zoom class="pinch-zoom" bind:this={pinchRight}>
       <canvas
-        class="pinch-target"
-        class:pixelated
+        class={['pinch-target', { pixelated }]}
         width={rightDraw?.width}
         height={rightDraw?.height}
         style:width={boxWidth}

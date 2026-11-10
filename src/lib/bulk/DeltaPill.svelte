@@ -25,10 +25,14 @@
 </script>
 
 <span
-  class="delta {variant}"
-  class:down={direction === 'down'}
-  class:up={direction === 'up'}
-  class:zero={direction === 'zero'}
+  class={[
+    `delta ${variant}`,
+    {
+      down: direction === 'down',
+      up: direction === 'up',
+      zero: direction === 'zero',
+    },
+  ]}
 >
   {#if direction !== 'zero'}
     <svg class="arrow" viewBox="0 0 10 10" aria-hidden="true">

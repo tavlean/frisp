@@ -52,10 +52,10 @@
 <div class="button-group" {@attach dismiss}>
   {@render leading?.()}
   <button
-    class="button last-button view-options-trigger"
-    class:first-button={!leading}
-    class:active={open}
-    class:dirty
+    class={[
+      'button last-button view-options-trigger',
+      { 'first-button': !leading, active: open, dirty },
+    ]}
     onclick={() => (open = !open)}
     title="View options: preview smoothing and background"
     aria-label="View options"
@@ -74,8 +74,7 @@
     <div class="view-options" role="group" aria-label="View options">
       {#if !isSafari}
         <button
-          class="view-option"
-          class:active={pixelated}
+          class={['view-option', { active: pixelated }]}
           onclick={() => (pixelated = !pixelated)}
           aria-pressed={pixelated}
         >
@@ -103,8 +102,7 @@
         </button>
       {/if}
       <button
-        class="view-option"
-        class:active={altBackground}
+        class={['view-option', { active: altBackground }]}
         onclick={() => (altBackground = !altBackground)}
         aria-pressed={altBackground}
       >

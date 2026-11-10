@@ -103,14 +103,12 @@
 
 <svelte:window onpaste={onWindowPaste} />
 
-<main class="intro-frame" class:dragging={dragActive} {@attach dropTarget}>
+<main class={['intro-frame', { dragging: dragActive }]} {@attach dropTarget}>
   <!-- The viewfinder: one dashed rounded rect that resizes with the viewport.
        Geometry lives in CSS (percentages) so the SVG needs no viewBox. -->
   <svg class="frame-svg" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
     <rect
-      class="frame-rect"
-      class:dragging={dragActive}
-      class:entered
+      class={['frame-rect', { dragging: dragActive, entered }]}
       fill="none"
       stroke-width="1.5"
       stroke-dasharray="7 9"
@@ -142,8 +140,8 @@
 
   <!-- Center column: the invitation, swapped in place (min-height reserved) so
        the drag state never shifts the layout. -->
-  <div class="center" class:entered>
-    <span class="tray" class:nudge={dragActive}>
+  <div class={['center', { entered }]}>
+    <span class={['tray', { nudge: dragActive }]}>
       <svg class="tray-icon" viewBox="0 0 18 18" aria-hidden="true">
         <path
           fill-rule="evenodd"

@@ -72,7 +72,7 @@
       <h2>Imported jobs</h2>
       {#each model.session.jobs as job (job.id)}
         <button
-          class:active={job.id === selectedJobId}
+          class={{ active: job.id === selectedJobId }}
           type="button"
           onclick={() => (selectedJobId = job.id)}
         >

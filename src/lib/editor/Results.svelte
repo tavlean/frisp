@@ -86,9 +86,10 @@
       </span>
       {#if direction}
         <span
-          class="delta"
-          class:down={direction === 'down'}
-          class:up={direction === 'up'}
+          class={[
+            'delta',
+            { down: direction === 'down', up: direction === 'up' },
+          ]}
         >
           <svg class="delta-arrow" viewBox="0 0 10 10" aria-hidden="true">
             {#if direction === 'down'}
@@ -127,8 +128,7 @@
     {#if canShare}
       <button
         type="button"
-        class="share"
-        class:download-disable={disabled}
+        class={['share', { 'download-disable': disabled }]}
         onclick={onShare}
         title="Share"
         aria-label="Share"
@@ -147,9 +147,7 @@
       </button>
     {/if}
     <a
-      class="download"
-      class:ghost={isOriginal}
-      class:download-disable={disabled}
+      class={['download', { ghost: isOriginal, 'download-disable': disabled }]}
       href={disabled ? undefined : downloadHref}
       download={disabled ? undefined : downloadName}
       title="Download"

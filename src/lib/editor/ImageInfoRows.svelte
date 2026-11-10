@@ -34,7 +34,7 @@
     <dt>Aspect</dt>
     <dd>
       {#if aspect}
-        <span class="chip" class:approx={aspect.approx}>{aspect.label}</span>
+        <span class={['chip', { approx: aspect.approx }]}>{aspect.label}</span>
       {:else}
         —
       {/if}

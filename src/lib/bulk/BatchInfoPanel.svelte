@@ -207,7 +207,7 @@
         </svg>
       </span>
 
-      <div class="stat stat-output" class:working={busy}>
+      <div class={['stat stat-output', { working: busy }]}>
         <span class="figure">
           {#if outputParts}
             {outputParts.value}<span class="unit">{outputParts.unit}</span>

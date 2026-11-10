@@ -400,10 +400,10 @@
           ? undefined
           : bulkStore.sourceUrlFor(item.id)}
         <div
-          class="card"
-          class:top={isTop}
-          class:peek={!isTop}
-          class:shimmer={shimmerIds.has(item.id)}
+          class={[
+            'card',
+            { top: isTop, peek: !isTop, shimmer: shimmerIds.has(item.id) },
+          ]}
           style:transform={cardTransform(slot)}
           style:opacity={slot.opacity}
           style:--split={`${splitPct}%`}
@@ -429,14 +429,14 @@
                       src={topSourceUrl}
                       alt=""
                       draggable="false"
-                      class:pixelated
+                      class={{ pixelated }}
                     />
                   {:else if topThumb}
                     <img
                       src={topThumb}
                       alt=""
                       draggable="false"
-                      class:pixelated
+                      class={{ pixelated }}
                     />
                   {:else}
                     <span class="placeholder" aria-hidden="true"></span>
@@ -448,15 +448,14 @@
                       src={topDownload.url}
                       alt=""
                       draggable="false"
-                      class:pixelated
+                      class={{ pixelated }}
                     />
                   {:else if topThumb}
                     <img
                       src={topThumb}
                       alt=""
                       draggable="false"
-                      class="dim"
-                      class:pixelated
+                      class={['dim', { pixelated }]}
                     />
                   {:else}
                     <span class="placeholder" aria-hidden="true"></span>
@@ -525,7 +524,7 @@
                   src={peekSource}
                   alt=""
                   draggable="false"
-                  class:pixelated
+                  class={{ pixelated }}
                 />
               {:else}
                 <span class="placeholder" aria-hidden="true"></span>

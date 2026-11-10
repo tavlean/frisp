@@ -127,10 +127,14 @@
 
 {#if phase !== 'hidden'}
   <div
-    class="badge {side}"
-    class:vertical={orientation === 'vertical'}
-    class:success={phase === 'success'}
-    class:measured={badgeWidth > 0}
+    class={[
+      `badge ${side}`,
+      {
+        vertical: orientation === 'vertical',
+        success: phase === 'success',
+        measured: badgeWidth > 0,
+      },
+    ]}
     bind:this={badgeEl}
     role="status"
     aria-live="polite"

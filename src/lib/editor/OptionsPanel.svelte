@@ -96,7 +96,7 @@
   const formatTooltip = $derived(formats.find((f) => f.id === format)?.tooltip);
 </script>
 
-<div class="options-scroller" class:original-image={isOriginal}>
+<div class={['options-scroller', { 'original-image': isOriginal }]}>
   {#if !isOriginal && format !== 'svg'}
     <div transition:reveal>
       <h3 class="options-title">

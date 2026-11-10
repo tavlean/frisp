@@ -17,7 +17,7 @@
 </script>
 
 <div class="checkbox">
-  <span class="box" class:checked class:disabled aria-hidden="true">
+  <span class={['box', { checked, disabled }]} aria-hidden="true">
     <svg class="tick" viewBox="0 0 12 10">
       <path
         d="M1 5.5L4.5 9L11 1.5"

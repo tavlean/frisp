@@ -24,9 +24,7 @@
 <div class="rich-strip size-{size}">
   <div
     {@attach fades}
-    class="scroller"
-    class:fade-left={fadeLeft}
-    class:fade-right={fadeRight}
+    class={['scroller', { 'fade-left': fadeLeft, 'fade-right': fadeRight }]}
     role="listbox"
     aria-label="Images"
     tabindex="-1"
