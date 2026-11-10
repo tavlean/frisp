@@ -19,9 +19,11 @@ session must know. Newest first. (Live project state stays in
   tests are now type-checked too), 258 unit tests, full e2e in Chromium and
   WebKit 143 passed and 7 skipped (the 4 usual plus the 3 Chromium-only
   motion tests on WebKit).
-- Not verified: the 404 status on a real Cloudflare deploy (`wrangler dev`
-  shows it locally), and the faster update notice against two real deploys.
-  Check both on the next deploy.
+- The 404 handling was checked on Cloudflare with a preview version
+  (`wrangler versions upload`; production untouched): `/` 200; `/nope`,
+  `/a/b/c`, `/lab` and `/diagnostics` 404 with absolute asset paths;
+  isolation headers intact. Not deployed. Not verified: the faster update
+  notice, which needs two real deploys.
 - Gotchas (all in `docs/gotchas.md`): subpath imports do no extension or
   index lookup, and the static audit reads the import text of the codec
   asset manifest; a `<svelte:boundary>` receives SvelteKit's `App.Error`, not

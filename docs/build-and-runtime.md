@@ -45,8 +45,11 @@ Vite as a static SPA. The retired Preact/Rollup app is preserved only on the
   asset paths, so it boots at any depth and renders the root
   `src/routes/+error.svelte` (`tests/e2e/not-found.spec.ts`). Before, the host
   served `index.html` (relative paths) for every unknown URL: a nested unknown
-  URL loaded a blank page and every path answered 200. Verified locally with
-  `wrangler dev` on 2026-11-10; not yet observed on a real deploy.
+  URL loaded a blank page and every path answered 200. Verified on
+  2026-11-10 with `wrangler dev` and on a Cloudflare preview version
+  (`wrangler versions upload`, which does not touch production): `/` answers
+  200; `/nope`, `/a/b/c`, `/lab` and `/diagnostics` answer 404 with absolute
+  asset paths.
 - Service-worker auto-registration is disabled so `src/lib/service-worker-registration.ts`
   can handle dev cleanup and production registration explicitly.
 - Imports resolve through the `imports` field of `package.json` (Node subpath

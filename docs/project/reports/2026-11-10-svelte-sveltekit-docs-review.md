@@ -35,7 +35,7 @@ Chromium and WebKit (143 passed, 7 skipped).
 
 | Item | Outcome | Commit |
 |---|---|---|
-| 1.1 unknown URLs, 4.1 error page | `404.html` fallback, `404-page` handling, root `+error.svelte`. `wrangler dev` answers 200 for `/` and 404 for `/nope`, `/a/b/c` and `/lab`. Not yet seen on a real deploy. | `3bcccd17` |
+| 1.1 unknown URLs, 4.1 error page | `404.html` fallback, `404-page` handling, root `+error.svelte`. `wrangler dev` and a Cloudflare preview version both answer 200 for `/` and 404 for `/nope`, `/a/b/c` and `/lab`. Production changes at the next deploy. | `3bcccd17` |
 | 1.2, 1.3, 1.4 motion | Rows and snackbar animate; `motion.ts` honors reduced motion; `tests/e2e/motion.spec.ts` pins it. | `c24df26c` |
 | 1.5 cache writes, 1.6 `/diagnostics` | Write moved into `waitUntil`; the route is no longer prerendered or precached. | `131f9a95` |
 | 1.7 classic-script tripwire | Audit parses the built worker as a classic script. | `3bcccd17` |
