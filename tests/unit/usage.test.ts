@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { OUTPUT_FORMATS } from '#lib/compress.ts';
-import { createTracker, type TrackerEnv } from '#lib/usage.ts';
+import { createTracker, readOptOut, type TrackerEnv } from '#lib/usage.ts';
 import { APP_HOST } from '#shared/brand.ts';
 import { USAGE_EVENTS, formatValue } from '#shared/usage-events.ts';
 
@@ -63,6 +63,42 @@ describe('track', () => {
     const off = tracker({ globalPrivacyControl: false, doNotTrack: '0' });
     off.track('visit', 'browser');
     expect(off.sendBeacon).toHaveBeenCalledOnce();
+  });
+
+  it('sends nothing from an opted-out or automated browser', () => {
+    const optedOut = tracker({ optedOut: true });
+    optedOut.track('visit', 'browser');
+    expect(optedOut.sendBeacon).not.toHaveBeenCalled();
+
+    const automated = tracker({ automated: true });
+    automated.track('visit', 'browser');
+    expect(automated.sendBeacon).not.toHaveBeenCalled();
+  });
+
+  it('remembers ?usage=off until ?usage=on', () => {
+    const store = new Map<string, string>();
+    const storage = {
+      getItem: (key: string) => store.get(key) ?? null,
+      setItem: (key: string, value: string) => void store.set(key, value),
+      removeItem: (key: string) => void store.delete(key),
+    };
+    expect(readOptOut('', storage)).toBe(false);
+    expect(readOptOut('?usage=off', storage)).toBe(true);
+    expect(readOptOut('', storage)).toBe(true);
+    expect(readOptOut('?usage=nonsense', storage)).toBe(true);
+    expect(readOptOut('?usage=on', storage)).toBe(false);
+    expect(readOptOut('', storage)).toBe(false);
+  });
+
+  it('treats storage that throws as not opted out', () => {
+    const broken = {
+      getItem: () => {
+        throw new Error('blocked');
+      },
+      setItem: () => {},
+      removeItem: () => {},
+    };
+    expect(readOptOut('?usage=off', broken)).toBe(false);
   });
 
   it('sends a deduped pair once per page load', () => {

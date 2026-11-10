@@ -32,7 +32,7 @@ The site counts a few anonymous usage events so the maintainer can see what gets
 
 - Each event is one word from a fixed list, plus the visitor's country as Cloudflare reports it.
 - No cookies and no identifiers. IP addresses and user agents are not stored.
-- Do Not Track and Global Privacy Control switch the counting off.
+- Do Not Track and Global Privacy Control switch the counting off. So does opening `frisp.app/?usage=off` once: that browser is then never counted (`?usage=on` undoes it).
 - The data stays in the project's own Cloudflare account. The code is short: [`src/lib/usage.ts`](src/lib/usage.ts), [`src/edge/worker.ts`](src/edge/worker.ts) and [`src/shared/usage-events.ts`](src/shared/usage-events.ts).
 
 Cloudflare Web Analytics is also on, for cookieless page-view counts.

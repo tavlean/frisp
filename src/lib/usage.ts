@@ -9,6 +9,12 @@
 // Track or Global Privacy Control, never throws, never awaits, and a missing
 // or failing endpoint changes nothing for the user (offline included).
 //
+// Two more things keep the numbers about real visitors. A browser can opt
+// out for good by opening the site with `?usage=off` (`?usage=on` undoes it);
+// the maintainer does this on his own devices. And a browser driven by
+// automation (`navigator.webdriver`) never sends, which covers the checks run
+// against production after a deploy.
+//
 // Every event except `open` and `download` is sent at most once per page load,
 // so its count reads "page loads that did this". `session` is keyed on the
 // name alone: one per page load, whatever the first open was.
@@ -30,6 +36,10 @@ export interface TrackerEnv {
   hostname: string;
   globalPrivacyControl?: boolean;
   doNotTrack?: string | null;
+  /** This browser opened the site with `?usage=off` at some point. */
+  optedOut?: boolean;
+  /** `navigator.webdriver`: a test tool is driving the browser. */
+  automated?: boolean;
   sendBeacon?: (url: string, data: string) => boolean;
 }
 
@@ -40,7 +50,9 @@ export function createTracker(env: TrackerEnv | null): Track {
     env &&
     env.hostname === APP_HOST &&
     env.globalPrivacyControl !== true &&
-    env.doNotTrack !== '1'
+    env.doNotTrack !== '1' &&
+    !env.optedOut &&
+    !env.automated
       ? env.sendBeacon
       : undefined;
   const sent = new Set<string>();
@@ -60,6 +72,34 @@ export function createTracker(env: TrackerEnv | null): Track {
   };
 }
 
+const OPT_OUT_KEY = 'app:usage-off';
+
+/** Applies a `?usage=off` or `?usage=on` in the address to the stored flag,
+ *  then reports the flag. Storage that throws (private modes) reads as not
+ *  opted out; such a browser can use Do Not Track instead. */
+export function readOptOut(
+  search: string,
+  storage: Pick<Storage, 'getItem' | 'setItem' | 'removeItem'>,
+): boolean {
+  try {
+    const choice = new URLSearchParams(search).get('usage');
+    if (choice === 'off') storage.setItem(OPT_OUT_KEY, '1');
+    else if (choice === 'on') storage.removeItem(OPT_OUT_KEY);
+    return storage.getItem(OPT_OUT_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
+
+// Reading `localStorage` itself can throw where storage is blocked.
+function storedOptOut(): boolean {
+  try {
+    return readOptOut(location.search, localStorage);
+  } catch {
+    return false;
+  }
+}
+
 // Read once at load: a page load is the unit every deduped count is per.
 export const track: Track = createTracker(
   typeof navigator === 'undefined' || typeof location === 'undefined'
@@ -70,6 +110,8 @@ export const track: Track = createTracker(
           navigator as Navigator & { globalPrivacyControl?: boolean }
         ).globalPrivacyControl,
         doNotTrack: navigator.doNotTrack,
+        optedOut: storedOptOut(),
+        automated: navigator.webdriver === true,
         sendBeacon:
           typeof navigator.sendBeacon === 'function'
             ? (url, data) => navigator.sendBeacon(url, data)
