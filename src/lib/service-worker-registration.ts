@@ -66,6 +66,22 @@ async function teardownServiceWorkers(): Promise<void> {
 }
 
 /**
+ * Ask the browser to fetch the service worker script now instead of waiting for
+ * its own check. A new worker then installs and lands in the waiting slot, which
+ * `onUpdateReady` already reports. Offline or unregistered, this does nothing.
+ */
+export async function checkForServiceWorkerUpdate(): Promise<void> {
+  if (!browser || !('serviceWorker' in navigator)) return;
+  try {
+    const registration = await navigator.serviceWorker.getRegistration();
+    await registration?.update();
+  } catch {
+    // update() rejects offline or when the script fetch fails; the next
+    // check retries.
+  }
+}
+
+/**
  * Register the SvelteKit-native service worker on the real deployed origin only.
  * In dev — and on any loopback/localhost origin running a production build — do
  * the opposite: proactively unregister any leftover worker and clear Cache

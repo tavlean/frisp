@@ -928,6 +928,9 @@ export class EditorSession {
     runtime.status = 'done';
     runtime.error = '';
     this.pinDisplayedResults();
+    // On a cache hit this runs inside the encode effect; untracked so the
+    // seeding's reads and writes never become encode dependencies.
+    untrack(() => this.seedResizeDimensions());
   }
 
   /**
@@ -1172,7 +1175,7 @@ export class EditorSession {
     if (this.file && !editorOpen) this.clearFile();
   }
 
-  seedResizeDimensions(): void {
+  private seedResizeDimensions(): void {
     const result = this.runtime[0].result ?? this.runtime[1].result;
     if (!result || this.seededLoadId === this.loadId) return;
 

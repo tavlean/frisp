@@ -8,6 +8,30 @@ import { expect, test } from '@playwright/test';
 // produce wrong-sized or corrupt output that the encode-only tests never touch.
 const photo = fileURLToPath(new URL('../fixtures/photo.jpg', import.meta.url));
 
+// The session seeds the disabled resize fields with the image's own size when
+// the first result lands, so enabling Resize starts at 100% (a no-op encode).
+test('enabling resize starts from the image dimensions', async ({ page }) => {
+  await page.goto('/');
+  await page.setInputFiles('input[type=file][accept="image/*"]', photo);
+  await expect
+    .poll(async () => (await page.title()).includes('⏳'), { timeout: 60_000 })
+    .toBe(false);
+
+  const panel = page.locator('.options-2');
+  await panel
+    .locator('label.option-toggle', { hasText: 'Resize' })
+    .locator('input[type="checkbox"]')
+    .evaluate((cb: HTMLInputElement) => cb.click());
+
+  const field = (name: string) =>
+    panel
+      .locator('label', { hasText: name })
+      .locator('input[type="number"]')
+      .first();
+  await expect(field('Width')).toHaveValue('1024');
+  await expect(field('Height')).toHaveValue('683');
+});
+
 test('WASM resize outputs the requested size and a valid image', async ({
   page,
 }) => {

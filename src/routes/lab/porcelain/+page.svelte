@@ -102,7 +102,6 @@
   // Mirror the production per-side effects that live OUTSIDE EditorSession.
   // (Route/history/bulk/service-worker effects are intentionally skipped — see
   // the brief: "Back" here simply clears the file.)
-  $effect(() => session.seedResizeDimensions());
   $effect(() => session.persistSettings());
 
   // pickFiles takes a callback the production page uses to push editor history;

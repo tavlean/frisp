@@ -28,8 +28,6 @@
 
   onMount(() => () => focusSession.dispose());
 
-  $effect(() => focusSession.seedResizeDimensions());
-
   $effect(() => {
     const selectedId = bulkStore.selectedId;
     untrack(() => (selectedId ? loadFocus() : clearFocus()));

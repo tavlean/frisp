@@ -182,7 +182,6 @@
 
   // The per-side encode + spinner effects live inside EditorSession; the shell
   // keeps only the two effects the production page also keeps (seed + persist).
-  $effect(() => session.seedResizeDimensions());
   $effect(() => session.persistSettings());
 
   // Global undo/redo shortcuts, ported verbatim from production +page.svelte

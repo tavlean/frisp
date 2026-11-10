@@ -2,9 +2,10 @@
   import { onMount, untrack } from 'svelte';
   import { dev } from '$app/env';
   import { resolve } from '$app/paths';
-  import { page } from '$app/state';
+  import { page, updated } from '$app/state';
   import {
     registerServiceWorker,
+    checkForServiceWorkerUpdate,
     applyServiceWorkerUpdate,
     anotherTabIsBusy,
     answerBusyQueries,
@@ -13,6 +14,7 @@
   import OptionsPanel from '$lib/editor/OptionsPanel.svelte';
   import ImageInfoPanel from '$lib/editor/ImageInfoPanel.svelte';
   import Snackbar from '$lib/editor/Snackbar.svelte';
+  import CrashPanel from '$lib/editor/CrashPanel.svelte';
   import Intro from '$lib/editor/intro/Intro.svelte';
   import BulkMode from '$lib/bulk/BulkMode.svelte';
   import { bulkStore } from '$lib/bulk/store.svelte';
@@ -27,6 +29,7 @@
   import type { AutoQualityControl } from '$lib/editor/auto-quality';
   import { IDENTITY, type CompressOutcome } from '$lib/compress';
   import { isSupportedBulkImage } from 'client/lazy-app/bulk';
+  import { isMac } from 'client/lazy-app/util';
   import { APP_NAME } from 'shared/brand';
   import '$lib/editor/theme.css';
 
@@ -50,9 +53,8 @@
     outcome?.outputFile.type === 'image/svg+xml' ? outcome.outputUrl : null;
 
   // Drives the shortcut hint in the Undo/Redo tooltips (⌘ on Apple, Ctrl else).
-  let isMac = $state(false);
-  const undoTitle = $derived(isMac ? 'Undo (⌘Z)' : 'Undo (Ctrl+Z)');
-  const redoTitle = $derived(isMac ? 'Redo (⇧⌘Z)' : 'Redo (Ctrl+Shift+Z)');
+  const undoTitle = isMac ? 'Undo (⌘Z)' : 'Undo (Ctrl+Z)';
+  const redoTitle = isMac ? 'Redo (⇧⌘Z)' : 'Redo (Ctrl+Shift+Z)';
 
   // The landing screen shows until an image loads or a batch opens. Both the
   // mobile browser chrome (theme-color) and the page canvas follow it: the
@@ -61,10 +63,6 @@
   const isLanding = $derived(!bulkStore.hasJobs && !session.file);
 
   onMount(() => {
-    isMac = /mac|iphone|ipad/i.test(
-      navigator.platform || navigator.userAgent || '',
-    );
-
     // When a new build is downloaded and waiting, offer a non-intrusive
     // "refresh now" prompt rather than reloading mid-task. Clicking Refresh
     // activates the waiting worker, which reloads EVERY open tab onto the new
@@ -120,8 +118,16 @@
       }
     });
   });
-  $effect(() => session.seedResizeDimensions());
   $effect(() => session.persistSettings());
+
+  // SvelteKit refetches _app/version.json whenever the tab regains focus, but
+  // the browser only rechecks the service worker on a full navigation, which
+  // this single-route app rarely makes. So when SvelteKit sees a new deploy,
+  // ask the worker to update; the waiting-worker prompt above takes it from
+  // there.
+  $effect(() => {
+    if (updated.current) void checkForServiceWorkerUpdate();
+  });
 
   // Mirror the current view onto the root data-view attribute so the global
   // body canvas and the OS color-scheme can switch with it (see the style
@@ -234,143 +240,157 @@
      or over the open editor) loads/replaces it instead of the browser opening
      the file — Squoosh wraps everything in <file-drop> the same way. -->
 <div class="app-root" {@attach fileDrop((files) => routeFiles(files))}>
+  <!-- The boundaries keep a render crash inside the view that threw. The
+       session and the bulk store live outside them, so recovery keeps the
+       image. src/hooks.client.ts logs the error. -->
   {#if bulkStore.hasJobs}
-    <BulkMode onExit={exitBulk} />
+    <svelte:boundary>
+      <BulkMode onExit={exitBulk} />
+      {#snippet failed(error, reset)}
+        <CrashPanel {error} onclose={exitBulk} onretry={reset} />
+      {/snippet}
+    </svelte:boundary>
   {:else if session.file}
-    <div class="compress editor-root">
-      <!-- grainPreview (the live grain scrub frame) outranks the stale result
+    <svelte:boundary>
+      <div class="compress editor-root">
+        <!-- grainPreview (the live grain scrub frame) outranks the stale result
            while its encode is in flight; see EditorSession.updateGrainPreview. -->
-      <Output
-        leftImage={session.runtime[0].grainPreview ??
-          session.runtime[0].result?.outputImageData}
-        rightImage={session.runtime[1].grainPreview ??
-          session.runtime[1].result?.outputImageData}
-        leftWorking={session.runtime[0].showSpinner}
-        rightWorking={session.runtime[1].showSpinner}
-        leftDone={session.runtime[0].status === 'done'}
-        rightDone={session.runtime[1].status === 'done'}
-        leftActivity={session.runtime[0].activity}
-        rightActivity={session.runtime[1].activity}
-        fileId={session.loadId}
-        leftContain={session.leftContain}
-        rightContain={session.rightContain}
-        containWidth={session.naturalWidth}
-        containHeight={session.naturalHeight}
-        onRotate={session.isVectorSource ? undefined : () => session.rotate()}
-        leftSvgUrl={svgPreviewUrl(session.runtime[0].result)}
-        rightSvgUrl={svgPreviewUrl(session.runtime[1].result)}
-      />
+        <Output
+          leftImage={session.runtime[0].grainPreview ??
+            session.runtime[0].result?.outputImageData}
+          rightImage={session.runtime[1].grainPreview ??
+            session.runtime[1].result?.outputImageData}
+          leftWorking={session.runtime[0].showSpinner}
+          rightWorking={session.runtime[1].showSpinner}
+          leftDone={session.runtime[0].status === 'done'}
+          rightDone={session.runtime[1].status === 'done'}
+          leftActivity={session.runtime[0].activity}
+          rightActivity={session.runtime[1].activity}
+          fileId={session.loadId}
+          leftContain={session.leftContain}
+          rightContain={session.rightContain}
+          containWidth={session.naturalWidth}
+          containHeight={session.naturalHeight}
+          onRotate={session.isVectorSource ? undefined : () => session.rotate()}
+          leftSvgUrl={svgPreviewUrl(session.runtime[0].result)}
+          rightSvgUrl={svgPreviewUrl(session.runtime[1].result)}
+        />
 
-      {#if session.firstError}
-        <p class="status-pill error">{session.firstError}</p>
-      {/if}
+        {#if session.firstError}
+          <p class="status-pill error">{session.firstError}</p>
+        {/if}
 
-      <button class="back" onclick={back} title="Back" aria-label="Back">
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path
-            d="M6.5 6.5l11 11m0-11l-11 11"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2.2"
-            stroke-linecap="round"
-          />
-        </svg>
-      </button>
-
-      <div class="history-controls">
-        <button
-          class="hist"
-          onclick={() => session.undo()}
-          disabled={!session.history.canUndo}
-          title={undoTitle}
-          aria-label={undoTitle}
-        >
+        <button class="back" onclick={back} title="Back" aria-label="Back">
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path
-              d="M9 14L4 9l5-5M4 9h10.5a5.5 5.5 0 0 1 0 11H9"
+              d="M6.5 6.5l11 11m0-11l-11 11"
               fill="none"
               stroke="currentColor"
-              stroke-width="2.1"
+              stroke-width="2.2"
               stroke-linecap="round"
-              stroke-linejoin="round"
             />
           </svg>
         </button>
-        <button
-          class="hist"
-          onclick={() => session.redo()}
-          disabled={!session.history.canRedo}
-          title={redoTitle}
-          aria-label={redoTitle}
-        >
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path
-              d="M15 14l5-5-5-5M20 9H9.5a5.5 5.5 0 0 0 0 11H15"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2.1"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-          </svg>
-        </button>
-      </div>
 
-      <aside class="options options-1">
-        {#if session.sides[0].format === IDENTITY}
-          <ImageInfoPanel
-            file={session.file}
-            width={session.naturalWidth}
-            height={session.naturalHeight}
-            onCompareAs={(f) => session.setFormat(0, f)}
-          />
-        {:else}
+        <div class="history-controls">
+          <button
+            class="hist"
+            onclick={() => session.undo()}
+            disabled={!session.history.canUndo}
+            title={undoTitle}
+            aria-label={undoTitle}
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                d="M9 14L4 9l5-5M4 9h10.5a5.5 5.5 0 0 1 0 11H9"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.1"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </button>
+          <button
+            class="hist"
+            onclick={() => session.redo()}
+            disabled={!session.history.canRedo}
+            title={redoTitle}
+            aria-label={redoTitle}
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                d="M15 14l5-5-5-5M20 9H9.5a5.5 5.5 0 0 0 0 11H15"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.1"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </button>
+        </div>
+
+        <aside class="options options-1">
+          {#if session.sides[0].format === IDENTITY}
+            <ImageInfoPanel
+              file={session.file}
+              width={session.naturalWidth}
+              height={session.naturalHeight}
+              onCompareAs={(f) => session.setFormat(0, f)}
+            />
+          {:else}
+            <OptionsPanel
+              side="left"
+              format={session.sides[0].format}
+              formats={session.availableFormats}
+              options={session.sides[0].optionsByFormat[
+                session.sides[0].format
+              ] ?? {}}
+              processorState={session.sides[0].processorState}
+              naturalWidth={session.naturalWidth}
+              naturalHeight={session.naturalHeight}
+              isVector={session.isVectorSource}
+              sourceType={session.sourceType}
+              transcodeBlocked={session.transcodeBlocked(0)}
+              result={session.runtime[0].result}
+              working={session.runtime[0].showSpinner}
+              exportable={session.runtime[0].exportable}
+              downloadName={session.downloadName(0)}
+              onFormatChange={(f) => session.setFormat(0, f)}
+              onCloseCompare={() => session.setFormat(0, IDENTITY)}
+              autoQuality={autoQuality[0]}
+            />
+          {/if}
+        </aside>
+
+        <aside class="options options-2">
           <OptionsPanel
-            side="left"
-            format={session.sides[0].format}
+            side="right"
+            format={session.sides[1].format}
             formats={session.availableFormats}
-            options={session.sides[0].optionsByFormat[
-              session.sides[0].format
+            options={session.sides[1].optionsByFormat[
+              session.sides[1].format
             ] ?? {}}
-            processorState={session.sides[0].processorState}
+            processorState={session.sides[1].processorState}
             naturalWidth={session.naturalWidth}
             naturalHeight={session.naturalHeight}
             isVector={session.isVectorSource}
             sourceType={session.sourceType}
-            transcodeBlocked={session.transcodeBlocked(0)}
-            result={session.runtime[0].result}
-            working={session.runtime[0].showSpinner}
-            exportable={session.runtime[0].exportable}
-            downloadName={session.downloadName(0)}
-            onFormatChange={(f) => session.setFormat(0, f)}
-            onCloseCompare={() => session.setFormat(0, IDENTITY)}
-            autoQuality={autoQuality[0]}
+            transcodeBlocked={session.transcodeBlocked(1)}
+            result={session.runtime[1].result}
+            working={session.runtime[1].showSpinner}
+            exportable={session.runtime[1].exportable}
+            downloadName={session.downloadName(1)}
+            onFormatChange={(f) => session.setFormat(1, f)}
+            autoQuality={autoQuality[1]}
           />
-        {/if}
-      </aside>
-
-      <aside class="options options-2">
-        <OptionsPanel
-          side="right"
-          format={session.sides[1].format}
-          formats={session.availableFormats}
-          options={session.sides[1].optionsByFormat[session.sides[1].format] ??
-            {}}
-          processorState={session.sides[1].processorState}
-          naturalWidth={session.naturalWidth}
-          naturalHeight={session.naturalHeight}
-          isVector={session.isVectorSource}
-          sourceType={session.sourceType}
-          transcodeBlocked={session.transcodeBlocked(1)}
-          result={session.runtime[1].result}
-          working={session.runtime[1].showSpinner}
-          exportable={session.runtime[1].exportable}
-          downloadName={session.downloadName(1)}
-          onFormatChange={(f) => session.setFormat(1, f)}
-          autoQuality={autoQuality[1]}
-        />
-      </aside>
-    </div>
+        </aside>
+      </div>
+      {#snippet failed(error, reset)}
+        <CrashPanel {error} onclose={back} onretry={reset} />
+      {/snippet}
+    </svelte:boundary>
   {:else}
     <Intro onFiles={routeFiles} onMessage={(m) => void snackbar.show(m)} />
     {#if dev}
