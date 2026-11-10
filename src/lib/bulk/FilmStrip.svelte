@@ -4,43 +4,25 @@
   import { bulkStore } from './store.svelte';
   import StripCell from './StripCell.svelte';
   import { createStripSelectionController } from './strip-selection';
+  import { scrollFades } from './scroll-fades';
 
   const items = $derived(bulkStore.stripItems);
   const selection = createStripSelectionController();
   const thumbCount = $derived(bulkStore.thumbs.size);
 
-  const EDGE_THRESHOLD = 2;
-  let scroller = $state<HTMLElement>();
   let fadeLeft = $state(false);
   let fadeRight = $state(false);
-
-  function updateScrollFades(): void {
-    if (!scroller) return;
-    const max = Math.max(0, scroller.scrollWidth - scroller.clientWidth);
-    fadeLeft = max > EDGE_THRESHOLD && scroller.scrollLeft > EDGE_THRESHOLD;
-    fadeRight =
-      max > EDGE_THRESHOLD && scroller.scrollLeft < max - EDGE_THRESHOLD;
-  }
-
-  $effect(() => {
-    if (!scroller) return;
-    const observer = new ResizeObserver(updateScrollFades);
-    observer.observe(scroller);
-    updateScrollFades();
-    return () => observer.disconnect();
-  });
-
-  $effect(() => {
-    items.length;
-    thumbCount;
-    queueMicrotask(updateScrollFades);
-  });
+  const fades = scrollFades(
+    ({ left, right }) => {
+      fadeLeft = left;
+      fadeRight = right;
+    },
+    () => [items.length, thumbCount],
+  );
 </script>
 
-<svelte:window onresize={updateScrollFades} />
-
 <div
-  bind:this={scroller}
+  {@attach fades}
   class="filmstrip"
   class:fade-left={fadeLeft}
   class:fade-right={fadeRight}
@@ -53,7 +35,6 @@
   onpointermove={selection.onPointermove}
   onpointerup={selection.onPointerup}
   onpointercancel={selection.onPointercancel}
-  onscroll={updateScrollFades}
 >
   {#each items as item (item.id)}
     <StripCell {item} mode="s" />
