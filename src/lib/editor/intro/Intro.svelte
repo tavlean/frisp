@@ -13,12 +13,8 @@
   import { onMount } from 'svelte';
   import { dev } from '$app/env';
   import { resolve } from '$app/paths';
-  import type { Attachment } from 'svelte/attachments';
-  import {
-    fromDataTransfer,
-    fromFileList,
-    type ImportedFile,
-  } from '$lib/bulk/import-sources';
+  import { fromFileList, type ImportedFile } from '$lib/bulk/import-sources';
+  import { fileDrop } from '$lib/editor/file-drop';
   import { APP_NAME } from 'shared/brand';
   // The canonical logomark (currentColor); shared with the lab's Logomark so the
   // mark has ONE source of truth instead of a hand-copied path per consumer.
@@ -46,64 +42,18 @@
   // Entrance reveal — released next frame so the transition plays from the
   // start state on mount.
   let entered = $state(false);
-  // Enter/leave depth counter so nested children never flicker the drag state.
-  let dragDepth = $state(0);
-  const dragActive = $derived(dragDepth > 0);
+  let dragActive = $state(false);
 
   onMount(() => {
     requestAnimationFrame(() => (entered = true));
   });
 
-  /** True when the drag actually carries files (not text, links, etc.). */
-  function dragHasFiles(event: DragEvent): boolean {
-    const types = event.dataTransfer?.types;
-    // `types` is a frozen array in the current spec, but older engines expose
-    // a DOMStringList with no `.includes`; the prototype call works on both.
-    return !!types && Array.prototype.includes.call(types, 'Files');
-  }
-
-  // Our own drop target. stopPropagation shields the app-wide fileDrop so the
-  // drop routes once and the global overlay stays hidden; fromDataTransfer walks
-  // dropped folders exactly like the global path does.
-  const dropTarget: Attachment<HTMLElement> = (node) => {
-    const onEnter = (event: DragEvent) => {
-      if (!dragHasFiles(event)) return;
-      event.preventDefault();
-      event.stopPropagation();
-      dragDepth += 1;
-    };
-    const onOver = (event: DragEvent) => {
-      if (!dragHasFiles(event)) return;
-      event.preventDefault();
-      event.stopPropagation();
-      if (event.dataTransfer) event.dataTransfer.dropEffect = 'copy';
-    };
-    const onLeave = (event: DragEvent) => {
-      if (!dragHasFiles(event)) return;
-      event.stopPropagation();
-      dragDepth = Math.max(0, dragDepth - 1);
-    };
-    const onDrop = (event: DragEvent) => {
-      event.preventDefault();
-      event.stopPropagation();
-      dragDepth = 0;
-      if (!event.dataTransfer) return;
-      void fromDataTransfer(event.dataTransfer).then((files) => {
-        if (files.length) onFiles(files);
-      });
-    };
-
-    node.addEventListener('dragenter', onEnter);
-    node.addEventListener('dragover', onOver);
-    node.addEventListener('dragleave', onLeave);
-    node.addEventListener('drop', onDrop);
-    return () => {
-      node.removeEventListener('dragenter', onEnter);
-      node.removeEventListener('dragover', onOver);
-      node.removeEventListener('dragleave', onLeave);
-      node.removeEventListener('drop', onDrop);
-    };
-  };
+  // Our own drop target, isolated so the app-wide fileDrop never sees these
+  // drags: the drop routes once and the global overlay stays hidden.
+  const dropTarget = fileDrop((files) => onFiles(files), {
+    isolate: true,
+    onActiveChange: (active) => (dragActive = active),
+  });
 
   function onBrowse() {
     fileInput?.click();

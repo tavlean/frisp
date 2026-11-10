@@ -11,7 +11,9 @@
 // does not open the file), tracks enter/leave with a depth counter so nested
 // children don't flicker the state, and toggles a `drop-valid` class on the
 // element for purely-CSS visual feedback — matching Squoosh's `.drop-valid`
-// overlay.
+// overlay. A nested target (the intro) passes `isolate` so its drags never
+// reach the app-wide target, and `onActiveChange` to drive its own feedback
+// instead of the class.
 
 import type { Attachment } from 'svelte/attachments';
 import { fromDataTransfer, type ImportedFile } from '$lib/bulk/import-sources';
@@ -19,7 +21,16 @@ import { fromDataTransfer, type ImportedFile } from '$lib/bulk/import-sources';
 /** True when the drag actually carries files (not text, links, etc.). */
 function dragHasFiles(event: DragEvent): boolean {
   const types = event.dataTransfer?.types;
+  // `types` is a frozen array in the current spec, but older engines expose
+  // a DOMStringList with no `.includes`; the prototype call works on both.
   return !!types && Array.prototype.includes.call(types, 'Files');
+}
+
+export interface FileDropOptions {
+  /** Stop file drags here so an enclosing drop target never sees them. */
+  isolate?: boolean;
+  /** Reports the drag-active state; replaces the `drop-valid` class toggle. */
+  onActiveChange?: (active: boolean) => void;
 }
 
 /**
@@ -27,17 +38,19 @@ function dragHasFiles(event: DragEvent): boolean {
  */
 export function fileDrop(
   onFiles: (files: ImportedFile[]) => void,
+  { isolate = false, onActiveChange }: FileDropOptions = {},
 ): Attachment<HTMLElement> {
   return (node) => {
     let depth = 0;
 
-    const setActive = (active: boolean) => {
-      node.classList.toggle('drop-valid', active);
-    };
+    const setActive =
+      onActiveChange ??
+      ((active: boolean) => node.classList.toggle('drop-valid', active));
 
     const onDragEnter = (event: DragEvent) => {
       if (!dragHasFiles(event)) return;
       event.preventDefault();
+      if (isolate) event.stopPropagation();
       depth += 1;
       setActive(true);
     };
@@ -46,17 +59,20 @@ export function fileDrop(
       if (!dragHasFiles(event)) return;
       // preventDefault on every dragover is what allows the drop to fire.
       event.preventDefault();
+      if (isolate) event.stopPropagation();
       if (event.dataTransfer) event.dataTransfer.dropEffect = 'copy';
     };
 
     const onDragLeave = (event: DragEvent) => {
       if (!dragHasFiles(event)) return;
+      if (isolate) event.stopPropagation();
       depth = Math.max(0, depth - 1);
       if (depth === 0) setActive(false);
     };
 
     const onDrop = (event: DragEvent) => {
       event.preventDefault();
+      if (isolate) event.stopPropagation();
       depth = 0;
       setActive(false);
       if (!event.dataTransfer) return;
