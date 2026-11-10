@@ -5,7 +5,10 @@ import { defineConfig, devices } from '@playwright/test';
 // service worker, and the COOP/COEP cross-origin-isolation headers (which the
 // `presk-cross-origin-isolation` plugin injects into preview too). This is the
 // automated safety net for codec changes — run it after any codec/build change.
-const PORT = 4317;
+// PLAYWRIGHT_PORT lets a second checkout run the suite at the same time. With
+// one fixed port, `reuseExistingServer` would point its tests at the other
+// checkout's preview server.
+const PORT = Number(process.env.PLAYWRIGHT_PORT) || 4317;
 // PLAYWRIGHT_SKIP_BUILD=1 serves the existing build/ without rebuilding. Set
 // it ONLY when a fresh build is guaranteed — `npm test` sets it because
 // `check` just built. Never inferred from build/ merely existing: a stale dir
