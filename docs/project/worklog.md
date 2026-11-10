@@ -33,6 +33,12 @@ session must know. Newest first. (Live project state stays in
   from the production check, two sessions with their `visit:browser`, `open`,
   `source:pick`, `format:avif` and `download:avif`. Real use starts after
   that. Test data expires in three months.
+- Keeping the maintainer and the tooling out of the numbers (same day): a
+  browser that opens the site with `?usage=off` is never counted again
+  (`localStorage` flag `app:usage-off`; `?usage=on` clears it), and a browser
+  driven by automation (`navigator.webdriver`) never sends. So a post-deploy
+  check with Playwright can no longer confirm that events arrive; the unit
+  tests and `wrangler dev` cover that path.
 - The global never-push rule was removed the same day (in `~/.agents`).
 
 ## 2026-11-10 (Fable, driver) - Agents push and deploy on their own

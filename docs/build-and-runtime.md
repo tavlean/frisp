@@ -246,7 +246,11 @@ Anonymous and first-party, decided 2026-11-10. Three files hold all of it:
 - `src/lib/usage.ts` is the client. `track(name, value)` sends one
   `navigator.sendBeacon` to `/api/usage`. It sends only on the production
   host (`APP_HOST` in `src/shared/brand.ts`), never under Do Not Track or
-  Global Privacy Control, and at most once per page load for every event
+  Global Privacy Control, never from a browser that opened the site with
+  `?usage=off` (a `localStorage` flag, `app:usage-off`; `?usage=on` clears
+  it; the maintainer's own browsers are opted out this way), never from a
+  browser driven by automation (`navigator.webdriver`), and at most once per
+  page load for every event
   except `open` and `download`. Calls sit at user-action handlers (the format
   select, the feature toggles, the save link), so restoring settings, undo and
   auto quality do not count.
