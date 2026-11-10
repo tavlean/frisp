@@ -15,6 +15,11 @@ export const isSafari =
   /Safari\//.test(navigator.userAgent) &&
   !/Chrom(e|ium)\//.test(navigator.userAgent);
 
+/** If the platform's shortcut modifier is ⌘ (macOS, iOS, iPadOS) */
+export const isMac = /mac|iphone|ipad/i.test(
+  navigator.platform || navigator.userAgent || '',
+);
+
 /**
  * Resolves when the user types the Konami code (↑ ↑ ↓ ↓ ← → ← → B A).
  *
