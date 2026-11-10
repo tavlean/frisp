@@ -16,17 +16,22 @@ export function lightDismiss({
       if (!isOpen() || node.contains(event.target as Node)) return;
       close();
     };
+    // One Escape closes one layer. The open popover is the top layer, so it
+    // takes the key in the capture phase and stops it there; otherwise the
+    // bulk view's own Escape handler would also deselect the image under it.
     const onKeyDown = (event: KeyboardEvent) => {
       if (!isOpen() || event.key !== 'Escape') return;
+      event.preventDefault();
+      event.stopPropagation();
       close();
       focusOnEscape?.()?.focus();
     };
 
     window.addEventListener('pointerdown', onPointerDown, true);
-    window.addEventListener('keydown', onKeyDown);
+    window.addEventListener('keydown', onKeyDown, true);
     return () => {
       window.removeEventListener('pointerdown', onPointerDown, true);
-      window.removeEventListener('keydown', onKeyDown);
+      window.removeEventListener('keydown', onKeyDown, true);
     };
   };
 }

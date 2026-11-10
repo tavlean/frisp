@@ -190,6 +190,28 @@ test('per-image quality change marks the selected strip cell as overridden', asy
   }).toPass({ timeout: 20_000 });
 });
 
+test('Escape closes an open view-options popover before it deselects', async ({
+  page,
+}) => {
+  await loadReadyBulk(page, [photo, gradient, screenshot]);
+
+  await page.locator(CELL).nth(1).locator('.thumb').click();
+  const imageTab = page.locator('.scope-tabs .tab-image');
+  await expect(imageTab).toHaveAttribute('aria-selected', 'true');
+
+  await page.getByRole('button', { name: 'View options' }).click();
+  const popover = page.locator('.view-options');
+  await expect(popover).toBeVisible();
+
+  // The first Escape belongs to the popover; the selection must survive it.
+  await page.keyboard.press('Escape');
+  await expect(popover).toBeHidden();
+  await expect(imageTab).toHaveAttribute('aria-selected', 'true');
+
+  await page.keyboard.press('Escape');
+  await expect(imageTab).toHaveAttribute('aria-selected', 'false');
+});
+
 test('save all exports a zip with one entry per ready image', async ({
   page,
 }) => {
