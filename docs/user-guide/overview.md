@@ -6,7 +6,7 @@
 
 Frisp makes image files smaller. You open an image, pick an output format and some settings, and Frisp re-encodes the picture so it takes up fewer bytes — handy for faster-loading websites, smaller email attachments, or fitting more photos in less space. The trick to good compression is balancing **file size** against **visual quality**, and Frisp is built to let you see that trade-off directly: it shows your original picture next to the compressed result so you can decide how far to push it.
 
-Everything happens locally in your web browser. Your image is never sent to a server — there are no uploads, no accounts, and no tracking (more on this below).
+Everything happens locally in your web browser. Your image is never sent to a server: there are no uploads, no accounts, and no tracking of you or your images (more on this below).
 
 > **Jargon check — "compress" / "encode":** _Compressing_ an image means re-saving it in a way that uses fewer bytes. _Encoding_ is the technical word for that re-saving step (turning raw pixels into a file in a given format like JPEG or PNG). In Frisp the two mean the same thing.
 
@@ -65,7 +65,7 @@ While a side is recalculating you'll briefly see **"Compressing…"**, and befor
 
 ## Privacy & offline
 
-Frisp is **local-first**: the entire pipeline — decode, preprocess, encode — runs inside your browser. No uploads, no servers, no telemetry, and no pixels ever leave your device. The compression engines are WebAssembly modules served from Frisp's own files, not fetched from anywhere else.
+Frisp is **local-first**: the entire pipeline (decode, preprocess, encode) runs inside your browser. No uploads, no server doing the work, and no pixels ever leave your device. The site counts a few anonymous usage events (which format was chosen, whether a result was saved) with no cookies or identifiers; the README's Privacy section lists them, and Do Not Track switches them off. The compression engines are WebAssembly modules served from Frisp's own files, not fetched from anywhere else.
 
 Because of this design, Frisp also works **offline**: after the first visit, a service worker caches the app so you can use it with no internet connection at all.
 

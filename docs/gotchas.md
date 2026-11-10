@@ -254,6 +254,13 @@ this doc holds the cross-cutting ones that no single file owns.
 
 ## Environment and process
 
+- **Analytics Engine data cannot be deleted, and a preview version shares
+  the production dataset.** The usage Worker therefore counts only requests
+  on the production host. To test the write path, use `wrangler dev` (local,
+  simulated) or accept that a test event sent to production stays for three
+  months. A write takes about a minute to show up in the SQL API, and a query
+  against a dataset that does not exist yet returns empty data, not an error.
+
 - **Playwright's `getByLabel(text, { exact: true })` cannot find a native
   `<select>` wrapped in its `<label>`.** The label's text content includes
   every option's text, so the exact match fails and the test times out

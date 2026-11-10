@@ -12,7 +12,7 @@ Frisp is a privacy-first, fully client-side image optimizer at
 Squoosh, rebuilt on SvelteKit 3 and Svelte 5 as a static SPA under Apache-2.0.
 Users drop, pick, or paste an image; the browser decodes, resizes, adds grain,
 quantizes, and encodes locally through WASM codecs in workers, multi-core where
-the browser allows. Nothing is ever uploaded. It installs as a PWA and works
+the browser allows. Images never leave the device. It installs as a PWA and works
 offline after the first load.
 
 The audience is everyday users optimizing images without a server, and the
@@ -20,8 +20,9 @@ maintainer's own daily work (single images and SVGs especially). Two planned
 articles about the migration and the codec sweep are a side goal; the source
 material is [../journey-and-article-notes.md](../journey-and-article-notes.md).
 
-Hosting is a Cloudflare Worker named `frisp` serving static assets, configured
-by the root `wrangler.jsonc`. Workers Builds CI is not connected, so a push
+Hosting is a Cloudflare Worker named `frisp`: the static build plus one small
+script (`src/edge/worker.ts`) that only counts anonymous usage events,
+configured by the root `wrangler.jsonc`. Workers Builds CI is not connected, so a push
 deploys nothing; `npm run deploy` does (it deploys only the pushed commit and
 checks production). Agents push and deploy finished work without asking; the
 rule is in `AGENTS.md`. The retired `sqush.app` and `presk.app` zones 301
@@ -125,6 +126,19 @@ Shipped since then, newest first:
   2026-11-10 at commit `e695b5b4` (manual `wrangler deploy`), with the 404
   handling confirmed on production. Report and execution table:
   [reports/2026-11-10-svelte-sveltekit-docs-review.md](reports/2026-11-10-svelte-sveltekit-docs-review.md).
+
+- **Usage counting (2026-11-10).** The maintainer decided to measure use,
+  first-party. The app sends one word from a fixed list (app opened, image
+  opened, format chosen, feature switched on, result saved) to
+  `POST /api/usage` on its own host; the Worker stores a count in Workers
+  Analytics Engine with the visitor's country, and nothing else: no cookie,
+  identifier, IP address or user agent. It is off under Do Not Track and
+  Global Privacy Control and anywhere but `frisp.app`. `npm run stats` prints
+  the numbers; "sessions" (page loads that opened an image) is the real-user
+  count. The public wording changed from "Nothing uploads" to "Your images
+  never leave your device", and the README has a Privacy section. Cloudflare
+  Web Analytics (cookieless page views) has been on all along. Details:
+  [../build-and-runtime.md](../build-and-runtime.md#usage-counting).
 
 - **Dependency audit and SvelteKit 3 (2026-11-10).** `npm audit fix`, Vite
   8.3.7, then SvelteKit 3.1.1 with adapter-static 4, vite-plugin-svelte 7.3
@@ -276,10 +290,6 @@ The lab skins and the desktop-shell direction stay (maintainer, 2026-11-04).
   model. An image follows the shared recipe or owns a full copy; a global
   edit stops reaching images with their own copy; multi-select edits carry
   the changed setting to each selected image.
-- **A usage signal.** Nothing measures what anyone uses, so questions like
-  "does anyone use the two-sided compare" have no answer. A cookieless
-  counter (Cloudflare Web Analytics) would fit the privacy stance, but it is
-  the maintainer's values call and is not built.
 - **The agent surface.** The go decision was settled by the 2026-08-08 product
   thesis; [../frisp-cli-analysis.md](../frisp-cli-analysis.md) holds the design.
   Still open: the Node decode path and the format-race policy. Surface choice

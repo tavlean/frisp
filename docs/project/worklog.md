@@ -4,6 +4,30 @@ Short session-by-session build log: what changed, why, and the gotchas a future
 session must know. Newest first. (Live project state stays in
 [the project brief](brief.md); this is the narrative trail.)
 
+## 2026-11-10 (Fable driver, Opus executor) - First-party usage counting
+
+- What: `src/shared/usage-events.ts` (the allowlist), `src/lib/usage.ts`
+  (the client), `src/edge/worker.ts` (the app's first Worker script, one
+  route), `scripts/stats.mjs` (`npm run stats`). Described in
+  [../build-and-runtime.md](../build-and-runtime.md#usage-counting).
+- Why: the maintainer wants to know how many real people use the app and
+  which controls they reach for. Cloudflare Web Analytics cannot record
+  events; a hosted product would put a third party on a page whose promise
+  is that images never leave the device. First-party counts in the project's
+  own Cloudflare account keep that promise and cost nothing.
+- Decisions: events fire from user-action handlers only; everything except
+  `open` and `download` counts once per page load; `lossless` was left out
+  (three separate checkboxes, two of them derived); format values are the
+  registry ids lowercased, with a unit test that fails if the registry and
+  the list differ; the Worker counts only the production host.
+- Wording: "Nothing uploads" became "Your images never leave your device" on
+  the landing, in the meta description and in the README, which gained a
+  Privacy section.
+- Known test data in the dataset: one `format:avif` and three
+  `visit:installed`, country IN, 2026-11-10 about 07:39 UTC, from the build
+  agent's preview check. They expire in three months.
+- The global never-push rule was removed the same day (in `~/.agents`).
+
 ## 2026-11-10 (Fable, driver) - Agents push and deploy on their own
 
 - The maintainer asked for pushing and deploying to stop needing his go-ahead.

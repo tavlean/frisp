@@ -62,7 +62,8 @@ because it has to match what people type into a search box ("convert png to
 webp"), and the no-upload line still closes it:
 
 > Compress images to WebP, AVIF, JPEG XL, PNG or JPEG and optimize SVGs, right in
-> your browser. Compare before and after, resize, and export. Nothing is uploaded.
+> your browser. Compare before and after, resize, and export. Your images never
+> leave your device.
 
 Kept at 160 characters or fewer, which is roughly where Google truncates.
 

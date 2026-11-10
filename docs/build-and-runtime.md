@@ -59,6 +59,11 @@ in [AGENTS.md](../AGENTS.md).
   (`wrangler versions upload`, which does not touch production): `/` answers
   200; `/nope`, `/a/b/c`, `/lab` and `/diagnostics` answer 404 with absolute
   asset paths.
+- The Worker script (since 2026-11-10): `wrangler.jsonc` names
+  `src/edge/worker.ts` as `main`, with the assets bound as `ASSETS` and an
+  Analytics Engine dataset bound as `USAGE`. Requests that match an asset
+  never reach the script, and unmatched navigations get the 404 page without
+  it. See [Usage counting](#usage-counting).
 - Service-worker auto-registration is disabled so `src/lib/service-worker-registration.ts`
   can handle dev cleanup and production registration explicitly.
 - Imports resolve through the `imports` field of `package.json` (Node subpath
@@ -230,6 +235,34 @@ the single-thread fallback loads on demand.
 Production preview is required for realistic service-worker testing. Note
 `vite preview` (sirv) snapshots the file list at startup — after a rebuild,
 restart the preview server or new hashed filenames 404.
+
+## Usage counting
+
+Anonymous and first-party, decided 2026-11-10. Three files hold all of it:
+
+- `src/shared/usage-events.ts` is the allowlist: each event name and the only
+  values it may carry (`visit`, `session`, `open`, `source`, `format`,
+  `option`, `download`). Client and Worker both import it.
+- `src/lib/usage.ts` is the client. `track(name, value)` sends one
+  `navigator.sendBeacon` to `/api/usage`. It sends only on the production
+  host (`APP_HOST` in `src/shared/brand.ts`), never under Do Not Track or
+  Global Privacy Control, and at most once per page load for every event
+  except `open` and `download`. Calls sit at user-action handlers (the format
+  select, the feature toggles, the save link), so restoring settings, undo and
+  auto quality do not count.
+- `src/edge/worker.ts` is the Worker. `POST /api/usage` checks that the
+  request is same-origin and on the production host, checks the pair against
+  the allowlist, and writes one Analytics Engine data point: name, value, and
+  the country Cloudflare reports. It reads no IP address or user agent and
+  always answers 204. Every other request goes to `env.ASSETS.fetch`.
+
+`npm run stats` (`scripts/stats.mjs`, `-- --days N`) prints sessions per day
+and the counts per event from the Analytics Engine SQL API; it needs
+`CLOUDFLARE_API_TOKEN`. A "session" is a page load that opened an image, which
+is the closest thing to a count of real users: bots load pages but do not
+open images. Data points cannot be deleted and expire after three months.
+Anyone can forge an allowlisted event with curl, so treat the numbers as
+indications, not accounting.
 
 ## Codec Assets
 
