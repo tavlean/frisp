@@ -34,6 +34,7 @@
     "preview": "vite preview",
     "sync": "node scripts/patch-codec-wrappers.mjs",
     "social-card": "node scripts/generate-social-card.mjs",
+    "stats": "node scripts/stats.mjs",
     "pwa-icons": "node scripts/generate-pwa-icons.mjs",
     "test": "npm run check && npm run test:unit && PLAYWRIGHT_SKIP_BUILD=1 npm run test:e2e",
     "test:unit": "vitest run",

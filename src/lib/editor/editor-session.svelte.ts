@@ -17,6 +17,7 @@ import { EditorHistory } from './editor-history.svelte';
 import { snackbar } from './snackbar-store.svelte';
 import { isAbortError } from '#client/lazy-app/abort.ts';
 import { APP_NAME } from '#shared/brand.ts';
+import { track } from '#lib/usage.ts';
 import { stableStringify } from '#shared/stable-stringify.ts';
 import {
   encodeSignature,
@@ -1317,7 +1318,9 @@ export class EditorSession {
     this.#sourceBridge = null;
   }
 
+  /** The rotate button's action; undo/redo restore rotation without it. */
   rotate(): void {
+    track('option', 'rotate');
     const previous = this.preprocessorState.rotate.rotate;
     const next = ((previous + 90) % 360) as 0 | 90 | 180 | 270;
     this.preprocessorState.rotate.rotate = next;

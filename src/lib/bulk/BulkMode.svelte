@@ -8,6 +8,7 @@
   import { bulkStore } from '#lib/bulk/store.svelte.ts';
   import { fromFileList } from '#lib/bulk/import-sources.ts';
   import Home from '#lib/bulk/Home.svelte';
+  import { trackOpen } from '#lib/usage.ts';
   import { applyRecipeChanges } from '#client/lazy-app/bulk/index.ts';
   import {
     recipeSignature,
@@ -95,7 +96,10 @@
   function onPick(event: Event) {
     const input = event.currentTarget as HTMLInputElement;
     const files = input.files ? fromFileList(input.files) : [];
-    if (files.length) void bulkStore.importFiles(files);
+    if (files.length) {
+      trackOpen('bulk', 'pick');
+      void bulkStore.importFiles(files);
+    }
     input.value = '';
   }
 </script>

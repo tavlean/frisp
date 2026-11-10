@@ -11,3 +11,6 @@
  */
 export const APP_NAME = 'Frisp';
 export const APP_SLUG = 'frisp';
+
+/** The production host. Usage counting sends only from here (src/lib/usage.ts). */
+export const APP_HOST = 'frisp.app';

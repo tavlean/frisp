@@ -1,6 +1,6 @@
 # Frisp
 
-Optimize images inside your browser. Resize and compress them on your own machine, and export. Nothing is uploaded, and it works offline after the first load.
+Optimize images inside your browser. Resize and compress them on your own machine, and export. Your images never leave your device, and it works offline after the first load.
 
 It is a modern fork of the amazing [Squoosh app], which has gone quiet over the last few years. Frisp is carrying it forward on a modern stack, current codebase, with the codecs rebuilt and the app being actively maintained.
 
@@ -26,7 +26,16 @@ The app is built on SvelteKit and Svelte 5 as a static site, a smaller and clear
 
 ## Privacy
 
-There is no upload and no server doing the work. Every step happens in the page, and it keeps running with the network off.
+There is no upload and no server doing the work. Every step happens in the page, and it keeps running with the network off. Your images, their file names and their details (size, dimensions, contents) never leave the browser.
+
+The site counts a few anonymous usage events so the maintainer can see what gets used: the app was opened, an image was opened, a format was chosen, a feature was switched on, a result was saved.
+
+- Each event is one word from a fixed list, plus the visitor's country as Cloudflare reports it.
+- No cookies and no identifiers. IP addresses and user agents are not stored.
+- Do Not Track and Global Privacy Control switch the counting off.
+- The data stays in the project's own Cloudflare account. The code is short: [`src/lib/usage.ts`](src/lib/usage.ts), [`src/edge/worker.ts`](src/edge/worker.ts) and [`src/shared/usage-events.ts`](src/shared/usage-events.ts).
+
+Cloudflare Web Analytics is also on, for cookieless page-view counts.
 
 ## Status
 

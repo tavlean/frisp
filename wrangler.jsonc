@@ -1,10 +1,16 @@
-// Cloudflare Worker (static assets only — no Worker script).
+// Cloudflare Worker: the static SvelteKit build plus one small script,
+// src/edge/worker.ts, which answers POST /api/usage (anonymous usage counts in
+// Workers Analytics Engine) and hands every other request to the assets.
+// Requests that match an asset are served before the script runs; unmatched
+// navigations get the 404 page without it (compatibility date 2025-04-01 or
+// later), so `run_worker_first` is not needed.
 // Workers Builds is not connected, so a push deploys nothing. Deploy with
 // `npm run deploy` (scripts/deploy.mjs): it deploys only the pushed commit,
 // runs the gates first, and checks production afterwards.
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "frisp",
+  "main": "./src/edge/worker.ts",
   "compatibility_date": "2026-07-05",
   // Production stays on the custom domain only; no duplicate workers.dev origin.
   "workers_dev": false,
@@ -13,11 +19,14 @@
   "preview_urls": true,
   "assets": {
     "directory": "./build",
+    "binding": "ASSETS",
     // Unknown paths get /404.html with status 404. That file is the adapter's
     // SvelteKit fallback shell, which uses absolute asset paths, so it boots at
     // any depth and the client router then renders the app's error page.
     "not_found_handling": "404-page"
   },
+  // The dataset is created on the first write.
+  "analytics_engine_datasets": [{ "binding": "USAGE", "dataset": "frisp_usage" }],
   // Apex only, matching the previous setup (no www record).
   "routes": [{ "pattern": "frisp.app", "custom_domain": true }]
 }

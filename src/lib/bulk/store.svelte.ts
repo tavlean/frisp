@@ -67,6 +67,7 @@ import { DEFAULT_SVG_OPTIONS } from '#lib/svg/optimize-options.ts';
 import { isSvgSource } from '#lib/svg/detect.ts';
 import { stableStringify } from '#shared/stable-stringify.ts';
 import { snackbar } from '#lib/editor/snackbar-store.svelte.ts';
+import { track } from '#lib/usage.ts';
 import type { ImportedFile } from './import-sources';
 import { createLimiter } from './limiter';
 import { BulkOutputCache } from './output-cache';
@@ -1019,6 +1020,7 @@ export class BulkStore {
     try {
       const blob = await buildZipBlob(plan);
       triggerBlobDownload(blob, `${plan.archiveName}.zip`);
+      track('download', 'zip');
       this.session = markBulkExportPlanExported(this.session, plan);
       void snackbar.show(`Saved ${plan.entries.length} images as ZIP.`);
     } catch (err) {

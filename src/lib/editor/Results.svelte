@@ -2,7 +2,8 @@
   import { prettySize, prettySizeParts } from './pretty-size';
   import { canShareFile, share } from '#lib/share-file.ts';
   import { snackbar } from './snackbar-store.svelte';
-  import type { CompressOutcome } from '#lib/compress.ts';
+  import type { CompressOutcome, SideFormat } from '#lib/compress.ts';
+  import { track, trackDownload } from '#lib/usage.ts';
 
   // The result footer of each side's panel: output filesize + a semantic
   // delta badge (green = smaller, red = larger), the download button, and —
@@ -14,6 +15,9 @@
   interface Props {
     /** Which side this footer belongs to (kept for parity; layout is uniform). */
     side: 'left' | 'right';
+    /** The side's output format, for the usage count of a save. Hosts that
+     *  leave it out (the lab skins) count nothing. */
+    format?: SideFormat;
     /** Output size in bytes (null while encoding / before first result). */
     size: number | null;
     /** Signed percent change vs the original (negative = smaller = good). */
@@ -33,6 +37,7 @@
 
   let {
     side,
+    format,
     size,
     percent,
     svg,
@@ -57,6 +62,8 @@
 
   async function onShare() {
     if (!namedShareFile) return;
+    // Counted at the tap: the sheet does not say whether the user saved.
+    track('download', 'share');
     const failure = await share(namedShareFile);
     if (failure) void snackbar.show(failure);
   }
@@ -152,6 +159,8 @@
       download={disabled ? undefined : downloadName}
       title="Download"
       aria-disabled={disabled}
+      onclick={() =>
+        format && !disabled && !isOriginal && trackDownload(format)}
     >
       {#if loading}
         <span class="spinner" aria-hidden="true"></span>

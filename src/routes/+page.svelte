@@ -31,6 +31,8 @@
   import { isSupportedBulkImage } from '#client/lazy-app/bulk/index.ts';
   import { isMac } from '#client/lazy-app/util/index.ts';
   import { APP_NAME } from '#shared/brand.ts';
+  import { track, trackFormat, trackOpen } from '#lib/usage.ts';
+  import type { UsageValue } from '#shared/usage-events.ts';
   import '#lib/editor/theme.css';
 
   const session = new EditorSession();
@@ -41,7 +43,10 @@
     get running() {
       return session.autoQualityRunning[index];
     },
-    run: (target) => void session.autoQuality(index, target),
+    run: (target) => {
+      track('option', 'auto-quality');
+      void session.autoQuality(index, target);
+    },
     cancel: () => session.cancelAutoQuality(index),
   });
   const autoQuality = [autoQualityFor(0), autoQualityFor(1)] as const;
@@ -63,6 +68,13 @@
   const isLanding = $derived(!bulkStore.hasJobs && !session.file);
 
   onMount(() => {
+    track(
+      'visit',
+      matchMedia('(display-mode: standalone)').matches
+        ? 'installed'
+        : 'browser',
+    );
+
     // When a new build is downloaded and waiting, offer a non-intrusive
     // "refresh now" prompt rather than reloading mid-task. Clicking Refresh
     // activates the waiting worker, which reloads EVERY open tab onto the new
@@ -142,12 +154,17 @@
     session.pickFiles(list, pushEditorRoute);
   }
 
-  function routeFiles(imported: ImportedFile[]): void {
+  function routeFiles(
+    imported: ImportedFile[],
+    source: UsageValue<'source'>,
+  ): void {
     const files = imported.filter((item) => isSupportedBulkImage(item.file));
     if (files.length === 0) {
       void snackbar.show('No supported images found.');
       return;
     }
+    const bulk = bulkStore.hasJobs || files.length > 1;
+    trackOpen(bulk ? 'bulk' : 'single', source);
     if (bulkStore.hasJobs) {
       void bulkStore.importFiles(files);
       return;
@@ -239,7 +256,7 @@
 <!-- The whole app is a drop target so an image dropped ANYWHERE (intro padding,
      or over the open editor) loads/replaces it instead of the browser opening
      the file — Squoosh wraps everything in <file-drop> the same way. -->
-<div class="app-root" {@attach fileDrop((files) => routeFiles(files))}>
+<div class="app-root" {@attach fileDrop((files) => routeFiles(files, 'drop'))}>
   <!-- The boundaries keep a render crash inside the view that threw. The
        session and the bulk store live outside them, so recovery keeps the
        image. src/hooks.client.ts logs the error. -->
@@ -337,7 +354,11 @@
               file={session.file}
               width={session.naturalWidth}
               height={session.naturalHeight}
-              onCompareAs={(f) => session.setFormat(0, f)}
+              onCompareAs={(f) => {
+                track('option', 'compare');
+                trackFormat(f);
+                session.setFormat(0, f);
+              }}
             />
           {:else}
             <OptionsPanel

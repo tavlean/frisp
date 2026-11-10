@@ -18,6 +18,7 @@
   import { bulkStore } from './store.svelte';
   import DeltaPill from './DeltaPill.svelte';
   import { prettySize } from '#lib/editor/pretty-size.ts';
+  import { trackDownload } from '#lib/usage.ts';
 
   interface Props {
     item: BulkStripItem;
@@ -76,6 +77,10 @@
     anchor.href = download.url;
     anchor.download = download.fileName;
     anchor.click();
+    const output = bulkStore.effectiveRecipeFor(item.id)?.output;
+    if (output) {
+      trackDownload(output.kind === 'svg' ? 'svg' : output.encoder.type);
+    }
   }
 </script>
 

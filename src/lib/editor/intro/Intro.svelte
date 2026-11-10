@@ -16,13 +16,14 @@
   import { fromFileList, type ImportedFile } from '#lib/bulk/import-sources.ts';
   import { fileDrop } from '#lib/editor/file-drop.ts';
   import { APP_NAME } from '#shared/brand.ts';
+  import type { UsageValue } from '#shared/usage-events.ts';
   // The canonical logomark (currentColor); shared with the lab's Logomark so the
   // mark has ONE source of truth instead of a hand-copied path per consumer.
   import logomark from '#lib/brand/logomark.svg?raw';
 
   interface Props {
-    /** Hand chosen files (from drop/picker/paste) up to the page. */
-    onFiles: (files: ImportedFile[]) => void;
+    /** Hand chosen files up to the page, with how they arrived. */
+    onFiles: (files: ImportedFile[], source: UsageValue<'source'>) => void;
     /** Reused for paste feedback (no image / clipboard read failed). */
     onMessage?: (text: string) => void;
   }
@@ -50,7 +51,7 @@
 
   // Our own drop target, isolated so the app-wide fileDrop never sees these
   // drags: the drop routes once and the global overlay stays hidden.
-  const dropTarget = fileDrop((files) => onFiles(files), {
+  const dropTarget = fileDrop((files) => onFiles(files, 'drop'), {
     isolate: true,
     onActiveChange: (active) => (dragActive = active),
   });
@@ -63,7 +64,7 @@
   // any folder structure the OS reports for bulk import.
   function onPick(event: Event) {
     const input = event.currentTarget as HTMLInputElement;
-    if (input.files?.length) onFiles(fromFileList(input.files));
+    if (input.files?.length) onFiles(fromFileList(input.files), 'pick');
     input.value = '';
   }
 
@@ -77,9 +78,10 @@
         const type = item.types.find((t) => t.startsWith('image/'));
         if (type) {
           const blob = await item.getType(type);
-          onFiles([
-            { file: new File([blob], 'pasted-image', { type: blob.type }) },
-          ]);
+          onFiles(
+            [{ file: new File([blob], 'pasted-image', { type: blob.type }) }],
+            'paste',
+          );
           return;
         }
       }
@@ -96,7 +98,7 @@
     );
     if (file) {
       event.preventDefault();
-      onFiles([{ file }]);
+      onFiles([{ file }], 'paste');
     }
   }
 </script>
@@ -188,7 +190,7 @@
 
     <p class="subline">
       Free, open-source image compression that runs offline in your browser.
-      Nothing uploads.
+      Your images never leave your device.
     </p>
 
     <div class="cta">

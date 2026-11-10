@@ -40,6 +40,7 @@
   import type { EncodeOptions as OxipngEncodeOptions } from '#features/encoders/oxiPNG/shared/meta.ts';
   import type { SvgOptimizeOptions } from '#lib/svg/optimize-options.ts';
   import type { AutoQualityControl } from './auto-quality';
+  import { track, trackFormat } from '#lib/usage.ts';
 
   interface Props {
     side: 'left' | 'right';
@@ -117,7 +118,10 @@
       </h3>
 
       <ToggleRow class="section-enabler" label="Resize">
-        <Toggle bind:checked={processorState.resize.enabled} />
+        <Toggle
+          bind:checked={processorState.resize.enabled}
+          onchange={(on) => on && track('option', 'resize')}
+        />
       </ToggleRow>
       {#if processorState.resize.enabled}
         <div transition:reveal>
@@ -132,7 +136,10 @@
 
       <!-- Panel order mirrors pipeline order: resize → grain → reduce palette. -->
       <ToggleRow class="section-enabler" label="Film grain">
-        <Toggle bind:checked={processorState.grain.enabled} />
+        <Toggle
+          bind:checked={processorState.grain.enabled}
+          onchange={(on) => on && track('option', 'grain')}
+        />
       </ToggleRow>
       {#if processorState.grain.enabled}
         <div transition:reveal>
@@ -143,7 +150,10 @@
       {/if}
 
       <ToggleRow class="section-enabler" label="Reduce palette">
-        <Toggle bind:checked={processorState.quantize.enabled} />
+        <Toggle
+          bind:checked={processorState.quantize.enabled}
+          onchange={(on) => on && track('option', 'palette')}
+        />
       </ToggleRow>
       {#if processorState.quantize.enabled}
         <div transition:reveal>
@@ -161,7 +171,10 @@
       large
       value={format}
       title={formatTooltip}
-      onchange={(v) => onFormatChange(v as SideFormat)}
+      onchange={(v) => {
+        trackFormat(v);
+        onFormatChange(v as SideFormat);
+      }}
     >
       <option value="identity">Original Image</option>
       {#each formats as option (option.id)}
@@ -230,6 +243,7 @@
 <div class="options-results">
   <Results
     {side}
+    {format}
     {isOriginal}
     {typeLabel}
     size={result ? result.outputSize : null}
