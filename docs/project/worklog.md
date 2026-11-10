@@ -22,8 +22,18 @@ session must know. Newest first. (Live project state stays in
 - The 404 handling was checked on Cloudflare with a preview version
   (`wrangler versions upload`; production untouched): `/` 200; `/nope`,
   `/a/b/c`, `/lab` and `/diagnostics` 404 with absolute asset paths;
-  isolation headers intact. Not deployed. Not verified: the faster update
-  notice, which needs two real deploys.
+  isolation headers intact.
+- Pushed and deployed 2026-11-10 at `e695b5b4` (`npm run build`, then
+  `wrangler deploy`; version `81196847`). Checked on `frisp.app` in Chromium
+  and WebKit: cross-origin isolated, a photo encodes, the service worker
+  cache is `app-e695b5b421e7`, `/a/b/c` answers 404 and shows the not-found
+  page. Not verified: the faster update notice, which needs a second deploy
+  while a tab stays open.
+- Seen on production, not caused by this work: Cloudflare injects its Web
+  Analytics beacon (`static.cloudflareinsights.com/beacon.min.js`) into the
+  page, and the COEP header blocks it, so every load logs a console error
+  and the analytics collect nothing. Turn the automatic injection off in the
+  Cloudflare dashboard, or decide it is wanted and serve it another way.
 - Gotchas (all in `docs/gotchas.md`): subpath imports do no extension or
   index lookup, and the static audit reads the import text of the codec
   asset manifest; a `<svelte:boundary>` receives SvelteKit's `App.Error`, not

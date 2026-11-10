@@ -119,9 +119,9 @@ Shipped since then, newest first:
   Removed: the unused italic font, `vitePreprocess`, the SvelteKit `alias`
   option (imports are `package.json` subpath imports, `#lib/*` and friends).
   Added: crash panels around the editor and bulk views, type-checked tests,
-  unit tests for rune modules, `svelte-check` failing on warnings. Not yet
-  deployed: production still runs the 2026-11-09 build. A Cloudflare preview
-  version confirmed the 404 handling. Report and execution table:
+  unit tests for rune modules, `svelte-check` failing on warnings. Deployed
+  2026-11-10 at commit `e695b5b4` (manual `wrangler deploy`), with the 404
+  handling confirmed on production. Report and execution table:
   [reports/2026-11-10-svelte-sveltekit-docs-review.md](reports/2026-11-10-svelte-sveltekit-docs-review.md).
 
 - **Dependency audit and SvelteKit 3 (2026-11-10).** `npm audit fix`, Vite
