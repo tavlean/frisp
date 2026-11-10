@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import {
   defaultProcessorState,
+  encoderMap,
   type EncoderState,
 } from '../../src/client/lazy-app/feature-meta/shared';
 import type { ImageRecipe } from '../../src/client/lazy-app/recipe';
@@ -56,8 +57,8 @@ function fakeHost(overrides: Partial<CodecHost> = {}) {
 function recipe(
   encoder: EncoderState = {
     type: 'webP',
-    options: getDefaultOptions('webP'),
-  } as EncoderState,
+    options: structuredClone(encoderMap.webP.meta.defaultOptions),
+  },
   rotate: ImageRecipe['rotate'] = 0,
 ): ImageRecipe {
   return {

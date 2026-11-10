@@ -29,7 +29,8 @@
     "bench": "playwright test --config benchmarks/playwright.config.ts",
     "bench:compare": "node benchmarks/compare.mjs",
     "bench:svg": "node benchmarks/svg/run-frisp.mjs",
-    "bench:svg:compare": "node benchmarks/svg/compare.mjs"
+    "bench:svg:compare": "node benchmarks/svg/compare.mjs",
+    "typecheck:tests": "tsc -p tests/tsconfig.json"
   },
   "devDependencies": {
     "@playwright/test": "^1.60.0",

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   defaultProcessorState,
+  encoderMap,
   type EncoderState,
   type PreprocessorState,
   type ProcessorState,
@@ -35,8 +36,8 @@ function raster(
   edit: (recipe: ImageRecipe) => void = () => {},
   encoder: EncoderState = {
     type: 'webP',
-    options: getDefaultOptions('webP'),
-  } as EncoderState,
+    options: structuredClone(encoderMap.webP.meta.defaultOptions),
+  },
 ): ImageRecipe {
   const recipe: ImageRecipe = {
     rotate: 0,
@@ -83,7 +84,7 @@ describe('recipeSignature', () => {
 
   it('ignores quantize options while quantize is disabled', () => {
     const disabled = raster((r) => {
-      r.processors.quantize.numColors = 8;
+      r.processors.quantize.maxNumColors = 8;
       r.processors.quantize.dither = 0.25;
     });
     const enabled = raster((r) => {

@@ -55,7 +55,11 @@ async function watchWorkerPosts(page: Page): Promise<void> {
       };
       walk(message, 'message');
       window.__workerPosts.push({ cloned });
-      return post.call(this, message, options as Transferable[]);
+      return post.call(
+        this,
+        message,
+        Array.isArray(options) ? { transfer: options } : options,
+      );
     };
   }, BIG);
 }

@@ -6,19 +6,15 @@ import SvelteKitWorkerBridge from '$lib/sveltekit-worker-bridge';
 import type { ImageJob, ImageOutput } from '../../src/client/lazy-app/bulk';
 import { fakeOutput, job, session } from './fixtures';
 
-vi.mock(
-  '$lib/sveltekit-worker-bridge',
-  () => ({
-    default: class FakeSvelteKitWorkerBridge {
-      static options: unknown[] = [];
-      constructor(options?: unknown) {
-        FakeSvelteKitWorkerBridge.options.push(options);
-      }
-      dispose(): void {}
-    },
-  }),
-  { virtual: true },
-);
+vi.mock('$lib/sveltekit-worker-bridge', () => ({
+  default: class FakeSvelteKitWorkerBridge {
+    static options: unknown[] = [];
+    constructor(options?: unknown) {
+      FakeSvelteKitWorkerBridge.options.push(options);
+    }
+    dispose(): void {}
+  },
+}));
 
 vi.mock('$lib/optimize-image', () => ({ optimizeImage: vi.fn() }));
 

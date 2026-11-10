@@ -76,7 +76,8 @@ export function recipe(
       },
       quantize: {
         enabled: false,
-        numColors: 256,
+        zx: 0,
+        maxNumColors: 256,
         dither: 1,
       },
       resize: {
@@ -89,7 +90,7 @@ export function recipe(
         linearRGB: true,
       },
     },
-  } as ImageRecipe;
+  };
   edit(result);
   return result;
 }

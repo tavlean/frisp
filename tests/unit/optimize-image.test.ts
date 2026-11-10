@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   defaultProcessorState,
+  encoderMap,
   type EncoderState,
 } from '../../src/client/lazy-app/feature-meta/shared';
 import type { ImageRecipe } from '../../src/client/lazy-app/recipe';
@@ -53,10 +54,10 @@ const jxl = (jpegTranscode: boolean) =>
     type: 'jxl',
     options: { ...getDefaultOptions('jxl'), jpegTranscode },
   }) as EncoderState;
-const webP = {
+const webP: EncoderState = {
   type: 'webP',
-  options: getDefaultOptions('webP'),
-} as EncoderState;
+  options: structuredClone(encoderMap.webP.meta.defaultOptions),
+};
 
 describe('chooseLane', () => {
   it('sends SVG output to the vector lane, and only for an SVG source', () => {

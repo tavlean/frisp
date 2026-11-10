@@ -184,7 +184,7 @@ test('divider keys ignore focused controls but work from the stage', async ({
     page.evaluate(
       () =>
         document
-          .querySelector('two-up')
+          .querySelector<HTMLElement>('two-up')
           ?.style.getPropertyValue('--split-point') ?? '',
     );
 

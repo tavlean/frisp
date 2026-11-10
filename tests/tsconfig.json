@@ -1,0 +1,14 @@
+{
+  "extends": "$app/tsconfig",
+  "compilerOptions": {
+    "strict": true,
+    "types": ["$app/types", "node"]
+  },
+  "include": [
+    "**/*.ts",
+    "../src/**/*.d.ts",
+    "../vite.config.ts",
+    "../vitest.config.ts",
+    "../playwright.config.ts"
+  ]
+}

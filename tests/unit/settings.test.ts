@@ -95,13 +95,20 @@ describe('bulk output hashes', () => {
   it('collapses disabled processor options', () => {
     const changed = recipe((r) => {
       r.processors.grain = { enabled: false, amount: 80, size: 60 };
-      r.processors.quantize = { enabled: false, numColors: 8, dither: 0.25 };
+      r.processors.quantize = {
+        enabled: false,
+        zx: 0,
+        maxNumColors: 8,
+        dither: 0.25,
+      };
       r.processors.resize = {
         ...r.processors.resize,
         enabled: false,
         width: 999,
         height: 777,
         method: 'mitchell',
+        premultiply: true,
+        linearRGB: true,
       };
     });
     const sized = job('a', { sourceWidth: 800, sourceHeight: 600 });
