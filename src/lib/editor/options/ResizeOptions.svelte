@@ -1,7 +1,7 @@
 <script lang="ts">
   // Ported from src/features/processors/resize/client/index.tsx at parity.
   // Mutates the resize processor options in place (a shared $state proxy).
-  import { slide } from 'svelte/transition';
+  import { reveal } from '../motion';
   import {
     sizePresets,
     getResizePresetSize,
@@ -98,7 +98,7 @@
     <Checkbox checked={maintainAspect} onchange={setMaintainAspect} />
   </ToggleRow>
   {#if !maintainAspect}
-    <label class="option-text-first" transition:slide={{ duration: 300 }}>
+    <label class="option-text-first" transition:reveal>
       Fit method:
       <Select
         value={options.fitMethod}
@@ -135,7 +135,7 @@
       </Select>
     </label>
     {#if isWorker}
-      <div transition:slide={{ duration: 300 }}>
+      <div transition:reveal>
         <ToggleRow label="Premultiply alpha channel">
           <Checkbox bind:checked={options.premultiply} />
         </ToggleRow>

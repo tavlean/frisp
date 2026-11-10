@@ -2,10 +2,12 @@
   // Single-column option row — the `option-one-cell` grid wrapper (layout lives
   // in theme.css) that every Range sits in. Extracted to replace the wrapper
   // `<div class="option-one-cell">` repeated across the encoder panels.
-  // `slide` plays the same 300ms reveal the panels used inline for rows that
-  // appear/disappear behind a toggle.
+  // `slide` plays the same 300ms reveal the panels use for rows that
+  // appear/disappear behind a toggle. One element, not an `{#if slide}` pair:
+  // a local transition plays only when its own block is created, so the
+  // element must belong to the caller's `{#if}`.
   import type { Snippet } from 'svelte';
-  import { slide } from 'svelte/transition';
+  import { reveal } from '../motion';
 
   let {
     slide: animate = false,
@@ -13,12 +15,6 @@
   }: { slide?: boolean; children: Snippet } = $props();
 </script>
 
-{#if animate}
-  <div class="option-one-cell" transition:slide={{ duration: 300 }}>
-    {@render children()}
-  </div>
-{:else}
-  <div class="option-one-cell">
-    {@render children()}
-  </div>
-{/if}
+<div class="option-one-cell" transition:reveal={{ enabled: animate }}>
+  {@render children()}
+</div>

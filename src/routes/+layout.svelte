@@ -54,4 +54,11 @@
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }
+
+  /* The one spinner rotation, referenced as plain `spin` by every component. */
+  @keyframes -global-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
 </style>

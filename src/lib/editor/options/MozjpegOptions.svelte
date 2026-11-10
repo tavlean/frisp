@@ -1,7 +1,7 @@
 <script lang="ts">
   // Ported from src/features/encoders/mozJPEG/client/index.tsx at parity.
   // mozJPEG stores its toggles as booleans, so the checkboxes bind directly.
-  import { slide } from 'svelte/transition';
+  import { reveal } from '../motion';
   import {
     MozJpegColorSpace,
     type EncodeOptions,
@@ -32,7 +32,7 @@
     </label>
 
     {#if options.color_space === MozJpegColorSpace.YCbCr}
-      <div transition:slide={{ duration: 300 }}>
+      <div transition:reveal>
         <ToggleRow label="Auto subsample chroma">
           <Checkbox bind:checked={options.auto_subsample} />
         </ToggleRow>

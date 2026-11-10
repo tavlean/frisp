@@ -602,12 +602,6 @@
     accent-color: var(--main-theme-color, #ff8a5e);
   }
 
-  @keyframes spin {
-    to {
-      transform: rotate(360deg);
-    }
-  }
-
   @keyframes figure-pulse {
     0%,
     100% {

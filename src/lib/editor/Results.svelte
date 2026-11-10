@@ -391,12 +391,6 @@
     border-top-color: #fff;
   }
 
-  @keyframes spin {
-    to {
-      transform: rotate(360deg);
-    }
-  }
-
   @media (max-width: 760px) {
     .results {
       padding: 6px var(--horizontal-padding, 12px) 8px;

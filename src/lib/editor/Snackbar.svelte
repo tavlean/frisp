@@ -1,7 +1,7 @@
 <script lang="ts">
   // Renders the current snackbar message (see snackbar-store.svelte.ts). Mirrors
   // Squoosh's bottom-centre snack-bar with optional action buttons (e.g. Undo).
-  import { fly } from 'svelte/transition';
+  import { toast } from './motion';
   // Import via the same $lib specifier as the rest of the app so Vite resolves
   // a single shared module instance (a relative path here would create a second
   // copy of the store, with its own state that the editor's writes can't reach).
@@ -12,11 +12,9 @@
 
 {#if snack}
   {#key snack.id}
-    <div
-      class="snackbar"
-      role="status"
-      transition:fly={{ y: 60, duration: 200 }}
-    >
+    <!-- `|global`: the key block is created and destroyed with the outer
+         `{#if}`, so a local transition would play only on replacement. -->
+    <div class="snackbar" role="status" transition:toast|global>
       <span class="message">{snack.message}</span>
       {#each snack.actions as action (action)}
         <button

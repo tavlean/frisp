@@ -4,7 +4,7 @@
   // an "Edit" section (resize / reduce-palette, hidden for the Original side)
   // above a "Compress" section (encoder picker + that encoder's options), with
   // the download/result bubble pinned at the bottom.
-  import { slide } from 'svelte/transition';
+  import { reveal } from './motion';
   import Select from './options/Select.svelte';
   import Toggle from './options/Toggle.svelte';
   import Range from './options/Range.svelte';
@@ -98,7 +98,7 @@
 
 <div class="options-scroller" class:original-image={isOriginal}>
   {#if !isOriginal && format !== 'svg'}
-    <div transition:slide={{ duration: 300 }}>
+    <div transition:reveal>
       <h3 class="options-title">
         <div class="title-and-buttons">
           Edit
@@ -120,7 +120,7 @@
         <Toggle bind:checked={processorState.resize.enabled} />
       </ToggleRow>
       {#if processorState.resize.enabled}
-        <div transition:slide={{ duration: 300 }}>
+        <div transition:reveal>
           <ResizeOptions
             options={processorState.resize as unknown as ResizeOptionsState}
             inputWidth={naturalWidth}
@@ -135,7 +135,7 @@
         <Toggle bind:checked={processorState.grain.enabled} />
       </ToggleRow>
       {#if processorState.grain.enabled}
-        <div transition:slide={{ duration: 300 }}>
+        <div transition:reveal>
           <GrainOptions
             options={processorState.grain as unknown as GrainOptionsState}
           />
@@ -146,7 +146,7 @@
         <Toggle bind:checked={processorState.quantize.enabled} />
       </ToggleRow>
       {#if processorState.quantize.enabled}
-        <div transition:slide={{ duration: 300 }}>
+        <div transition:reveal>
           <QuantizeOptions
             options={processorState.quantize as unknown as QuantizeOptionsState}
           />
@@ -171,7 +171,7 @@
   </section>
 
   {#if !isOriginal}
-    <div class="options-section" transition:slide={{ duration: 300 }}>
+    <div class="options-section" transition:reveal>
       <!-- Re-key on the options object identity so a panel that seeds its UI
            state once (AVIF/JXL etc.) remounts and re-derives when copy/import
            replaces the options object. In-place edits keep the same identity,

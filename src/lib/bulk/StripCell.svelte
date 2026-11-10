@@ -426,12 +426,6 @@
     font-weight: 500;
   }
 
-  @keyframes spin {
-    to {
-      transform: rotate(360deg);
-    }
-  }
-
   @media (prefers-reduced-motion: reduce) {
     .download {
       transition: opacity 100ms ease;

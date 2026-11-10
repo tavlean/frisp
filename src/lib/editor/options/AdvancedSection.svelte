@@ -3,7 +3,7 @@
   // in and out. Replaces the identical scaffold that was duplicated in the
   // AVIF / WebP / MozJPEG panels (each with its own `showAdvanced`).
   import type { Snippet } from 'svelte';
-  import { slide } from 'svelte/transition';
+  import { reveal } from '../motion';
   import Revealer from './Revealer.svelte';
 
   let { children }: { children: Snippet } = $props();
@@ -16,7 +16,7 @@
   Advanced
 </label>
 {#if open}
-  <div transition:slide={{ duration: 300 }}>
+  <div transition:reveal>
     {@render children()}
   </div>
 {/if}

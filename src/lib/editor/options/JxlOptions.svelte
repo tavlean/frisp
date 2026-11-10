@@ -3,7 +3,7 @@
   // The UI form-state is derived from the encoder options once, then written back
   // via apply() on every change (mirrors the Preact getDerivedStateFromProps).
   import { untrack } from 'svelte';
-  import { slide } from 'svelte/transition';
+  import { reveal } from '../motion';
   import type { EncodeOptions } from 'features/encoders/jxl/shared/meta';
   import Range from './Range.svelte';
   import Checkbox from './Checkbox.svelte';
@@ -72,12 +72,9 @@
     <label class="option-toggle">
       Lossless transcode
       <Checkbox
-        checked={jpegTranscode}
+        bind:checked={jpegTranscode}
         disabled={transcodeBlocked}
-        onchange={(value) => {
-          jpegTranscode = value;
-          apply();
-        }}
+        onchange={apply}
       />
     </label>
     <p class="option-hint">
@@ -94,36 +91,18 @@
   {#if !transcoding}
     <label class="option-toggle">
       Lossless
-      <Checkbox
-        checked={lossless}
-        onchange={(value) => {
-          lossless = value;
-          apply();
-        }}
-      />
+      <Checkbox bind:checked={lossless} onchange={apply} />
     </label>
 
     {#if lossless}
-      <label class="option-toggle" transition:slide={{ duration: 300 }}>
+      <label class="option-toggle" transition:reveal>
         Slight loss
-        <Checkbox
-          checked={slightLoss}
-          onchange={(value) => {
-            slightLoss = value;
-            apply();
-          }}
-        />
+        <Checkbox bind:checked={slightLoss} onchange={apply} />
       </label>
     {:else}
-      <div class="option-one-cell" transition:slide={{ duration: 300 }}>
-        <Range
-          min={0}
-          max={99}
-          value={quality}
-          oninput={(v) => {
-            quality = v;
-            apply();
-          }}>Quality:</Range
+      <div class="option-one-cell" transition:reveal>
+        <Range min={0} max={99} bind:value={quality} oninput={apply}
+          >Quality:</Range
         >
       </div>
       {#if autoQuality}
@@ -132,15 +111,7 @@
     {/if}
 
     <div class="option-one-cell">
-      <Range
-        min={1}
-        max={9}
-        value={effort}
-        oninput={(v) => {
-          effort = v;
-          apply();
-        }}>Effort:</Range
-      >
+      <Range min={1} max={9} bind:value={effort} oninput={apply}>Effort:</Range>
     </div>
 
     <AdvancedSection>
@@ -158,36 +129,21 @@
         </label>
         <label class="option-toggle">
           Auto edge filter
-          <Checkbox
-            checked={autoEdgePreservingFilter}
-            onchange={(value) => {
-              autoEdgePreservingFilter = value;
-              apply();
-            }}
-          />
+          <Checkbox bind:checked={autoEdgePreservingFilter} onchange={apply} />
         </label>
         {#if !autoEdgePreservingFilter}
-          <div class="option-one-cell" transition:slide={{ duration: 300 }}>
+          <div class="option-one-cell" transition:reveal>
             <Range
               min={0}
               max={3}
-              value={edgePreservingFilter}
-              oninput={(v) => {
-                edgePreservingFilter = v;
-                apply();
-              }}>Edge preserving filter:</Range
+              bind:value={edgePreservingFilter}
+              oninput={apply}>Edge preserving filter:</Range
             >
           </div>
         {/if}
         <div class="option-one-cell">
-          <Range
-            min={0}
-            max={4}
-            value={decodingSpeedTier}
-            oninput={(v) => {
-              decodingSpeedTier = v;
-              apply();
-            }}>Optimize for decoding speed (worse compression):</Range
+          <Range min={0} max={4} bind:value={decodingSpeedTier} oninput={apply}
+            >Optimize for decoding speed (worse compression):</Range
           >
         </div>
         <div class="option-one-cell">
@@ -195,23 +151,14 @@
             min={0}
             max={50000}
             step={100}
-            value={photonNoiseIso}
-            oninput={(v) => {
-              photonNoiseIso = v;
-              apply();
-            }}>Noise equivalent to ISO:</Range
+            bind:value={photonNoiseIso}
+            oninput={apply}>Noise equivalent to ISO:</Range
           >
         </div>
       {/if}
       <label class="option-toggle">
         Progressive rendering
-        <Checkbox
-          checked={progressive}
-          onchange={(value) => {
-            progressive = value;
-            apply();
-          }}
-        />
+        <Checkbox bind:checked={progressive} onchange={apply} />
       </label>
     </AdvancedSection>
   {/if}
