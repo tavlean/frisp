@@ -11,22 +11,15 @@
      bulk font comparison, replacing Outfit) — woff2 files in
      static/fonts/, served from the app origin so SvelteKit's service worker
      auto-precaches them via `files` (offline-safe, no network font fetch,
-     nothing leaves the device). The italic face is loaded because the intro
-     headline genuinely uses <em>; absolute `/fonts/` URLs are correct because
-     no base path is configured. */
+     nothing leaves the device). Only the upright face ships: nothing in the
+     app sets italic text. The absolute `/fonts/` URL is correct because no
+     base path is configured, and src/app.html preloads this exact URL. */
   @font-face {
     font-family: 'Satoshi';
     font-style: normal;
     font-weight: 300 900;
     font-display: swap;
     src: url(/fonts/Satoshi-Variable.woff2) format('woff2');
-  }
-  @font-face {
-    font-family: 'Satoshi';
-    font-style: italic;
-    font-weight: 300 900;
-    font-display: swap;
-    src: url(/fonts/Satoshi-VariableItalic.woff2) format('woff2');
   }
 
   /* Root font-size = 12px, matching Squoosh's `font: 12px/1.3` base

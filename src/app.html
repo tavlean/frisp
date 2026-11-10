@@ -17,6 +17,17 @@
          service worker satisfies the installability criteria). Icons are
          regenerated with `npm run pwa-icons` after any brand change. -->
     <link rel="manifest" href="%sveltekit.assets%/manifest.webmanifest" />
+    <!-- Starts the font download before the CSS that names it is parsed. The
+         path is literal, not %sveltekit.assets% (which renders relative), so
+         it matches the @font-face URL in src/routes/+layout.svelte exactly;
+         any mismatch, or a missing crossorigin, downloads the font twice. -->
+    <link
+      rel="preload"
+      href="/fonts/Satoshi-Variable.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
     <!-- iOS standalone extras. Modern iOS reads the manifest (display,
          short_name), so these cover two Safari-only gaps: older iOS needs the
          capable/title pair to go standalone under the right name, and the
