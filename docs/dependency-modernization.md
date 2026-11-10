@@ -22,7 +22,12 @@ and no longer describe this branch.
 ## Policy
 
 - Use `npm run check` after dependency changes.
-- Use `npm run audit` after lockfile changes.
+- Use `npm run audit` after lockfile changes. It runs
+  `scripts/audit-deps.mjs`: `npm audit`, failing on every advisory except the
+  ones accepted in that file, each with its reason and date. It also fails
+  when an accepted advisory is no longer reported, so the list cannot go
+  stale. Accepted as of 2026-11-10: one, `GHSA-gcqx-w48m-w2h4` (deepmerge, no
+  patched release, build-time only).
 - Do not run `npm audit fix --force` blindly.
 - Do not change codec package lockfiles unless actively rebuilding that codec.
 - Keep build/dependency changes separate from product feature work.
