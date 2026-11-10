@@ -91,15 +91,20 @@ this doc holds the cross-cutting ones that no single file owns.
 - **`$lib/svg/optimize` must only ever be dynamic-imported.** A static import
   pulls SVGO into the main bundle. An audit tripwire asserts it stays
   worker-side.
-- **SvelteKit's service-worker `build` list omits the worker chunks Vite emits
-  for `new Worker(new URL(...))`** (codec worker, SVG optimizer worker, OxiPNG
-  thread helper). The codec WASM was precached but no worker could load it, so a
-  first offline encode of any image failed until an online encode had fetched the
-  worker, and an old SVG-worker exclusion keyed on `build` never matched
+- **SvelteKit's service-worker file list does not reliably cover the worker
+  chunks Vite emits for `new Worker(new URL(...))`** (codec worker, SVG
+  optimizer worker, OxiPNG thread helper). When this was found, none were
+  listed: the codec WASM was precached but no worker could load it, so a first
+  offline encode of any image failed until an online encode had fetched the
+  worker, and an old SVG-worker exclusion keyed on the list never matched
   anything. Fixed 2026-11-04: the `app-worker-precache-manifest` plugin in
   `vite.config.ts` writes `_app/worker-precache.json`, the service worker
   precaches it at install, and `audit:static-output` fails if the list and the
-  emitted workers disagree. Chunk names are hash-only, so anything that matches
+  emitted workers disagree. With SvelteKit 3.1.1 and Vite 8.3.7 the two worker
+  entry chunks do appear in `immutable`, but the thread helper, a chunk loaded
+  from inside a worker, still does not. Keep the plugin: what the list holds
+  depends on the Vite manifest shape, and a gap fails silently. Chunk names
+  are hash-only, so anything that matches
   a worker must key on the stable `workers/<name>-` path segment.
 - **Changing a codec default does not reach existing users.** `app:settings:v3`
   stores each side's full options object, so a side autosaved under the old

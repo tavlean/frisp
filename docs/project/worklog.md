@@ -4,6 +4,32 @@ Short session-by-session build log: what changed, why, and the gotchas a future
 session must know. Newest first. (Live project state stays in
 [the project brief](brief.md); this is the narrative trail.)
 
+## 2026-11-10 (Fable, driver) - Svelte and SvelteKit docs review
+
+- Report: [reports/2026-11-10-svelte-sveltekit-docs-review.md](reports/2026-11-10-svelte-sveltekit-docs-review.md).
+  Review only; nothing in it is implemented yet.
+- How: 11 Opus readers took the Svelte and SvelteKit docs (150 sections) through
+  the Svelte MCP server and compared them with the code; 10 Opus checkers tried
+  to refute their 74 findings; the driver verified the main ones against the
+  code, the build output and the Svelte runtime source.
+- Found on the way: nested unknown URLs boot a blank page on the host
+  (`index.html` is the fallback and uses relative paths); the `slide` prop on
+  option rows and the snackbar's first fly-in never animate; Svelte
+  transitions ignore reduced motion; a failed cache write fails the request in
+  the service worker; `/diagnostics` is stubbed in production but still
+  prerendered and precached; the italic font is precached and unused.
+- Verdict on experimental features: none worth enabling now. Async Svelte
+  holds UI updates until awaits resolve and may change outside major
+  releases; remote functions and forked preloads need a server or routes
+  Frisp does not have.
+- Doc corrections made here: `version.pollInterval: 0` stops only the hourly
+  timer (SvelteKit still fetches `_app/version.json` on tab focus); the
+  service-worker file list now includes the two worker entry chunks, and only
+  the OxiPNG thread helper still needs the precache plugin.
+- Gotcha for agents: a local `transition:` inside a component's own `{#if}`
+  never plays when the parent creates the component. Check a transition in
+  the browser at the element it is on, not at a neighbor.
+
 ## 2026-11-10 (Opus, executor) - Dependency audit: npm audit fix, Vite 8.3.7, SvelteKit 3
 
 - `b6bf58ab`: `npm audit fix` (devalue, source-map-js, svgo 4.1.0, vitest

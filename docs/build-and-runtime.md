@@ -30,8 +30,10 @@ Vite as a static SPA. The retired Preact/Rollup app is preserved only on the
 - `src/routes/+layout.ts` exports `ssr = false` and `prerender = true`.
 - SvelteKit 3: there is no `svelte.config.js`. The config is passed to the
   `sveltekit()` plugin in `vite.config.ts`: `@sveltejs/adapter-static` with
-  `fallback: '200.html'`, and `version.pollInterval: 0` so SvelteKit does not
-  poll `_app/version.json` (updates arrive through the service worker).
+  `fallback: '200.html'`, and `version.pollInterval: 0`, which turns off the
+  hourly poll of `_app/version.json`. SvelteKit still fetches that file each
+  time the tab regains focus or becomes visible; nothing reads the result
+  today, because updates arrive through the service worker.
 - Service-worker auto-registration is disabled so `src/lib/service-worker-registration.ts`
   can handle dev cleanup and production registration explicitly.
 - `appAliases` in `vite.config.ts` is the one alias map: `$lib`, `client`,
@@ -123,10 +125,14 @@ Behavior (variant-aware precache, 2026-06-10 — first-visit payload
   2026-11-04), so they stay runtime-cacheable only;
 - install also fetches `/_app/worker-precache.json` and precaches every worker
   chunk it lists (codec worker, SVG optimizer worker, OxiPNG thread helper).
-  SvelteKit's `build` list (`immutable` in `$app/manifest`) omits the chunks Vite emits for
-  `new Worker(new URL(...))`, so before 2026-11-04 the codec WASM was cached but
-  no worker could load it, and a first offline encode failed until an online
-  encode had fetched the worker. The `app-worker-precache-manifest` plugin in
+  SvelteKit's `immutable` list in `$app/manifest` does not reliably cover the
+  chunks Vite emits for `new Worker(new URL(...))`: a chunk loaded from inside
+  a worker (the OxiPNG thread helper) is never listed, and before 2026-11-04
+  no worker was, so the codec WASM was cached but no worker could load it, and
+  a first offline encode failed until an online encode had fetched the worker.
+  With SvelteKit 3.1.1 and Vite 8.3.7 the codec worker and the SVG optimizer
+  worker are listed, and the service worker dedupes them against this file.
+  The `app-worker-precache-manifest` plugin in
   `vite.config.ts` writes the list at build time; a missing list (dev or partial
   build) degrades to runtime caching, never a failed install;
 - the shell is everything in `build` except the codec variants and the
