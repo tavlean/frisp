@@ -69,12 +69,11 @@ fade). `ViewOptions` unified two small visual differences: the stack toolbar's
 trigger keeps its active color under hover, and the editor's trigger is a full
 pill when there is no Rotate button.
 
-Found on the way and left for later: in the bulk focus view, Escape closes the
-view-options popover and also deselects the image; `.wrangler/` is not
-gitignored; a comment in `playwright.config.ts` names a plugin by its old
-name; the gotcha that `requestAnimationFrame` never fires in headless e2e
-runs sits oddly beside `motion.spec.ts`, which relies on it in headless
-Chromium.
+Found on the way and fixed the same day: in the bulk focus view, Escape
+closed the view-options popover and also deselected the image (the popover
+now takes the key; e2e test added); `.wrangler/` was not gitignored; a comment
+in `playwright.config.ts` named a plugin by its old name; the gotcha about
+`requestAnimationFrame` now says where it really stalls.
 
 ## The short version
 

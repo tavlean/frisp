@@ -126,10 +126,13 @@ this doc holds the cross-cutting ones that no single file owns.
   job, never a side effect of a quality setting.** Worth checking whenever a
   codec is upgraded, since the only reliable detector is decoding the output and
   comparing dimensions.
-- **`requestAnimationFrame` never fires in a non-compositing context** such as a
-  headless e2e run or a background tab. Never use it to schedule state work; use
-  a latest-wins drain loop with `setTimeout` yields. This was hit live while
-  verifying the grain scrub preview.
+- **`requestAnimationFrame` does not fire where the page is not being
+  composited**, such as a background tab or a hidden preview pane. Never use it
+  to schedule state work; use a latest-wins drain loop with `setTimeout`
+  yields. This was hit live while verifying the grain scrub preview. Playwright's
+  headless Chromium does run it for the page under test
+  (`tests/e2e/motion.spec.ts` relies on that), so a passing e2e run does not
+  prove a hidden tab behaves.
 - **`pinch-zoom` transforms every child** via a `pinch-zoom > *` rule, not just
   the first. Overlays that must not be pinched opt out with
   `data-pinch-overlay`.

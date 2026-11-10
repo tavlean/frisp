@@ -131,9 +131,9 @@ Shipped since then, newest first:
   itself; the editor's shallow-route entry goes through
   `src/lib/editor/editor-route.svelte.ts` because shallow routing is now async.
   `npm audit` still reports 4 low findings, all one advisory in `deepmerge`
-  (GHSA-gcqx-w48m-w2h4) with no patched release, so the CI audit job at
-  `--audit-level=low` stays red until upstream ships a fix or the policy
-  changes. Write-up in the 2026-11-10 worklog entry.
+  (GHSA-gcqx-w48m-w2h4) with no patched release. `npm run audit` accepts
+  that one advisory by name (`scripts/audit-deps.mjs`) and fails on any
+  other, so the CI audit job is green and still meaningful.
 
 - **Auto quality (2026-11-04, review change D).** An Auto select under
   the Quality slider of WebP, AVIF, JPEG XL, and JPEG (Visually lossless 90,

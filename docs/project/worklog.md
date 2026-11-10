@@ -35,9 +35,11 @@ session must know. Newest first. (Live project state stays in
   pointed at a hand-made worktree; the e2e suite needs a distinct
   `PLAYWRIGHT_PORT` per checkout or `reuseExistingServer` tests the wrong
   build.
-- Left for later: Escape in the bulk focus view closes the view-options
-  popover and also deselects the image; `.wrangler/` is not gitignored; the
-  CI audit job is still red on the unfixable `deepmerge` advisory.
+- Follow-up fixes the same day: an open popover now takes Escape for itself
+  (it used to close and also deselect the image in the bulk view; new e2e
+  test); `npm run audit` runs `scripts/audit-deps.mjs`, which accepts the one
+  unfixable `deepmerge` advisory by name and fails on anything else, so the
+  CI audit job is green again; `.wrangler/` is gitignored.
 
 ## 2026-11-10 (Fable, driver) - Svelte and SvelteKit docs review
 
