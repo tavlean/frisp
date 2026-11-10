@@ -1,6 +1,6 @@
 # Design system
 
-Last updated: 2026-07-25.
+Last updated: 2026-11-10.
 
 > **PLACEHOLDER.** This doc records the conventions that already exist in the
 > code; it is not yet a designed system. The production editor and the three lab
@@ -35,8 +35,8 @@ those aliases is a real refactor, not a rename.
 - **Theming uses CSS `light-dark()`**, not a class-swapped theme or a JS
   variable. A surface that needs both modes declares both values in one place.
 - **Squircles use the CSS `corner-shape` property**, paired with a radius.
-  `svelte-check` does not know `corner-shape` and warns on every use; those
-  warnings are expected noise, so only a change in the ERROR count matters.
+  `svelte-check` reports 0 warnings and `npm run typecheck` fails on any
+  warning (since 2026-11-10), so a new warning is a real failure.
 - **Icons are Nucleo**, exported as `currentColor` SVGs. The lab set is 27
   pure-stroke 18px glyphs in `src/lib/lab/icons/` behind `LabIcon.svelte`. The
   exporter strips duotone accent layers, which is why a glyph whose meaning lived
@@ -68,8 +68,12 @@ force above).
   lab skins wins ([lab.md](lab.md) has the registry and the recommendation).
 - One token vocabulary across the editor, the intro, and the winning skin,
   replacing the per-skin sets and retiring the legacy pink/blue aliases.
-- A documented type scale. Satoshi is the typeface (self-hosted variable woff2,
-  weights 300 to 900, plus an italic face, in `static/fonts/`) but the scale it is
-  used at has never been written down.
-- Motion: there is no shared duration or easing vocabulary yet.
+- A documented type scale. Satoshi is the typeface (one self-hosted upright
+  variable woff2, weights 300 to 900, in `static/fonts/`, preloaded from
+  `src/app.html`; the italic face was dropped on 2026-11-10 because nothing sets
+  italic text) but the scale it is used at has never been written down.
+- Motion: there is no shared easing vocabulary yet. Since 2026-11-10 the two
+  shared transitions live in `src/lib/editor/motion.ts` (`reveal`, a 300 ms
+  height slide, and `toast`, the snackbar's 200 ms rise). Under reduced motion
+  the reveal is instant and the toast keeps only its fade.
 - Whether light mode ships for the production editor, which today is dark only.

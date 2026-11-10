@@ -14,10 +14,27 @@ this doc holds the cross-cutting ones that no single file owns.
   chunks. Only the build-time `app-strip-dev-only-routes` plugin (or a
   `dev`-gated dynamic import that dead-code elimination can drop) removes them.
   `npm run audit:static-output` is the tripwire; keep it passing.
-- **`vitest.config.ts` does not inherit `vite.config.ts` aliases.** It imports
-  the exported `appAliases`. If the two drift, tests silently resolve nothing and
-  whole files stop running. This already happened once and hid a real bug for
-  weeks (10 tests dropped, an accidental `frisp-` prefix on bulk ZIP names).
+- **`vitest.config.ts` does not inherit `vite.config.ts`.** A standalone
+  Vitest config takes full precedence, so anything a test's imports need must
+  be set there too. Import aliases were the trap once: the two configs
+  drifted, tests silently resolved nothing, and whole files stopped running
+  (10 tests dropped, and an accidental `frisp-` prefix on bulk ZIP names went
+  unseen for weeks). Since 2026-11-10 imports resolve through `package.json`
+  subpath imports, which Vitest reads on its own, so that drift cannot recur.
+  It still needs its own Svelte plugin (`svelte({ configFile: false })`) for
+  tests to import `.svelte.ts` rune modules. Under Vitest's node environment
+  those compile as the server build, so their effects never run: a unit test
+  can exercise a rune class's methods and state, not its `$effect`s.
+- **Subpath imports do no lookup.** Imports go through the `imports` field of
+  `package.json` (`#lib/*`, `#client/*`, `#features/*`, `#shared/*`, `#sw/*`,
+  `#worker-shared/*`, `#codecs/*`, `#app-generated/*`). Write the real
+  extension (`#lib/compress.ts`, `#lib/bulk/store.svelte.ts`), name `index.ts`
+  for a directory, and name the entry file of a `codecs/*/pkg` directory: a
+  directory's own `package.json` is not read. One more reader of those
+  specifiers is easy to miss: `scripts/audit-static-output.mjs` parses the
+  import text of `src/shared/codec-assets/manifest.ts` and compares it with
+  the manifest's record paths, so changing how that file imports breaks
+  `audit:static-output` while the build and tests stay green.
 - **`PLAYWRIGHT_SKIP_BUILD=1` serves whatever is already in `build/`.** Set it
   only immediately after a `check` or `build`; a stale `build/` tests old code
   and passes.
@@ -40,6 +57,12 @@ this doc holds the cross-cutting ones that no single file owns.
 - **Markdown is never auto-formatted.** The Prettier globs and the pre-commit
   hook glob both exclude `*.md` on purpose, and `proseWrap: always` is banned.
   Adding Markdown back reflows every hand-wrapped doc in one commit.
+- **`{@const}` stays until prettier-plugin-svelte can print its
+  replacement.** The Svelte docs call `{@const}` legacy syntax, but the
+  replacement, declaration tags (`{const x = $derived(...)}`, Svelte 5.56),
+  cannot be used yet: prettier-plugin-svelte 4.0.1 cannot print it. The four
+  `{@const}` tags in `src/lib/bulk/StackStage.svelte` stay until the plugin
+  supports the new tag.
 
 - **In a minified build, identifier names do not prove bundle membership.**
   The main page chunk keeps the string `optimizeSvgSide` at the dynamic-import
@@ -62,14 +85,36 @@ this doc holds the cross-cutting ones that no single file owns.
   upgrade.
 - **Never read `page.state.editor` directly to decide whether the editor is
   open; ask `isEditorOpen()` in `src/lib/editor/editor-route.svelte.ts`.**
-  SvelteKit 3 made `pushState` async: it resolves the route first and writes
-  `page.state` a few microtasks later. In that gap the route-sync effects in
+  `pushEditorRoute()` pushes the entry with
+  `goto('', { state: { editor: true }, shallow: true })` (since 2026-11-10;
+  SvelteKit 3 deprecated `pushState`). Like SvelteKit 3's `pushState`, that
+  `goto` is async: it resolves the route first and writes `page.state` a few
+  microtasks later. In that gap the route-sync effects in
   `src/routes/+page.svelte` saw an image with no editor state, took it for
   Back, and closed the image the moment it opened (and tore down a restored
   batch). Check, unit tests and the build all stayed green; only e2e caught
-  it. `pushEditorRoute()` counts a push in flight as open. The same applies
-  to `goto(..., { shallow: true })`, which `sv migrate sveltekit-3` offers as
-  the replacement for the deprecated `pushState`.
+  it. `pushEditorRoute()` counts a push in flight as open.
+- **A local `transition:` inside a component's own `{#if}` or `{#key}` never
+  plays when a parent block creates the component.** Svelte plays a local
+  transition only when the block that owns the element already existed, so
+  ToggleRow's and OptionRow's `slide` prop never animated, and nothing failed.
+  Put the transition on one element owned by the caller's block (as those two
+  rows now do), or make it `|global` (as the snackbar does). New transitions
+  go through `src/lib/editor/motion.ts` so they honor reduced motion: Svelte
+  runs transitions in JS, which the CSS `prefers-reduced-motion` rules do not
+  reach. `tests/e2e/motion.spec.ts` pins the reveal and the snackbar.
+- **A `<svelte:boundary>` never sees the thrown Error.** SvelteKit 3 passes
+  every error the boundary catches through `handleError` first, so `failed`
+  and `onerror` receive an `App.Error`, with the message "Internal Error"
+  unless `src/hooks.client.ts` returns the real one. That hook keeps the
+  message and logs the error; defining it turns off SvelteKit's own logging,
+  so keep the `console.error` there.
+- **A scoped `.bar > *` rule does not match the root element of a child
+  component.** Output's `.controls > *` and FocusView's `.stack-controls > *`
+  turn pointer events back on for their own children only. A component
+  extracted from such a bar must set what it needs itself, as
+  `src/lib/editor/output/ViewOptions.svelte` sets its own `pointer-events`;
+  otherwise its buttons silently ignore clicks.
 
 - **A codec can silently change the output's resolution.** libjxl downsamples 2x
   on its own once the requested butteraugli distance crosses a threshold, and
@@ -88,7 +133,7 @@ this doc holds the cross-cutting ones that no single file owns.
 - **`pinch-zoom` transforms every child** via a `pinch-zoom > *` rule, not just
   the first. Overlays that must not be pinched opt out with
   `data-pinch-overlay`.
-- **`$lib/svg/optimize` must only ever be dynamic-imported.** A static import
+- **`src/lib/svg/optimize.ts` must only ever be dynamic-imported.** A static import
   pulls SVGO into the main bundle. An audit tripwire asserts it stays
   worker-side.
 - **SvelteKit's service-worker file list does not reliably cover the worker
@@ -193,6 +238,12 @@ this doc holds the cross-cutting ones that no single file owns.
   never produces, so `AUTO_QUALITY_BOUNDS` must stop short of every such
   coupling, the same way it stops short of a lossless switch at 100. Check
   the panel's `apply()` before adding a codec's bounds.
+- **To find what triggers a redundant encode, put `$inspect.trace('label')`
+  as the first statement of the method body**, not in the one-line effect
+  arrow that calls it. In `src/lib/editor/editor-session.svelte.ts` that means
+  inside `encodeSide`, `updateGrainPreview` or `watchHistory`: the arrow
+  `$effect(() => this.encodeSide(index))` reads nothing itself, so a trace
+  there reports nothing useful.
 - **The `photo-large` bench fixture is a single cold run.** Treat it as a
   regression signal, never as a timing measurement.
 - **The SVG auto gate deliberately upscales small sources.** Precision loss that
@@ -215,6 +266,17 @@ this doc holds the cross-cutting ones that no single file owns.
 - **Worktree agents need `ln -s <main>/node_modules` and a widened
   `server.fs.allow`** to run the dev server, because the symlink resolves outside
   the default allow-list.
+- **A git worktree nested inside the main checkout depends on the main
+  checkout's install.** The build looks up a tsconfig for
+  `src/service-worker.ts`, which the root `tsconfig.json` excludes, so the
+  lookup walks up past the worktree into the parent checkout's `tsconfig.json`.
+  If `node_modules/$app` is missing there, the build fails with "Tsconfig not
+  found $app/tsconfig". Run `npm ci` and `npx svelte-kit sync` in the main
+  checkout.
+- **In a fresh checkout or worktree, run `npm run sync` before `vite dev`.**
+  Without the generated codec wrappers the page loads, but every encode hangs
+  with no console error. `npm run build` and `npm run typecheck` run `sync`
+  themselves; `npm run dev` does not.
 - **`git add <dir>` while a parallel agent is editing that directory stages its
   half-finished work under your commit message.** `git add src` takes whatever is
   on disk at that instant, not what you reviewed a moment earlier, so a diff you
@@ -246,15 +308,28 @@ this doc holds the cross-cutting ones that no single file owns.
   "offline" test passes even when offline is broken. Also abort every request
   with `context.route('**/*', (r) => r.abort('internetdisconnected'))`, as
   `tests/e2e/export-contract.spec.ts` does.
+- **A Playwright check made after an action can miss a 200 to 300 ms
+  transition.** By the time Playwright's own round trips return, the
+  animation may be over and the test reads "no animation". Start watching for
+  the element in the page before the action that inserts it, as
+  `animationsOnArrival` in `tests/e2e/motion.spec.ts` does.
 - **In zsh, an unquoted `grep --include=*.svelte` matches nothing.** zsh expands
   the glob itself or errors with "no matches found", so the search returns
   nothing and looks like proof a symbol is unused. Quote the glob:
   `--include='*.svelte'`.
 - **Cloudflare's Browser Cache TTL must stay on "Respect Existing Headers".**
   Anything else overrides the app's own cache headers and serves stale assets.
-- **Workers static assets serve the SPA fallback via `not_found_handling`**
-  returning `/index.html`, so the adapter's `200.html` ships unused. `_headers`
+- **Unknown URLs need the `404.html` fallback, not `index.html`.**
+  `index.html` uses relative asset paths, so served for a nested unknown URL
+  (`/a/b`) it loads a blank page, and serving it for everything answers 200.
+  Since 2026-11-10 the adapter emits `404.html` (absolute paths) and
+  `wrangler.jsonc` sets `not_found_handling: "404-page"`; details in
+  [build-and-runtime.md](build-and-runtime.md#sveltekit-config). `_headers`
   and `_redirects` work as they did on Pages.
+- **Local `wrangler dev` needs a compatibility date override.** The installed
+  wrangler 4.98's workerd rejects this project's `compatibility_date`, so pass
+  `--compatibility-date 2026-06-10` on the command line. It also writes a
+  `.wrangler/` folder into the repo, which is not gitignored; do not commit it.
 - **`page.setInputFiles` cannot mix file paths and buffers in one call.** It
   throws "File paths cannot be mixed with buffers". For a batch that needs an
   inline buffer (an SVG string, say), read the path fixtures with

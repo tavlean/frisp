@@ -24,7 +24,10 @@ Open `http://127.0.0.1:5189` in a fresh browser context when possible.
 - Logo renders on the intro screen.
 - File picker is available.
 - Drag/drop overlay appears when dragging an image.
-- `/diagnostics` loads.
+- `/diagnostics` loads under `npm run dev` (it is dev-only; a production build
+  answers 404 there).
+- An unknown nested URL (for example `/a/b`) shows the not-found page with a
+  way home, not a blank page.
 - Browser console has no unexpected errors.
 
 ## Single-Image Workflow

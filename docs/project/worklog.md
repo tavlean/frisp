@@ -4,6 +4,41 @@ Short session-by-session build log: what changed, why, and the gotchas a future
 session must know. Newest first. (Live project state stays in
 [the project brief](brief.md); this is the narrative trail.)
 
+## 2026-11-10 (Fable driver, Opus executors) - Docs review executed
+
+- Everything the review recommended is done; the per-item outcomes and
+  commits are in the Execution table of
+  [reports/2026-11-10-svelte-sveltekit-docs-review.md](reports/2026-11-10-svelte-sveltekit-docs-review.md).
+  Commits `3712aaa6` to `43d37ad6`, plus this docs commit.
+- How: five Opus build agents in parallel, each in its own worktree on
+  disjoint files (hosting and service worker; motion and option panels; bulk
+  and output components; page and session; test tooling), then two sweeps one
+  after the other (`class:` directives; import aliases to `package.json`
+  subpath imports). The driver reviewed and committed every diff.
+- Gates on the final tree: `npm run check` exit 0 (0 errors, 0 warnings; the
+  tests are now type-checked too), 258 unit tests, full e2e in Chromium and
+  WebKit 143 passed and 7 skipped (the 4 usual plus the 3 Chromium-only
+  motion tests on WebKit).
+- Not verified: the 404 status on a real Cloudflare deploy (`wrangler dev`
+  shows it locally), and the faster update notice against two real deploys.
+  Check both on the next deploy.
+- Gotchas (all in `docs/gotchas.md`): subpath imports do no extension or
+  index lookup, and the static audit reads the import text of the codec
+  asset manifest; a `<svelte:boundary>` receives SvelteKit's `App.Error`, not
+  the thrown Error; a scoped `.bar > *` rule skips a child component's root;
+  a worktree nested in the main checkout depends on the main checkout's
+  install.
+- Process gotchas for agent runs: the worktree isolation tool cuts from the
+  last PUSHED commit, so agents on unpushed work must first fast-forward
+  their own worktree; a guard hook stops an agent from editing a worktree
+  other than the one its session started in, so a stopped agent cannot be
+  pointed at a hand-made worktree; the e2e suite needs a distinct
+  `PLAYWRIGHT_PORT` per checkout or `reuseExistingServer` tests the wrong
+  build.
+- Left for later: Escape in the bulk focus view closes the view-options
+  popover and also deselects the image; `.wrangler/` is not gitignored; the
+  CI audit job is still red on the unfixable `deepmerge` advisory.
+
 ## 2026-11-10 (Fable, driver) - Svelte and SvelteKit docs review
 
 - Report: [reports/2026-11-10-svelte-sveltekit-docs-review.md](reports/2026-11-10-svelte-sveltekit-docs-review.md).

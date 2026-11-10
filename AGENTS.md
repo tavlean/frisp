@@ -23,4 +23,6 @@ Match the surrounding code by default. When the surroundings are mixed or absent
 - No em dashes in anything you write; rewrite the sentence to be simpler instead.
 - Note your gotcha discoveries in your final report so the worklog can capture them.
 
-Svelte work: follow `~/.agents/svelte-mcp.md` (how to use the Svelte MCP tools; mandatory autofixer loop).
+## Svelte work
+
+SvelteKit 3 and several Svelte 5 features are newer than most training data, so read the docs before relying on memory. With the Svelte MCP server: `list-sections` to find the pages, `get-documentation` to read them, and `svelte-autofixer` on every `.svelte` or `.svelte.ts` file you change, repeated until it reports nothing that applies. Without the MCP server the same tools run from the CLI: `npx -y @sveltejs/mcp svelte-autofixer <file> --svelte-version <the svelte version in package.json>`. The maintainer's own notes are in `~/.agents/svelte-mcp.md`.

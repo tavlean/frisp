@@ -1,6 +1,6 @@
 # Build And Runtime Map
 
-Last updated: 2026-11-04.
+Last updated: 2026-11-10.
 
 The production app lives on `main` at the repo root, built with SvelteKit and
 Vite as a static SPA. The retired Preact/Rollup app is preserved only on the
@@ -17,9 +17,11 @@ Vite as a static SPA. The retired Preact/Rollup app is preserved only on the
 
 `npm run check` runs:
 
-1. `npm run typecheck` (`npm run sync`, `svelte-kit sync`, `svelte-check --tsconfig ./tsconfig.json`,
-   then `tsc -p tsconfig.service-worker.json` for the service worker, which is
-   its own TypeScript project because it needs WebWorker types)
+1. `npm run typecheck` (`npm run sync`, `svelte-kit sync`,
+   `svelte-check --tsconfig ./tsconfig.json --fail-on-warnings`, then
+   `tsc -p tsconfig.service-worker.json` for the service worker, which is its
+   own TypeScript project because it needs WebWorker types, then
+   `tsc -p tests/tsconfig.json` for the tests and the three root config files)
 2. `vite build`
 3. `npm run audit:static-output`
 
@@ -30,20 +32,31 @@ Vite as a static SPA. The retired Preact/Rollup app is preserved only on the
 - `src/routes/+layout.ts` exports `ssr = false` and `prerender = true`.
 - SvelteKit 3: there is no `svelte.config.js`. The config is passed to the
   `sveltekit()` plugin in `vite.config.ts`: `@sveltejs/adapter-static` with
-  `fallback: '200.html'`, and `version.pollInterval: 0`, which turns off the
-  hourly poll of `_app/version.json`. SvelteKit still fetches that file each
-  time the tab regains focus or becomes visible; nothing reads the result
-  today, because updates arrive through the service worker.
+  `fallback: '404.html'` as its only option, `compilerOptions.discloseVersion:
+  false`, and `version.pollInterval: 0`, which turns off the hourly poll of
+  `_app/version.json`. There is no `vitePreprocess()`. SvelteKit still fetches
+  `_app/version.json` each time the tab regains focus or becomes visible. When
+  that turns `updated.current` true, `src/routes/+page.svelte` calls
+  `checkForServiceWorkerUpdate()`, so the service worker's update prompt
+  (below) appears sooner.
+- Hosting fallback (since 2026-11-10): `wrangler.jsonc` sets
+  `not_found_handling: "404-page"`, so an unknown URL gets `404.html` with
+  status 404. That file is the adapter's fallback shell, which uses absolute
+  asset paths, so it boots at any depth and renders the root
+  `src/routes/+error.svelte` (`tests/e2e/not-found.spec.ts`). Before, the host
+  served `index.html` (relative paths) for every unknown URL: a nested unknown
+  URL loaded a blank page and every path answered 200. Verified locally with
+  `wrangler dev` on 2026-11-10; not yet observed on a real deploy.
 - Service-worker auto-registration is disabled so `src/lib/service-worker-registration.ts`
   can handle dev cleanup and production registration explicitly.
-- `appAliases` in `vite.config.ts` is the one alias map: `$lib`, `client`,
-  `features`, `shared`, `sw`, `codecs`, `worker-shared`, and `app-generated`
-  (now only patched codec wrappers). It feeds SvelteKit's `alias` option (which
-  also writes the TypeScript paths), Vite's `resolve.alias`, and
-  `vitest.config.ts`. SvelteKit 3 no longer provides `$lib` itself and marks
-  `alias` deprecated in favour of `package.json` subpath imports, so every
-  build prints `config_option_deprecated_alias`; moving to `#lib`-style
-  imports is a separate follow-up.
+- Imports resolve through the `imports` field of `package.json` (Node subpath
+  imports): `#lib/*`, `#client/*`, `#features/*`, `#shared/*`, `#sw/*`,
+  `#worker-shared/*`, `#codecs/*`, and `#app-generated/*` (now only patched
+  codec wrappers). Node, Vite, TypeScript and Vitest all read that field, so
+  there is no alias map, no `resolve.alias` and no TypeScript `paths`.
+  Specifiers carry the real file extension, because subpath imports do no
+  extension or index lookup. SvelteKit 3's deprecated `alias` option and the
+  old `$lib` are not used (moved 2026-11-10).
 - `tsconfig.json` extends `$app/tsconfig` (generated into `node_modules/$app/`),
   not `.svelte-kit/tsconfig.json`.
 - `src/service-worker.ts` reads its lists from `$app/manifest`, `$app/env` and
@@ -74,7 +87,7 @@ Former generated runtime modules are committed source now:
 `npm run sync` now runs `scripts/patch-codec-wrappers.mjs` only. It writes
 patched Emscripten/wasm-bindgen wrapper copies under
 `.svelte-kit/app-generated/codecs/**` so Vite does not emit duplicate
-worker-local WASM assets. The `app-generated` alias points at that wrapper tree.
+worker-local WASM assets. The `#app-generated/*` import points at that wrapper tree.
 
 The patched wrapper files are ignored and can be deleted; `npm run sync`
 recreates them. The committed runtime modules above are ordinary source files.
@@ -143,12 +156,16 @@ Behavior (variant-aware precache, 2026-06-10 — first-visit payload
   installs the app). Everything excluded here stays in `assets`, so it still
   resolves cache-first on demand. `manifest.webmanifest` itself stays in the
   shell: it is a few hundred bytes and keeps the installed app's identity
-  resolvable offline;
+  resolvable offline. These hand-written file lists are typed as `AssetPath`
+  (from `$app/types`), so renaming a static file fails the typecheck;
 - activate: delete old Frisp caches and claim clients;
-- fetch: serve known assets cache-first (runtime-caching misses, so a
-  non-precached variant still ends up cached after first use — a
-  mis-detection costs one online network trip, never a broken codec),
-  otherwise network-first with cache fallback;
+- fetch: serve known assets cache-first, otherwise network-first with cache
+  fallback. A network answer is returned at once; `fetchAndCache` writes a
+  copy to the cache inside `event.waitUntil`, and only for a status 200
+  response without `no-store`. A failed write (a full quota) no longer fails
+  the request. Runtime caching means a non-precached variant still ends up
+  cached after first use, so a mis-detection costs one online network trip,
+  never a broken codec;
 - message: on `{ type: 'SKIP_WAITING' }` from the page, call `skipWaiting()`
   to promote this build past the waiting state (the update prompt, below).
 
@@ -188,8 +205,11 @@ at 4 h instead of the year-long `immutable` cache `_headers` grants them. Leave
 Pages **Build cache** (Beta) off — it caches build *outputs* between CI builds
 and can resurface stale-artifact confusion given SvelteKit's service-worker manifest generation and codec wrapper patching; it has no effect on what users are served.
 
-`version` (hence `cacheName`) defaults to SvelteKit's build timestamp, so the
-worker bytes change every build and the update check always fires.
+`version` (hence `cacheName`) is the 12-character commit hash when the git
+tree is clean, and SvelteKit's build timestamp otherwise (`commitVersionName()`
+in `vite.config.ts`). An identical rebuild of a clean commit therefore keeps
+the cache name, and installs do not download the precache again; any build
+with uncommitted changes still gets a new name.
 
 Known approximation: nested-worker support (the Safari 16 gap) can't be
 probed from SW scope, so such a browser precaches `_mt` builds it won't use;
@@ -214,7 +234,13 @@ build emits **no** duplicate worker chunks of its own (top-level
 app workers actually emitted, if the service worker does not read that list, or
 if a diagnostics probe worker reaches the build: `/diagnostics` and its probes
 are stripped from production by `app-strip-dev-only-routes`, like `/lab`, and
-remain available under `npm run dev`.
+remain available under `npm run dev`. Since 2026-11-10 `/diagnostics` is not
+prerendered either (`src/routes/diagnostics/+page.ts`), so nothing of it is
+precached and the path answers 404 in production. The audit also asserts that
+`404.html` exists, that the built `service-worker.js` parses as a classic
+script (SvelteKit 3 builds it as a module, but the app registers it without
+`type: 'module'`), and that the service worker precaches the prerendered root
+page.
 
 **Multithreading is enabled** (2026-06-03): the committed worker and codec-asset
 modules wire the threaded variants and real thread detection, so AVIF / JXL
@@ -240,8 +266,12 @@ prod build unaffected). Details in
 ## Tests
 
 - `npm run check` — static gate (`typecheck`, production build, static-output audit).
+- `npm run typecheck:fast` is the incremental svelte-check alone, for quick
+  loops; `npm run typecheck:tests` checks the tests project alone.
+- `npm run test:unit` is `vitest run` over `tests/unit/`. `svelte-kit sync` now
+  runs from `prepare` (on install), not from this script.
 - `npm run test:e2e` — Playwright browser regression (`tests/e2e/`): boots the
-  production preview, asserts cross-origin isolation, encodes through every
+  production preview (port 4317, or `PLAYWRIGHT_PORT`), asserts cross-origin isolation, encodes through every
   codec asserting valid output magic bytes, and tests SW offline reload and a
   first offline encode (`export-contract.spec.ts`). Needs the Chromium headless
   shell installed (`npx playwright install chromium`). The

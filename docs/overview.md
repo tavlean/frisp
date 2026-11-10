@@ -1,6 +1,6 @@
 # Frisp Project Overview
 
-Last updated: 2026-11-04.
+Last updated: 2026-11-10.
 
 Frisp is a browser-local image optimizer. Users import one image or a batch,
 it decodes and processes pixels in the browser's codec workers, and exports
@@ -10,7 +10,8 @@ path.
 ## What Runs Where
 
 - SvelteKit renders a client-only static SPA (`ssr = false`, prerendered with a
-  `200.html` fallback).
+  `404.html` fallback that the host serves, with status 404, for unknown URLs;
+  see [build-and-runtime.md](build-and-runtime.md#sveltekit-config)).
 - Svelte 5 components and `.svelte.ts` modules own editor UI, bulk UI, session
   state, history, and result caches.
 - Framework-neutral TypeScript under `src/client/lazy-app/` owns the recipe,
@@ -102,5 +103,7 @@ keeps the headless boundary honest without shipping a CLI.
 
 The production build uses SvelteKit adapter-static plus host headers for
 COOP/COEP, immutable assets, and no-cache service-worker updates. `npm run check`
-runs typecheck, build, and the static-output audit; `npm test` adds Vitest unit
-and Playwright e2e coverage.
+runs typecheck (app, service worker and tests, failing on any svelte-check
+warning), build, and the static-output audit; `npm test` adds Vitest unit and
+Playwright e2e coverage. The full command list is in
+[README.md](README.md#testing-commands).

@@ -1,6 +1,6 @@
 # SEO and link previews
 
-Last updated: 2026-07-25.
+Last updated: 2026-11-10.
 
 How Frisp presents itself to search engines and social crawlers, and why the
 mechanism is unusual. Added 2026-07-25, when the standardization pass found the
@@ -137,9 +137,10 @@ Update `og:image:alt` in `src/app.html` whenever the composition changes.
 
 ## robots.txt and sitemap.xml
 
-`static/robots.txt` allows everything except `/diagnostics`, the codec and runtime
-probe page. It is prerendered and reachable, but it is a maintenance tool whose
-numbers look alarming out of context. The prefix also covers `/diagnostics.html`.
+`static/robots.txt` allows everything and points at the sitemap. It used to
+disallow `/diagnostics`, the codec and runtime probe page; since 2026-11-10 that
+page is dev-only and not prerendered, so in production the path answers 404 and
+needs no rule.
 
 `static/sitemap.xml` has a single entry, `https://frisp.app/`, because the intro,
 the editor, and bulk mode are all states of one route rather than separate URLs.
@@ -175,7 +176,7 @@ today).
 - **The og:image is not verified against live crawlers.** Correct by
   construction and served with the right content type, but a real check needs the
   deployed origin and each platform's own debugger.
-- **`/diagnostics` shares the root's canonical and preview tags**, since every
-  prerendered page is stamped from the same `app.html`. Harmless, and arguably
-  desirable because it points crawlers at the real page, but it does mean the
-  `robots.txt` disallow is the only thing keeping it out of an index.
+- **The `404.html` fallback shares the root's canonical and preview tags**,
+  since it is stamped from the same `app.html`. Harmless: the host serves it
+  with status 404, so crawlers do not index it, and the canonical points at the
+  real page.

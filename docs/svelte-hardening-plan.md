@@ -1,6 +1,6 @@
 # Frisp Post-Migration Cleanup & Svelte Hardening Plan
 
-Last updated: 2026-07-07.
+Last updated: 2026-11-10.
 
 Read [the project brief](project/brief.md) first for live state. The SvelteKit 2 / Svelte 5
 migration is **concluded** — `main` is the production app and the retired
@@ -195,6 +195,8 @@ Highest leverage — one change at the primitives ripples through every panel.
       Left the canvas-draw/fit `$effect`s as-is (they read several reactive
       props and read cleanly already). Browser-verified wheel-zoom retarget +
       focus-on-reveal. _
+      2026-11-10: the canvas draws are attachments now (`5e8f3e39`): each
+      `<canvas>` in Output draws from its own `{@attach}`.
 - [x] Replace the `downloadAttributes` `$derived`-object spread on `<a>` with
       conditional attributes (`href={disabled ? undefined : …}`)
       ([Results.svelte](../src/lib/editor/Results.svelte)). **Done** (`780ad8af`).
@@ -216,6 +218,12 @@ Highest leverage — one change at the primitives ripples through every panel.
 > OptionRow/ToggleRow, `50e7e7b3` root `+layout.svelte`). Gate green; browser-
 > verified panel layout, format switch, branch swaps, slide reveals, and the
 > body font/background on both routes.
+>
+> 2026-11-10: the slide reveals did not in fact animate. The transition sat
+> inside each row's own `{#if}`, and a local transition never plays when a
+> parent block creates the component, so the rows appeared without motion.
+> Fixed in `c24df26c` (one element per row, `reveal` from
+> `src/lib/editor/motion.ts`); `tests/e2e/motion.spec.ts` now pins it.
 
 - [x] Extract a shared "Advanced settings" component
       (`options/AdvancedSection.svelte`, owns `open`, renders a children snippet) —
@@ -232,6 +240,8 @@ Highest leverage — one change at the primitives ripples through every panel.
       `<section class="option-one-cell options-section">` stays raw. Browser-
       verified layout, format switch, Lossless branch swap, and the slide reveals.
       _
+      2026-11-10: the `slide` prop never animated (see the Wave 6 note); it
+      does since `c24df26c`.
 - [x] Add a root `src/routes/+layout.svelte` for the shared body font stack +
       reset (was duplicated in both route pages). **Done** (`50e7e7b3`). The
       layout owns `body { margin: 0; font-family: … }`; each page keeps its own
@@ -252,12 +262,20 @@ Highest leverage — one change at the primitives ripples through every panel.
       `FocusView`, `StackStage`, and `Output`.
 - [x] Replace the manual `matchMedia('(prefers-reduced-motion: reduce)')`
       listener in `ProcessingBadge` with `new MediaQuery(...)`.
+      2026-11-10: it now reads `prefersReducedMotion` from `svelte/motion`
+      (`c24df26c`).
 - [x] Extract one shared `lightDismiss` `{@attach}` factory for the three
       popovers in `ImageInfoPanel`, `Output`, and `FocusView`, preserving
       pointerdown capture dismissal and Escape focus return.
+      2026-11-10: Output's and FocusView's popovers are now one component,
+      `src/lib/editor/output/ViewOptions.svelte` (`5e8f3e39`), so
+      `lightDismiss` has two users: it and `ImageInfoPanel`.
 - [x] Evaluate the `StackStage` `{#key}` reset idea. Skipped by design: keying
       markup would not remove both script-level guards (`lastSignature`,
       `lastSplitTopId`) without extracting more component state.
+      2026-11-10: both guards are gone without a `{#key}`. `frontOffset` and
+      `splitPct` are writable deriveds that reset themselves when the item set
+      or the top card changes (`5e8f3e39`).
 
 ## Deferred — bigger / design-dependent (do after the waves above)
 
@@ -301,6 +319,8 @@ Highest leverage — one change at the primitives ripples through every panel.
   `class` over the `class:` directive (confirmed via the Svelte MCP, 2026-06-02).
   So it's a sanctioned cleanup if a component's `class:` usage gets unwieldy —
   just not worth a sweeping pass. Skip unless it improves a specific component.
+  2026-11-10: the sweep happened after all (`964987fa`). The main app has no
+  `class:` directives left; lab code still uses them.
 
 ## Dropped after verification
 

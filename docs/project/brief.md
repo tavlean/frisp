@@ -110,12 +110,26 @@ Prettier is clean.
 
 Shipped since then, newest first:
 
+- **Svelte and SvelteKit docs review, executed (2026-11-10).** The whole
+  Svelte and SvelteKit documentation was read against the code and the
+  findings were carried out the same day. Fixed: unknown URLs now get a real
+  404 and an error page (nested ones used to load blank), option-row reveals
+  and the snackbar animate and honor reduced motion, a failed cache write no
+  longer fails a request, and `/diagnostics` is out of the production build.
+  Removed: the unused italic font, `vitePreprocess`, the SvelteKit `alias`
+  option (imports are `package.json` subpath imports, `#lib/*` and friends).
+  Added: crash panels around the editor and bulk views, type-checked tests,
+  unit tests for rune modules, `svelte-check` failing on warnings. Still to
+  confirm on the next deploy: the 404 status on Cloudflare. Report and
+  execution table:
+  [reports/2026-11-10-svelte-sveltekit-docs-review.md](reports/2026-11-10-svelte-sveltekit-docs-review.md).
+
 - **Dependency audit and SvelteKit 3 (2026-11-10).** `npm audit fix`, Vite
   8.3.7, then SvelteKit 3.1.1 with adapter-static 4, vite-plugin-svelte 7.3
   and Svelte 5.57. The SvelteKit config moved into `vite.config.ts`; the
   service worker reads `$app/manifest` and drops `_headers` from its precache
   itself; the editor's shallow-route entry goes through
-  `src/lib/editor/editor-route.svelte.ts` because `pushState` is now async.
+  `src/lib/editor/editor-route.svelte.ts` because shallow routing is now async.
   `npm audit` still reports 4 low findings, all one advisory in `deepmerge`
   (GHSA-gcqx-w48m-w2h4) with no patched release, so the CI audit job at
   `--audit-level=low` stays red until upstream ships a fix or the policy

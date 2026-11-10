@@ -1,8 +1,9 @@
 # Svelte and SvelteKit docs review, 2026-11-10
 
 Last updated: 2026-11-10.
-Status: review only. Nothing here is implemented yet, apart from the doc
-corrections listed under "Corrected in this pass".
+Status: executed 2026-11-10 (see Execution). Everything recommended in
+sections 1 to 4 is done except the three items the table marks as left. The
+sections below are the review as written, before the work.
 
 The maintainer asked for the whole Svelte and SvelteKit documentation to be
 read against the codebase after the SvelteKit 3 migration, with extra weight
@@ -22,6 +23,58 @@ verified is a reading of docs and code, not an observed behavior.
 
 Versions reviewed: Svelte 5.57.3, SvelteKit 3.1.1, Vite 8.3.7, at commit
 `b249289b`.
+
+## Execution (2026-11-10)
+
+The maintainer approved all of it. Five Opus 5.5 build agents worked in
+parallel, each in its own worktree on files the others did not touch; two
+mechanical sweeps followed, one after the other. The driver reviewed every
+diff before committing. Gates on the final tree: `npm run check` (0 errors,
+0 warnings, tests type-checked), 258 unit tests, and the full e2e suite in
+Chromium and WebKit (143 passed, 7 skipped).
+
+| Item | Outcome | Commit |
+|---|---|---|
+| 1.1 unknown URLs, 4.1 error page | `404.html` fallback, `404-page` handling, root `+error.svelte`. `wrangler dev` answers 200 for `/` and 404 for `/nope`, `/a/b/c` and `/lab`. Not yet seen on a real deploy. | `3bcccd17` |
+| 1.2, 1.3, 1.4 motion | Rows and snackbar animate; `motion.ts` honors reduced motion; `tests/e2e/motion.spec.ts` pins it. | `c24df26c` |
+| 1.5 cache writes, 1.6 `/diagnostics` | Write moved into `waitUntil`; the route is no longer prerendered or precached. | `131f9a95` |
+| 1.7 classic-script tripwire | Audit parses the built worker as a classic script. | `3bcccd17` |
+| 1.8 declaration tags | Gotcha added; the four `{@const}` tags stay until Prettier supports the new tag. | docs |
+| 2.1 italic font, 4.8 preload | Font file and rule deleted; upright face preloaded. | `3a90911d` |
+| 2.2, 2.3, 2.4 config | `vitePreprocess` and the dead adapter options removed (emitted CSS identical); `svelte-kit sync` runs from `prepare`. | `3bcccd17` |
+| 2.5 intro drop target | Intro uses `fileDrop` with `isolate` and `onActiveChange`. | `81a1f526` |
+| 2.6 spin keyframes | One global keyframe. | `c24df26c` |
+| 2.7, 3.1 aliases | Eight `package.json` subpath imports; 605 specifiers in 135 files; alias plumbing deleted; build listing identical. | `a9ec9515` |
+| 2.8 lab option files | One `lab/+layout.ts`; eleven option-only files deleted. | `bb07623f` |
+| 2.9 preload attribute | Left: harmless template default. | none |
+| 3.2 `goto` | Shallow `goto` replaces `pushState`; pending flag kept. | `4e6f0057` |
+| 3.3, 3.5, 3.7, 3.8, 3.10 | Writable deriveds, `ViewOptions`, shared platform constants, canvas attachments, custom properties in place of seven global selectors. Screenshots at 1280, 760 and 420 match, except the stack trigger's hover color while open. | `5e8f3e39`, `b86ddcb9` |
+| 3.4 scroll fades | `scroll-fades.ts` attachment for both strips. | `f09d5a50` |
+| 3.6 AVIF and JXL panels | 23 controls on `bind:` plus `oninput={apply}`. | `c24df26c` |
+| 3.9 resize seeding | Seeded from `showResult`, untracked; encode counts unchanged; new e2e test. | `b86ddcb9` |
+| 3.11 diagnostics | `{#await}` blocks. | `477b85d5` |
+| 3.12 `class:` | 60 directives in 17 main-app files converted. Lab code left as it is. | `964987fa` |
+| 4.2 boundaries | Editor and bulk views in `<svelte:boundary>` with `CrashPanel`; `hooks.client.ts` keeps the real error message. Verified by forcing a crash in a production build. | `b86ddcb9` |
+| 4.3 rune unit tests | Svelte plugin in Vitest; 12 `EditorHistory` tests. | `3712aaa6` |
+| 4.4 warnings gate | `svelte-check --fail-on-warnings`. | `3bcccd17` |
+| 4.5 update check | `updated.current` triggers `registration.update()`. Not tested against two real deploys. | `b86ddcb9` |
+| 4.6 types | `AssetPath` in the service worker; `<two-up>` and `<pinch-zoom>` typed. | `131f9a95`, `3bcccd17` |
+| 4.7 tests type-checked | `tests/tsconfig.json`; ten errors fixed in tests; part of `typecheck`. | `3712aaa6`, `19cb130b` |
+| 4.9 agent instructions | Svelte section in `AGENTS.md` with the CLI fallback. | docs |
+| 4.10 small ones | `discloseVersion: false`, commit-based `version.name`, `typecheck:fast`, `$inspect.trace` gotcha. | `3bcccd17`, docs |
+
+Changed from the plan: the two transitions in 1.4 follow one stated policy
+(movement removed; the row reveal becomes instant, the snackbar keeps its
+fade). `ViewOptions` unified two small visual differences: the stack toolbar's
+trigger keeps its active color under hover, and the editor's trigger is a full
+pill when there is no Rotate button.
+
+Found on the way and left for later: in the bulk focus view, Escape closes the
+view-options popover and also deselects the image; `.wrangler/` is not
+gitignored; a comment in `playwright.config.ts` names a plugin by its old
+name; the gotcha that `requestAnimationFrame` never fires in headless e2e
+runs sits oddly beside `motion.spec.ts`, which relies on it in headless
+Chromium.
 
 ## The short version
 

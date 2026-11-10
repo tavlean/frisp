@@ -1,6 +1,6 @@
 # Test strategy & plan
 
-**Status: in progress. Last updated: 2026-11-04.**
+**Status: in progress. Last updated: 2026-11-10.**
 
 Frisp's test strategy protects the browser-local image pipeline: import, decode,
 process, encode, preview, export, and offline reload. The current suite has three
@@ -12,7 +12,7 @@ layers: static gates, pure unit tests, and full browser e2e.
 
 | Layer | Command | What it checks | Cadence |
 |---|---|---|---|
-| Static gate | `npm run check` | wrapper patch sync + SvelteKit sync/typecheck, production build, static-output audit | every push/PR |
+| Static gate | `npm run check` | wrapper patch sync + SvelteKit sync, typecheck of the app (fails on warnings), service worker and tests, production build, static-output audit | every push/PR |
 | Unit tests | `npm run test:unit` | pure helpers and bulk-engine reducers in Vitest | every push/PR |
 | Browser e2e | `npm run test:e2e` | real production preview in Chromium + WebKit, codec bytes, threading, offline reload, bulk flows | every push/PR |
 
@@ -67,7 +67,20 @@ by hand.
   update prompt), a keep-original case in `export.test.ts` (never keep an
   original that would undo a pixel edit), and two `svg-integration.test.ts` cases
   (Auto keeps the original when no candidate passed the visual gate; a saved
-  MozJPEG side loads as jpegli at the same quality).
+  MozJPEG side loads as jpegli at the same quality). On 2026-11-10
+  `editor-history.test.ts` landed (12 cases, the first test of a `.svelte.ts`
+  rune module), bringing the unit run to 258 tests in 31 files.
+- Added 2026-11-10 in e2e: `not-found.spec.ts` (unknown URLs, nested ones
+  included, render the not-found page; `vite preview` does not model the
+  host's 404 status, so that part is checked only with `wrangler dev`),
+  `motion.spec.ts` (Chromium only: an
+  option row's reveal animates, reduced motion removes it, and the snackbar
+  animates on its first show), and a `resize.spec.ts` case pinning that
+  enabling resize starts from the image's own dimensions.
+- `tests/tsconfig.json` type-checks every test file and the three root config
+  files (`npm run typecheck:tests`, also part of `npm run typecheck`). Its
+  `include` must keep `../src/**/*.d.ts`, or the ambient app types (custom
+  elements, `App` namespace) disappear from the tests' view.
 - A benchmark harness (`benchmarks/`) with a fixture corpus and before/after
   comparison for codec changes.
 - `npm run audit:static-output`, which checks emitted codec assets,
@@ -84,19 +97,21 @@ by hand.
 3. **Single-image helper extraction.** Some editor-session parsing, snapshot,
    and object-URL lifecycle logic still lives behind Svelte state and should be
    extracted before broad unit testing.
-4. **History units.** `EditorHistory` has no unit tests; it protects undo and
-   redo. (`ResultCache` gained its tests on 2026-08-08, and the SVG lane is
-   covered by `tests/e2e/svg.spec.ts` and the export-contract suite.)
+4. ~~**History units.**~~ Done 2026-11-10: `editor-history.test.ts` covers
+   `EditorHistory`. (`ResultCache` gained its tests on 2026-08-08, and the SVG
+   lane is covered by `tests/e2e/svg.spec.ts` and the export-contract suite.)
 
 ---
 
 ## 4. Unit-test plan (Layer 1 — the new work)
 
 **Tooling:** **Vitest landed 2026-07-02** for the pure unit layer, with
-`npm run test:unit` (`vitest run`), a minimal `vitest.config.ts` scoped to
+`npm run test:unit` (`vitest run`), a `vitest.config.ts` scoped to
 `tests/unit/**/*.test.ts`, and shared `fixtures.ts` fake-`File` / job / session
-builders. jsdom is not used; the current bulk-engine tests run in the default
-Node environment with lightweight `File` fixtures. Unit tests are in CI and `npm test`; `npm run check` remains the static gate.
+builders. jsdom is not used; the tests run in the default Node environment with
+lightweight `File` fixtures. Since 2026-11-10 the config also loads the Svelte
+plugin, so tests can import `.svelte.ts` rune modules; they compile as the
+server build, where effects never run. Unit tests are in CI and `npm test`; `npm run check` remains the static gate.
 
 **Phase 2 landed 2026-07-03:** the engine unit layer added 13 cases for
 `restoreJob`, the keep-original-when-larger export option, and `relativePath`
@@ -125,8 +140,8 @@ mocking.
 | `output-filename.test.ts` | ~9 | **Implemented: 5 cases** | **Reserved Windows names** (`con`, `nul`, `com1`, `lpt9` → `-file`), illegal/control chars, path stripping, dotfiles, fallback names, and extension normalization. |
 | `urls.test.ts` | ~5 | **Implemented: 3 cases** | Dedup collect + per-job/session revoke spy counts (leak prevention). |
 | `size.test.ts` | ~4 | **Implemented: 2 cases** | `getPercentChange` shrink/growth and divide-by-zero (orig 0 → 0, not NaN). |
-| `result-cache.test.ts` | ~8 | Planned | `ResultCache` (`src/lib/result-cache.ts`, plain TS — no DOM, ideal unit target): LRU recency on `get`, byte-budget + entry-cap eviction, **pinned keys never evicted**, `clear()` revokes every URL (spy counts), no double-insert. |
-| `editor-history.test.ts` | ~8 | Planned | `EditorHistory` (`editor-history.svelte.ts` — needs the Svelte test env for runes): commit/undo/redo pointer math, signature dedup (no-op commit), redo-tail truncation on a new commit, `#limit` front-trim, `reset`/`clear`. |
+| `result-cache.test.ts` | ~8 | **Implemented: 5 cases** (2026-08-08) | `ResultCache` (`src/lib/result-cache.ts`, plain TS with no DOM, an ideal unit target): LRU recency on `get`, byte-budget + entry-cap eviction, **pinned keys never evicted**, `clear()` revokes every URL (spy counts), no double-insert. |
+| `editor-history.test.ts` | ~8 | **Implemented: 12 cases** (2026-11-10) | `EditorHistory` (`editor-history.svelte.ts`, loaded through the Svelte plugin in `vitest.config.ts`): commit/undo/redo pointer math, signature dedup (no-op commit), redo-tail truncation on a new commit, `#limit` front-trim, `reset`/`clear`. |
 | `detail/strip/summary.test.ts` | ~6 | Planned | Light composition smoke only — these are mostly selectors; **don't over-test**. |
 | `changes.test.ts` | (folded) | Planned | "change a global setting → only stale jobs requeue, overrides preserved" — the core bulk promise. Partially covered through `queue.test.ts` + `settings.test.ts`, but not yet as the dedicated change reducer. |
 

@@ -1,6 +1,6 @@
 # Frisp docs
 
-Last updated: 2026-08-11.
+Last updated: 2026-11-10.
 
 The index of every doc, and the discipline that keeps them worth reading. Start
 with [project/brief.md](project/brief.md): what Frisp is, where it stands, and
@@ -121,10 +121,16 @@ status), [worklog.md](project/worklog.md) (the session narrative, newest first),
 
 - `npm run check`: typecheck, production build, static-output audit. The gate for
   any app, build, runtime, service-worker, or tooling change.
+- `npm run typecheck:fast`: the incremental svelte-check alone, for quick loops.
+  `npm run typecheck` (part of `check`) also checks the service worker and the
+  tests, and fails on any warning.
+- `npm run typecheck:tests`: type-checks `tests/` and the three root config
+  files alone.
 - `npm run test:unit`: Vitest over `tests/unit/`. Fast; does not boot a browser.
 - `npm run test:e2e`: Playwright over `tests/e2e/`. Boots the production preview
   cross-origin-isolated and encodes through every codec. Required after any
-  codec, build, worker, or service-worker change.
+  codec, build, worker, or service-worker change. Set `PLAYWRIGHT_PORT` to run
+  a second checkout's suite at the same time.
 - `npm test`: check, unit, then e2e.
 - `npm run bench` and `npm run bench:compare`: codec size and time regression
   gate. Read the benchmark caveat in [gotchas.md](gotchas.md) before trusting a
