@@ -1,7 +1,8 @@
 // The editor's shared JS transitions. Svelte runs these on the Web Animations
 // API, so the CSS `prefers-reduced-motion` rules elsewhere cannot reach them;
 // each one reads the preference itself. Policy (same as ProcessingBadge):
-// reduced motion removes spatial movement, while in-place fades stay.
+// reduced motion removes spatial movement. The reveal is all movement, so it
+// becomes instant; the snackbar keeps its fade.
 import { prefersReducedMotion } from 'svelte/motion';
 import { fly, slide } from 'svelte/transition';
 
