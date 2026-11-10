@@ -1,6 +1,7 @@
 import { readdir, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import vm from 'node:vm';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
 const buildDir = join(root, 'build');
@@ -326,11 +327,26 @@ const physicalWasmGroups = [
 ];
 
 assert(files.includes('index.html'), 'Missing static index.html output.');
-assert(files.includes('200.html'), 'Missing static fallback output.');
+assert(files.includes('404.html'), 'Missing static fallback output.');
 assert(
   files.includes('service-worker.js'),
   'Missing SvelteKit service-worker output.',
 );
+// SvelteKit 3 builds the service worker as an ES module, but the app registers
+// it as a classic script, which works only while the bundle has no import,
+// export or import.meta. `vm.Script` parses as a classic script and throws on
+// all three.
+try {
+  new vm.Script(serviceWorker, { filename: 'build/service-worker.js' });
+} catch (error) {
+  throw new Error(
+    `build/service-worker.js no longer parses as a classic script (${error.message}). ` +
+      'The app registers it without `type: module`, so the install would fail. ' +
+      'Remove the import from the service worker, or register it with ' +
+      "`type: 'module'` in src/client/lazy-app/sw-bridge/runtime.ts after " +
+      'checking browser support for module service workers.',
+  );
+}
 assert(appEntryAsset, 'Missing emitted SvelteKit app entry asset.');
 assert(startEntryAsset, 'Missing emitted SvelteKit start entry asset.');
 assert(
@@ -619,11 +635,12 @@ assert(
   serviceWorker.includes(pageCssAsset),
   `Service-worker build manifest does not include ${pageCssAsset}.`,
 );
-// SvelteKit 3's `$app/manifest` lists prerendered pages base-relative
-// (`diagnostics`, resolved at runtime), not as `/diagnostics`.
+// SvelteKit 3's `$app/manifest` lists prerendered pages base-relative, so the
+// root page is the entry `{path:''}` (resolved at runtime), not `/`. Asset and
+// build entries always have a non-empty path. The minifier picks the quotes.
 assert(
-  /[`'"]\/?diagnostics[`'"]/.test(serviceWorker),
-  'Service worker does not pre-cache prerendered route HTML.',
+  /\{\s*path:\s*([`'"])\1\s*\}/.test(serviceWorker),
+  'Service worker does not pre-cache the prerendered root page.',
 );
 assert(
   /\.addAll\(/.test(serviceWorker),

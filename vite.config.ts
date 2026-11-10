@@ -1,10 +1,10 @@
+import { execSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import type { ServerResponse } from 'node:http';
 import { join, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import adapter from '@sveltejs/adapter-static';
 import { sveltekit } from '@sveltejs/kit/vite';
-import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 import { defineConfig, type Connect, type Plugin } from 'vite';
 
 const repoRoot = fileURLToPath(new URL('.', import.meta.url));
@@ -172,6 +172,27 @@ export const appAliases = {
   ),
 };
 
+// The service worker names its cache after SvelteKit's version, so the
+// default (a build timestamp) made every rebuild of identical code look like a
+// new release and re-download the whole precache on every install. A clean
+// tree names the build after its commit instead. A dirty or non-git tree
+// returns undefined so SvelteKit falls back to the timestamp: reusing a commit
+// name for different code would leave users on a stale cache.
+function commitVersionName(): string | undefined {
+  try {
+    const run = (command: string) =>
+      execSync(command, {
+        cwd: repoRoot,
+        encoding: 'utf8',
+        stdio: ['ignore', 'pipe', 'ignore'],
+      }).trim();
+    if (run('git status --porcelain') !== '') return undefined;
+    return run('git rev-parse --short=12 HEAD');
+  } catch {
+    return undefined;
+  }
+}
+
 export default defineConfig({
   plugins: [
     rawThreadedCodecWorkers,
@@ -180,21 +201,20 @@ export default defineConfig({
     workerPrecacheManifest,
     // SvelteKit 3 reads its config here; svelte.config.js is gone.
     sveltekit({
-      preprocess: vitePreprocess(),
       // `alias` also generates the TypeScript paths. SvelteKit 3 no longer
       // provides `$lib` itself, so it rides in the same map as the others.
       alias: appAliases,
-      adapter: adapter({
-        pages: 'build',
-        assets: 'build',
-        fallback: '200.html',
-        strict: false,
-      }),
+      // The host serves 404.html for unknown paths (wrangler.jsonc). With a
+      // fallback set, the adapter never runs its `strict` check; if the
+      // fallback is ever removed, set `strict: false`, because the lab and
+      // bench routes are not prerendered.
+      adapter: adapter({ fallback: '404.html' }),
+      compilerOptions: { discloseVersion: false },
       serviceWorker: { register: false },
       // SvelteKit 3 polls `_app/version.json` hourly by default. Updates
       // here come through the service worker's waiting-worker prompt, so
       // keep SvelteKit 2's behavior of not polling.
-      version: { pollInterval: 0 },
+      version: { name: commitVersionName(), pollInterval: 0 },
     }),
   ],
   optimizeDeps: {
