@@ -637,16 +637,12 @@
       --panel-inset: 6px;
       --fit-inset-left: 0px;
       --fit-inset-right: 0px;
-    }
-
-    :global(.editor-root .output) {
-      bottom: calc(var(--mobile-options-height) + var(--panel-inset));
-    }
-
-    :global(.editor-root .controls) {
-      bottom: calc(var(--mobile-options-height) + var(--panel-inset) + 8px);
-      padding: 0 56px;
-      box-sizing: border-box;
+      /* Lift Output's stage and bar clear of the docked bottom cards. */
+      --output-bottom: calc(var(--mobile-options-height) + var(--panel-inset));
+      --controls-bottom: calc(
+        var(--mobile-options-height) + var(--panel-inset) + 8px
+      );
+      --controls-padding-inline: 56px;
     }
 
     .back {
@@ -701,11 +697,10 @@
   @media (max-width: 420px) {
     .compress {
       --mobile-options-height: 48dvh;
-    }
-
-    :global(.editor-root .controls) {
-      bottom: calc(var(--mobile-options-height) + var(--panel-inset) + 6px);
-      padding: 0 48px;
+      --controls-bottom: calc(
+        var(--mobile-options-height) + var(--panel-inset) + 6px
+      );
+      --controls-padding-inline: 48px;
     }
   }
 </style>

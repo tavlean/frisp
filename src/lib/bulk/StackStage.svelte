@@ -69,21 +69,14 @@
 
   // Local cycle pointer: which item is currently on top. It's an OFFSET into the
   // incoming order, so ←/→ and peek-clicks rotate the fan without touching the
-  // engine selection. Reset whenever the underlying set changes (add/remove/
-  // reselect) so a stale pointer can't point past the end.
-  let frontOffset = $state(0);
-  // Plain (non-reactive) marker of the last item set we reset for. Reading it in
-  // the effect must NOT create a dependency, so it stays a bare local.
-  let lastSignature = '';
-
+  // engine selection. A writable derived keyed on the id signature (a string,
+  // so a session reassignment with the same ids does not reset it): it resets
+  // to 0 whenever the underlying set changes (add/remove/reselect) so a stale
+  // pointer can't point past the end, and ←/→ and peek-clicks override it.
   const signature = $derived(items.map((item) => item.id).join('|'));
-  // Reset the local cycle pointer whenever the underlying set changes (add /
-  // remove / reselect) so it can never point past the new end.
-  $effect(() => {
-    if (signature !== lastSignature) {
-      lastSignature = signature;
-      frontOffset = 0;
-    }
+  let frontOffset = $derived.by(() => {
+    void signature;
+    return 0;
   });
 
   // The visible order: rotate the incoming list so `frontOffset` sits first.
@@ -281,19 +274,15 @@
   // handle is focused. Lightweight — no zoom coupling, unlike the two-up.
   const SPLIT_MIN = 4;
   const SPLIT_MAX = 96;
-  let splitPct = $state(50);
-  let splitCardEl = $state<HTMLElement>();
-
-  // Reset the divider to centre whenever the top card changes, so a new anchor
-  // never inherits the previous card's drag position.
-  let lastSplitTopId = '';
-  $effect(() => {
-    const id = topItem?.id ?? '';
-    if (id !== lastSplitTopId) {
-      lastSplitTopId = id;
-      splitPct = 50;
-    }
+  // Resets to centre whenever the top card changes, so a new anchor never
+  // inherits the previous card's drag position. Keyed on the id string, not
+  // topItem: stripItems builds new objects on every session reassignment.
+  const topId = $derived(topItem?.id ?? '');
+  let splitPct = $derived.by(() => {
+    void topId;
+    return 50;
   });
+  let splitCardEl = $state<HTMLElement>();
 
   function clampSplit(value: number): number {
     return Math.min(SPLIT_MAX, Math.max(SPLIT_MIN, value));
@@ -723,9 +712,9 @@
      default 50%), the same technique the production two-up uses: each <img>
      covers the full frame, so the split reads as one continuous image cut down
      the middle wherever the divider sits. NB: the halves are `side-before` /
-     `side-after`, NOT `original` / `output` — a class literally named `output`
-     would be captured by the focus view's `:global(...) .output` rule (meant for
-     the production Output component) and collapse the half. */
+     `side-after`, NOT `original` / `output`: FocusView detects the production
+     Output with `.stage-region:has(.output)`, so a half named `output` would
+     switch off the resting stage texture. */
   .half {
     position: absolute;
     inset: 0;

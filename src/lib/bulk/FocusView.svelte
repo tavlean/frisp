@@ -1,12 +1,13 @@
 <script lang="ts">
-  import { onMount, type Snippet } from 'svelte';
+  import type { Snippet } from 'svelte';
   import { innerHeight, innerWidth } from 'svelte/reactivity/window';
+  import { isMac } from 'client/lazy-app/util';
   import Output from '$lib/editor/output/Output.svelte';
   import OptionsPanel from '$lib/editor/OptionsPanel.svelte';
   import type { EditorSession } from '$lib/editor/editor-session.svelte';
   import type { SideFormat } from '$lib/compress';
   import { prettySize } from '$lib/editor/pretty-size';
-  import { lightDismiss } from '$lib/editor/light-dismiss';
+  import ViewOptions from '$lib/editor/output/ViewOptions.svelte';
   import { bulkStore } from './store.svelte';
   import BatchInfoPanel from './BatchInfoPanel.svelte';
   import FilmStrip from './FilmStrip.svelte';
@@ -38,10 +39,8 @@
     stripHeight = 104,
   }: Props = $props();
 
-  let isMac = $state(false);
   const viewportWidth = $derived(innerWidth.current ?? 1024);
   const viewportHeight = $derived(innerHeight.current ?? 768);
-  let isSafari = $state(false);
 
   // ── Stack stage view controls ─────────────────────────────────────────────
   // The stack resting state has no production Output, so bulk owns a toolbar
@@ -56,9 +55,6 @@
   let stackZoom = $state(1);
   let stackAltBackground = $state(false);
   let stackPixelated = $state(false);
-  let stackViewOptionsOpen = $state(false);
-  let stackViewOptionsBtn = $state<HTMLButtonElement>();
-  const stackViewOptionsDirty = $derived(stackPixelated || stackAltBackground);
   const stackZoomPercent = $derived(Math.round(stackZoom * 100));
   const stackViewDirty = $derived(Math.abs(stackZoom - 1) > 1e-3);
 
@@ -68,12 +64,6 @@
   function stackResetView(): void {
     stackZoom = 1;
   }
-
-  const stackViewOptionsLightDismiss = lightDismiss({
-    isOpen: () => stackViewOptionsOpen,
-    close: () => (stackViewOptionsOpen = false),
-    focusOnEscape: () => stackViewOptionsBtn,
-  });
 
   // ── Phone layout state ────────────────────────────────────────────────────
   // Below this width the two side-by-side bottom sheets can't coexist without
@@ -90,8 +80,12 @@
     viewportWidth <= PHONE_MAX || viewportHeight <= SHORT_MAX,
   );
   // Which phone sheet (if any) is open. Only one at a time; both start closed so
-  // the stage + strip own the screen.
-  let phoneSheet = $state<'none' | 'info' | 'settings'>('none');
+  // the stage + strip own the screen. Resets whenever isPhone flips, so the
+  // desktop layout never inherits a stuck-open overlay.
+  let phoneSheet = $derived.by((): 'none' | 'info' | 'settings' => {
+    void isPhone;
+    return 'none';
+  });
 
   const selectedId = $derived(bulkStore.selectedId);
   const selectedCount = $derived(bulkStore.selectedCount);
@@ -135,24 +129,8 @@
       (format) => (format.id as string) !== 'identity',
     ),
   );
-  const undoTitle = $derived(isMac ? 'Undo (⌘Z)' : 'Undo (Ctrl+Z)');
-  const redoTitle = $derived(isMac ? 'Redo (⇧⌘Z)' : 'Redo (Ctrl+Shift+Z)');
-
-  onMount(() => {
-    isMac = /mac|iphone|ipad/i.test(
-      navigator.platform || navigator.userAgent || '',
-    );
-    // image-rendering:pixelated is a no-op in Safari, so (like the production
-    // Output) the smoothing toggle is omitted there — detect it the same way.
-    const ua = navigator.userAgent;
-    isSafari = /^((?!chrome|android).)*safari/i.test(ua);
-  });
-
-  // Leaving phone width closes any open sheet, so the desktop layout never
-  // inherits a stuck-open overlay.
-  $effect(() => {
-    if (!isPhone && phoneSheet !== 'none') phoneSheet = 'none';
-  });
+  const undoTitle = isMac ? 'Undo (⌘Z)' : 'Undo (Ctrl+Z)';
+  const redoTitle = isMac ? 'Redo (⇧⌘Z)' : 'Redo (Ctrl+Shift+Z)';
 
   function togglePhoneSheet(sheet: 'info' | 'settings'): void {
     phoneSheet = phoneSheet === sheet ? 'none' : sheet;
@@ -581,85 +559,10 @@
           </button>
         </div>
 
-        <div class="button-group" {@attach stackViewOptionsLightDismiss}>
-          <button
-            class="button first-button last-button view-options-trigger"
-            class:active={stackViewOptionsOpen}
-            class:dirty={stackViewOptionsDirty}
-            onclick={() => (stackViewOptionsOpen = !stackViewOptionsOpen)}
-            title="View options — preview smoothing &amp; background"
-            aria-label="View options"
-            aria-haspopup="true"
-            aria-expanded={stackViewOptionsOpen}
-            bind:this={stackViewOptionsBtn}
-          >
-            <svg class="icon" viewBox="0 0 24 24"
-              ><path
-                d="M3 17v2h6v-2H3zM3 5v2h10V5H3zm10 16v-2h8v-2h-8v-2h-2v6h2zM7 9v2H3v2h4v2h2V9H7zm14 4v-2H11v2h10zm-6-4h2V7h4V5h-4V3h-2v6z"
-              /></svg
-            >
-          </button>
-
-          {#if stackViewOptionsOpen}
-            <div class="view-options" role="group" aria-label="View options">
-              {#if !isSafari}
-                <button
-                  class="view-option"
-                  class:active={stackPixelated}
-                  onclick={() => (stackPixelated = !stackPixelated)}
-                  aria-pressed={stackPixelated}
-                >
-                  {#if stackPixelated}
-                    <svg class="icon" viewBox="0 0 24 24"
-                      ><path
-                        d="M12 3h5v2h2v2h2v5h-2V9h-2V7h-2V5h-3V3M21 12v5h-2v2h-2v2h-5v-2h3v-2h2v-2h2v-3h2M12 21H7v-2H5v-2H3v-5h2v3h2v2h2v2h3v2M3 12V7h2V5h2V3h5v2H9v2H7v2H5v3H3"
-                      /></svg
-                    >
-                  {:else}
-                    <svg class="icon" viewBox="0 0 24 24"
-                      ><circle
-                        cx="12"
-                        cy="12"
-                        r="8"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                      /></svg
-                    >
-                  {/if}
-                  <span class="view-option-label">Smoothing</span>
-                  <span class="view-option-state"
-                    >{stackPixelated ? 'Pixelated' : 'On'}</span
-                  >
-                </button>
-              {/if}
-              <button
-                class="view-option"
-                class:active={stackAltBackground}
-                onclick={() => (stackAltBackground = !stackAltBackground)}
-                aria-pressed={stackAltBackground}
-              >
-                {#if stackAltBackground}
-                  <svg class="icon" viewBox="0 0 24 24"
-                    ><path
-                      d="M9 7H7v2h2V7zm0 4H7v2h2v-2zm0-8a2 2 0 0 0-2 2h2V3zm4 12h-2v2h2v-2zm6-12v2h2a2 2 0 0 0-2-2zm-6 0h-2v2h2V3zM9 17v-2H7c0 1.1.9 2 2 2zm10-4h2v-2h-2v2zm0-4h2V7h-2v2zm0 8a2 2 0 0 0 2-2h-2v2zM5 7H3v12c0 1.1.9 2 2 2h12v-2H5V7zm10-2h2V3h-2v2zm0 12h2v-2h-2v2z"
-                    /></svg
-                  >
-                {:else}
-                  <svg class="icon" viewBox="0 0 24 24"
-                    ><path
-                      d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm2 4v-2H3c0 1.1.9 2 2 2zM3 9h2V7H3v2zm12 12h2v-2h-2v2zm4-18H9a2 2 0 0 0-2 2v10c0 1.1.9 2 2 2h10a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 12H9V5h10v10zm-8 6h2v-2h-2v2zm-4 0h2v-2H7v2z"
-                    /></svg
-                  >
-                {/if}
-                <span class="view-option-label">Background</span>
-                <span class="view-option-state"
-                  >{stackAltBackground ? 'Light' : 'Dark'}</span
-                >
-              </button>
-            </div>
-          {/if}
-        </div>
+        <ViewOptions
+          bind:pixelated={stackPixelated}
+          bind:altBackground={stackAltBackground}
+        />
       </div>
     {/if}
 
@@ -838,11 +741,12 @@
   }
 
   /* ── Stack stage toolbar ────────────────────────────────────────────────────
-     A faithful copy of the production Output bottom bar (Output.svelte
-     `.controls` + descendants), so the stack state has the identical zoom /
-     view-options affordance the focus view gets for free. Same glass, same pill
-     radii, same icon sizing — only the buttons here drive the bulk stack view
-     controls instead of the pinch-zoom two-up. Docked bottom-centre; the
+     The zoom pill is a faithful copy of the production Output bottom bar
+     (Output.svelte `.controls` + descendants), and the view-options pill is the
+     shared ViewOptions component, so the stack state has the same affordances
+     the focus view gets for free. Same glass, same pill radii, same icon
+     sizing; only the buttons here drive the bulk stack view controls instead of
+     the pinch-zoom two-up. Docked bottom-centre; the
      view-picker pairs to its right via `.view-picker-dock.with-toolbar`. */
   .stack-controls {
     position: absolute;
@@ -917,10 +821,6 @@
     background: rgba(45, 45, 54, 0.92);
     color: var(--text-1, #fff);
   }
-  .stack-controls .button.active {
-    background: rgba(62, 62, 74, 0.95);
-    color: var(--text-1, #fff);
-  }
   .stack-controls .button:disabled {
     opacity: 0.35;
     cursor: default;
@@ -937,9 +837,6 @@
     border-radius: 0 999px 999px 0;
     border-right-width: 1px;
     padding-right: 11px;
-  }
-  .stack-controls .first-button.last-button {
-    border-radius: 999px;
   }
   .stack-controls .zoom {
     cursor: default;
@@ -959,78 +856,6 @@
     font-variant-numeric: tabular-nums;
     color: var(--text-1, #fff);
   }
-  .stack-controls .view-options-trigger {
-    position: relative;
-  }
-  .stack-controls .view-options-trigger.dirty::after {
-    content: '';
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--accent-1, #ff8a5e);
-  }
-  .stack-controls .view-options {
-    position: absolute;
-    bottom: calc(100% + 8px);
-    right: 0;
-    z-index: 10;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    padding: 6px;
-    min-width: 196px;
-    background-color: var(--surface, rgba(19, 19, 25, 0.82));
-    backdrop-filter: blur(16px) saturate(1.3);
-    -webkit-backdrop-filter: blur(16px) saturate(1.3);
-    border: 1px solid var(--border, rgba(255, 255, 255, 0.08));
-    border-radius: 14px;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
-  }
-  .stack-controls .view-option {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    width: 100%;
-    height: 38px;
-    padding: 0 10px;
-    border: none;
-    border-radius: 9px;
-    background: transparent;
-    color: var(--text-2, #bbb);
-    font: inherit;
-    font-size: 0.9rem;
-    cursor: pointer;
-    text-align: left;
-    transition:
-      background-color 150ms ease,
-      color 150ms ease;
-  }
-  .stack-controls .view-option:hover {
-    background: rgba(45, 45, 54, 0.92);
-    color: var(--text-1, #fff);
-  }
-  .stack-controls .view-option.active {
-    color: var(--text-1, #fff);
-  }
-  .stack-controls .view-option .icon {
-    width: 20px;
-    height: 20px;
-  }
-  .stack-controls .view-option-label {
-    flex: 1;
-  }
-  .stack-controls .view-option-state {
-    color: var(--text-3, #939393);
-    font-size: 0.8rem;
-    font-variant-numeric: tabular-nums;
-  }
-  .stack-controls .view-option.active .view-option-state {
-    color: var(--accent-1, #ff8a5e);
-  }
-
   /* Real layout space for the strip — no longer an overlay footer. The strip
      spans the FULL viewport width (small breathing padding only) and its
      content starts from the LEFT; the panels live in the stage region above,
@@ -1282,18 +1107,15 @@
       --panel-inset: 8px;
       --fit-inset-left: 0px;
       --fit-inset-right: 0px;
-    }
-
-    /* Lift the reused production Output's control bar + canvas above the docked
-       panels (the panels live inside the stage region, so clearing their height
-       is enough — the strip sits outside/below the stage region). */
-    :global(.compress .stage-region .output) {
-      bottom: calc(var(--mobile-options-height) + var(--panel-inset));
-    }
-    :global(.compress .stage-region .controls) {
-      bottom: calc(var(--mobile-options-height) + var(--panel-inset) + 8px);
-      padding: 0 12px;
-      box-sizing: border-box;
+      /* Lift the reused production Output's control bar + canvas above the
+         docked panels. The panels live inside the stage region and the strip
+         sits below it, so clearing their height is enough. Output reads these
+         in its .output / .controls rules. */
+      --output-bottom: calc(var(--mobile-options-height) + var(--panel-inset));
+      --controls-bottom: calc(
+        var(--mobile-options-height) + var(--panel-inset) + 8px
+      );
+      --controls-padding-inline: 12px;
     }
 
     /* Two half-width bottom sheets. They clamp to a usable minimum width so
@@ -1357,16 +1179,11 @@
       --fit-inset-left: 0px;
       --fit-inset-right: 0px;
       --fit-inset-top: var(--stage-top);
-    }
-
-    /* Output fills the stage down to the strip again — undo the 900px lift. */
-    :global(.compress .stage-region .output) {
-      bottom: 0;
-      top: var(--stage-top);
-    }
-    :global(.compress .stage-region .controls) {
-      bottom: 10px;
-      padding: 0 12px;
+      /* Output fills the stage down to the strip again: undo the 900px lift. */
+      --output-top: var(--stage-top);
+      --output-bottom: 0;
+      --controls-bottom: 10px;
+      --controls-padding-inline: 12px;
     }
 
     /* Move the top-left chrome below the summary bar so nothing collides. */
