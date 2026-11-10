@@ -8,11 +8,11 @@
   // can anchor near them and restore focus on close. Porcelain skin: buttons use
   // the shared .hy-rail-btn class (defined in hybrid.css).
   import ThemeToggle, { type ThemeMode } from './ThemeToggle.svelte';
-  import LabIcon from '$lib/lab/LabIcon.svelte';
-  import backIcon from '$lib/lab/icons/back.svg?raw';
-  import infoIcon from '$lib/lab/icons/info.svg?raw';
-  import compareIcon from '$lib/lab/icons/compare.svg?raw';
-  import rotateIcon from '$lib/lab/icons/rotate.svg?raw';
+  import LabIcon from '#lib/lab/LabIcon.svelte';
+  import backIcon from '#lib/lab/icons/back.svg?raw';
+  import infoIcon from '#lib/lab/icons/info.svg?raw';
+  import compareIcon from '#lib/lab/icons/compare.svg?raw';
+  import rotateIcon from '#lib/lab/icons/rotate.svg?raw';
 
   type Flyout = 'info' | 'compare' | null;
 

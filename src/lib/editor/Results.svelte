@@ -1,8 +1,8 @@
 <script lang="ts">
   import { prettySize, prettySizeParts } from './pretty-size';
-  import { canShareFile, share } from '$lib/share-file';
+  import { canShareFile, share } from '#lib/share-file.ts';
   import { snackbar } from './snackbar-store.svelte';
-  import type { CompressOutcome } from '$lib/compress';
+  import type { CompressOutcome } from '#lib/compress.ts';
 
   // The result footer of each side's panel: output filesize + a semantic
   // delta badge (green = smaller, red = larger), the download button, and —

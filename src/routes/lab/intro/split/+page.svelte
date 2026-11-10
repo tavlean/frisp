@@ -2,12 +2,12 @@
   import { dev } from '$app/env';
   import ThemeToggle, {
     type ThemeMode,
-  } from '$lib/lab/intro/ThemeToggle.svelte';
-  import { IntroDropDemo } from '$lib/lab/intro/drop-demo.svelte';
-  import Brand from '$lib/lab/intro/Brand.svelte';
-  import Icon from '$lib/lab/intro/Icon.svelte';
-  import { APP_NAME } from 'shared/brand';
-  import '$lib/lab/intro/intro-lab.css';
+  } from '#lib/lab/intro/ThemeToggle.svelte';
+  import { IntroDropDemo } from '#lib/lab/intro/drop-demo.svelte.ts';
+  import Brand from '#lib/lab/intro/Brand.svelte';
+  import Icon from '#lib/lab/intro/Icon.svelte';
+  import { APP_NAME } from '#shared/brand.ts';
+  import '#lib/lab/intro/intro-lab.css';
 
   type Sample = {
     name: 'sunset' | 'sea' | 'meadow';

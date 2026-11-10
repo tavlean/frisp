@@ -1,12 +1,12 @@
 import { describe, expect, it, vi } from 'vitest';
-import { optimizeImage } from '$lib/optimize-image';
+import { optimizeImage } from '#lib/optimize-image.ts';
 import type { BulkRunnerHost } from '../../src/lib/bulk/runtime';
 import { BulkRuntime, bulkThreadBudget } from '../../src/lib/bulk/runtime';
-import SvelteKitWorkerBridge from '$lib/sveltekit-worker-bridge';
+import SvelteKitWorkerBridge from '#lib/sveltekit-worker-bridge.ts';
 import type { ImageJob, ImageOutput } from '../../src/client/lazy-app/bulk';
 import { fakeOutput, job, session } from './fixtures';
 
-vi.mock('$lib/sveltekit-worker-bridge', () => ({
+vi.mock('#lib/sveltekit-worker-bridge.ts', () => ({
   default: class FakeSvelteKitWorkerBridge {
     static options: unknown[] = [];
     constructor(options?: unknown) {
@@ -16,7 +16,7 @@ vi.mock('$lib/sveltekit-worker-bridge', () => ({
   },
 }));
 
-vi.mock('$lib/optimize-image', () => ({ optimizeImage: vi.fn() }));
+vi.mock('#lib/optimize-image.ts', () => ({ optimizeImage: vi.fn() }));
 
 type ResolveJob = (output?: ImageOutput) => void;
 

@@ -2,12 +2,12 @@
 // needs the DOM (an <img> element), so it cannot move into the codec worker
 // with the rest of the pipeline: the worker receives these pixels instead.
 
-import { abortable } from 'client/lazy-app/abort';
-import { processSvg } from 'client/lazy-app/svg-source';
-import { drawableToImageData } from 'client/lazy-app/util/canvas';
-import { getContainOffsets } from 'features/processors/resize/shared/util';
-import type { VectorResizeOptions } from 'features/processors/resize/shared/meta';
-import type { Rotation } from 'client/lazy-app/recipe';
+import { abortable } from '#client/lazy-app/abort.ts';
+import { processSvg } from '#client/lazy-app/svg-source.ts';
+import { drawableToImageData } from '#client/lazy-app/util/canvas.ts';
+import { getContainOffsets } from '#features/processors/resize/shared/util.ts';
+import type { VectorResizeOptions } from '#features/processors/resize/shared/meta.ts';
+import type { Rotation } from '#client/lazy-app/recipe.ts';
 
 export interface SvgRaster {
   /** Drawn again at another size for a vector resize. */

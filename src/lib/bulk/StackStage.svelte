@@ -19,7 +19,7 @@
   // delayed shimmer so a global change visibly ripples through the fan.
   import { SvelteSet } from 'svelte/reactivity';
   import { innerHeight, innerWidth } from 'svelte/reactivity/window';
-  import type { BulkStripItem } from 'client/lazy-app/bulk';
+  import type { BulkStripItem } from '#client/lazy-app/bulk/index.ts';
   import { bulkStore } from './store.svelte';
   import DeltaPill from './DeltaPill.svelte';
 

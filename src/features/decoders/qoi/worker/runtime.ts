@@ -1,6 +1,9 @@
-import type { QOIModule } from 'codecs/qoi/dec/qoi_dec';
+import type { QOIModule } from '#codecs/qoi/dec/qoi_dec.js';
 
-import { blobToArrayBuffer, initEmscriptenModule } from 'features/worker-utils';
+import {
+  blobToArrayBuffer,
+  initEmscriptenModule,
+} from '#features/worker-utils/index.ts';
 
 type QoiDecoderModuleFactory = EmscriptenWasm.ModuleFactory<QOIModule>;
 

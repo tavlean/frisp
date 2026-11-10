@@ -3,8 +3,8 @@
 // Every supported browser has both in workers (Chrome 121, Firefox 115,
 // Safari 17; see docs/browser-support.md).
 
-import { getContainOffsets } from 'features/processors/resize/shared/util';
-import type { BrowserResizeOptions } from 'features/processors/resize/shared/meta';
+import { getContainOffsets } from '#features/processors/resize/shared/util.ts';
+import type { BrowserResizeOptions } from '#features/processors/resize/shared/meta.ts';
 
 function context2d(
   width: number,

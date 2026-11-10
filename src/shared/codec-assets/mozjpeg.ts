@@ -1,4 +1,4 @@
-import mozjpegEncoderWasmUrl from 'codecs/mozjpeg/enc/mozjpeg_enc.wasm?url';
+import mozjpegEncoderWasmUrl from '#codecs/mozjpeg/enc/mozjpeg_enc.wasm?url';
 
 export { mozjpegEncoderWasmUrl };
 

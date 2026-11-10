@@ -1,7 +1,7 @@
-import type { QuantizerModule } from 'codecs/imagequant/imagequant';
+import type { QuantizerModule } from '#codecs/imagequant/imagequant.js';
 import type { Options } from '../shared/meta';
 
-import { initEmscriptenModule } from 'features/worker-utils';
+import { initEmscriptenModule } from '#features/worker-utils/index.ts';
 
 type QuantizerModuleFactory = EmscriptenWasm.ModuleFactory<QuantizerModule>;
 

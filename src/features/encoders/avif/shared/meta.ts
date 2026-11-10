@@ -13,7 +13,7 @@
 import type {
   AVIFTune as AVIFTuneType,
   EncodeOptions,
-} from 'codecs/avif/enc/avif_enc';
+} from '#codecs/avif/enc/avif_enc.js';
 
 export type { EncodeOptions };
 export type AVIFTune = AVIFTuneType;

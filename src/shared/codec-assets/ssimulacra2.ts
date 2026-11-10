@@ -1,4 +1,4 @@
-import ssimulacra2WasmUrl from 'codecs/ssimulacra2/ssimulacra2.wasm?url';
+import ssimulacra2WasmUrl from '#codecs/ssimulacra2/ssimulacra2.wasm?url';
 
 export { ssimulacra2WasmUrl };
 

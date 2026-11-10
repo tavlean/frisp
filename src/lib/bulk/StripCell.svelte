@@ -14,10 +14,10 @@
   //   s     → size + bare delta
   //   m     → name; "251 kB → 26.2 kB" + delta pill
   //   l     → two lines: name; sizes + delta pill (browsing-first)
-  import type { BulkStripItem } from 'client/lazy-app/bulk';
+  import type { BulkStripItem } from '#client/lazy-app/bulk/index.ts';
   import { bulkStore } from './store.svelte';
   import DeltaPill from './DeltaPill.svelte';
-  import { prettySize } from '$lib/editor/pretty-size';
+  import { prettySize } from '#lib/editor/pretty-size.ts';
 
   interface Props {
     item: BulkStripItem;

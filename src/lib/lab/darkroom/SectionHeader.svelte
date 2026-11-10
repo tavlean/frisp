@@ -5,10 +5,10 @@
   // per-section visibility control onto Frisp's real per-section ENABLE state
   // (Resize / Reduce-palette). A disabled section reads dimmed; the caller keeps
   // `open` and `enabled` as bindable local/real state respectively.
-  import LabIcon from '$lib/lab/LabIcon.svelte';
-  import chevronDownIcon from '$lib/lab/icons/chevron-down.svg?raw';
-  import eyeIcon from '$lib/lab/icons/eye.svg?raw';
-  import eyeOffIcon from '$lib/lab/icons/eye-off.svg?raw';
+  import LabIcon from '#lib/lab/LabIcon.svelte';
+  import chevronDownIcon from '#lib/lab/icons/chevron-down.svg?raw';
+  import eyeIcon from '#lib/lab/icons/eye.svg?raw';
+  import eyeOffIcon from '#lib/lab/icons/eye-off.svg?raw';
 
   interface Props {
     label: string;

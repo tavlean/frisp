@@ -6,7 +6,7 @@
 // customElements.define is guarded against double registration under HMR.
 import PointerTracker, { type Pointer } from 'pointer-tracker';
 import './pinch-zoom.css';
-import { isSafari } from 'client/lazy-app/util';
+import { isSafari } from '#client/lazy-app/util/index.ts';
 
 interface Point {
   clientX: number;

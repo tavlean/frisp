@@ -4,7 +4,7 @@ import {
   getPrecacheCodecAssetUrls,
   type CodecAssetRecord,
   type CodecAssetRecordSource,
-} from 'shared/codec-assets';
+} from '#shared/codec-assets.ts';
 import {
   avifDecoderWasmUrl,
   avifEncoderMtScriptUrl,

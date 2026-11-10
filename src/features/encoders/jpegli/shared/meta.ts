@@ -1,4 +1,4 @@
-import type { EncodeOptions } from 'codecs/jpegli/enc/jpegli_enc';
+import type { EncodeOptions } from '#codecs/jpegli/enc/jpegli_enc.js';
 
 export type { EncodeOptions };
 

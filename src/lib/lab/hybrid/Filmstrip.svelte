@@ -8,9 +8,9 @@
   // docked by hybrid.css. The page owns the gallery array + object-URL lifecycle;
   // this component only renders it. The trailing padding (--hy-dock-reserve) keeps
   // long thumbnail rows scrolling UNDER the docked cluster instead of colliding.
-  import LabIcon from '$lib/lab/LabIcon.svelte';
-  import closeIcon from '$lib/lab/icons/close.svg?raw';
-  import plusIcon from '$lib/lab/icons/plus.svg?raw';
+  import LabIcon from '#lib/lab/LabIcon.svelte';
+  import closeIcon from '#lib/lab/icons/close.svg?raw';
+  import plusIcon from '#lib/lab/icons/plus.svg?raw';
 
   interface Entry {
     id: string;

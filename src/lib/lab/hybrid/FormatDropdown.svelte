@@ -4,12 +4,12 @@
   // the porcelain lab's FormatDropdown so the hybrid stays self-contained. Lists
   // "Original Image" (IDENTITY) plus every encoder; light-dismiss + Escape via the
   // shared attachment. Reads `--pc-*` tokens, which resolve under `.hybrid-root`.
-  import { lightDismiss } from '$lib/editor/light-dismiss';
-  import { IDENTITY, type SideFormat } from '$lib/compress';
-  import LabIcon from '$lib/lab/LabIcon.svelte';
-  import imageIcon from '$lib/lab/icons/image.svg?raw';
-  import chevronIcon from '$lib/lab/icons/chevron-down.svg?raw';
-  import checkIcon from '$lib/lab/icons/check.svg?raw';
+  import { lightDismiss } from '#lib/editor/light-dismiss.ts';
+  import { IDENTITY, type SideFormat } from '#lib/compress.ts';
+  import LabIcon from '#lib/lab/LabIcon.svelte';
+  import imageIcon from '#lib/lab/icons/image.svg?raw';
+  import chevronIcon from '#lib/lab/icons/chevron-down.svg?raw';
+  import checkIcon from '#lib/lab/icons/check.svg?raw';
 
   interface FormatOption {
     id: string;

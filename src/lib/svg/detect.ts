@@ -1,1 +1,1 @@
-export { isSvgSource } from 'client/lazy-app/svg-source';
+export { isSvgSource } from '#client/lazy-app/svg-source.ts';

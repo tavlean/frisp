@@ -6,10 +6,10 @@
   // (near-black) tooltip + aria-label. The `.hy-rail-btn` porcelain skin (surface
   // + right-anchored tooltip) lives in hybrid.css so the rail's buttons and this
   // one share one definition.
-  import LabIcon from '$lib/lab/LabIcon.svelte';
-  import sunMoonIcon from '$lib/lab/icons/sun-moon.svg?raw';
-  import sunIcon from '$lib/lab/icons/sun.svg?raw';
-  import moonIcon from '$lib/lab/icons/moon.svg?raw';
+  import LabIcon from '#lib/lab/LabIcon.svelte';
+  import sunMoonIcon from '#lib/lab/icons/sun-moon.svg?raw';
+  import sunIcon from '#lib/lab/icons/sun.svg?raw';
+  import moonIcon from '#lib/lab/icons/moon.svg?raw';
 
   export type ThemeMode = 'system' | 'light' | 'dark';
 

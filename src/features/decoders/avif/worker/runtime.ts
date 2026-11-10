@@ -10,9 +10,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import type { AVIFModule } from 'codecs/avif/dec/avif_dec';
+import type { AVIFModule } from '#codecs/avif/dec/avif_dec.js';
 
-import { blobToArrayBuffer, initEmscriptenModule } from 'features/worker-utils';
+import {
+  blobToArrayBuffer,
+  initEmscriptenModule,
+} from '#features/worker-utils/index.ts';
 
 type AvifDecoderModuleFactory = EmscriptenWasm.ModuleFactory<AVIFModule>;
 

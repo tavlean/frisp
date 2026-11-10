@@ -1,6 +1,6 @@
 <script lang="ts">
-  import type { SvgOptimizeOptions } from '$lib/svg/optimize-options';
-  import { describeWinner } from '$lib/svg/svgo-config';
+  import type { SvgOptimizeOptions } from '#lib/svg/optimize-options.ts';
+  import { describeWinner } from '#lib/svg/svgo-config.ts';
   import AdvancedSection from './AdvancedSection.svelte';
   import Checkbox from './Checkbox.svelte';
   import OptionRow from './OptionRow.svelte';

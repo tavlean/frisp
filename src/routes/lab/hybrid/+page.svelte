@@ -11,25 +11,25 @@
   // just clears the file, and the gallery is the batch stepping-stone).
   import { onMount } from 'svelte';
   import { dev } from '$app/env';
-  import Output from '$lib/editor/output/Output.svelte';
-  import Snackbar from '$lib/editor/Snackbar.svelte';
-  import ImageInfoRows from '$lib/editor/ImageInfoRows.svelte';
-  import { fileDrop } from '$lib/editor/file-drop';
-  import { EditorSession } from '$lib/editor/editor-session.svelte';
-  import { IDENTITY, type SideFormat } from '$lib/compress';
-  import { isSupportedBulkImage } from 'client/lazy-app/bulk';
-  import type { ImportedFile } from '$lib/bulk/import-sources';
-  import TopBar from '$lib/lab/hybrid/TopBar.svelte';
-  import Rail from '$lib/lab/hybrid/Rail.svelte';
-  import Flyout from '$lib/lab/hybrid/Flyout.svelte';
-  import Inspector from '$lib/lab/hybrid/Inspector.svelte';
-  import Filmstrip from '$lib/lab/hybrid/Filmstrip.svelte';
-  import LabIcon from '$lib/lab/LabIcon.svelte';
-  import closeIcon from '$lib/lab/icons/close.svg?raw';
-  import type { ThemeMode } from '$lib/lab/hybrid/ThemeToggle.svelte';
-  import { labSourceFile, rememberLabSource } from '$lib/lab/lab-source';
-  import '$lib/editor/theme.css';
-  import '$lib/lab/hybrid/hybrid.css';
+  import Output from '#lib/editor/output/Output.svelte';
+  import Snackbar from '#lib/editor/Snackbar.svelte';
+  import ImageInfoRows from '#lib/editor/ImageInfoRows.svelte';
+  import { fileDrop } from '#lib/editor/file-drop.ts';
+  import { EditorSession } from '#lib/editor/editor-session.svelte.ts';
+  import { IDENTITY, type SideFormat } from '#lib/compress.ts';
+  import { isSupportedBulkImage } from '#client/lazy-app/bulk/index.ts';
+  import type { ImportedFile } from '#lib/bulk/import-sources.ts';
+  import TopBar from '#lib/lab/hybrid/TopBar.svelte';
+  import Rail from '#lib/lab/hybrid/Rail.svelte';
+  import Flyout from '#lib/lab/hybrid/Flyout.svelte';
+  import Inspector from '#lib/lab/hybrid/Inspector.svelte';
+  import Filmstrip from '#lib/lab/hybrid/Filmstrip.svelte';
+  import LabIcon from '#lib/lab/LabIcon.svelte';
+  import closeIcon from '#lib/lab/icons/close.svg?raw';
+  import type { ThemeMode } from '#lib/lab/hybrid/ThemeToggle.svelte';
+  import { labSourceFile, rememberLabSource } from '#lib/lab/lab-source.ts';
+  import '#lib/editor/theme.css';
+  import '#lib/lab/hybrid/hybrid.css';
 
   const session = new EditorSession();
 

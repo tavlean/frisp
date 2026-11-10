@@ -1,5 +1,5 @@
-import type { optimise as singleThreadOptimise } from 'codecs/oxipng/pkg/squoosh_oxipng';
-import type { optimise as multiThreadOptimise } from 'codecs/oxipng/pkg-parallel/squoosh_oxipng';
+import type { optimise as singleThreadOptimise } from '#codecs/oxipng/pkg/squoosh_oxipng.js';
+import type { optimise as multiThreadOptimise } from '#codecs/oxipng/pkg-parallel/squoosh_oxipng.js';
 import type { EncodeOptions } from '../shared/meta';
 
 export interface OxiPngWasmUrls {

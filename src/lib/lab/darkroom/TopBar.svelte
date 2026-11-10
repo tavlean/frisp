@@ -5,12 +5,12 @@
   // result), and a circular "+" that adds images to the session gallery. Frisp
   // has no accounts, so the reference's avatar/pro chips are honestly omitted.
   import { resolve } from '$app/paths';
-  import Logomark from '$lib/lab/Logomark.svelte';
-  import LabIcon from '$lib/lab/LabIcon.svelte';
-  import undoIcon from '$lib/lab/icons/undo.svg?raw';
-  import redoIcon from '$lib/lab/icons/redo.svg?raw';
-  import exportIcon from '$lib/lab/icons/export.svg?raw';
-  import plusIcon from '$lib/lab/icons/plus.svg?raw';
+  import Logomark from '#lib/lab/Logomark.svelte';
+  import LabIcon from '#lib/lab/LabIcon.svelte';
+  import undoIcon from '#lib/lab/icons/undo.svg?raw';
+  import redoIcon from '#lib/lab/icons/redo.svg?raw';
+  import exportIcon from '#lib/lab/icons/export.svg?raw';
+  import plusIcon from '#lib/lab/icons/plus.svg?raw';
 
   interface Props {
     /** The right side's download URL, or undefined while encoding / no result. */

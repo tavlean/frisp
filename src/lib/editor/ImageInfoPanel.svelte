@@ -1,6 +1,6 @@
 <script lang="ts">
   import ImageInfoRows from './ImageInfoRows.svelte';
-  import { OUTPUT_FORMATS, type OutputFormat } from '$lib/compress';
+  import { OUTPUT_FORMATS, type OutputFormat } from '#lib/compress.ts';
   import { lightDismiss } from './light-dismiss';
 
   interface Props {

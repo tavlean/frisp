@@ -1,7 +1,7 @@
 <script lang="ts">
   import { dev } from '$app/env';
   import { resolve } from '$app/paths';
-  import { APP_NAME } from 'shared/brand';
+  import { APP_NAME } from '#shared/brand.ts';
 
   // Two doors, not one per experiment: each opens the FIRST variant of its
   // group, and the lab layout's tab bar flips between the rest in place.

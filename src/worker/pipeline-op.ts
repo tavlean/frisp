@@ -17,14 +17,14 @@
 //
 // Codec-neutral: codec-worker.ts supplies the host, tests supply a fake.
 
-import { chooseLane, type LaneFile } from 'client/lazy-app/lane';
-import { sniffMimeType } from 'client/lazy-app/image-decode';
+import { chooseLane, type LaneFile } from '#client/lazy-app/lane.ts';
+import { sniffMimeType } from '#client/lazy-app/image-decode.ts';
 import {
   prepareFrame,
   processFrame,
   type PipelineSteps,
-} from 'client/lazy-app/pipeline-core';
-import type { ImageRecipe, Rotation } from 'client/lazy-app/recipe';
+} from '#client/lazy-app/pipeline-core.ts';
+import type { ImageRecipe, Rotation } from '#client/lazy-app/recipe.ts';
 
 /** A source as the worker receives it. A File crosses by reference (no byte
  *  copy) and is decoded here; pixels (an SVG rasterized on the main thread)

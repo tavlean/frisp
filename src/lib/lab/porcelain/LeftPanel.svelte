@@ -5,14 +5,14 @@
   //  • the "compare" face — when the left side has picked a format, the shared
   //    LabOptionsPanel takes over, with a header to close the comparison.
   // The brand mark lives in the toolbar, not here.
-  import ImageInfoRows from '$lib/editor/ImageInfoRows.svelte';
-  import { prettySize } from '$lib/editor/pretty-size';
-  import { IDENTITY, type SideFormat } from '$lib/compress';
-  import type { EditorSession } from '$lib/editor/editor-session.svelte';
+  import ImageInfoRows from '#lib/editor/ImageInfoRows.svelte';
+  import { prettySize } from '#lib/editor/pretty-size.ts';
+  import { IDENTITY, type SideFormat } from '#lib/compress.ts';
+  import type { EditorSession } from '#lib/editor/editor-session.svelte.ts';
   import Segmented from './Segmented.svelte';
   import LabOptionsPanel from './LabOptionsPanel.svelte';
-  import LabIcon from '$lib/lab/LabIcon.svelte';
-  import closeIcon from '$lib/lab/icons/close.svg?raw';
+  import LabIcon from '#lib/lab/LabIcon.svelte';
+  import closeIcon from '#lib/lab/icons/close.svg?raw';
 
   interface Props {
     session: EditorSession;

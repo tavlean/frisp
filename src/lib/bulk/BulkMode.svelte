@@ -1,12 +1,18 @@
 <script lang="ts">
   import { onMount, untrack } from 'svelte';
-  import { EditorSession } from '$lib/editor/editor-session.svelte';
-  import { applyRecipeToSide, recipeFromSide } from '$lib/editor/side-recipe';
-  import { bulkStore } from '$lib/bulk/store.svelte';
-  import { fromFileList } from '$lib/bulk/import-sources';
-  import Home from '$lib/bulk/Home.svelte';
-  import { applyRecipeChanges } from 'client/lazy-app/bulk';
-  import { recipeSignature, type ImageRecipe } from 'client/lazy-app/recipe';
+  import { EditorSession } from '#lib/editor/editor-session.svelte.ts';
+  import {
+    applyRecipeToSide,
+    recipeFromSide,
+  } from '#lib/editor/side-recipe.ts';
+  import { bulkStore } from '#lib/bulk/store.svelte.ts';
+  import { fromFileList } from '#lib/bulk/import-sources.ts';
+  import Home from '#lib/bulk/Home.svelte';
+  import { applyRecipeChanges } from '#client/lazy-app/bulk/index.ts';
+  import {
+    recipeSignature,
+    type ImageRecipe,
+  } from '#client/lazy-app/recipe.ts';
 
   interface Props {
     onExit: () => void;

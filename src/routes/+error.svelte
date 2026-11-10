@@ -1,7 +1,7 @@
 <script lang="ts">
   import { page } from '$app/state';
   import { resolve } from '$app/paths';
-  import { APP_NAME } from 'shared/brand';
+  import { APP_NAME } from '#shared/brand.ts';
 
   const notFound = $derived(page.status === 404);
   const heading = $derived(

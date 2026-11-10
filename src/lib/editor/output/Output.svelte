@@ -10,7 +10,7 @@
   // (centerSplit / splitFraction) and listen for its 'splitchange' event.
   import TwoUp from './two-up';
   import SvgPreview from './SvgPreview.svelte';
-  import { drawDataToCanvas } from 'client/lazy-app/util/canvas';
+  import { drawDataToCanvas } from '#client/lazy-app/util/canvas.ts';
   import { retargetViewEvents } from './retarget-events';
   import ProcessingBadge from './ProcessingBadge.svelte';
   import { innerHeight, innerWidth } from 'svelte/reactivity/window';

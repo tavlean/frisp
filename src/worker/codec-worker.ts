@@ -1,45 +1,45 @@
 import { expose, transfer } from 'comlink';
-import { createAvifDecoderRuntime } from 'features/decoders/avif/worker/runtime';
-import avifDecoder from 'app-generated/codecs/avif/dec/avif_dec';
-import { createAvifEncoderRuntime } from 'features/encoders/avif/worker/runtime';
-import avifEncoder from 'app-generated/codecs/avif/enc/avif_enc';
-import { createWebpDecoderRuntime } from 'features/decoders/webp/worker/runtime';
-import webpDecoder from 'app-generated/codecs/webp/dec/webp_dec';
-import { createWebpEncoderRuntime } from 'features/encoders/webP/worker/runtime';
-import webpEncoder from 'app-generated/codecs/webp/enc/webp_enc';
-import webpEncoderSimd from 'app-generated/codecs/webp/enc/webp_enc_simd';
-import { createQoiDecoderRuntime } from 'features/decoders/qoi/worker/runtime';
-import qoiDecoder from 'app-generated/codecs/qoi/dec/qoi_dec';
-import { createJxlDecoderRuntime } from 'features/decoders/jxl/worker/runtime';
-import jxlDecoder from 'app-generated/codecs/jxl/dec/jxl_dec';
-import { createQoiEncoderRuntime } from 'features/encoders/qoi/worker/runtime';
-import qoiEncoder from 'app-generated/codecs/qoi/enc/qoi_enc';
-import { createJxlEncoderRuntime } from 'features/encoders/jxl/worker/runtime';
-import type { EncodeOptions as JxlEncodeOptions } from 'features/encoders/jxl/shared/meta';
-import jxlEncoder from 'app-generated/codecs/jxl/enc/jxl_enc';
-import { createMozjpegEncoderRuntime } from 'features/encoders/mozJPEG/worker/runtime';
-import mozjpegEncoder from 'app-generated/codecs/mozjpeg/enc/mozjpeg_enc';
-import { createJpegliEncoderRuntime } from 'features/encoders/jpegli/worker/runtime';
-import jpegliEncoder from 'app-generated/codecs/jpegli/enc/jpegli_enc';
-import { createOxiPngEncoderRuntime } from 'features/encoders/oxiPNG/worker/runtime';
-import type { EncodeOptions as OxipngEncodeOptions } from 'features/encoders/oxiPNG/shared/meta';
+import { createAvifDecoderRuntime } from '#features/decoders/avif/worker/runtime.ts';
+import avifDecoder from '#app-generated/codecs/avif/dec/avif_dec.js';
+import { createAvifEncoderRuntime } from '#features/encoders/avif/worker/runtime.ts';
+import avifEncoder from '#app-generated/codecs/avif/enc/avif_enc.js';
+import { createWebpDecoderRuntime } from '#features/decoders/webp/worker/runtime.ts';
+import webpDecoder from '#app-generated/codecs/webp/dec/webp_dec.js';
+import { createWebpEncoderRuntime } from '#features/encoders/webP/worker/runtime.ts';
+import webpEncoder from '#app-generated/codecs/webp/enc/webp_enc.js';
+import webpEncoderSimd from '#app-generated/codecs/webp/enc/webp_enc_simd.js';
+import { createQoiDecoderRuntime } from '#features/decoders/qoi/worker/runtime.ts';
+import qoiDecoder from '#app-generated/codecs/qoi/dec/qoi_dec.js';
+import { createJxlDecoderRuntime } from '#features/decoders/jxl/worker/runtime.ts';
+import jxlDecoder from '#app-generated/codecs/jxl/dec/jxl_dec.js';
+import { createQoiEncoderRuntime } from '#features/encoders/qoi/worker/runtime.ts';
+import qoiEncoder from '#app-generated/codecs/qoi/enc/qoi_enc.js';
+import { createJxlEncoderRuntime } from '#features/encoders/jxl/worker/runtime.ts';
+import type { EncodeOptions as JxlEncodeOptions } from '#features/encoders/jxl/shared/meta.ts';
+import jxlEncoder from '#app-generated/codecs/jxl/enc/jxl_enc.js';
+import { createMozjpegEncoderRuntime } from '#features/encoders/mozJPEG/worker/runtime.ts';
+import mozjpegEncoder from '#app-generated/codecs/mozjpeg/enc/mozjpeg_enc.js';
+import { createJpegliEncoderRuntime } from '#features/encoders/jpegli/worker/runtime.ts';
+import jpegliEncoder from '#app-generated/codecs/jpegli/enc/jpegli_enc.js';
+import { createOxiPngEncoderRuntime } from '#features/encoders/oxiPNG/worker/runtime.ts';
+import type { EncodeOptions as OxipngEncodeOptions } from '#features/encoders/oxiPNG/shared/meta.ts';
 import initOxipngWasm, {
   optimise as optimiseOxipng,
-} from 'app-generated/codecs/oxipng/pkg/squoosh_oxipng';
-import checkThreadsSupport from 'worker-shared/supports-wasm-threads';
+} from '#app-generated/codecs/oxipng/pkg/squoosh_oxipng.js';
+import checkThreadsSupport from '#worker-shared/supports-wasm-threads.ts';
 import { simd } from 'wasm-feature-detect';
-import { createQuantizeRuntime } from 'features/processors/quantize/worker/runtime';
-import imagequant from 'app-generated/codecs/imagequant/imagequant';
-import { createResize } from 'features/processors/resize/worker/runtime';
+import { createQuantizeRuntime } from '#features/processors/quantize/worker/runtime.ts';
+import imagequant from '#app-generated/codecs/imagequant/imagequant.js';
+import { createResize } from '#features/processors/resize/worker/runtime.ts';
 import initResizeWasm, {
   resize as wasmResize,
-} from 'app-generated/codecs/resize/pkg/squoosh_resize';
+} from '#app-generated/codecs/resize/pkg/squoosh_resize.js';
 import initHqxWasm, {
   resize as wasmHqx,
-} from 'app-generated/codecs/hqx/pkg/squooshhqx';
-import { createRotate } from 'features/preprocessors/rotate/worker/runtime';
-import type { EncoderState } from 'client/lazy-app/feature-meta/shared';
-import type { PipelineSteps } from 'client/lazy-app/pipeline-core';
+} from '#app-generated/codecs/hqx/pkg/squooshhqx.js';
+import { createRotate } from '#features/preprocessors/rotate/worker/runtime.ts';
+import type { EncoderState } from '#client/lazy-app/feature-meta/shared.ts';
+import type { PipelineSteps } from '#client/lazy-app/pipeline-core.ts';
 import {
   createPipelineOps,
   replyTransfers,
@@ -49,9 +49,9 @@ import {
   type PrepareRequest,
 } from './pipeline-op';
 import { nativeDecode, pixelatedResize } from './offscreen';
-import type { Ssimulacra2Module } from 'codecs/ssimulacra2/ssimulacra2';
-import ssimulacra2 from 'app-generated/codecs/ssimulacra2/ssimulacra2';
-import { initEmscriptenModule } from 'features/worker-utils';
+import type { Ssimulacra2Module } from '#codecs/ssimulacra2/ssimulacra2.js';
+import ssimulacra2 from '#app-generated/codecs/ssimulacra2/ssimulacra2.js';
+import { initEmscriptenModule } from '#features/worker-utils/index.ts';
 import { scorePairs } from './score-scale';
 
 export interface AvifWasmUrls {
@@ -270,7 +270,7 @@ const encodeOxipng = createOxiPngEncoderRuntime({
       default: initOxipngMtWasm,
       initThreadPool,
       optimise: optimiseOxipngMt,
-    } = await import('app-generated/codecs/oxipng/pkg-parallel/squoosh_oxipng');
+    } = await import('#app-generated/codecs/oxipng/pkg-parallel/squoosh_oxipng.js');
     await initOxipngMtWasm(wasmUrl);
     await initThreadPool(oxipngThreads);
     return optimiseOxipngMt;

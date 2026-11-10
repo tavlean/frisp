@@ -5,10 +5,10 @@
   // visibility control onto Frisp's real enable state. A disabled section reads
   // dimmed. Porcelain skin: sentence-case 13px semibold label, thin-stroke glyphs,
   // inset hover on the eye. Caller owns `open` (local UI) and `enabled` (real).
-  import LabIcon from '$lib/lab/LabIcon.svelte';
-  import chevronIcon from '$lib/lab/icons/chevron-down.svg?raw';
-  import eyeIcon from '$lib/lab/icons/eye.svg?raw';
-  import eyeOffIcon from '$lib/lab/icons/eye-off.svg?raw';
+  import LabIcon from '#lib/lab/LabIcon.svelte';
+  import chevronIcon from '#lib/lab/icons/chevron-down.svg?raw';
+  import eyeIcon from '#lib/lab/icons/eye.svg?raw';
+  import eyeOffIcon from '#lib/lab/icons/eye-off.svg?raw';
 
   interface Props {
     label: string;

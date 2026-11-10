@@ -10,7 +10,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export { blobToArrayBuffer } from 'shared/blob';
+export { blobToArrayBuffer } from '#shared/blob.ts';
 
 export function initEmscriptenModule<T extends EmscriptenWasm.Module>(
   moduleFactory: EmscriptenWasm.ModuleFactory<T>,

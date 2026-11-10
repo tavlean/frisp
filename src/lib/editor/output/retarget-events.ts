@@ -11,7 +11,7 @@
 // imperative output-retargeting setup — `{@attach retargetViewEvents(() => …)}`.
 
 import type { Attachment } from 'svelte/attachments';
-import { isSafari } from 'client/lazy-app/util';
+import { isSafari } from '#client/lazy-app/util/index.ts';
 import type PinchZoom from './pinch-zoom';
 
 /**

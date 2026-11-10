@@ -1,7 +1,7 @@
-import type { QoiModule } from 'codecs/qoi/enc/qoi_enc';
+import type { QoiModule } from '#codecs/qoi/enc/qoi_enc.js';
 import type { EncodeOptions } from '../shared/meta';
 
-import { initEmscriptenModule } from 'features/worker-utils';
+import { initEmscriptenModule } from '#features/worker-utils/index.ts';
 
 type QoiEncoderModuleFactory = EmscriptenWasm.ModuleFactory<QoiModule>;
 

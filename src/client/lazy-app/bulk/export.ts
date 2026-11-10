@@ -1,5 +1,5 @@
 import { getFileNameParts, getSafeFileNameBase } from '../output-filename';
-import { APP_SLUG } from 'shared/brand';
+import { APP_SLUG } from '#shared/brand.ts';
 import {
   getJobSourceDimensions,
   isJobCurrentExport,

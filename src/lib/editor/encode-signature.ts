@@ -6,13 +6,16 @@
 // into a redundant re-encode and undo into re-encodes. Change the projection in
 // recipe.ts and nowhere else.
 
-import { stableStringify } from 'shared/stable-stringify';
-import type { SideFormat } from '$lib/compress';
+import { stableStringify } from '#shared/stable-stringify.ts';
+import type { SideFormat } from '#lib/compress.ts';
 import type {
   PreprocessorState,
   ProcessorState,
-} from 'client/lazy-app/feature-meta';
-import { recipeSignature, type SourceDimensions } from 'client/lazy-app/recipe';
+} from '#client/lazy-app/feature-meta/index.ts';
+import {
+  recipeSignature,
+  type SourceDimensions,
+} from '#client/lazy-app/recipe.ts';
 import { recipeFromSide } from './side-recipe';
 
 /**

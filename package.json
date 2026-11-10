@@ -9,6 +9,16 @@
     "node": ">=24.12.0 <25",
     "npm": ">=11"
   },
+  "imports": {
+    "#lib/*": "./src/lib/*",
+    "#client/*": "./src/client/*",
+    "#features/*": "./src/features/*",
+    "#shared/*": "./src/shared/*",
+    "#sw/*": "./src/sw/*",
+    "#worker-shared/*": "./src/worker-shared/*",
+    "#codecs/*": "./codecs/*",
+    "#app-generated/*": "./.svelte-kit/app-generated/*"
+  },
   "scripts": {
     "audit:static-output": "node scripts/audit-static-output.mjs",
     "build": "npm run sync && vite build",

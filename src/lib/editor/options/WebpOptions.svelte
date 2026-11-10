@@ -2,7 +2,7 @@
   // Ported from src/features/encoders/webP/client/index.tsx at parity.
   // Mutates the encoder's option object in place (a shared $state proxy from the
   // page), so changes flow back and re-trigger encoding.
-  import type { EncodeOptions } from 'features/encoders/webP/shared/meta';
+  import type { EncodeOptions } from '#features/encoders/webP/shared/meta.ts';
   import Range from './Range.svelte';
   import Checkbox from './Checkbox.svelte';
   import AdvancedSection from './AdvancedSection.svelte';

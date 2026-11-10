@@ -21,15 +21,15 @@ import type SvelteKitWorkerBridge from './sveltekit-worker-bridge';
 import type { SvgOptimizeOptions } from './svg/optimize-options';
 import { rasterizeSvg, vectorResize, type SvgRaster } from './svg/raster';
 import { sourceKey } from './source-key';
-import { abortable } from 'client/lazy-app/abort';
-import { getPercentChange } from 'client/lazy-app/bulk/size';
-import { encoderMap } from 'client/lazy-app/feature-meta/shared';
-import { getOutputFileName } from 'client/lazy-app/output-filename';
-import type { ImageRecipe, Rotation } from 'client/lazy-app/recipe';
-import { isSvgSource } from 'client/lazy-app/svg-source';
+import { abortable } from '#client/lazy-app/abort.ts';
+import { getPercentChange } from '#client/lazy-app/bulk/size.ts';
+import { encoderMap } from '#client/lazy-app/feature-meta/shared.ts';
+import { getOutputFileName } from '#client/lazy-app/output-filename.ts';
+import type { ImageRecipe, Rotation } from '#client/lazy-app/recipe.ts';
+import { isSvgSource } from '#client/lazy-app/svg-source.ts';
 import type { OptimizeReply, OptimizeRequest } from '../worker/pipeline-op';
 
-export { chooseLane, type Lane } from 'client/lazy-app/lane';
+export { chooseLane, type Lane } from '#client/lazy-app/lane.ts';
 
 /** One source file, plus what only the caller's main thread can supply. */
 export interface OptimizeSource {
@@ -89,7 +89,7 @@ export async function optimizeImage(
     if (score) throw Error('Only a raster encode can be scored.');
     if (!svg) throw Error('Only an SVG source can stay vector.');
     const [{ optimizeSvgSide }, text, { raster }] = await Promise.all([
-      import('$lib/svg/optimize'),
+      import('#lib/svg/optimize.ts'),
       svgText ?? file.text(),
       abortable(signal, svg()),
     ]);

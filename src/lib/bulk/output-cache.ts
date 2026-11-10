@@ -1,4 +1,4 @@
-import type { ImageOutput } from 'client/lazy-app/bulk';
+import type { ImageOutput } from '#client/lazy-app/bulk/index.ts';
 
 // Earlier outputs of bulk jobs, keyed by job and recipe hash, so returning to a
 // previous setting (or undoing a removal) restores a result without encoding

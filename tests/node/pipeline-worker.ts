@@ -14,12 +14,12 @@ import {
   encodeFrame,
   prepareFrame,
   type PipelineSteps,
-} from 'client/lazy-app/pipeline-core';
-import { defaultProcessorState } from 'client/lazy-app/feature-meta/shared';
-import { createRotate } from 'features/preprocessors/rotate/worker/runtime';
-import { createResize } from 'features/processors/resize/worker/runtime';
-import { createWebpEncoderRuntime } from 'features/encoders/webP/worker/runtime';
-import { defaultOptions as webpDefaults } from 'features/encoders/webP/shared/meta';
+} from '#client/lazy-app/pipeline-core.ts';
+import { defaultProcessorState } from '#client/lazy-app/feature-meta/shared.ts';
+import { createRotate } from '#features/preprocessors/rotate/worker/runtime.ts';
+import { createResize } from '#features/processors/resize/worker/runtime.ts';
+import { createWebpEncoderRuntime } from '#features/encoders/webP/worker/runtime.ts';
+import { defaultOptions as webpDefaults } from '#features/encoders/webP/shared/meta.ts';
 
 export interface ProofInput {
   /** Repository root, where codecs/ lives. */

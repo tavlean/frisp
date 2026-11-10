@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterAll } from 'vitest';
-import { ResultCache } from '$lib/result-cache';
-import type { CompressOutcome } from '$lib/compress';
+import { ResultCache } from '#lib/result-cache.ts';
+import type { CompressOutcome } from '#lib/compress.ts';
 
 // The cache only ever reads `outputUrl`, the output ImageData byte length,
 // and the optional svg text length, so a minimal fake keeps the tests free of

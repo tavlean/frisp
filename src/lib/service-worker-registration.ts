@@ -3,7 +3,7 @@ import {
   applyServiceWorkerUpdate,
   anotherTabIsBusy,
   answerBusyQueries,
-} from 'client/lazy-app/sw-bridge/runtime';
+} from '#client/lazy-app/sw-bridge/runtime.ts';
 import { resolve } from '$app/paths';
 import { browser, dev } from '$app/env';
 

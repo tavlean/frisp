@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { createLimiter } from '$lib/bulk/limiter';
+import { createLimiter } from '#lib/bulk/limiter.ts';
 
 describe('createLimiter', () => {
   it('never runs more than its slots at once, in call order', async () => {

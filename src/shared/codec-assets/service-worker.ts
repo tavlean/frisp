@@ -2,7 +2,7 @@ import codecAssetRecordSources from '../codec-asset-records.json';
 import type {
   CodecAssetRecord,
   CodecAssetRecordSource,
-} from 'shared/codec-assets';
+} from '#shared/codec-assets.ts';
 import {
   avifDecoderWasmUrl,
   avifEncoderMtScriptUrl,

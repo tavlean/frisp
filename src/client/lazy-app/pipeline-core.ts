@@ -11,13 +11,13 @@ import {
   grainIsReal,
   type EncoderState,
   type ProcessorState,
-} from 'client/lazy-app/feature-meta/shared';
-import { applyGrain } from 'features/processors/grain/shared/apply';
-import type { Options as QuantizeOptions } from 'features/processors/quantize/shared/meta';
+} from '#client/lazy-app/feature-meta/shared.ts';
+import { applyGrain } from '#features/processors/grain/shared/apply.ts';
+import type { Options as QuantizeOptions } from '#features/processors/quantize/shared/meta.ts';
 import type {
   BrowserResizeOptions,
   WorkerResizeOptions,
-} from 'features/processors/resize/shared/meta';
+} from '#features/processors/resize/shared/meta.ts';
 import type { Rotation } from './recipe';
 
 /** The resize methods a pipeline host runs. 'vector' is not one: it redraws

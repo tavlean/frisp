@@ -8,8 +8,8 @@
   // wrapping /lab/intro/aurora page owns the drop target (via IntroDropDemo);
   // this component only raises picked/pasted files through onFiles.
   import type { Attachment } from 'svelte/attachments';
-  import { fromFileList, type ImportedFile } from '$lib/bulk/import-sources';
-  import { APP_NAME } from 'shared/brand';
+  import { fromFileList, type ImportedFile } from '#lib/bulk/import-sources.ts';
+  import { APP_NAME } from '#shared/brand.ts';
   import { startBlobAnim } from './blob-anim';
 
   interface Props {

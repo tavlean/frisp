@@ -1,4 +1,4 @@
-import imagequantWasmUrl from 'codecs/imagequant/imagequant.wasm?url';
+import imagequantWasmUrl from '#codecs/imagequant/imagequant.wasm?url';
 
 export { imagequantWasmUrl };
 

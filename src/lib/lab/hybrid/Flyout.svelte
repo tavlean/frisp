@@ -5,9 +5,9 @@
   // is a snippet. Porcelain card styling: white surface, big soft shadow, ~18px
   // squircle corners.
   import type { Snippet } from 'svelte';
-  import { lightDismiss } from '$lib/editor/light-dismiss';
-  import LabIcon from '$lib/lab/LabIcon.svelte';
-  import closeIcon from '$lib/lab/icons/close.svg?raw';
+  import { lightDismiss } from '#lib/editor/light-dismiss.ts';
+  import LabIcon from '#lib/lab/LabIcon.svelte';
+  import closeIcon from '#lib/lab/icons/close.svg?raw';
 
   interface Props {
     title: string;

@@ -3,12 +3,12 @@
   // trailing chevron) opening a raised popover of options. Replaces the reused
   // native Select for the porcelain look; same job (choose "Original Image" or
   // one of the encoders). Light-dismiss + Escape via the shared attachment.
-  import { lightDismiss } from '$lib/editor/light-dismiss';
-  import { IDENTITY, type SideFormat } from '$lib/compress';
-  import LabIcon from '$lib/lab/LabIcon.svelte';
-  import imageIcon from '$lib/lab/icons/image.svg?raw';
-  import chevronDownIcon from '$lib/lab/icons/chevron-down.svg?raw';
-  import checkIcon from '$lib/lab/icons/check.svg?raw';
+  import { lightDismiss } from '#lib/editor/light-dismiss.ts';
+  import { IDENTITY, type SideFormat } from '#lib/compress.ts';
+  import LabIcon from '#lib/lab/LabIcon.svelte';
+  import imageIcon from '#lib/lab/icons/image.svg?raw';
+  import chevronDownIcon from '#lib/lab/icons/chevron-down.svg?raw';
+  import checkIcon from '#lib/lab/icons/check.svg?raw';
 
   interface FormatOption {
     id: string;

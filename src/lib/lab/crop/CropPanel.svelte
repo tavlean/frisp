@@ -9,7 +9,7 @@
   // dark. Contract: docs/project/specs/2026-07-07-porcelain-crop-tool.md ("Panel").
   import { CropTool } from './crop-tool.svelte';
   import type { OverlayKind, OverlayShowMode } from './crop-types';
-  import { lightDismiss } from '$lib/editor/light-dismiss';
+  import { lightDismiss } from '#lib/editor/light-dismiss.ts';
 
   interface Props {
     tool: CropTool;

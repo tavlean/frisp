@@ -4,7 +4,7 @@
   // via apply() on every change (mirrors the Preact getDerivedStateFromProps).
   import { untrack } from 'svelte';
   import { reveal } from '../motion';
-  import type { EncodeOptions } from 'features/encoders/jxl/shared/meta';
+  import type { EncodeOptions } from '#features/encoders/jxl/shared/meta.ts';
   import Range from './Range.svelte';
   import Checkbox from './Checkbox.svelte';
   import AdvancedSection from './AdvancedSection.svelte';

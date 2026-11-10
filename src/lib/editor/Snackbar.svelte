@@ -2,10 +2,10 @@
   // Renders the current snackbar message (see snackbar-store.svelte.ts). Mirrors
   // Squoosh's bottom-centre snack-bar with optional action buttons (e.g. Undo).
   import { toast } from './motion';
-  // Import via the same $lib specifier as the rest of the app so Vite resolves
+  // Import via the same #lib specifier as the rest of the app so Vite resolves
   // a single shared module instance (a relative path here would create a second
   // copy of the store, with its own state that the editor's writes can't reach).
-  import { snackbar } from '$lib/editor/snackbar-store.svelte';
+  import { snackbar } from '#lib/editor/snackbar-store.svelte.ts';
 
   const snack = $derived(snackbar.current);
 </script>

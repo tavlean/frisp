@@ -10,7 +10,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import type { EncodeOptions } from 'codecs/qoi/enc/qoi_enc';
+import type { EncodeOptions } from '#codecs/qoi/enc/qoi_enc.js';
 export type { EncodeOptions };
 
 export const label = 'QOI';

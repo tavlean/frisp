@@ -10,9 +10,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import type { JXLModule } from 'codecs/jxl/dec/jxl_dec';
+import type { JXLModule } from '#codecs/jxl/dec/jxl_dec.js';
 
-import { blobToArrayBuffer, initEmscriptenModule } from 'features/worker-utils';
+import {
+  blobToArrayBuffer,
+  initEmscriptenModule,
+} from '#features/worker-utils/index.ts';
 
 type JxlDecoderModuleFactory = EmscriptenWasm.ModuleFactory<JXLModule>;
 

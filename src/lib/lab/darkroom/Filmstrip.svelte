@@ -5,9 +5,9 @@
   // ringed, close on hover removes) and a trailing "+" add chip. Its right end
   // reserves --dr-dock-w for the zoom/rotate controls docked over it (Output's
   // .controls, positioned in darkroom.css).
-  import LabIcon from '$lib/lab/LabIcon.svelte';
-  import closeIcon from '$lib/lab/icons/close.svg?raw';
-  import plusIcon from '$lib/lab/icons/plus.svg?raw';
+  import LabIcon from '#lib/lab/LabIcon.svelte';
+  import closeIcon from '#lib/lab/icons/close.svg?raw';
+  import plusIcon from '#lib/lab/icons/plus.svg?raw';
 
   interface Entry {
     id: string;

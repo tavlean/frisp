@@ -2,7 +2,10 @@
 // default options, and the shape of a finished result. The encode itself is
 // optimizeImage (optimize-image.ts), which runs in the codec worker.
 
-import { encoderMap, type EncoderType } from 'client/lazy-app/feature-meta';
+import {
+  encoderMap,
+  type EncoderType,
+} from '#client/lazy-app/feature-meta/index.ts';
 import { DEFAULT_SVG_OPTIONS } from './svg/optimize-options';
 
 /** Any encoder the generated SvelteKit surface supports. */

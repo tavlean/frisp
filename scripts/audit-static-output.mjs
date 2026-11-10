@@ -48,8 +48,10 @@ function assertUnique(values, label) {
   );
 }
 
+// Records hold repo paths (`codecs/...`); the imports reach the same files
+// through the `#codecs/*` subpath import, so the `#` is dropped to compare.
 function parseUrlImportPaths(source) {
-  return [...source.matchAll(/from '([^']+)\?url'/g)].map((match) => match[1]);
+  return [...source.matchAll(/from '#([^']+)\?url'/g)].map((match) => match[1]);
 }
 
 const files = await listFiles(buildDir);
@@ -493,7 +495,7 @@ assert(
   'Codec asset manifest does not derive records from the JSON source.',
 );
 assert(
-  codecAssetManifest.includes("from 'shared/codec-assets'"),
+  codecAssetManifest.includes("from '#shared/codec-assets.ts'"),
   'Codec asset manifest does not consume the shared codec asset contract.',
 );
 assert(

@@ -3,60 +3,60 @@ import {
   avifCodecAssetUrls,
   avifDecoderWasmUrl,
   avifEncoderWasmUrl,
-} from 'shared/codec-assets/avif';
+} from '#shared/codec-assets/avif.ts';
 import {
   webpCodecAssetUrls,
   webpDecoderWasmUrl,
   webpEncoderSimdWasmUrl,
   webpEncoderWasmUrl,
-} from 'shared/codec-assets/webp';
+} from '#shared/codec-assets/webp.ts';
 import {
   rotateCodecAssetUrls,
   rotateWasmUrl,
-} from 'shared/codec-assets/rotate';
+} from '#shared/codec-assets/rotate.ts';
 import {
   qoiCodecAssetUrls,
   qoiDecoderWasmUrl,
   qoiEncoderWasmUrl,
-} from 'shared/codec-assets/qoi';
+} from '#shared/codec-assets/qoi.ts';
 import {
   jxlCodecAssetUrls,
   jxlDecoderWasmUrl,
   jxlEncoderWasmUrl,
-} from 'shared/codec-assets/jxl';
+} from '#shared/codec-assets/jxl.ts';
 import {
   jpegliCodecAssetUrls,
   jpegliEncoderWasmUrl,
-} from 'shared/codec-assets/jpegli';
+} from '#shared/codec-assets/jpegli.ts';
 import {
   mozjpegCodecAssetUrls,
   mozjpegEncoderWasmUrl,
-} from 'shared/codec-assets/mozjpeg';
+} from '#shared/codec-assets/mozjpeg.ts';
 import {
   oxipngCodecAssetUrls,
   oxipngWasmUrl,
-} from 'shared/codec-assets/oxipng';
+} from '#shared/codec-assets/oxipng.ts';
 import {
   imagequantCodecAssetUrls,
   imagequantWasmUrl,
-} from 'shared/codec-assets/imagequant';
+} from '#shared/codec-assets/imagequant.ts';
 import {
   ssimulacra2CodecAssetUrls,
   ssimulacra2WasmUrl,
-} from 'shared/codec-assets/ssimulacra2';
+} from '#shared/codec-assets/ssimulacra2.ts';
 import {
   hqxWasmUrl,
   resizeCodecAssetUrls,
   resizeWasmUrl,
-} from 'shared/codec-assets/resize';
+} from '#shared/codec-assets/resize.ts';
 import {
   svelteKitCodecAssetRecords,
   type CodecAssetRecord,
-} from 'shared/codec-assets/manifest';
+} from '#shared/codec-assets/manifest.ts';
 import {
   precacheCodecAssetRecords,
   precacheCodecAssetUrls,
-} from 'shared/codec-assets/precache';
+} from '#shared/codec-assets/precache.ts';
 
 export {
   avifCodecAssetUrls,

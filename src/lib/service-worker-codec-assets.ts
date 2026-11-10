@@ -7,6 +7,6 @@
 import {
   serviceWorkerCodecAssetRecords,
   type CodecAssetRecord,
-} from 'shared/codec-assets/service-worker';
+} from '#shared/codec-assets/service-worker.ts';
 
 export { serviceWorkerCodecAssetRecords, type CodecAssetRecord };

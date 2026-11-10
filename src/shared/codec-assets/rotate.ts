@@ -1,4 +1,4 @@
-import rotateWasmUrl from 'codecs/rotate/rotate.wasm?url';
+import rotateWasmUrl from '#codecs/rotate/rotate.wasm?url';
 
 export { rotateWasmUrl };
 

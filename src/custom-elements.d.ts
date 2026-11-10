@@ -3,8 +3,8 @@
 // Event named `change` / `splitchange`, not a form event, so `onchange` is
 // replaced rather than inherited.
 import type { HTMLAttributes } from 'svelte/elements';
-import type PinchZoom from '$lib/editor/output/pinch-zoom';
-import type TwoUp from '$lib/editor/output/two-up';
+import type PinchZoom from '#lib/editor/output/pinch-zoom.ts';
+import type TwoUp from '#lib/editor/output/two-up.ts';
 
 declare module 'svelte/elements' {
   export interface SvelteHTMLElements {

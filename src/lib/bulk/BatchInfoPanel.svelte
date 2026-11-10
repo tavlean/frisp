@@ -21,9 +21,9 @@
   // stats and the OPTIMIZED figure pulses as it climbs. On the IMAGE face a
   // tiny "ALL IMAGES" whisper-caption tops the footer so the info-for-one /
   // action-for-all seam reads intentionally.
-  import ImageInfoRows from '$lib/editor/ImageInfoRows.svelte';
-  import { formatLabel } from '$lib/editor/format-label';
-  import { prettySize, prettySizeParts } from '$lib/editor/pretty-size';
+  import ImageInfoRows from '#lib/editor/ImageInfoRows.svelte';
+  import { formatLabel } from '#lib/editor/format-label.ts';
+  import { prettySize, prettySizeParts } from '#lib/editor/pretty-size.ts';
   import { bulkStore } from './store.svelte';
   import DeltaPill from './DeltaPill.svelte';
 

@@ -6,27 +6,27 @@
   // this subtree out of prerender/SSR and we hard-guard on `dev` below.
   import { onMount } from 'svelte';
   import { dev } from '$app/env';
-  import Output from '$lib/editor/output/Output.svelte';
-  import Snackbar from '$lib/editor/Snackbar.svelte';
-  import { snackbar } from '$lib/editor/snackbar-store.svelte';
-  import { fileDrop } from '$lib/editor/file-drop';
-  import { EditorSession } from '$lib/editor/editor-session.svelte';
-  import { IDENTITY } from '$lib/compress';
-  import type { ImportedFile } from '$lib/bulk/import-sources';
-  import TopBar, { type ThemeMode } from '$lib/lab/porcelain/TopBar.svelte';
-  import LeftPanel from '$lib/lab/porcelain/LeftPanel.svelte';
-  import LabOptionsPanel from '$lib/lab/porcelain/LabOptionsPanel.svelte';
-  import CropStage from '$lib/lab/crop/CropStage.svelte';
-  import CropPanel from '$lib/lab/crop/CropPanel.svelte';
-  import { CropTool } from '$lib/lab/crop/crop-tool.svelte';
-  import type { CropSnapshot } from '$lib/lab/crop/crop-types';
-  import LabIcon from '$lib/lab/LabIcon.svelte';
-  import copyIcon from '$lib/lab/icons/copy.svg?raw';
-  import saveIcon from '$lib/lab/icons/save.svg?raw';
-  import importIcon from '$lib/lab/icons/import.svg?raw';
-  import { labSourceFile, rememberLabSource } from '$lib/lab/lab-source';
-  import '$lib/editor/theme.css';
-  import '$lib/lab/porcelain/porcelain.css';
+  import Output from '#lib/editor/output/Output.svelte';
+  import Snackbar from '#lib/editor/Snackbar.svelte';
+  import { snackbar } from '#lib/editor/snackbar-store.svelte.ts';
+  import { fileDrop } from '#lib/editor/file-drop.ts';
+  import { EditorSession } from '#lib/editor/editor-session.svelte.ts';
+  import { IDENTITY } from '#lib/compress.ts';
+  import type { ImportedFile } from '#lib/bulk/import-sources.ts';
+  import TopBar, { type ThemeMode } from '#lib/lab/porcelain/TopBar.svelte';
+  import LeftPanel from '#lib/lab/porcelain/LeftPanel.svelte';
+  import LabOptionsPanel from '#lib/lab/porcelain/LabOptionsPanel.svelte';
+  import CropStage from '#lib/lab/crop/CropStage.svelte';
+  import CropPanel from '#lib/lab/crop/CropPanel.svelte';
+  import { CropTool } from '#lib/lab/crop/crop-tool.svelte.ts';
+  import type { CropSnapshot } from '#lib/lab/crop/crop-types.ts';
+  import LabIcon from '#lib/lab/LabIcon.svelte';
+  import copyIcon from '#lib/lab/icons/copy.svg?raw';
+  import saveIcon from '#lib/lab/icons/save.svg?raw';
+  import importIcon from '#lib/lab/icons/import.svg?raw';
+  import { labSourceFile, rememberLabSource } from '#lib/lab/lab-source.ts';
+  import '#lib/editor/theme.css';
+  import '#lib/lab/porcelain/porcelain.css';
 
   const session = new EditorSession();
 

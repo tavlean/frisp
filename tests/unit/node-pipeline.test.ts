@@ -4,11 +4,10 @@ import { join, resolve } from 'node:path';
 import { Worker } from 'node:worker_threads';
 import { build } from 'vite';
 import { afterAll, describe, expect, it } from 'vitest';
-import { appAliases } from '../../vite.config';
 import type { ProofInput, ProofReply } from '../node/pipeline-worker';
 
 // The headless boundary, proven rather than promised: bundle the Node proof
-// for Node (aliases resolved, codec artifacts left on disk), run it in a real
+// for Node (`#` imports resolved, codec artifacts left on disk), run it in a real
 // worker_thread, and check the WebP it makes. A DOM reference anywhere in the
 // pipeline core fails here, not in a CLI months later.
 
@@ -20,7 +19,6 @@ async function bundle(): Promise<string> {
   await build({
     configFile: false,
     logLevel: 'silent',
-    resolve: { alias: appAliases },
     ssr: { noExternal: true, target: 'node' },
     build: {
       ssr: join(root, 'tests/node/pipeline-worker.ts'),

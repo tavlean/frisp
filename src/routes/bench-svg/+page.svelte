@@ -1,11 +1,11 @@
 <script lang="ts">
   import { dev } from '$app/env';
   import { onMount } from 'svelte';
-  import { processSvg } from 'client/lazy-app/svg-source';
-  import { autoSearch } from '$lib/svg/auto-search';
-  import { DEFAULT_SVG_OPTIONS } from '$lib/svg/optimize-options';
-  import { optimizeSvg } from '$lib/svg/optimizer-client';
-  import { buildSvgoConfig } from '$lib/svg/svgo-config';
+  import { processSvg } from '#client/lazy-app/svg-source.ts';
+  import { autoSearch } from '#lib/svg/auto-search.ts';
+  import { DEFAULT_SVG_OPTIONS } from '#lib/svg/optimize-options.ts';
+  import { optimizeSvg } from '#lib/svg/optimizer-client.ts';
+  import { buildSvgoConfig } from '#lib/svg/svgo-config.ts';
 
   type BenchError = { error: string };
 

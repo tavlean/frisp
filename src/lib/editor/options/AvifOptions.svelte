@@ -9,7 +9,7 @@
     AVIFTune,
     defaultOptions,
     type EncodeOptions,
-  } from 'features/encoders/avif/shared/meta';
+  } from '#features/encoders/avif/shared/meta.ts';
   import Range from './Range.svelte';
   import Checkbox from './Checkbox.svelte';
   import AdvancedSection from './AdvancedSection.svelte';

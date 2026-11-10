@@ -1,8 +1,11 @@
 import type {
   default as initResizeWasm,
   resize as wasmResize,
-} from 'codecs/resize/pkg';
-import type { default as initHqxWasm, resize as wasmHqx } from 'codecs/hqx/pkg';
+} from '#codecs/resize/pkg/squoosh_resize.js';
+import type {
+  default as initHqxWasm,
+  resize as wasmHqx,
+} from '#codecs/hqx/pkg/squooshhqx.js';
 import type { WorkerResizeOptions } from '../shared/meta';
 import { getContainOffsets } from '../shared/util';
 

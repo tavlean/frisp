@@ -25,20 +25,20 @@
     OUTPUT_FORMATS,
     type SideFormat,
     type CompressOutcome,
-  } from '$lib/compress';
+  } from '#lib/compress.ts';
   import type {
     ResizeOptionsState,
     GrainOptionsState,
     QuantizeOptionsState,
   } from './options/processor-types';
-  import type { ProcessorState } from 'client/lazy-app/feature-meta';
-  import type { EncodeOptions as WebpEncodeOptions } from 'features/encoders/webP/shared/meta';
-  import type { EncodeOptions as AvifEncodeOptions } from 'features/encoders/avif/shared/meta';
-  import type { EncodeOptions as JxlEncodeOptions } from 'features/encoders/jxl/shared/meta';
-  import type { EncodeOptions as MozjpegEncodeOptions } from 'features/encoders/mozJPEG/shared/meta';
-  import type { EncodeOptions as JpegliEncodeOptions } from 'features/encoders/jpegli/shared/meta';
-  import type { EncodeOptions as OxipngEncodeOptions } from 'features/encoders/oxiPNG/shared/meta';
-  import type { SvgOptimizeOptions } from '$lib/svg/optimize-options';
+  import type { ProcessorState } from '#client/lazy-app/feature-meta/index.ts';
+  import type { EncodeOptions as WebpEncodeOptions } from '#features/encoders/webP/shared/meta.ts';
+  import type { EncodeOptions as AvifEncodeOptions } from '#features/encoders/avif/shared/meta.ts';
+  import type { EncodeOptions as JxlEncodeOptions } from '#features/encoders/jxl/shared/meta.ts';
+  import type { EncodeOptions as MozjpegEncodeOptions } from '#features/encoders/mozJPEG/shared/meta.ts';
+  import type { EncodeOptions as JpegliEncodeOptions } from '#features/encoders/jpegli/shared/meta.ts';
+  import type { EncodeOptions as OxipngEncodeOptions } from '#features/encoders/oxiPNG/shared/meta.ts';
+  import type { SvgOptimizeOptions } from '#lib/svg/optimize-options.ts';
   import type { AutoQualityControl } from './auto-quality';
 
   interface Props {

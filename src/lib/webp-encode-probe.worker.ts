@@ -1,7 +1,7 @@
-import { createWebpEncoderRuntime } from 'features/encoders/webP/worker/runtime';
-import { defaultOptions } from 'features/encoders/webP/shared/meta';
-import webpEncoder from 'app-generated/codecs/webp/enc/webp_enc';
-import webpEncoderSimd from 'app-generated/codecs/webp/enc/webp_enc_simd';
+import { createWebpEncoderRuntime } from '#features/encoders/webP/worker/runtime.ts';
+import { defaultOptions } from '#features/encoders/webP/shared/meta.ts';
+import webpEncoder from '#app-generated/codecs/webp/enc/webp_enc.js';
+import webpEncoderSimd from '#app-generated/codecs/webp/enc/webp_enc_simd.js';
 
 interface WebpEncodeProbeRequest {
   type: 'encode';

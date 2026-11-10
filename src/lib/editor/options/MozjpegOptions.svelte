@@ -5,7 +5,7 @@
   import {
     MozJpegColorSpace,
     type EncodeOptions,
-  } from 'features/encoders/mozJPEG/shared/meta';
+  } from '#features/encoders/mozJPEG/shared/meta.ts';
   import Range from './Range.svelte';
   import Checkbox from './Checkbox.svelte';
   import AdvancedSection from './AdvancedSection.svelte';

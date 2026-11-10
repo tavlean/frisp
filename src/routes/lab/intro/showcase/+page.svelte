@@ -10,21 +10,21 @@
   // prerender/SSR and we hard-guard on `dev` below.
   import { onMount, tick } from 'svelte';
   import { dev } from '$app/env';
-  import { APP_NAME } from 'shared/brand';
-  import { fromDataTransfer } from '$lib/bulk/import-sources';
-  import { EditorSession } from '$lib/editor/editor-session.svelte';
-  import { IDENTITY } from '$lib/compress';
-  import Output from '$lib/editor/output/Output.svelte';
-  import OptionsPanel from '$lib/editor/OptionsPanel.svelte';
-  import ImageInfoPanel from '$lib/editor/ImageInfoPanel.svelte';
-  import Snackbar from '$lib/editor/Snackbar.svelte';
-  import Brand from '$lib/lab/intro/Brand.svelte';
-  import Icon from '$lib/lab/intro/Icon.svelte';
+  import { APP_NAME } from '#shared/brand.ts';
+  import { fromDataTransfer } from '#lib/bulk/import-sources.ts';
+  import { EditorSession } from '#lib/editor/editor-session.svelte.ts';
+  import { IDENTITY } from '#lib/compress.ts';
+  import Output from '#lib/editor/output/Output.svelte';
+  import OptionsPanel from '#lib/editor/OptionsPanel.svelte';
+  import ImageInfoPanel from '#lib/editor/ImageInfoPanel.svelte';
+  import Snackbar from '#lib/editor/Snackbar.svelte';
+  import Brand from '#lib/lab/intro/Brand.svelte';
+  import Icon from '#lib/lab/intro/Icon.svelte';
   import ThemeToggle, {
     type ThemeMode,
-  } from '$lib/lab/intro/ThemeToggle.svelte';
-  import '$lib/editor/theme.css';
-  import '$lib/lab/intro/intro-lab.css';
+  } from '#lib/lab/intro/ThemeToggle.svelte';
+  import '#lib/editor/theme.css';
+  import '#lib/lab/intro/intro-lab.css';
 
   // Constructed once at module-instance level (porcelain's proven pattern); its
   // encode/spinner effects live in an internal $effect.root, so no component

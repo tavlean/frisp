@@ -1,5 +1,5 @@
 import { downloadZip } from 'client-zip';
-import type { BulkExportPlan } from 'client/lazy-app/bulk';
+import type { BulkExportPlan } from '#client/lazy-app/bulk/index.ts';
 
 export async function buildZipBlob(plan: BulkExportPlan): Promise<Blob> {
   const files = plan.entries.map((entry) => ({

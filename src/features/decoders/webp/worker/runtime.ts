@@ -10,9 +10,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import type { WebPModule } from 'codecs/webp/dec/webp_dec';
+import type { WebPModule } from '#codecs/webp/dec/webp_dec.js';
 
-import { blobToArrayBuffer, initEmscriptenModule } from 'features/worker-utils';
+import {
+  blobToArrayBuffer,
+  initEmscriptenModule,
+} from '#features/worker-utils/index.ts';
 
 type WebpDecoderModuleFactory = EmscriptenWasm.ModuleFactory<WebPModule>;
 

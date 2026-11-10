@@ -11,17 +11,17 @@
   // primary Export. All wiring is real — Back clears the file, Undo/Redo drive
   // session history, Export downloads the right side's encoded result. Tooltips
   // are pure CSS (no `title`) so they can carry a right-aligned kbd shortcut.
-  import type { EditorSession } from '$lib/editor/editor-session.svelte';
-  import Logomark from '$lib/lab/Logomark.svelte';
-  import LabIcon from '$lib/lab/LabIcon.svelte';
-  import backIcon from '$lib/lab/icons/back.svg?raw';
-  import undoIcon from '$lib/lab/icons/undo.svg?raw';
-  import redoIcon from '$lib/lab/icons/redo.svg?raw';
-  import cropIcon from '$lib/lab/icons/crop.svg?raw';
-  import sunMoonIcon from '$lib/lab/icons/sun-moon.svg?raw';
-  import sunIcon from '$lib/lab/icons/sun.svg?raw';
-  import moonIcon from '$lib/lab/icons/moon.svg?raw';
-  import exportIcon from '$lib/lab/icons/export.svg?raw';
+  import type { EditorSession } from '#lib/editor/editor-session.svelte.ts';
+  import Logomark from '#lib/lab/Logomark.svelte';
+  import LabIcon from '#lib/lab/LabIcon.svelte';
+  import backIcon from '#lib/lab/icons/back.svg?raw';
+  import undoIcon from '#lib/lab/icons/undo.svg?raw';
+  import redoIcon from '#lib/lab/icons/redo.svg?raw';
+  import cropIcon from '#lib/lab/icons/crop.svg?raw';
+  import sunMoonIcon from '#lib/lab/icons/sun-moon.svg?raw';
+  import sunIcon from '#lib/lab/icons/sun.svg?raw';
+  import moonIcon from '#lib/lab/icons/moon.svg?raw';
+  import exportIcon from '#lib/lab/icons/export.svg?raw';
 
   interface Props {
     session: EditorSession;

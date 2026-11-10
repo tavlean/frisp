@@ -21,8 +21,8 @@ import {
   fromDataTransfer,
   fromFileList,
   type ImportedFile,
-} from '$lib/bulk/import-sources';
-import { prettySize } from '$lib/editor/pretty-size';
+} from '#lib/bulk/import-sources.ts';
+import { prettySize } from '#lib/editor/pretty-size.ts';
 
 /** True when the drag actually carries files (not text, links, etc.). */
 function dragHasFiles(event: DragEvent): boolean {

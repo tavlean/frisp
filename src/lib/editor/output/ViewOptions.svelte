@@ -18,8 +18,8 @@
   // bar and re-enable them for direct children through a scoped `> *` rule,
   // which does not reach a child component's root.
   import type { Snippet } from 'svelte';
-  import { isSafari } from 'client/lazy-app/util';
-  import { lightDismiss } from '$lib/editor/light-dismiss';
+  import { isSafari } from '#client/lazy-app/util/index.ts';
+  import { lightDismiss } from '#lib/editor/light-dismiss.ts';
 
   interface Props {
     /** Smoothing off: the preview uses image-rendering:pixelated. */

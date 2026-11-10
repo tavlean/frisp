@@ -1,5 +1,5 @@
-import hqxWasmUrl from 'codecs/hqx/pkg/squooshhqx_bg.wasm?url';
-import resizeWasmUrl from 'codecs/resize/pkg/squoosh_resize_bg.wasm?url';
+import hqxWasmUrl from '#codecs/hqx/pkg/squooshhqx_bg.wasm?url';
+import resizeWasmUrl from '#codecs/resize/pkg/squoosh_resize_bg.wasm?url';
 
 export { hqxWasmUrl, resizeWasmUrl };
 

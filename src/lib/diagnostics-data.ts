@@ -1,15 +1,15 @@
 import {
   createImageJobs,
   createBulkSessionFromImport,
-} from 'client/lazy-app/bulk/import';
-import { completeJob } from 'client/lazy-app/bulk/queue';
-import { getBulkSessionSummary } from 'client/lazy-app/bulk/summary';
+} from '#client/lazy-app/bulk/import.ts';
+import { completeJob } from '#client/lazy-app/bulk/queue.ts';
+import { getBulkSessionSummary } from '#client/lazy-app/bulk/summary.ts';
 import {
   defaultProcessorState,
   encoderMap,
-} from 'client/lazy-app/feature-meta';
-import type { BulkSession } from 'client/lazy-app/bulk/session';
-import type { ImageRecipe } from 'client/lazy-app/recipe';
+} from '#client/lazy-app/feature-meta/index.ts';
+import type { BulkSession } from '#client/lazy-app/bulk/session.ts';
+import type { ImageRecipe } from '#client/lazy-app/recipe.ts';
 
 export interface DiagnosticsModel {
   session: BulkSession;

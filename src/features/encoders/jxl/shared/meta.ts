@@ -10,7 +10,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import type { EncodeOptions as WasmEncodeOptions } from 'codecs/jxl/enc/jxl_enc';
+import type { EncodeOptions as WasmEncodeOptions } from '#codecs/jxl/enc/jxl_enc.js';
 
 /**
  * The wasm encoder's options plus one app-level field. `jpegTranscode` picks a

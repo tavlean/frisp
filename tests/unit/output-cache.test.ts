@@ -1,5 +1,5 @@
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
-import { BulkOutputCache } from '$lib/bulk/output-cache';
+import { BulkOutputCache } from '#lib/bulk/output-cache.ts';
 import { fakeOutput } from './fixtures';
 
 const revoked: string[] = [];

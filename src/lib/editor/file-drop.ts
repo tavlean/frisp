@@ -16,7 +16,10 @@
 // instead of the class.
 
 import type { Attachment } from 'svelte/attachments';
-import { fromDataTransfer, type ImportedFile } from '$lib/bulk/import-sources';
+import {
+  fromDataTransfer,
+  type ImportedFile,
+} from '#lib/bulk/import-sources.ts';
 
 /** True when the drag actually carries files (not text, links, etc.). */
 function dragHasFiles(event: DragEvent): boolean {

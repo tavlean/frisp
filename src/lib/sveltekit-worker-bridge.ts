@@ -1,6 +1,6 @@
 import { transfer } from 'comlink';
-import { createWorkerBridgeRuntime } from 'client/lazy-app/worker-bridge/runtime';
-import { getCodecAssetUrl } from 'shared/codec-assets';
+import { createWorkerBridgeRuntime } from '#client/lazy-app/worker-bridge/runtime.ts';
+import { getCodecAssetUrl } from '#shared/codec-assets.ts';
 import type {
   OptimizeReply,
   OptimizeRequest,

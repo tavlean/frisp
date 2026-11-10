@@ -1,4 +1,4 @@
-import { blobToArrayBuffer } from 'shared/blob';
+import { blobToArrayBuffer } from '#shared/blob.ts';
 
 async function decodeImage(url: string): Promise<HTMLImageElement> {
   const img = new Image();

@@ -9,29 +9,29 @@
     applyServiceWorkerUpdate,
     anotherTabIsBusy,
     answerBusyQueries,
-  } from '$lib/service-worker-registration';
-  import Output from '$lib/editor/output/Output.svelte';
-  import OptionsPanel from '$lib/editor/OptionsPanel.svelte';
-  import ImageInfoPanel from '$lib/editor/ImageInfoPanel.svelte';
-  import Snackbar from '$lib/editor/Snackbar.svelte';
-  import CrashPanel from '$lib/editor/CrashPanel.svelte';
-  import Intro from '$lib/editor/intro/Intro.svelte';
-  import BulkMode from '$lib/bulk/BulkMode.svelte';
-  import { bulkStore } from '$lib/bulk/store.svelte';
-  import type { ImportedFile } from '$lib/bulk/import-sources';
-  import { snackbar } from '$lib/editor/snackbar-store.svelte';
-  import { fileDrop } from '$lib/editor/file-drop';
-  import { EditorSession } from '$lib/editor/editor-session.svelte';
+  } from '#lib/service-worker-registration.ts';
+  import Output from '#lib/editor/output/Output.svelte';
+  import OptionsPanel from '#lib/editor/OptionsPanel.svelte';
+  import ImageInfoPanel from '#lib/editor/ImageInfoPanel.svelte';
+  import Snackbar from '#lib/editor/Snackbar.svelte';
+  import CrashPanel from '#lib/editor/CrashPanel.svelte';
+  import Intro from '#lib/editor/intro/Intro.svelte';
+  import BulkMode from '#lib/bulk/BulkMode.svelte';
+  import { bulkStore } from '#lib/bulk/store.svelte.ts';
+  import type { ImportedFile } from '#lib/bulk/import-sources.ts';
+  import { snackbar } from '#lib/editor/snackbar-store.svelte.ts';
+  import { fileDrop } from '#lib/editor/file-drop.ts';
+  import { EditorSession } from '#lib/editor/editor-session.svelte.ts';
   import {
     isEditorOpen,
     pushEditorRoute,
-  } from '$lib/editor/editor-route.svelte';
-  import type { AutoQualityControl } from '$lib/editor/auto-quality';
-  import { IDENTITY, type CompressOutcome } from '$lib/compress';
-  import { isSupportedBulkImage } from 'client/lazy-app/bulk';
-  import { isMac } from 'client/lazy-app/util';
-  import { APP_NAME } from 'shared/brand';
-  import '$lib/editor/theme.css';
+  } from '#lib/editor/editor-route.svelte.ts';
+  import type { AutoQualityControl } from '#lib/editor/auto-quality.ts';
+  import { IDENTITY, type CompressOutcome } from '#lib/compress.ts';
+  import { isSupportedBulkImage } from '#client/lazy-app/bulk/index.ts';
+  import { isMac } from '#client/lazy-app/util/index.ts';
+  import { APP_NAME } from '#shared/brand.ts';
+  import '#lib/editor/theme.css';
 
   const session = new EditorSession();
 

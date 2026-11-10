@@ -4,8 +4,8 @@
 // would silently undo the lazy-chunk and service-worker cache design.
 
 import { gzipSync, strToU8 } from 'fflate';
-import type { CompressOutcome } from '$lib/compress';
-import { getPercentChange } from 'client/lazy-app/bulk/size';
+import type { CompressOutcome } from '#lib/compress.ts';
+import { getPercentChange } from '#client/lazy-app/bulk/size.ts';
 import type { SvgOptimizeOptions } from './optimize-options';
 import { autoSearch } from './auto-search';
 import { optimizeSvg } from './optimizer-client';

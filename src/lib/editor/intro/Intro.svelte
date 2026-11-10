@@ -13,12 +13,12 @@
   import { onMount } from 'svelte';
   import { dev } from '$app/env';
   import { resolve } from '$app/paths';
-  import { fromFileList, type ImportedFile } from '$lib/bulk/import-sources';
-  import { fileDrop } from '$lib/editor/file-drop';
-  import { APP_NAME } from 'shared/brand';
+  import { fromFileList, type ImportedFile } from '#lib/bulk/import-sources.ts';
+  import { fileDrop } from '#lib/editor/file-drop.ts';
+  import { APP_NAME } from '#shared/brand.ts';
   // The canonical logomark (currentColor); shared with the lab's Logomark so the
   // mark has ONE source of truth instead of a hand-copied path per consumer.
-  import logomark from '$lib/brand/logomark.svg?raw';
+  import logomark from '#lib/brand/logomark.svg?raw';
 
   interface Props {
     /** Hand chosen files (from drop/picker/paste) up to the page. */

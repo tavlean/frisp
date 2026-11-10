@@ -6,8 +6,8 @@
     sizePresets,
     getResizePresetSize,
     getMatchingResizePreset,
-  } from 'features/processors/resize/client/preset-state';
-  import { workerResizeMethods } from 'features/processors/resize/shared/meta';
+  } from '#features/processors/resize/client/preset-state.ts';
+  import { workerResizeMethods } from '#features/processors/resize/shared/meta.ts';
   import Select from './Select.svelte';
   import Checkbox from './Checkbox.svelte';
   import ToggleRow from './ToggleRow.svelte';

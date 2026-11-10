@@ -11,12 +11,12 @@ import { asset, resolve } from '$app/paths';
 import { self as worker } from '$app/service-worker';
 import type { AssetPath } from '$app/types';
 import { simd, threads } from 'wasm-feature-detect';
-import { serviceWorkerCodecAssetRecords } from '$lib/service-worker-codec-assets';
+import { serviceWorkerCodecAssetRecords } from '#lib/service-worker-codec-assets.ts';
 import {
   dedupeUrls,
   selectCodecPrecacheUrls,
   type CodecPrecacheSupport,
-} from 'sw/cache-plan';
+} from '#sw/cache-plan.ts';
 
 const cacheName = `app-${version}`;
 

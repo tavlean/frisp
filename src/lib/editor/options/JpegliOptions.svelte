@@ -5,7 +5,7 @@
   import {
     JpegliChromaSubsample,
     type EncodeOptions,
-  } from 'features/encoders/jpegli/shared/meta';
+  } from '#features/encoders/jpegli/shared/meta.ts';
   import Range from './Range.svelte';
   import Checkbox from './Checkbox.svelte';
   import AdvancedSection from './AdvancedSection.svelte';

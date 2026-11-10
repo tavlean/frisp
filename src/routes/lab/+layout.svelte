@@ -9,7 +9,7 @@
   import LabTabs, {
     LAB_TABS_HEIGHT,
     type LabTab,
-  } from '$lib/lab/LabTabs.svelte';
+  } from '#lib/lab/LabTabs.svelte';
 
   let { children }: { children: Snippet } = $props();
 

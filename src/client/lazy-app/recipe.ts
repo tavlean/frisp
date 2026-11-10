@@ -11,8 +11,8 @@ import {
   grainIsReal,
   type EncoderState,
   type ProcessorState,
-} from 'client/lazy-app/feature-meta/shared';
-import { stableStringify } from 'shared/stable-stringify';
+} from '#client/lazy-app/feature-meta/shared.ts';
+import { stableStringify } from '#shared/stable-stringify.ts';
 
 /** Quarter turns, the same values PreprocessorState.rotate.rotate holds. */
 export type Rotation = 0 | 90 | 180 | 270;

@@ -4,7 +4,7 @@
   // themes it via its own `color` (graphite on light, white on dark) — the same
   // contract as Icon.svelte. The source is 1650×1800; it's sized by height with
   // width following the aspect ratio, so a square host box centres it undistorted.
-  import mark from '$lib/brand/logomark.svg?raw';
+  import mark from '#lib/brand/logomark.svg?raw';
 </script>
 
 <script lang="ts">

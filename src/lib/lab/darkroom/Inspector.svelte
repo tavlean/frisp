@@ -6,38 +6,38 @@
   // reduce-palette sections, the ···-menu actions, and the pinned Results footer
   // — but re-skinned into the darkroom's chip-tab + collapsible-section language.
   import { slide } from 'svelte/transition';
-  import Range from '$lib/editor/options/Range.svelte';
-  import OptionRow from '$lib/editor/options/OptionRow.svelte';
-  import WebpOptions from '$lib/editor/options/WebpOptions.svelte';
-  import AvifOptions from '$lib/editor/options/AvifOptions.svelte';
-  import JxlOptions from '$lib/editor/options/JxlOptions.svelte';
-  import MozjpegOptions from '$lib/editor/options/MozjpegOptions.svelte';
-  import JpegliOptions from '$lib/editor/options/JpegliOptions.svelte';
-  import OxipngOptions from '$lib/editor/options/OxipngOptions.svelte';
-  import ResizeOptions from '$lib/editor/options/ResizeOptions.svelte';
-  import QuantizeOptions from '$lib/editor/options/QuantizeOptions.svelte';
-  import Results from '$lib/editor/Results.svelte';
+  import Range from '#lib/editor/options/Range.svelte';
+  import OptionRow from '#lib/editor/options/OptionRow.svelte';
+  import WebpOptions from '#lib/editor/options/WebpOptions.svelte';
+  import AvifOptions from '#lib/editor/options/AvifOptions.svelte';
+  import JxlOptions from '#lib/editor/options/JxlOptions.svelte';
+  import MozjpegOptions from '#lib/editor/options/MozjpegOptions.svelte';
+  import JpegliOptions from '#lib/editor/options/JpegliOptions.svelte';
+  import OxipngOptions from '#lib/editor/options/OxipngOptions.svelte';
+  import ResizeOptions from '#lib/editor/options/ResizeOptions.svelte';
+  import QuantizeOptions from '#lib/editor/options/QuantizeOptions.svelte';
+  import Results from '#lib/editor/Results.svelte';
   import SectionHeader from './SectionHeader.svelte';
   import DropdownChip from './DropdownChip.svelte';
-  import LabIcon from '$lib/lab/LabIcon.svelte';
-  import moreIcon from '$lib/lab/icons/more.svg?raw';
-  import { lightDismiss } from '$lib/editor/light-dismiss';
+  import LabIcon from '#lib/lab/LabIcon.svelte';
+  import moreIcon from '#lib/lab/icons/more.svg?raw';
+  import { lightDismiss } from '#lib/editor/light-dismiss.ts';
   import {
     IDENTITY,
     type SideFormat,
     type CompressOutcome,
-  } from '$lib/compress';
+  } from '#lib/compress.ts';
   import type {
     ResizeOptionsState,
     QuantizeOptionsState,
-  } from '$lib/editor/options/processor-types';
-  import type { ProcessorState } from 'client/lazy-app/feature-meta';
-  import type { EncodeOptions as WebpEncodeOptions } from 'features/encoders/webP/shared/meta';
-  import type { EncodeOptions as AvifEncodeOptions } from 'features/encoders/avif/shared/meta';
-  import type { EncodeOptions as JxlEncodeOptions } from 'features/encoders/jxl/shared/meta';
-  import type { EncodeOptions as MozjpegEncodeOptions } from 'features/encoders/mozJPEG/shared/meta';
-  import type { EncodeOptions as JpegliEncodeOptions } from 'features/encoders/jpegli/shared/meta';
-  import type { EncodeOptions as OxipngEncodeOptions } from 'features/encoders/oxiPNG/shared/meta';
+  } from '#lib/editor/options/processor-types.ts';
+  import type { ProcessorState } from '#client/lazy-app/feature-meta/index.ts';
+  import type { EncodeOptions as WebpEncodeOptions } from '#features/encoders/webP/shared/meta.ts';
+  import type { EncodeOptions as AvifEncodeOptions } from '#features/encoders/avif/shared/meta.ts';
+  import type { EncodeOptions as JxlEncodeOptions } from '#features/encoders/jxl/shared/meta.ts';
+  import type { EncodeOptions as MozjpegEncodeOptions } from '#features/encoders/mozJPEG/shared/meta.ts';
+  import type { EncodeOptions as JpegliEncodeOptions } from '#features/encoders/jpegli/shared/meta.ts';
+  import type { EncodeOptions as OxipngEncodeOptions } from '#features/encoders/oxiPNG/shared/meta.ts';
 
   interface FormatMeta {
     id: string;

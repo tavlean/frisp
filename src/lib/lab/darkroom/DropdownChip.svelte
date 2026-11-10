@@ -4,10 +4,10 @@
   // option rows (hover raised fill; selected = active fill + check). Closed with
   // lightDismiss (Escape + click-out). Used for the Inspector's format picker;
   // kept generic (value/options/onchange) so it can be reused.
-  import { lightDismiss } from '$lib/editor/light-dismiss';
-  import LabIcon from '$lib/lab/LabIcon.svelte';
-  import chevronDownIcon from '$lib/lab/icons/chevron-down.svg?raw';
-  import checkIcon from '$lib/lab/icons/check.svg?raw';
+  import { lightDismiss } from '#lib/editor/light-dismiss.ts';
+  import LabIcon from '#lib/lab/LabIcon.svelte';
+  import chevronDownIcon from '#lib/lab/icons/chevron-down.svg?raw';
+  import checkIcon from '#lib/lab/icons/check.svg?raw';
 
   interface Option {
     value: string;

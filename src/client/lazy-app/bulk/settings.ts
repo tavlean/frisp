@@ -4,7 +4,7 @@
 // preset: a shared 25, 50 or 100 percent resize means that fraction of EACH
 // source, not the reference image's pixel size.
 
-import { stableStringify } from 'shared/stable-stringify';
+import { stableStringify } from '#shared/stable-stringify.ts';
 import type { ImageRecipe } from '../recipe';
 
 export interface BulkSourceDimensions {

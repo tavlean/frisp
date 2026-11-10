@@ -1,8 +1,8 @@
-import { IDENTITY, OUTPUT_FORMATS, type SideFormat } from '$lib/compress';
+import { IDENTITY, OUTPUT_FORMATS, type SideFormat } from '#lib/compress.ts';
 import {
   defaultProcessorState,
   type ProcessorState,
-} from 'client/lazy-app/feature-meta';
+} from '#client/lazy-app/feature-meta/index.ts';
 
 /**
  * The editor's localStorage persistence: the auto-saved encoder settings (both

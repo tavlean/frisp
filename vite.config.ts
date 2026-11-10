@@ -153,25 +153,6 @@ const workerPrecacheManifest: Plugin = {
   },
 };
 
-// Exported so vitest.config.ts resolves the same aliases (it does NOT inherit
-// this file: a standalone vitest.config takes full precedence, and without
-// these an aliased import inside any transitively-loaded source module makes
-// that whole test file fail at collection).
-export const appAliases = {
-  $lib: fileURLToPath(new URL('./src/lib', import.meta.url)),
-  'app-generated': fileURLToPath(
-    new URL('./.svelte-kit/app-generated', import.meta.url),
-  ),
-  codecs: fileURLToPath(new URL('./codecs', import.meta.url)),
-  client: fileURLToPath(new URL('./src/client', import.meta.url)),
-  features: fileURLToPath(new URL('./src/features', import.meta.url)),
-  shared: fileURLToPath(new URL('./src/shared', import.meta.url)),
-  sw: fileURLToPath(new URL('./src/sw', import.meta.url)),
-  'worker-shared': fileURLToPath(
-    new URL('./src/worker-shared', import.meta.url),
-  ),
-};
-
 // The service worker names its cache after SvelteKit's version, so the
 // default (a build timestamp) made every rebuild of identical code look like a
 // new release and re-download the whole precache on every install. A clean
@@ -201,9 +182,6 @@ export default defineConfig({
     workerPrecacheManifest,
     // SvelteKit 3 reads its config here; svelte.config.js is gone.
     sveltekit({
-      // `alias` also generates the TypeScript paths. SvelteKit 3 no longer
-      // provides `$lib` itself, so it rides in the same map as the others.
-      alias: appAliases,
       // The host serves 404.html for unknown paths (wrangler.jsonc). With a
       // fallback set, the adapter never runs its `strict` check; if the
       // fallback is ever removed, set `strict: false`, because the lab and
@@ -236,9 +214,6 @@ export default defineConfig({
       if (/_mt(_simd)?(\.worker)?\.js$/.test(filePath)) return false;
       return undefined;
     },
-  },
-  resolve: {
-    alias: appAliases,
   },
   server: {
     headers: crossOriginIsolationHeaders,

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { EditorSession } from '$lib/editor/editor-session.svelte';
+  import type { EditorSession } from '#lib/editor/editor-session.svelte.ts';
   import FocusView from './FocusView.svelte';
   import RichStrip from './RichStrip.svelte';
   import { bulkStore, type StripSize } from './store.svelte';

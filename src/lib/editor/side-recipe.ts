@@ -6,8 +6,8 @@
 import type {
   EncoderState,
   PreprocessorState,
-} from 'client/lazy-app/feature-meta';
-import type { ImageRecipe, SvgOutputOptions } from 'client/lazy-app/recipe';
+} from '#client/lazy-app/feature-meta/index.ts';
+import type { ImageRecipe, SvgOutputOptions } from '#client/lazy-app/recipe.ts';
 import type { SideState } from './editor-session.svelte';
 
 /**

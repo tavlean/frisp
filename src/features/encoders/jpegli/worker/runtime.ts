@@ -1,7 +1,7 @@
-import type { JpegliModule } from 'codecs/jpegli/enc/jpegli_enc';
+import type { JpegliModule } from '#codecs/jpegli/enc/jpegli_enc.js';
 import type { EncodeOptions } from '../shared/meta';
 
-import { initEmscriptenModule } from 'features/worker-utils';
+import { initEmscriptenModule } from '#features/worker-utils/index.ts';
 
 type JpegliEncoderModuleFactory = EmscriptenWasm.ModuleFactory<JpegliModule>;
 

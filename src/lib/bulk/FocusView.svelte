@@ -1,13 +1,13 @@
 <script lang="ts">
   import type { Snippet } from 'svelte';
   import { innerHeight, innerWidth } from 'svelte/reactivity/window';
-  import { isMac } from 'client/lazy-app/util';
-  import Output from '$lib/editor/output/Output.svelte';
-  import OptionsPanel from '$lib/editor/OptionsPanel.svelte';
-  import type { EditorSession } from '$lib/editor/editor-session.svelte';
-  import type { SideFormat } from '$lib/compress';
-  import { prettySize } from '$lib/editor/pretty-size';
-  import ViewOptions from '$lib/editor/output/ViewOptions.svelte';
+  import { isMac } from '#client/lazy-app/util/index.ts';
+  import Output from '#lib/editor/output/Output.svelte';
+  import OptionsPanel from '#lib/editor/OptionsPanel.svelte';
+  import type { EditorSession } from '#lib/editor/editor-session.svelte.ts';
+  import type { SideFormat } from '#lib/compress.ts';
+  import { prettySize } from '#lib/editor/pretty-size.ts';
+  import ViewOptions from '#lib/editor/output/ViewOptions.svelte';
   import { bulkStore } from './store.svelte';
   import BatchInfoPanel from './BatchInfoPanel.svelte';
   import FilmStrip from './FilmStrip.svelte';

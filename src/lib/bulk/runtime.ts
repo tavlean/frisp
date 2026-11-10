@@ -9,7 +9,7 @@
 // `store.session` so the UI shows queued -> processing -> encoded live,
 // exactly the way the probe reassigns.
 
-import { isAbortError } from 'client/lazy-app/abort';
+import { isAbortError } from '#client/lazy-app/abort.ts';
 import {
   completeJob,
   effectiveRecipe,
@@ -22,9 +22,9 @@ import {
   defaultBulkConcurrency,
   type ImageJob,
   type ImageOutput,
-} from 'client/lazy-app/bulk';
-import { optimizeImage } from '$lib/optimize-image';
-import SvelteKitWorkerBridge from '$lib/sveltekit-worker-bridge';
+} from '#client/lazy-app/bulk/index.ts';
+import { optimizeImage } from '#lib/optimize-image.ts';
+import SvelteKitWorkerBridge from '#lib/sveltekit-worker-bridge.ts';
 import type { BulkStore } from './store.svelte';
 
 /**

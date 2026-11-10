@@ -1,11 +1,11 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { resolve } from '$app/paths';
-  import { runCodecAssetProbe } from '$lib/codec-asset-probe';
-  import { createDiagnosticsModel } from '$lib/diagnostics-data';
-  import { runWebpEncodeProbe } from '$lib/webp-encode-probe';
-  import { registerServiceWorker } from '$lib/service-worker-registration';
-  import { APP_NAME } from 'shared/brand';
+  import { runCodecAssetProbe } from '#lib/codec-asset-probe.ts';
+  import { createDiagnosticsModel } from '#lib/diagnostics-data.ts';
+  import { runWebpEncodeProbe } from '#lib/webp-encode-probe.ts';
+  import { registerServiceWorker } from '#lib/service-worker-registration.ts';
+  import { APP_NAME } from '#shared/brand.ts';
 
   const model = createDiagnosticsModel();
 

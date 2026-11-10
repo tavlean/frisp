@@ -1,7 +1,7 @@
 <script lang="ts">
-  import OptionsPanel from '$lib/editor/OptionsPanel.svelte';
-  import type { EditorSession } from '$lib/editor/editor-session.svelte';
-  import { SVG_FORMAT } from '$lib/editor/format-label';
+  import OptionsPanel from '#lib/editor/OptionsPanel.svelte';
+  import type { EditorSession } from '#lib/editor/editor-session.svelte.ts';
+  import { SVG_FORMAT } from '#lib/editor/format-label.ts';
   import { bulkStore } from './store.svelte';
 
   interface Props {

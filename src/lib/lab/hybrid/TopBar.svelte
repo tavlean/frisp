@@ -9,14 +9,14 @@
   // is ONE pill — undo · redo · add · Export — with Export the single filled
   // primary at its end.
   import { resolve } from '$app/paths';
-  import { APP_NAME } from 'shared/brand';
-  import type { EditorSession } from '$lib/editor/editor-session.svelte';
-  import Logomark from '$lib/lab/Logomark.svelte';
-  import LabIcon from '$lib/lab/LabIcon.svelte';
-  import undoIcon from '$lib/lab/icons/undo.svg?raw';
-  import redoIcon from '$lib/lab/icons/redo.svg?raw';
-  import plusIcon from '$lib/lab/icons/plus.svg?raw';
-  import exportIcon from '$lib/lab/icons/export.svg?raw';
+  import { APP_NAME } from '#shared/brand.ts';
+  import type { EditorSession } from '#lib/editor/editor-session.svelte.ts';
+  import Logomark from '#lib/lab/Logomark.svelte';
+  import LabIcon from '#lib/lab/LabIcon.svelte';
+  import undoIcon from '#lib/lab/icons/undo.svg?raw';
+  import redoIcon from '#lib/lab/icons/redo.svg?raw';
+  import plusIcon from '#lib/lab/icons/plus.svg?raw';
+  import exportIcon from '#lib/lab/icons/export.svg?raw';
 
   interface Props {
     session: EditorSession;

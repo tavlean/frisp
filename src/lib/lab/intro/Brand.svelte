@@ -2,8 +2,8 @@
   // The Frisp lockup for the intro-lab variants: logomark badge + wordmark. The
   // mark rides currentColor (via --il-text-1), so it themes with the page —
   // graphite on light, near-white on dark — no per-mode brightness filter needed.
-  import { APP_NAME } from 'shared/brand';
-  import Logomark from '$lib/lab/Logomark.svelte';
+  import { APP_NAME } from '#shared/brand.ts';
+  import Logomark from '#lib/lab/Logomark.svelte';
 
   interface Props {
     /** Wordmark font size in px; the mark scales with it. */

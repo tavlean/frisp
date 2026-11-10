@@ -8,14 +8,14 @@
   // hard-guard on `dev` below.
   import { dev } from '$app/env';
   import { resolve } from '$app/paths';
-  import { APP_NAME } from 'shared/brand';
-  import { IntroDropDemo } from '$lib/lab/intro/drop-demo.svelte';
-  import Brand from '$lib/lab/intro/Brand.svelte';
-  import Icon from '$lib/lab/intro/Icon.svelte';
+  import { APP_NAME } from '#shared/brand.ts';
+  import { IntroDropDemo } from '#lib/lab/intro/drop-demo.svelte.ts';
+  import Brand from '#lib/lab/intro/Brand.svelte';
+  import Icon from '#lib/lab/intro/Icon.svelte';
   import ThemeToggle, {
     type ThemeMode,
-  } from '$lib/lab/intro/ThemeToggle.svelte';
-  import '$lib/lab/intro/intro-lab.css';
+  } from '#lib/lab/intro/ThemeToggle.svelte';
+  import '#lib/lab/intro/intro-lab.css';
 
   const demo = new IntroDropDemo();
 

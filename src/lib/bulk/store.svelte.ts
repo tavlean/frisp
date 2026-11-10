@@ -14,13 +14,13 @@
 // rendered by a real EditorSession in the route.
 
 import { SvelteMap, SvelteSet } from 'svelte/reactivity';
-import { pushEditorRoute } from '$lib/editor/editor-route.svelte';
+import { pushEditorRoute } from '#lib/editor/editor-route.svelte.ts';
 import {
   getDefaultOptions,
   OUTPUT_FORMATS,
   type SideFormat,
-} from '$lib/compress';
-import type { SideState } from '$lib/editor/editor-session.svelte';
+} from '#lib/compress.ts';
+import type { SideState } from '#lib/editor/editor-session.svelte.ts';
 import {
   addBulkImportToSession,
   canExportBulkSession,
@@ -55,18 +55,18 @@ import {
   type BulkStripItem,
   type ImageJob,
   type ImageOutput,
-} from 'client/lazy-app/bulk';
+} from '#client/lazy-app/bulk/index.ts';
 import {
   defaultProcessorState,
   encoderMap,
   type ProcessorState,
-} from 'client/lazy-app/feature-meta';
-import type { ImageRecipe, SvgOutputOptions } from 'client/lazy-app/recipe';
-import { applyRecipeToSide, recipeFromSide } from '$lib/editor/side-recipe';
-import { DEFAULT_SVG_OPTIONS } from '$lib/svg/optimize-options';
-import { isSvgSource } from '$lib/svg/detect';
-import { stableStringify } from 'shared/stable-stringify';
-import { snackbar } from '$lib/editor/snackbar-store.svelte';
+} from '#client/lazy-app/feature-meta/index.ts';
+import type { ImageRecipe, SvgOutputOptions } from '#client/lazy-app/recipe.ts';
+import { applyRecipeToSide, recipeFromSide } from '#lib/editor/side-recipe.ts';
+import { DEFAULT_SVG_OPTIONS } from '#lib/svg/optimize-options.ts';
+import { isSvgSource } from '#lib/svg/detect.ts';
+import { stableStringify } from '#shared/stable-stringify.ts';
+import { snackbar } from '#lib/editor/snackbar-store.svelte.ts';
 import type { ImportedFile } from './import-sources';
 import { createLimiter } from './limiter';
 import { BulkOutputCache } from './output-cache';

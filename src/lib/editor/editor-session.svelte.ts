@@ -5,19 +5,19 @@ import {
   OUTPUT_FORMATS,
   type CompressOutcome,
   type SideFormat,
-} from '$lib/compress';
-import { optimizeImage, type OptimizeSource } from '$lib/optimize-image';
-import { ResultCache } from '$lib/result-cache';
-import SvelteKitWorkerBridge from '$lib/sveltekit-worker-bridge';
+} from '#lib/compress.ts';
+import { optimizeImage, type OptimizeSource } from '#lib/optimize-image.ts';
+import { ResultCache } from '#lib/result-cache.ts';
+import SvelteKitWorkerBridge from '#lib/sveltekit-worker-bridge.ts';
 import type { ResizeOptionsState } from './options/processor-types';
-import { isSvgSource } from '$lib/svg/detect';
-import { rasterizeSvg, type SvgRaster } from '$lib/svg/raster';
+import { isSvgSource } from '#lib/svg/detect.ts';
+import { rasterizeSvg, type SvgRaster } from '#lib/svg/raster.ts';
 import { SVG_FORMAT } from './format-label';
 import { EditorHistory } from './editor-history.svelte';
 import { snackbar } from './snackbar-store.svelte';
-import { isAbortError } from 'client/lazy-app/abort';
-import { APP_NAME } from 'shared/brand';
-import { stableStringify } from 'shared/stable-stringify';
+import { isAbortError } from '#client/lazy-app/abort.ts';
+import { APP_NAME } from '#shared/brand.ts';
+import { stableStringify } from '#shared/stable-stringify.ts';
 import {
   encodeSignature,
   resizeIsReal,
@@ -30,8 +30,8 @@ import {
   recipeSignature,
   type ImageRecipe,
   type Rotation,
-} from 'client/lazy-app/recipe';
-import { getPercentChange } from 'client/lazy-app/bulk/size';
+} from '#client/lazy-app/recipe.ts';
+import { getPercentChange } from '#client/lazy-app/bulk/size.ts';
 import { recipeFromSide } from './side-recipe';
 import {
   AUTO_QUALITY_BOUNDS,
@@ -42,16 +42,16 @@ import {
   searchQuality,
   type AutoQualityTarget,
 } from './auto-quality';
-import { applyGrainToPixels } from 'features/processors/grain/shared/apply';
+import { applyGrainToPixels } from '#features/processors/grain/shared/apply.ts';
 import {
   defaultPreprocessorState,
   defaultProcessorState,
   grainIsReal,
-} from 'client/lazy-app/feature-meta';
+} from '#client/lazy-app/feature-meta/index.ts';
 import type {
   PreprocessorState,
   ProcessorState,
-} from 'client/lazy-app/feature-meta';
+} from '#client/lazy-app/feature-meta/index.ts';
 import {
   SAVE_VERSION,
   canUseLocalStorage,

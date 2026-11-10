@@ -1,7 +1,7 @@
-import type { MozJPEGModule } from 'codecs/mozjpeg/enc/mozjpeg_enc';
+import type { MozJPEGModule } from '#codecs/mozjpeg/enc/mozjpeg_enc.js';
 import type { EncodeOptions } from '../shared/meta';
 
-import { initEmscriptenModule } from 'features/worker-utils';
+import { initEmscriptenModule } from '#features/worker-utils/index.ts';
 
 type MozjpegEncoderModuleFactory = EmscriptenWasm.ModuleFactory<MozJPEGModule>;
 

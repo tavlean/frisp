@@ -1,6 +1,6 @@
 <script lang="ts">
   // Ported from src/features/encoders/oxiPNG/client/index.tsx at parity.
-  import type { EncodeOptions } from 'features/encoders/oxiPNG/shared/meta';
+  import type { EncodeOptions } from '#features/encoders/oxiPNG/shared/meta.ts';
   import Range from './Range.svelte';
   import Checkbox from './Checkbox.svelte';
   import OptionRow from './OptionRow.svelte';
