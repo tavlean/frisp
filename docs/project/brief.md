@@ -21,8 +21,10 @@ articles about the migration and the codec sweep are a side goal; the source
 material is [../journey-and-article-notes.md](../journey-and-article-notes.md).
 
 Hosting is a Cloudflare Worker named `frisp` serving static assets, configured
-by the root `wrangler.jsonc`. Workers Builds CI is not connected, so deploys are
-a manual `wrangler deploy`. The retired `sqush.app` and `presk.app` zones 301
+by the root `wrangler.jsonc`. Workers Builds CI is not connected, so a push
+deploys nothing; `npm run deploy` does (it deploys only the pushed commit and
+checks production). Agents push and deploy finished work without asking; the
+rule is in `AGENTS.md`. The retired `sqush.app` and `presk.app` zones 301
 here through a shared sunset Worker in `infra/sqush-sunset/`.
 
 Brand identity lives in exactly one place, `src/shared/brand.ts`: `APP_NAME`

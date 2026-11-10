@@ -4,6 +4,18 @@ Short session-by-session build log: what changed, why, and the gotchas a future
 session must know. Newest first. (Live project state stays in
 [the project brief](brief.md); this is the narrative trail.)
 
+## 2026-11-10 (Fable, driver) - Agents push and deploy on their own
+
+- The maintainer asked for pushing and deploying to stop needing his go-ahead.
+  `AGENTS.md` now says: push finished work whose gates pass; deploy when the
+  change touches what visitors load; docs, tests and tooling alone do not
+  deploy, because each deploy shows returning users an update prompt.
+- `npm run deploy` (`scripts/deploy.mjs`) is the one deploy path: clean tree,
+  HEAD equal to `origin/main`, `check` and unit tests, `wrangler deploy`, then
+  it waits until production's `_app/version.json` names the commit and checks
+  that `/` answers 200 and an unknown path 404. `-- --dry-run` changes
+  nothing.
+
 ## 2026-11-10 (Fable driver, Opus executors) - Docs review executed
 
 - Everything the review recommended is done; the per-item outcomes and
@@ -29,11 +41,15 @@ session must know. Newest first. (Live project state stays in
   cache is `app-e695b5b421e7`, `/a/b/c` answers 404 and shows the not-found
   page. Not verified: the faster update notice, which needs a second deploy
   while a tab stays open.
-- Seen on production, not caused by this work: Cloudflare injects its Web
-  Analytics beacon (`static.cloudflareinsights.com/beacon.min.js`) into the
-  page, and the COEP header blocks it, so every load logs a console error
-  and the analytics collect nothing. Turn the automatic injection off in the
-  Cloudflare dashboard, or decide it is wanted and serve it another way.
+- Correction to an earlier version of this entry: Cloudflare Web Analytics is
+  NOT blocked by the COEP header. Cloudflare injects its beacon with
+  `crossorigin`, and it loads for ordinary visitors; the console error seen
+  during the production check came from this machine's DNS blocker, which
+  resolves `static.cloudflareinsights.com` to `0.0.0.0`. The analytics API
+  shows data for `frisp.app` (about 30 page loads in the 30 days to
+  2026-11-10, 20 of them not flagged as bots). Gotcha: a browser error that
+  names the `loopback` address space means the local network blocked the
+  host, not the site.
 - Gotchas (all in `docs/gotchas.md`): subpath imports do no extension or
   index lookup, and the static audit reads the import text of the codec
   asset manifest; a `<svelte:boundary>` receives SvelteKit's `App.Error`, not

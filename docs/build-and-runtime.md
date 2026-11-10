@@ -27,6 +27,15 @@ Vite as a static SPA. The retired Preact/Rollup app is preserved only on the
 
 `npm run preview` serves the generated `build/` folder with Vite preview.
 
+`npm run deploy` (`scripts/deploy.mjs`) is the only deploy path; a push alone
+deploys nothing. It refuses a dirty tree or a HEAD that is not `origin/main`,
+runs `check` and the unit tests, runs `wrangler deploy`, then waits until
+production's `_app/version.json` names the deployed commit and checks that `/`
+answers 200 and an unknown path answers 404. `npm run deploy -- --dry-run`
+goes through the same steps without changing production. Run the full e2e
+suite before a deploy; the script does not. When to push and deploy is a rule
+in [AGENTS.md](../AGENTS.md).
+
 ## SvelteKit Config
 
 - `src/routes/+layout.ts` exports `ssr = false` and `prerender = true`.

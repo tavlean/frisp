@@ -11,7 +11,8 @@ Match the surrounding code by default. When the surroundings are mixed or absent
 
 ## Hard rules (every task; all how-to detail lives in docs/)
 
-- Never push. Commit checkpoint-sized changes regularly, straight to `main` unless the change is risky enough to need a branch.
+- Commit checkpoint-sized changes regularly, straight to `main` unless the change is risky enough to need a branch.
+- Ship without asking. When a piece of work is finished and its gates pass, push `main`. If the change touches anything a visitor loads or runs (`src/`, `static/`, `codecs/`, the build or host config), also run the full `npm run test:e2e` and then `npm run deploy`, which deploys only the pushed commit and checks production afterwards. Docs, tests and tooling alone are pushed without a deploy, because every deploy shows returning users an update prompt. Never force-push, and never push or deploy a tree whose gates fail.
 - One source of truth per topic.
 - Never introduce server-side image processing or an upload path. Offline must keep working after first load.
 - Never delete or move anything under `codecs/`, the codec asset manifest, the workers, or the WASM assets without proving the build AND runtime consequences. A green build is not sufficient; only the e2e suite catches a broken WASM import name.
