@@ -7,7 +7,7 @@
   "license": "Apache-2.0",
   "engines": {
     "node": ">=24.12.0 <25",
-    "npm": ">=11"
+    "npm": ">=11.10.0"
   },
   "imports": {
     "#lib/*": "./src/lib/*",
@@ -37,42 +37,27 @@
     "stats": "node scripts/stats.mjs",
     "pwa-icons": "node scripts/generate-pwa-icons.mjs",
     "test": "npm run check && npm run test:unit && PLAYWRIGHT_SKIP_BUILD=1 npm run test:e2e",
-    "test:unit": "vitest run",
+    "test:unit": "svelte-kit sync && vitest run",
     "test:e2e": "playwright test",
     "bench": "playwright test --config benchmarks/playwright.config.ts",
     "bench:compare": "node benchmarks/compare.mjs",
     "bench:svg": "node benchmarks/svg/run-frisp.mjs",
     "bench:svg:compare": "node benchmarks/svg/compare.mjs",
-    "typecheck:tests": "tsc -p tests/tsconfig.json"
+    "typecheck:tests": "svelte-kit sync && tsc -p tests/tsconfig.json"
   },
   "devDependencies": {
-    "@playwright/test": "^1.60.0",
+    "@playwright/test": "1.60.0",
     "@sveltejs/adapter-static": "4.0.1",
     "@sveltejs/kit": "3.1.1",
     "@sveltejs/vite-plugin-svelte": "7.3.1",
-    "@types/node": "^24.13.2",
-    "client-zip": "^2.5.0",
-    "comlink": "^4.4.2",
-    "lint-staged": "^17.0.8",
-    "pointer-tracker": "^2.5.3",
-    "prettier": "^3.8.3",
-    "prettier-plugin-svelte": "^4.0.1",
-    "simple-git-hooks": "^2.13.1",
+    "@types/node": "24.13.2",
+    "prettier": "3.8.3",
+    "prettier-plugin-svelte": "4.0.1",
     "svelte": "5.57.3",
-    "svelte-check": "^4.7.8",
+    "svelte-check": "4.7.8",
     "typescript": "6.0.3",
     "vite": "8.3.7",
-    "vitest": "^4.1.9",
-    "wasm-feature-detect": "^1.8.0"
-  },
-  "overrides": {
-    "cookie": "1.1.1"
-  },
-  "simple-git-hooks": {
-    "pre-commit": "npx lint-staged"
-  },
-  "lint-staged": {
-    "*.{js,css,json,ts,tsx,svelte}": "prettier --write"
+    "vitest": "4.1.12"
   },
   "prettier": {
     "endOfLine": "lf",
@@ -83,8 +68,9 @@
     "trailingComma": "all"
   },
   "dependencies": {
-    "fflate": "^0.8.3",
-    "pixelmatch": "^7.2.0",
-    "svgo": "^4.1.0"
+    "client-zip": "2.5.0",
+    "comlink": "4.4.2",
+    "fflate": "0.8.3",
+    "svgo": "4.1.0"
   }
 }
