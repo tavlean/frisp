@@ -1,0 +1,7 @@
+# The nightly that built the committed artifacts: its rustc reports
+# 1.98.0-nightly (6bdf43094 2026-06-01), which is the nightly-2026-06-02
+# channel release. Read by rustup; see docs/codec-provenance.md.
+[toolchain]
+channel = "nightly-2026-06-02"
+components = ["rust-src"]
+targets = ["wasm32-unknown-unknown"]

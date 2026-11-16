@@ -18,7 +18,8 @@ HWY_VERSION := f670ea580bb70b4113b63b9cdaa42ba9b10cd13a
 HWY_DIR := node_modules/highway
 
 LCMS_URL := https://github.com/mm2/Little-CMS.git
-LCMS_VERSION := lcms2.16
+# The commit the lcms2.16 tag points to.
+LCMS_VERSION := 453bafeb85b4ef96498866b7a8eadcc74dff9223
 LCMS_DIR := node_modules/lcms2
 
 SRC := $(CODEC_DIR)/src
@@ -71,21 +72,15 @@ $(LCMS_LIB): $(LCMS_DIR)/src/cmsxform.c
 		$(CC) -I include ${CFLAGS} -c $$f -o $${f%.c}.o || exit 1; \
 	done && $(AR) rcs liblcms2.a src/*.o
 
+# Every source is pinned by commit SHA through ../fetch-git.sh.
 $(SRC)/ssimulacra2.cc:
-	$(RM) -r $(CODEC_DIR)
-	git init $(CODEC_DIR)
-	git -C $(CODEC_DIR) fetch $(CODEC_URL) $(CODEC_VERSION) --depth 1
-	git -C $(CODEC_DIR) checkout FETCH_HEAD
+	../fetch-git.sh $(CODEC_URL) $(CODEC_VERSION) $(CODEC_DIR)
 
 $(HWY_DIR)/hwy/targets.cc:
-	$(RM) -r $(HWY_DIR)
-	git init $(HWY_DIR)
-	git -C $(HWY_DIR) fetch $(HWY_URL) $(HWY_VERSION) --depth 1
-	git -C $(HWY_DIR) checkout FETCH_HEAD
+	../fetch-git.sh $(HWY_URL) $(HWY_VERSION) $(HWY_DIR)
 
 $(LCMS_DIR)/src/cmsxform.c:
-	$(RM) -r $(LCMS_DIR)
-	git clone --depth 1 --branch $(LCMS_VERSION) $(LCMS_URL) $(LCMS_DIR)
+	../fetch-git.sh $(LCMS_URL) $(LCMS_VERSION) $(LCMS_DIR)
 
 clean:
 	$(RM) $(OUT_JS) $(OUT_WASM)

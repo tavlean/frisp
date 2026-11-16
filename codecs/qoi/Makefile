@@ -1,4 +1,7 @@
+# Fetched through ../fetch-verified.sh; see docs/codec-provenance.md for the pin.
 CODEC_URL = https://github.com/phoboslab/qoi/archive/8d35d93cdca85d2868246c2a8a80a1e2c16ba2a8.tar.gz
+CODEC_SHA256 = 00f10a37021d1f75c78a94a95cf45500177b6f78e9a9b27cef49237798bd4db4
+CODEC_PACKAGE = node_modules/qoi-8d35d93c.tar.gz
 
 CODEC_DIR = node_modules/qoi
 CODEC_BUILD_DIR:= $(CODEC_DIR)/build
@@ -33,9 +36,12 @@ $(OUT_JS):
 		$<
 
 # CREATE DIRECTORY
-$(CODEC_DIR):
+$(CODEC_PACKAGE):
+	../fetch-verified.sh $(CODEC_URL) $(CODEC_SHA256) $@
+
+$(CODEC_DIR): $(CODEC_PACKAGE)
 	mkdir -p $(CODEC_DIR)
-	curl -sL $(CODEC_URL) | tar xz --strip 1 -C $(CODEC_DIR)
+	tar xz --strip 1 -C $(CODEC_DIR) -f $(CODEC_PACKAGE)
 
 clean:
 	$(RM) $(OUT_JS) $(OUT_WASM)

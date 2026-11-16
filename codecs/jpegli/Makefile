@@ -1,6 +1,5 @@
 # google/jpegli has no release tags, so the source is pinned to an exact commit
-# and fetched the way codecs/jxl fetches libjxl (git init + fetch <SHA> --depth
-# 1). jpegli lived inside libjxl until v0.12.0 removed it; this standalone repo
+# and fetched through ../fetch-git.sh, the way codecs/jxl fetches libjxl. jpegli lived inside libjxl until v0.12.0 removed it; this standalone repo
 # is the only place it exists now, and the same SHA is recorded in
 # docs/codec-provenance.md.
 CODEC_URL := https://github.com/google/jpegli.git
@@ -80,11 +79,7 @@ $(LIBHWY): $(LIBJPEGLI)
 	$(MAKE) -C $(CODEC_BUILD_DIR) hwy
 
 $(CODEC_DIR)/CMakeLists.txt:
-	$(RM) -r $(@D)
-	git init $(@D)
-	git -C $(@D) fetch $(CODEC_URL) $(CODEC_VERSION) --depth 1
-	git -C $(@D) checkout FETCH_HEAD
-	git -C $(@D) submodule update --init --depth 1 --recursive --jobs `nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 4`
+	../fetch-git.sh $(CODEC_URL) $(CODEC_VERSION) $(@D) --submodules
 
 clean:
 	$(RM) $(OUT_JS) $(OUT_WASM)

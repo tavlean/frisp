@@ -1,7 +1,10 @@
 # mozjpeg v4.x is CMake-only (configure.ac was removed). This Makefile builds
 # libjpeg.a via emcmake + the `jpeg-static` target, then links the wrapper.
 # (v3.x used autotools: ./configure + .libs/libjpeg.a + rdswitch.o.)
+# Fetched through ../fetch-verified.sh; see docs/codec-provenance.md for the pin.
 CODEC_URL := https://github.com/mozilla/mozjpeg/archive/refs/tags/v4.1.5.tar.gz
+CODEC_SHA256 := 9fcbb7171f6ac383f5b391175d6fb3acde5e64c4c4727274eade84ed0998fcc1
+CODEC_PACKAGE := node_modules/mozjpeg-4.1.5.tar.gz
 CODEC_DIR := node_modules/mozjpeg
 CODEC_BUILD_DIR := $(CODEC_DIR)/build
 LIBJPEG := $(CODEC_BUILD_DIR)/libjpeg.a
@@ -83,9 +86,12 @@ $(RDSWITCH): $(LIBJPEG)
 
 $(CODEC_DIR)/CMakeLists.txt: $(CODEC_DIR)
 
-$(CODEC_DIR):
+$(CODEC_PACKAGE):
+	../fetch-verified.sh $(CODEC_URL) $(CODEC_SHA256) $@
+
+$(CODEC_DIR): $(CODEC_PACKAGE)
 	mkdir -p $@
-	curl -sL $(CODEC_URL) | tar xz --strip 1 -C $@
+	tar xz --strip 1 -C $@ -f $(CODEC_PACKAGE)
 
 clean:
 	$(RM) $(OUT_JS) $(OUT_WASM)

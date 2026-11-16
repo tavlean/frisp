@@ -1,4 +1,7 @@
+# Fetched through ../fetch-verified.sh; see docs/codec-provenance.md for the pin.
 CODEC_URL = https://github.com/webmproject/libwebp/archive/refs/tags/v1.6.0.tar.gz
+CODEC_SHA256 = 93a852c2b3efafee3723efd4636de855b46f9fe1efddd607e1f42f60fc8f2136
+CODEC_PACKAGE = node_modules/libwebp-1.6.0.tar.gz
 CODEC_DIR = node_modules/libwebp
 CODEC_BUILD_ROOT := $(CODEC_DIR)/build
 CODEC_BASELINE_BUILD_DIR := $(CODEC_BUILD_ROOT)/baseline
@@ -67,9 +70,12 @@ $(CODEC_SIMD_BUILD_DIR)/Makefile: CMAKE_FLAGS+=-DWEBP_ENABLE_SIMD=1
 		-B $(@D) \
 		$(<D)
 
-$(CODEC_DIR)/CMakeLists.txt:
+$(CODEC_PACKAGE):
+	../fetch-verified.sh $(CODEC_URL) $(CODEC_SHA256) $@
+
+$(CODEC_DIR)/CMakeLists.txt: $(CODEC_PACKAGE)
 	mkdir -p $(CODEC_DIR)
-	curl -sL $(CODEC_URL) | tar xz --strip 1 -C $(CODEC_DIR)
+	tar xz --strip 1 -C $(CODEC_DIR) -f $(CODEC_PACKAGE)
 
 clean:
 	$(RM) $(OUT_JS) $(OUT_WASM)

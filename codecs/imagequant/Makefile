@@ -1,4 +1,7 @@
+# Fetched through ../fetch-verified.sh; see docs/codec-provenance.md for the pin.
 CODEC_URL := https://github.com/ImageOptim/libimagequant/archive/2.18.0.tar.gz
+CODEC_SHA256 := 790d2593a587f9a27cec6245ee7a212b34b0aa63cac6383e550eda01236be636
+CODEC_PACKAGE := node_modules/libimagequant-2.18.0.tar.gz
 CODEC_DIR := node_modules/libimagequant
 CODEC_OUT_RELATIVE := libimagequant.a
 CODEC_OUT := $(addprefix $(CODEC_DIR)/, $(CODEC_OUT_RELATIVE))
@@ -32,9 +35,12 @@ $(CODEC_DIR)/config.mk: $(CODEC_DIR)/configure
 
 $(CODEC_DIR)/configure: $(CODEC_DIR)
 
-$(CODEC_DIR):
+$(CODEC_PACKAGE):
+	../fetch-verified.sh $(CODEC_URL) $(CODEC_SHA256) $@
+
+$(CODEC_DIR): $(CODEC_PACKAGE)
 	mkdir -p $@
-	curl -sL $(CODEC_URL) | tar xz --strip 1 -C $@
+	tar xz --strip 1 -C $@ -f $(CODEC_PACKAGE)
 
 clean:
 	$(RM) $(OUT_JS) $(OUT_WASM)

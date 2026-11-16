@@ -4,7 +4,12 @@ CODEC_URL = https://github.com/libjxl/libjxl.git
 # deleted enc_file.h / enc_color_management.h / EncodeFile / GetJxlCms). Adds the
 # 0.11.1 / 0.11.2 CVE fixes on top of the 0.8.x ones. Note that 0.12 spends more
 # bits than 0.8.5 for the same butteraugli distance; see codec-provenance.md.
+#
+# Pinned by commit SHA through ../fetch-git.sh, because a tag can be moved.
+# a7a9c787 is the commit the v0.12.0 tag points to; the submodules (brotli,
+# highway, skcms and the rest) are pinned by that commit's gitlinks.
 CODEC_VERSION = v0.12.0
+CODEC_COMMIT = a7a9c787341cf703dede03c2009fa460cae5e5df
 CODEC_DIR = node_modules/jxl
 CODEC_BUILD_ROOT := $(CODEC_DIR)/build
 CODEC_MT_BUILD_DIR := $(CODEC_BUILD_ROOT)/mt
@@ -90,11 +95,7 @@ $(CODEC_MT_SIMD_BUILD_DIR)/Makefile: CXXFLAGS+=-msimd128
 	$(<D)
 
 $(CODEC_DIR)/CMakeLists.txt:
-	$(RM) -r $(@D)
-	git init $(@D)
-	git -C $(@D) fetch $(CODEC_URL) $(CODEC_VERSION) --depth 1
-	git -C $(@D) checkout FETCH_HEAD
-	git -C $(@D) submodule update --init --depth 1 --recursive --jobs `nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 4`
+	../fetch-git.sh $(CODEC_URL) $(CODEC_COMMIT) $(@D) --submodules
 
 # CODEC_BUILD_DIR is target-specific, so it is empty here; the line that used it
 # expanded to `make -C  clean` and aborted before either real build dir was
