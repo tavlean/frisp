@@ -1,8 +1,9 @@
 CODEC_URL = https://github.com/libjxl/libjxl.git
 # v0.13.0 (2026-11-11). The encoder wrapper is written against libjxl's PUBLIC
 # JxlEncoder* C API, so a version bump is a pin change: 0.12.0 -> 0.13.0 needed
-# no wrapper or build change. 0.13.0 adds core-decoder and JPEG-reconstruction
-# hardening and brotli 1.2.1; see codec-provenance.md for what reaches us.
+# no build change and one wrapper option (transcodeJPEG pins LF smoothing off).
+# 0.13.0 adds core-decoder and JPEG-reconstruction hardening and brotli 1.2.1;
+# see codec-provenance.md for what reaches us and what output changed.
 #
 # Pinned by commit SHA through ../fetch-git.sh, because a tag can be moved.
 # 5a7da834 is the commit the v0.13.0 tag points to; the submodules (brotli,

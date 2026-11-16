@@ -132,6 +132,12 @@ val encode(std::string image, int width, int height, JXLOptions options) {
   info.xsize = width;
   info.ysize = height;
   info.num_color_channels = 3;
+  // Every input is RGBA, so alpha is always declared. Since v0.13.0 libjxl's
+  // default STRIP_ALPHA mode drops an all-opaque alpha channel on lossy
+  // encodes (kept on lossless). Same pixels, fewer bytes, and with no extra
+  // channel left, PROGRESSIVE_DC below now takes effect on opaque images,
+  // where libjxl used to ignore it (enc_frame.cc zeroes it whenever an extra
+  // channel exists). Left at the default on purpose.
   info.num_extra_channels = 1;
   info.alpha_bits = 8;
   info.bits_per_sample = 8;
@@ -328,12 +334,14 @@ val transcodeJPEG(std::string jpeg_bytes) {
   // (CanDoStreamingEncoding bails on IsJPEG), and resampling belongs to the
   // pixel path it never enters.
   //
-  // LF smoothing is pinned off. v0.13.0 turns it on by default for 4:4:4
-  // JPEGs, and decoders before v0.13.0 wrongly apply it while rebuilding the
-  // JPEG, so `djxl` 0.12 cannot get the original file back from such a JXL
-  // (measured: a 4:4:4 cjpeg photo reconstructs bit-exactly from the 0.12 and
-  // the smoothing-off output, and not from the 0.13 default). Off keeps every
-  // transcode reversible by every libjxl decoder; 4:2:0 JPEGs are unaffected.
+  // LF smoothing is pinned off. v0.13.0 turns it on by default for 4:4:4 and
+  // grayscale JPEGs, and decoders before v0.13.0 wrongly apply it while
+  // rebuilding the JPEG, so `djxl` 0.12 cannot get the original file back
+  // from such a JXL (measured on a 4:4:4 and a grayscale cjpeg photo: both
+  // reconstruct bit-exactly from the smoothing-off output, neither from the
+  // 0.13 default). Off keeps every transcode reversible by every libjxl
+  // decoder, and makes it byte-identical to v0.12.0's. Chroma-subsampled
+  // JPEGs never took the smoothing default.
   if (JXL_ENC_SUCCESS !=
       JxlEncoderFrameSettingsSetOption(frame_settings, JXL_ENC_FRAME_SETTING_JPEG_RECON_LFS, 0)) {
     return val::null();
