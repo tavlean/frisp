@@ -54,6 +54,21 @@ this doc holds the cross-cutting ones that no single file owns.
   production even though nothing there runs it. Keep dev-only probe URLs inside
   the probe module itself; `audit:static-output` fails if a probe worker is
   emitted.
+- **A codec `.wasm` ships if any one of four places still names it.** The
+  worker's import of the generated wrapper (`#app-generated/codecs/...`), a
+  `?url` import in `src/shared/codec-assets/*.ts`, a record in
+  `src/shared/codec-asset-records.json`, and the wrapper that
+  `scripts/patch-codec-wrappers.mjs` writes into `.svelte-kit/`. Removing a
+  codec means all four, plus the asset checks in
+  `scripts/audit-static-output.mjs`, which cross-checks the records, the
+  manifest imports and the emitted files. Generated wrappers outlive their
+  source: `npm run sync` only writes files, so a retired wrapper stays
+  importable in a reused checkout unless the patch script deletes it (it now
+  deletes the MozJPEG and QOI encoder ones).
+- **`codecs/mozjpeg` is not only the MozJPEG encoder.** Its one Makefile also
+  builds `dec/mozjpeg_node_dec.*`, which `tests/node/pipeline-worker.ts` uses
+  to decode JPEG fixtures. The encoder stopped shipping on 2026-11-17, but
+  deleting or trimming that directory breaks the node tests.
 - **Markdown is never auto-formatted.** The Prettier globs and the pre-commit
   hook glob both exclude `*.md` on purpose, and `proseWrap: always` is banned.
   Adding Markdown back reflows every hand-wrapped doc in one commit.
@@ -253,6 +268,13 @@ this doc holds the cross-cutting ones that no single file owns.
   is invisible at 24px is obvious at 256px.
 
 ## Environment and process
+
+- **Browsers give `.qoi` files an empty MIME type, and the single-image editor
+  refuses those.** `EditorSession.pickFiles` accepts only `image/*` types (or
+  SVG), so a `.qoi` picked from disk on most systems gets "doesn't look like
+  an image" before the QOI decoder is reached; bulk import also accepts by
+  extension and is not affected. `tests/e2e/qoi-decode.spec.ts` passes
+  `image/qoi` explicitly for this reason. Found 2026-11-17, not yet fixed.
 
 - **`npm install` deletes `node_modules/$app`, and nothing puts it back on
   install.** That folder holds the `$app/tsconfig` every tsconfig here extends;

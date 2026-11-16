@@ -54,9 +54,8 @@ Notes that apply throughout:
   selectable: jpegli is faster on every bench fixture and about 7% smaller on
   photos at the shipped defaults. A saved side that chose `mozJPEG` loads as
   `jpegli` at the same quality (`migrateRetiredFormat` in
-  `src/lib/editor/settings-storage.ts`). The MozJPEG codec and its panel are still
-  in the build, but the service worker no longer precaches its encoder; its
-  retirement is pending. The old jpegli tooltip claim "around 30% better
+  `src/lib/editor/settings-storage.ts`). The MozJPEG encoder stopped shipping on
+  2026-11-17; its options panel and type stay because the lab skins use them. The old jpegli tooltip claim "around 30% better
   compression" was removed because no measurement supports it.
 - **Every raster output format is an always-available WASM codec** — there is no
   runtime feature detection. (QOI and the canvas/browser encoders were removed from

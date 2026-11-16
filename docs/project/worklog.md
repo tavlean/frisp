@@ -4,6 +4,38 @@ Short session-by-session build log: what changed, why, and the gotchas a future
 session must know. Newest first. (Live project state stays in
 [the project brief](brief.md); this is the narrative trail.)
 
+## 2026-11-17 (Opus side session) - MozJPEG and QOI encoders stop shipping
+
+- Why: the dependency audit (entry below) found both encoders unreachable but
+  still imported by the codec worker and emitted into every build.
+- Proof first: a read-only `audit` trace found no path to either encoder. The
+  picker offers WebP, AVIF, JXL, jpegli and OxiPNG; both settings keys go
+  through `parseSavedSide`, which migrates `mozJPEG` to jpegli and drops
+  anything else; bulk recipes are never parsed from storage; no URL parameter
+  sets a format; the lab skins read `session.availableFormats`. The
+  `/diagnostics` QOI encode probe that `src/sw/cache-plan.ts` and
+  `codec-encode.spec.ts` described does not exist: both probes encode WebP.
+- Done: the worker, bridge, asset records, `?url` imports and generated
+  wrappers for both encoders are gone, and `scripts/audit-static-output.mjs`
+  now fails if `mozjpeg_enc` or `qoi_enc` WASM is emitted. The worker throws a
+  named error if a retired type ever arrives. Build output loses
+  `mozjpeg_enc.CxQAIo0B.wasm` (272 KB) and `qoi_enc.Ca7K5QTS.wasm` (20 KB);
+  nothing else changed in the WASM list.
+- Kept: `codecs/mozjpeg` and `codecs/qoi/enc` sources (the Makefile also
+  builds the Node JPEG decoder the node tests use), the option types,
+  `MozjpegOptions.svelte` and the dead `format === 'mozJPEG'` branches in the
+  three lab skins and `OptionsPanel.svelte` (protected lab code; noted in
+  [../lab.md](../lab.md)), and the saved-settings migration.
+- New test: `tests/e2e/qoi-decode.spec.ts` writes a 40x24 QOI image, opens
+  it, saves lossless PNG and compares every pixel, in Chromium and WebKit.
+  Nothing tested `.qoi` input before.
+- Found, not fixed: the single-image editor rejects a `.qoi` picked from disk
+  in most browsers, because the browser reports no MIME type and
+  `pickFiles` wants `image/*`. Entry in [../gotchas.md](../gotchas.md).
+- Gotchas: two new entries under "Build and bundle" (the four places a codec
+  `.wasm` is named, and what else `codecs/mozjpeg` builds) and one under
+  "Environment and process" (the `.qoi` MIME type).
+
 ## 2026-11-17 (Fable driver, Opus executor) - Dependency audit and reduction
 
 - Why: the maintainer asked for a deep audit of the dependency surface after

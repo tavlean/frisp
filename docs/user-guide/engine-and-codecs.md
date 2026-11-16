@@ -41,7 +41,7 @@ The versions below come straight from the project's build recipes, recorded in `
 | **JPEG**                     | `google/jpegli`                  | pinned commit (no upstream tags)   | none          | Modern JPEG encoder (jpegli; encoder in the tooltip).                    |
 | **PNG**                      | `oxipng` (crates.io)             | `10.1.1`                           | Threads       | Lossless PNG optimizer (OxiPNG; encoder in the tooltip).                 |
 
-All five output codecs are bundled WebAssembly and **always available**; there is nothing to feature-detect. Until 2026-11-04 the menu also offered a second JPEG encoder, MozJPEG (`mozilla/mozjpeg` `v4.1.5`). It is no longer selectable, because jpegli was faster on every benchmark image and about 7% smaller on photos at the defaults; settings saved with MozJPEG load as jpegli at the same quality number. The MozJPEG codec is still in the build, but no longer cached for offline use, until its retirement lands.
+All five output codecs are bundled WebAssembly and **always available**; there is nothing to feature-detect. Until 2026-11-04 the menu also offered a second JPEG encoder, MozJPEG (`mozilla/mozjpeg` `v4.1.5`). It is no longer selectable, because jpegli was faster on every benchmark image and about 7% smaller on photos at the defaults; settings saved with MozJPEG load as jpegli at the same quality number. Since 2026-11-17 the MozJPEG encoder is no longer part of the app at all.
 
 ### Input formats (what you can open)
 

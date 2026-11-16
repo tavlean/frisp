@@ -150,9 +150,9 @@ Behavior (variant-aware precache, 2026-06-10 — first-visit payload
   `selectCodecPrecacheUrls()` in `src/sw/cache-plan.ts` (e.g. threads+SIMD
   Chromium gets `avif_enc_mt` + `jxl_enc_mt_simd` + `webp_enc_simd` +
   oxipng-MT and skips the single-thread/baseline builds and the natively
-  decodable AVIF/WebP WASM decoders). The QOI and MozJPEG encoders are never
-  precached: neither is a selectable output (MozJPEG left the picker on
-  2026-11-04), so they stay runtime-cacheable only;
+  decodable AVIF/WebP WASM decoders). The QOI and MozJPEG encoders are not
+  in the build at all since 2026-11-17 (neither was a selectable output), and
+  `audit:static-output` fails if either `.wasm` is emitted again;
 - install also fetches `/_app/worker-precache.json` and precaches every worker
   chunk it lists (codec worker, SVG optimizer worker, OxiPNG thread helper).
   SvelteKit's `immutable` list in `$app/manifest` does not reliably cover the
