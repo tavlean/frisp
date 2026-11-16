@@ -5,7 +5,7 @@
 // keys are scoped to viewer-or-body focus with no modifiers (parity-audit
 // §A.16), and a public divider API (centerSplit / splitFraction + a
 // 'splitchange' event) was added for the reset-view control.
-import PointerTracker, { type Pointer } from 'pointer-tracker';
+import PointerTracker, { type Pointer } from './pointer-tracking';
 import './two-up.css';
 
 const legacyClipCompatAttr = 'legacy-clip-compat';

@@ -1,4 +1,4 @@
-import { threads } from 'wasm-feature-detect';
+import { threads } from '#shared/wasm-features.ts';
 
 export default async function checkThreadsSupport() {
   const supportsWasmThreads = await threads();

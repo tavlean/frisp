@@ -195,14 +195,6 @@ export default defineConfig({
       version: { name: commitVersionName(), pollInterval: 0 },
     }),
   ],
-  optimizeDeps: {
-    // Only imported inside lazily-spawned codec workers (and the SW), so Vite's
-    // start-up scan never sees it; it gets discovered mid-session on the first
-    // encode ("✨ new dependencies optimized"), which can force a dev-server
-    // page reload. Pre-bundle it up front instead. Dev-only; builds are
-    // unaffected.
-    include: ['wasm-feature-detect'],
-  },
   build: {
     // Never inline WASM, nor the threaded (pthread / rayon) codec glue + worker
     // scripts. A `*_mt(.worker).js` is ~2 kB — below the default inline limit —

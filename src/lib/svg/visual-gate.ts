@@ -2,7 +2,7 @@
 // normalized by painted content, not by transparent canvas area, so sparse
 // icons cannot hide meaningful changes inside a large viewport.
 
-import pixelmatch from 'pixelmatch';
+import { countMismatchedPixels } from '#shared/pixelmatch.ts';
 
 export function paintedUnion(
   a: Uint8ClampedArray,
@@ -20,13 +20,12 @@ export function gatePasses(
   candidate: ImageData,
   painted: number,
 ): boolean {
-  const mismatched = pixelmatch(
+  const mismatched = countMismatchedPixels(
     original.data,
     candidate.data,
-    null as unknown as Uint8Array,
     original.width,
     original.height,
-    { threshold: 0.1 },
+    0.1,
   );
   return mismatched / Math.max(painted, 1) <= 5e-4;
 }

@@ -4,7 +4,7 @@
 // wheel-zoom anchoring was added (pointer-anchored over the image, centre-
 // anchored over the backdrop — see the 2026-06-28 zoom-scroll work), and
 // customElements.define is guarded against double registration under HMR.
-import PointerTracker, { type Pointer } from 'pointer-tracker';
+import PointerTracker, { type Pointer } from './pointer-tracking';
 import './pinch-zoom.css';
 import { isSafari } from '#client/lazy-app/util/index.ts';
 

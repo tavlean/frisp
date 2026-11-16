@@ -27,7 +27,7 @@ import initOxipngWasm, {
   optimise as optimiseOxipng,
 } from '#app-generated/codecs/oxipng/pkg/squoosh_oxipng.js';
 import checkThreadsSupport from '#worker-shared/supports-wasm-threads.ts';
-import { simd } from 'wasm-feature-detect';
+import { simd } from '#shared/wasm-features.ts';
 import { createQuantizeRuntime } from '#features/processors/quantize/worker/runtime.ts';
 import imagequant from '#app-generated/codecs/imagequant/imagequant.js';
 import { createResize } from '#features/processors/resize/worker/runtime.ts';

@@ -10,7 +10,7 @@ import {
 import { asset, resolve } from '$app/paths';
 import { self as worker } from '$app/service-worker';
 import type { AssetPath } from '$app/types';
-import { simd, threads } from 'wasm-feature-detect';
+import { simd, threads } from '#shared/wasm-features.ts';
 import { serviceWorkerCodecAssetRecords } from '#lib/service-worker-codec-assets.ts';
 import {
   dedupeUrls,
