@@ -46,9 +46,9 @@ structural changes below come next. Full reasoning and the execution table:
 - [x] **Stop shipping the MozJPEG and QOI encoders.** Done 2026-11-17: the
       worker, bridge, asset records and generated wrappers are gone and the
       static audit forbids the two `.wasm` files. Kept: the `codecs/` sources,
-      the option types, and `MozjpegOptions.svelte` (the lab skins and the
-      saved-settings migration name them). Removing those waits for the lab
-      re-style verdict.
+      the MozJPEG option type and `MozjpegOptions.svelte` (the lab skins name
+      them; removing them waits for the lab re-style verdict), and the QOI
+      encoder's registry entry, which nothing uses and could go now.
 - [ ] **Close the SVG benchmark (stage S8).** The ImageOptim and nano legs are
       measured; finish the Frisp run and publish with its limitations, per
       [specs/2026-07-12-svg-optimization.md](specs/2026-07-12-svg-optimization.md).

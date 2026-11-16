@@ -9,9 +9,9 @@ session must know. Newest first. (Live project state stays in
 - Why: the dependency audit (entry below) found both encoders unreachable but
   still imported by the codec worker and emitted into every build.
 - Proof first: a read-only `audit` trace found no path to either encoder. The
-  picker offers WebP, AVIF, JXL, jpegli and OxiPNG; both settings keys go
-  through `parseSavedSide`, which migrates `mozJPEG` to jpegli and drops
-  anything else; bulk recipes are never parsed from storage; no URL parameter
+  picker offers WebP, AVIF, JXL, jpegli and OxiPNG; both settings keys accept
+  only a picker format (`isValidFormat`), so a saved `mozJPEG` or `qoi` never
+  reaches the worker; bulk recipes are never parsed from storage; no URL parameter
   sets a format; the lab skins read `session.availableFormats`. The
   `/diagnostics` QOI encode probe that `src/sw/cache-plan.ts` and
   `codec-encode.spec.ts` described does not exist: both probes encode WebP.
@@ -19,7 +19,8 @@ session must know. Newest first. (Live project state stays in
   wrappers for both encoders are gone, and `scripts/audit-static-output.mjs`
   now fails if `mozjpeg_enc` or `qoi_enc` WASM is emitted. The worker throws a
   named error if a retired type ever arrives. Build output loses
-  `mozjpeg_enc.CxQAIo0B.wasm` (272 KB) and `qoi_enc.Ca7K5QTS.wasm` (20 KB);
+  `mozjpeg_enc.CxQAIo0B.wasm` (276,382 bytes) and `qoi_enc.Ca7K5QTS.wasm`
+  (16,577 bytes);
   nothing else changed in the WASM list.
 - Kept: `codecs/mozjpeg` and `codecs/qoi/enc` sources (the Makefile also
   builds the Node JPEG decoder the node tests use), the option types,
@@ -29,9 +30,18 @@ session must know. Newest first. (Live project state stays in
 - New test: `tests/e2e/qoi-decode.spec.ts` writes a 40x24 QOI image, opens
   it, saves lossless PNG and compares every pixel, in Chromium and WebKit.
   Nothing tested `.qoi` input before.
-- Found, not fixed: the single-image editor rejects a `.qoi` picked from disk
-  in most browsers, because the browser reports no MIME type and
-  `pickFiles` wants `image/*`. Entry in [../gotchas.md](../gotchas.md).
+- Found, not fixed (both predate this change):
+  - The single-image editor rejects a `.qoi` picked from disk in most
+    browsers, because the browser reports no MIME type and `pickFiles` wants
+    `image/*`. Entry in [../gotchas.md](../gotchas.md). The user guide's
+    "you can open QOI files" is only true for two or more files (bulk).
+  - `migrateRetiredFormat` runs only for the Save/Import side slots
+    (`parseSavedSide`). The auto-saved `app:settings:v3` path (`buildSide` in
+    `editor-session.svelte.ts`) only checks `isValidFormat`, so a returning
+    user whose right side was MozJPEG gets WebP, not jpegli at the same
+    quality, despite what the user guide says.
+- Review: a `judge` pass found no defect in the change; it found the two
+  bugs above and the doc corrections made before landing.
 - Gotchas: two new entries under "Build and bundle" (the four places a codec
   `.wasm` is named, and what else `codecs/mozjpeg` builds) and one under
   "Environment and process" (the `.qoi` MIME type).

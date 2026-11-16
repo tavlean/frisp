@@ -54,13 +54,15 @@ this doc holds the cross-cutting ones that no single file owns.
   production even though nothing there runs it. Keep dev-only probe URLs inside
   the probe module itself; `audit:static-output` fails if a probe worker is
   emitted.
-- **A codec `.wasm` ships if any one of four places still names it.** The
-  worker's import of the generated wrapper (`#app-generated/codecs/...`), a
-  `?url` import in `src/shared/codec-assets/*.ts`, a record in
-  `src/shared/codec-asset-records.json`, and the wrapper that
-  `scripts/patch-codec-wrappers.mjs` writes into `.svelte-kit/`. Removing a
-  codec means all four, plus the asset checks in
-  `scripts/audit-static-output.mjs`, which cross-checks the records, the
+- **Removing a codec means four places, not one.** Only the `?url` import in
+  `src/shared/codec-assets/*.ts` emits the `.wasm` (the generated wrappers
+  are patched so Vite does not emit a second copy), but the other three must
+  go too: the worker's import of the generated wrapper
+  (`#app-generated/codecs/...`), the record in
+  `src/shared/codec-asset-records.json` (a record without its import throws
+  "Codec asset record/import mismatch"), and the wrapper that
+  `scripts/patch-codec-wrappers.mjs` writes into `.svelte-kit/`. Then update
+  the asset checks in `scripts/audit-static-output.mjs`, which cross-checks the records, the
   manifest imports and the emitted files. Generated wrappers outlive their
   source: `npm run sync` only writes files, so a retired wrapper stays
   importable in a reused checkout unless the patch script deletes it (it now
