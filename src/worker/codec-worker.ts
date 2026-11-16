@@ -12,13 +12,9 @@ import { createQoiDecoderRuntime } from '#features/decoders/qoi/worker/runtime.t
 import qoiDecoder from '#app-generated/codecs/qoi/dec/qoi_dec.js';
 import { createJxlDecoderRuntime } from '#features/decoders/jxl/worker/runtime.ts';
 import jxlDecoder from '#app-generated/codecs/jxl/dec/jxl_dec.js';
-import { createQoiEncoderRuntime } from '#features/encoders/qoi/worker/runtime.ts';
-import qoiEncoder from '#app-generated/codecs/qoi/enc/qoi_enc.js';
 import { createJxlEncoderRuntime } from '#features/encoders/jxl/worker/runtime.ts';
 import type { EncodeOptions as JxlEncodeOptions } from '#features/encoders/jxl/shared/meta.ts';
 import jxlEncoder from '#app-generated/codecs/jxl/enc/jxl_enc.js';
-import { createMozjpegEncoderRuntime } from '#features/encoders/mozJPEG/worker/runtime.ts';
-import mozjpegEncoder from '#app-generated/codecs/mozjpeg/enc/mozjpeg_enc.js';
 import { createJpegliEncoderRuntime } from '#features/encoders/jpegli/worker/runtime.ts';
 import jpegliEncoder from '#app-generated/codecs/jpegli/enc/jpegli_enc.js';
 import { createOxiPngEncoderRuntime } from '#features/encoders/oxiPNG/worker/runtime.ts';
@@ -70,7 +66,6 @@ export interface WebpWasmUrls {
 
 export interface QoiWasmUrls {
   decoder: string;
-  encoder: string;
 }
 
 export interface JxlWasmUrls {
@@ -82,10 +77,6 @@ export interface JxlWasmUrls {
   encoderMtSimd: string;
   encoderMtSimdWorker: string;
   encoderMtSimdScript: string;
-}
-
-export interface MozjpegWasmUrls {
-  encoder: string;
 }
 
 export interface JpegliWasmUrls {
@@ -121,7 +112,6 @@ export interface CodecUrls {
   webp: WebpWasmUrls;
   qoi: QoiWasmUrls;
   jxl: JxlWasmUrls;
-  mozjpeg: MozjpegWasmUrls;
   jpegli: JpegliWasmUrls;
   oxipng: OxipngWasmUrls;
   imagequant: ImagequantWasmUrls;
@@ -152,7 +142,6 @@ function locateCodecWasm({
   imagequant,
   jpegli,
   jxl,
-  mozjpeg,
   qoi,
   ssimulacra2,
   webp,
@@ -161,7 +150,6 @@ function locateCodecWasm({
   imagequant?: ImagequantWasmUrls;
   jpegli?: JpegliWasmUrls;
   jxl?: JxlWasmUrls;
-  mozjpeg?: MozjpegWasmUrls;
   qoi?: QoiWasmUrls;
   ssimulacra2?: Ssimulacra2WasmUrls;
   webp?: WebpWasmUrls;
@@ -177,7 +165,6 @@ function locateCodecWasm({
     if (path === 'webp_enc.wasm') return webp?.baseline ?? path;
     if (path === 'webp_dec.wasm') return webp?.decoder ?? path;
     if (path === 'webp_enc_simd.wasm') return webp?.simd ?? path;
-    if (path === 'qoi_enc.wasm') return qoi?.encoder ?? path;
     if (path === 'qoi_dec.wasm') return qoi?.decoder ?? path;
     if (path === 'jxl_enc.wasm') return jxl?.encoder ?? path;
     if (path === 'jxl_dec.wasm') return jxl?.decoder ?? path;
@@ -186,7 +173,6 @@ function locateCodecWasm({
     if (path === 'jxl_enc_mt_simd.wasm') return jxl?.encoderMtSimd ?? path;
     if (path === 'jxl_enc_mt_simd.worker.js')
       return jxl?.encoderMtSimdWorker ?? path;
-    if (path === 'mozjpeg_enc.wasm') return mozjpeg?.encoder ?? path;
     if (path === 'jpegli_enc.wasm') return jpegli?.encoder ?? path;
     if (path === 'imagequant.wasm') return imagequant?.processor ?? path;
     if (path === 'ssimulacra2.wasm') return ssimulacra2?.metric ?? path;
@@ -223,9 +209,6 @@ const encodeWebp = createWebpEncoderRuntime({
 const decodeQoi = createQoiDecoderRuntime({
   loadDecoder: async () => qoiDecoder,
 });
-const encodeQoi = createQoiEncoderRuntime({
-  loadEncoder: async () => qoiEncoder,
-});
 const decodeJxl = createJxlDecoderRuntime({
   loadDecoder: async () => jxlDecoder,
 });
@@ -256,9 +239,6 @@ const jxl = createJxlEncoderRuntime({
     );
     return jxlEncoderMtSimd.default;
   },
-});
-const encodeMozjpeg = createMozjpegEncoderRuntime({
-  loadEncoder: async () => mozjpegEncoder,
 });
 const encodeJpegli = createJpegliEncoderRuntime({
   loadEncoder: async () => jpegliEncoder,
@@ -328,18 +308,23 @@ const urls = (): CodecUrls => {
   return currentUrls;
 };
 
+// MozJPEG and QOI stay in EncoderState (old saves, the lab skins' option
+// panels) but no encoder ships for them: neither is offered by the picker and
+// saved settings are validated against it, so nothing should send them here.
+type RetiredEncoder = 'mozJPEG' | 'qoi';
 type EncodeFn = (image: ImageData, options: unknown) => Promise<ArrayBuffer>;
-const encoders: Record<EncoderState['type'], EncodeFn> = {
+const encoders: Record<
+  Exclude<EncoderState['type'], RetiredEncoder>,
+  EncodeFn
+> = {
   avif: encodeAvif as EncodeFn,
   jpegli: encodeJpegli as EncodeFn,
   jxl: ((image, options) =>
     jxl.encode(image, options as JxlEncodeOptions)) as EncodeFn,
-  mozJPEG: encodeMozjpeg as EncodeFn,
   oxiPNG: ((image, options) =>
     encodeOxipng(image, options as OxipngEncodeOptions, {
       wasmUrls: urls().oxipng,
     })) as EncodeFn,
-  qoi: encodeQoi as EncodeFn,
   webP: encodeWebp as EncodeFn,
 };
 
@@ -350,7 +335,12 @@ const steps: PipelineSteps = {
       ? pixelatedResize(image, options)
       : resize(image, options, urls().resize),
   quantize: (image, options) => quantize(image, options),
-  encode: (image, encoder) => encoders[encoder.type](image, encoder.options),
+  encode: (image, encoder) => {
+    if (encoder.type === 'mozJPEG' || encoder.type === 'qoi') {
+      throw Error(`No ${encoder.type} encoder ships with this build.`);
+    }
+    return encoders[encoder.type](image, encoder.options);
+  },
 };
 
 const pipeline = createPipelineOps({

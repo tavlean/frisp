@@ -34,16 +34,13 @@ export function dedupeUrls(urls: readonly string[]): string[] {
  *   SSIMULACRA2 metric (auto-quality's scorer, so it must work offline) each
  *   have a single variant used everywhere.
  *
- * The QOI and MozJPEG ENCODERS are deliberately NOT precached: neither is a
- * user-selectable output (QOI left the picker 2026-06-27, MozJPEG 2026-11-04
- * when jpegli became the one JPEG), so only the dev-only diagnostics probe
- * ever runs QOI encode. The QOI DECODER stays (it decodes `.qoi` inputs
+ * The QOI and MozJPEG ENCODERS no longer ship at all (2026-11-17): neither
+ * was a selectable output. The QOI DECODER stays (it decodes `.qoi` inputs
  * offline).
  *
  * Assets left out stay reachable: the service worker runtime-caches any known
- * asset on first fetch, so a mis-detection (or the excluded QOI encoder, if the
- * probe ever runs) only costs a network trip while online — it never breaks the
- * codec.
+ * asset on first fetch, so a mis-detection only costs a network trip while
+ * online. It never breaks the codec.
  */
 export function selectCodecPrecacheUrls(
   records: readonly CodecAssetRecord[],

@@ -72,14 +72,6 @@
     "cache": "precache"
   },
   {
-    "logicalKey": "qoi:encoder:default",
-    "codec": "qoi",
-    "role": "encoder",
-    "variant": "default",
-    "path": "codecs/qoi/enc/qoi_enc.wasm",
-    "cache": "precache"
-  },
-  {
     "logicalKey": "jxl:decoder:default",
     "codec": "jxl",
     "role": "decoder",
@@ -149,14 +141,6 @@
     "role": "encoder",
     "variant": "default",
     "path": "codecs/jpegli/enc/jpegli_enc.wasm",
-    "cache": "precache"
-  },
-  {
-    "logicalKey": "mozjpeg:encoder:default",
-    "codec": "mozjpeg",
-    "role": "encoder",
-    "variant": "default",
-    "path": "codecs/mozjpeg/enc/mozjpeg_enc.wasm",
     "cache": "precache"
   },
   {

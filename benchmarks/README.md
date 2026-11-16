@@ -17,10 +17,10 @@ BENCH_LABEL=webp-1.6 npm run bench    # custom label → results/webp-1.6.json
 It boots the production build (cross-origin isolated) and, for each **image type**
 (`photo` 1024×683, `illustration`, `transparent`, five synthetic stressors, and
 `photo-large` 12 MP; see `tests/fixtures/`), encodes through each of WebP, AVIF,
-JPEG XL, MozJPEG and OxiPNG at the app's default settings. The normal fixtures
+JPEG XL, jpegli and OxiPNG at the app's default settings. The normal fixtures
 take 3 measured runs (records the median); the big 12 MP image takes one (each
 encode is slow; it's there to show whether huge inputs behave differently).
-Browser PNG/JPEG/GIF and QOI are excluded (native or decode-only).
+Browser PNG/JPEG/GIF are excluded (native), and QOI is decode-only.
 
 Multiple types matter: a codec change can help photos but hurt flat
 illustrations, break alpha, or behave very differently on huge images; the

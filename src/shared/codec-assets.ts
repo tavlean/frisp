@@ -9,7 +9,6 @@ export type CodecAssetCodec =
   | 'imagequant'
   | 'jpegli'
   | 'jxl'
-  | 'mozjpeg'
   | 'oxipng'
   | 'qoi'
   | 'resize'
