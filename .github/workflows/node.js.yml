@@ -59,7 +59,7 @@ jobs:
 
   # Formatting is its own job, not part of `check`, so a Prettier nit can never
   # mask (or block) a real type/build failure — the two report independently. A
-  # code-only pre-commit hook (see package.json `simple-git-hooks`) keeps this
+  # code-only pre-commit hook (`.githooks/pre-commit`) keeps this
   # green without thought; this is the backstop for commits made without it.
   # OS-independent, so one runner is enough.
   format:
