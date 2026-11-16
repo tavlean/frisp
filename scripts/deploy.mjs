@@ -47,11 +47,12 @@ if (sh('git rev-parse origin/main') !== head) {
   stop('HEAD is not origin/main. Push first; only pushed commits deploy.');
 }
 
+requirePinnedWrangler();
+
 // check = typecheck, build, static-output audit. The e2e suite is the
 // caller's job (AGENTS.md): it takes minutes and has usually just run.
 run('npm', ['run', 'check']);
 run('npm', ['run', 'test:unit']);
-requirePinnedWrangler();
 run('wrangler', ['deploy', ...(dryRun ? ['--dry-run'] : [])]);
 if (dryRun) {
   console.log('deploy: dry run finished; production was not changed.');

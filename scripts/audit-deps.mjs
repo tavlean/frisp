@@ -7,14 +7,10 @@
 // also when a listed one stops being reported, so the list cannot go stale.
 import { spawnSync } from 'node:child_process';
 
-const ACCEPTED = {
-  // deepmerge mergeObject() prototype poisoning. No patched deepmerge exists,
-  // and @sveltejs/vite-plugin-svelte (latest, 7.3.1) depends on it; kit and
-  // adapter-static are flagged only for depending on that plugin. It merges
-  // Frisp's own build config at build time: no user input, not in the bundle.
-  // Accepted 2026-11-10. Remove when the plugin drops or updates deepmerge.
-  'GHSA-gcqx-w48m-w2h4': 'deepmerge via @sveltejs/vite-plugin-svelte',
-};
+// Empty since 2026-11-17: the one entry, GHSA-gcqx-w48m-w2h4 (deepmerge via
+// @sveltejs/vite-plugin-svelte), was withdrawn upstream on 2026-11-16. An
+// entry is `'GHSA-id': 'why it is accepted'`, with a dated comment above it.
+const ACCEPTED = {};
 
 // npm audit exits non-zero when it finds anything; the JSON is still on stdout.
 const run = spawnSync('npm', ['audit', '--json'], { encoding: 'utf8' });
