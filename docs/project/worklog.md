@@ -45,6 +45,9 @@ session must know. Newest first. (Live project state stays in
   `prepare` from running `svelte-kit sync`, and the hook's `git add` could
   stage unstaged work through pathspec globbing.
 - Gates: check, 288 unit, format, audit, 147 e2e (7 skipped) green.
+- Deployed 2026-11-17 at `6181c82a` with `npm run deploy`, the first run with
+  the pinned-wrangler check; production reported that commit. A fresh clone
+  with `npm ci` passed unit, format and audit before the push.
 - Gotchas: three new entries at the top of "Environment and process" in
   [../gotchas.md](../gotchas.md). Also: `vite.config.ts` had a hidden
   reference to `wasm-feature-detect` in `optimizeDeps.include`, which would
