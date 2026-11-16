@@ -25,9 +25,8 @@ import {
   jxlEncoderWasmUrl,
 } from './jxl';
 import { jpegliEncoderWasmUrl } from './jpegli';
-import { mozjpegEncoderWasmUrl } from './mozjpeg';
 import { oxipngMtWasmUrl, oxipngWasmUrl } from './oxipng';
-import { qoiDecoderWasmUrl, qoiEncoderWasmUrl } from './qoi';
+import { qoiDecoderWasmUrl } from './qoi';
 import { rotateWasmUrl } from './rotate';
 import { ssimulacra2WasmUrl } from './ssimulacra2';
 import {
@@ -55,11 +54,9 @@ const assetUrlEntries = [
   ['codecs/jxl/enc/jxl_enc_mt_simd.wasm', jxlEncoderMtSimdWasmUrl],
   ['codecs/jxl/enc/jxl_enc_mt_simd.worker.js', jxlEncoderMtSimdWorkerUrl],
   ['codecs/jxl/enc/jxl_enc_mt_simd.js', jxlEncoderMtSimdScriptUrl],
-  ['codecs/mozjpeg/enc/mozjpeg_enc.wasm', mozjpegEncoderWasmUrl],
   ['codecs/oxipng/pkg/squoosh_oxipng_bg.wasm', oxipngWasmUrl],
   ['codecs/oxipng/pkg-parallel/squoosh_oxipng_bg.wasm', oxipngMtWasmUrl],
   ['codecs/qoi/dec/qoi_dec.wasm', qoiDecoderWasmUrl],
-  ['codecs/qoi/enc/qoi_enc.wasm', qoiEncoderWasmUrl],
   ['codecs/rotate/rotate.wasm', rotateWasmUrl],
   ['codecs/resize/pkg/squoosh_resize_bg.wasm', resizeWasmUrl],
   ['codecs/ssimulacra2/ssimulacra2.wasm', ssimulacra2WasmUrl],

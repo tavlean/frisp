@@ -152,13 +152,13 @@ JS/WASM artifacts). Each codec is wired through `src/features/{encoders,decoders
 | WebP enc/dec           | libwebp (webmproject/libwebp)    | `v1.6.0`                                                        | no                    | yes (`webp_enc_simd`)   | enc+dec, `image/webp`                                                                         |
 | AVIF enc/dec           | libavif + libaom (+ libsharpyuv) | libavif `v1.4.2`, libaom `v3.12.1`, libwebp `v1.6.0` (sharpyuv) | yes (`avif_enc_mt`)   | no                      | enc+dec, `image/avif`; engages multi-core, single-thread fallback                             |
 | JPEG XL enc/dec        | libjxl                           | `v0.12.0`                                                       | yes (`jxl_enc_mt`)    | yes (`jxl_enc_mt_simd`) | enc+dec, menu "JPEG XL", `image/jxl`; engages multi-core, single-thread fallback              |
-| MozJPEG enc            | mozilla/mozjpeg                  | `v4.1.5` (built `--with-build-date=squoosh`)                    | no                    | no                      | enc still wired but not in the picker since 2026-11-04 (saved MozJPEG sides load as jpegli); not precached by the service worker; retirement pending |
+| MozJPEG enc            | mozilla/mozjpeg                  | `v4.1.5` (built `--with-build-date=squoosh`)                    | no                    | no                      | not shipped since 2026-11-17 (left the picker 2026-11-04; saved MozJPEG sides load as jpegli); sources kept in `codecs/mozjpeg` |
 | jpegli enc             | google/jpegli                    | commit `031a0077f5799a6041004267fc12b956c1f52a20` (no upstream tags) | no                | no                      | enc, menu "JPEG" (encoder in tooltip), `image/jpeg`; the one JPEG encoder offered since 2026-11-04 |
 | OxiPNG enc             | oxipng (crates.io)               | `10.1.1` (normal + parallel wasm-pack)                          | parallel build exists | no                      | enc, menu "PNG" (encoder in tooltip), `image/png`; engages multi-core, single-thread fallback |
 | imagequant (quantize)  | libimagequant (ImageOptim)       | `2.18.0` (`--disable-sse`)                                      | no                    | no                      | quantize processor                                                                            |
 | resize (worker resize) | `resize` crate (crates.io)       | `0.8.9` (wrapper `squoosh-resize` 0.1.0)                        | no                    | no                      | resize processor                                                                              |
 | hqx (pixel-art resize) | CryZe/wasmboy-rs `hqx` crate     | git tag `v0.1.3` (wrapper `squooshhqx` 0.1.0)                   | no                    | no                      | resize processor (`hqx` method)                                                               |
-| QOI dec (enc unused)   | phoboslab/qoi                    | commit `8d35d93cdca85d2868246c2a8a80a1e2c16ba2a8`               | no                    | no                      | dec wired for import; encoder built but removed from `OUTPUT_FORMATS` (2026-06-27)            |
+| QOI dec                | phoboslab/qoi                    | commit `8d35d93cdca85d2868246c2a8a80a1e2c16ba2a8`               | no                    | no                      | dec wired for import; the encoder left the picker 2026-06-27 and stopped shipping 2026-11-17 |
 | rotate (preprocessor)  | local Rust (`squoosh-rotate`)    | local `0.1.0` (WABT `1.0.11` + `wasm-opt`)                      | no                    | no                      | rotate preprocessor                                                                           |
 
 ### Codec assets present but not wired as app features
@@ -188,8 +188,8 @@ serviceWorkerCodecAssetUrls` (codec WASM/JS via
   writes `_app/worker-precache.json` and the service worker fetches it at install;
   `audit:static-output` fails if that list and the emitted workers disagree. Before
   2026-11-04 a first offline encode failed until an online encode had fetched the
-  worker. The QOI and MozJPEG encoders are not precached (neither is selectable);
-  they stay runtime-cacheable. Strategy:
+  worker. The QOI and MozJPEG encoders are not in the build (since 2026-11-17).
+  Strategy:
   **cache-first for known asset pathnames, network-first (with cache fallback)**
   for everything else. On `activate` it deletes stale caches and claims clients.
   Result: offline reload and offline encoding on the deployed origin once cached.

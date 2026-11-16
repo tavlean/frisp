@@ -45,6 +45,16 @@ hybrid `Inspector.svelte`). When the skins are retired or the winner is
 promoted without those buttons, delete the methods with them; until then a
 dead-code audit must not flag them.
 
+The same holds for MozJPEG's options panel. The MozJPEG encoder stopped
+shipping on 2026-11-17, but `src/lib/editor/options/MozjpegOptions.svelte`,
+`src/features/encoders/mozJPEG/shared/meta.ts` and the `mozJPEG` entry in the
+encoder registry stay because the darkroom and hybrid `Inspector.svelte` and
+porcelain's `LabOptionsPanel.svelte` each have a `format === 'mozJPEG'`
+branch. The branches can never be taken (the skins take their format list
+from `session.availableFormats`), and the production `OptionsPanel.svelte`
+has the same dead branch. Remove all of them together when the skins are
+retired.
+
 ## Crop tool
 
 **Status: ongoing, kept for reference regardless of the skin verdict.** A

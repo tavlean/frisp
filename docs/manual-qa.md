@@ -69,7 +69,7 @@ At minimum before launch:
 - WebP encode/download.
 - AVIF encode/download.
 - JPEG XL encode/download if browser/runtime permits the preview.
-- MozJPEG and OxiPNG encode/download.
+- JPEG (jpegli) and OxiPNG encode/download.
 
 ## Saved Settings
 

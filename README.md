@@ -17,7 +17,7 @@ The app is built on SvelteKit and Svelte 5 as a static site, a smaller and clear
 ## Features
 
 - Add an image by file picker, drag and drop, or paste.
-- Encode to WebP, AVIF, JPEG XL, JPEG (MozJPEG), or PNG (OxiPNG).
+- Encode to WebP, AVIF, JPEG XL, JPEG (jpegli), or PNG (OxiPNG).
 - Optimize an SVG source to a smaller SVG on a dedicated vector lane.
 - Resize, reduce the color palette, and rotate.
 - Compare before and after side by side, with zoom, pan, and a draggable split.

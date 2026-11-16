@@ -30,9 +30,9 @@ No `aria-keyshortcuts` anywhere yet. Every `Range` control renders a native
 range + mirrored number input (native arrow-stepping preserved).
 
 Formats (`src/lib/compress.ts` OUTPUT_FORMATS + identity): `webP` WebP ·
-`avif` AVIF · `jxl` JPEG XL · `mozJPEG` JPEG · `oxiPNG` PNG · `identity`
+`avif` AVIF · `jxl` JPEG XL · `jpegli` JPEG · `oxiPNG` PNG · `identity`
 Original. Quality fields: WebP 0–100; AVIF 0–99 lossy (100 = lossless);
-JXL 0–99 (100 = lossless); MozJPEG 0–100; OxiPNG has NO quality (effort only).
+JXL 0–99 (100 = lossless); jpegli 0–100; OxiPNG has NO quality (effort only).
 WebP lossless mode's "Slight loss" is inverted (`near_lossless = 100 − v`).
 
 ## Proposed keymap v1 (draft — letters are maintainer decisions)

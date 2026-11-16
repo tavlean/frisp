@@ -17,7 +17,6 @@ import {
 import {
   qoiCodecAssetUrls,
   qoiDecoderWasmUrl,
-  qoiEncoderWasmUrl,
 } from '#shared/codec-assets/qoi.ts';
 import {
   jxlCodecAssetUrls,
@@ -28,10 +27,6 @@ import {
   jpegliCodecAssetUrls,
   jpegliEncoderWasmUrl,
 } from '#shared/codec-assets/jpegli.ts';
-import {
-  mozjpegCodecAssetUrls,
-  mozjpegEncoderWasmUrl,
-} from '#shared/codec-assets/mozjpeg.ts';
 import {
   oxipngCodecAssetUrls,
   oxipngWasmUrl,
@@ -71,13 +66,10 @@ export {
   jxlCodecAssetUrls,
   jxlDecoderWasmUrl,
   jxlEncoderWasmUrl,
-  mozjpegCodecAssetUrls,
-  mozjpegEncoderWasmUrl,
   oxipngCodecAssetUrls,
   oxipngWasmUrl,
   qoiCodecAssetUrls,
   qoiDecoderWasmUrl,
-  qoiEncoderWasmUrl,
   resizeCodecAssetUrls,
   resizeWasmUrl,
   rotateCodecAssetUrls,

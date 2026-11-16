@@ -14,7 +14,6 @@ import type {
   ImagequantWasmUrls,
   JpegliWasmUrls,
   JxlWasmUrls,
-  MozjpegWasmUrls,
   OxipngWasmUrls,
   QoiWasmUrls,
   ResizeWasmUrls,
@@ -108,7 +107,6 @@ const webpWasmUrls = {
 
 const qoiWasmUrls = {
   decoder: codecAssetUrl('qoi:decoder:default'),
-  encoder: codecAssetUrl('qoi:encoder:default'),
 } satisfies QoiWasmUrls;
 
 const jxlWasmUrls = {
@@ -121,10 +119,6 @@ const jxlWasmUrls = {
   encoderMtSimdWorker: codecAssetUrl('jxl:encoder:multi-thread-simd-worker'),
   encoderMtSimdScript: codecAssetUrl('jxl:encoder:multi-thread-simd-script'),
 } satisfies JxlWasmUrls;
-
-const mozjpegWasmUrls = {
-  encoder: codecAssetUrl('mozjpeg:encoder:default'),
-} satisfies MozjpegWasmUrls;
 
 const jpegliWasmUrls = {
   encoder: codecAssetUrl('jpegli:encoder:default'),
@@ -157,7 +151,6 @@ const codecUrls = {
   webp: webpWasmUrls,
   qoi: qoiWasmUrls,
   jxl: jxlWasmUrls,
-  mozjpeg: mozjpegWasmUrls,
   jpegli: jpegliWasmUrls,
   oxipng: oxipngWasmUrls,
   imagequant: imagequantWasmUrls,
