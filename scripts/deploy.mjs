@@ -20,6 +20,24 @@ function stop(message) {
   process.exit(1);
 }
 
+// wrangler holds the Cloudflare token and pushes production, and it is not in
+// package-lock.json (it would add its own large tree). So the version is
+// pinned here instead, and the binary on PATH is run directly: `npx` would
+// fetch whatever the registry serves on a machine that lacks it. To move the
+// pin, read the wrangler changelog for the versions in between, install the
+// new one globally, then change this line.
+const WRANGLER_VERSION = '4.98.0';
+function requirePinnedWrangler() {
+  const probe = spawnSync('wrangler', ['--version'], { encoding: 'utf8' });
+  const found = probe.stdout?.match(/\d+\.\d+\.\d+/)?.[0];
+  if (found !== WRANGLER_VERSION) {
+    stop(
+      `wrangler ${WRANGLER_VERSION} is required on PATH, found ${found ?? 'none'}. ` +
+        `Run: npm install -g wrangler@${WRANGLER_VERSION}`,
+    );
+  }
+}
+
 if (sh('git status --porcelain') !== '') {
   stop('the working tree has uncommitted changes. Commit or remove them.');
 }
@@ -33,7 +51,8 @@ if (sh('git rev-parse origin/main') !== head) {
 // caller's job (AGENTS.md): it takes minutes and has usually just run.
 run('npm', ['run', 'check']);
 run('npm', ['run', 'test:unit']);
-run('npx', ['wrangler', 'deploy', ...(dryRun ? ['--dry-run'] : [])]);
+requirePinnedWrangler();
+run('wrangler', ['deploy', ...(dryRun ? ['--dry-run'] : [])]);
 if (dryRun) {
   console.log('deploy: dry run finished; production was not changed.');
   process.exit(0);

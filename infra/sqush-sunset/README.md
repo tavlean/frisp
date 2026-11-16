@@ -8,7 +8,7 @@ cached app — see the comment in `worker.js` for why a plain 301 can't) and
 ## Deploy
 
 ```
-npx wrangler deploy -c infra/sqush-sunset/wrangler.jsonc
+wrangler deploy -c infra/sqush-sunset/wrangler.jsonc
 ```
 
 **Prerequisite:** the zone's Single Redirect Rule (sqush.app → frisp.app) must
