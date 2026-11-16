@@ -158,10 +158,13 @@ Shipped since then, newest first:
   pinned by SHA, and owned copies of three small packages. Policy and the
   list of what was kept and why:
   [dependency-modernization.md](../dependency-modernization.md). Open from
-  the same audit: codec build fetches are not hash-verified and nothing
-  checks the committed `.wasm`; libjxl 0.13.0 has decoder hardening we do
-  not ship yet. The unreachable MozJPEG and QOI encoders stopped shipping
-  the same day. Details in the [worklog](worklog.md).
+  the same audit and closed the same day: every codec source fetch is now
+  hash- or commit-verified, every committed codec artifact is checksummed
+  by `npm run verify:codecs` inside `npm run check`, and libjxl is on
+  v0.13.0 (decoder and JPEG-reconstruction hardening, brotli CVE). The
+  unreachable MozJPEG and QOI encoders stopped shipping the same day.
+  Details in the [worklog](worklog.md) and
+  [codec-provenance.md](../codec-provenance.md).
 
 - **Auto quality (2026-11-04, review change D).** An Auto select under
   the Quality slider of WebP, AVIF, JPEG XL, and JPEG (Visually lossless 90,

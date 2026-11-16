@@ -70,7 +70,7 @@ generated from exactly these inputs.
 | ------------------- | ----------------------------------------------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
 | `codecs/avif`       | AOMediaCodec/libavif                                  | `v1.4.2` tarball (was `v1.0.1`)                                     | Uses libaom `v3.12.1` (was `v3.7.0`) and libwebp `v1.6.0` for libsharpyuv. CVE-2024-5171; zero size regression, 6–13% faster encode. |
 | `codecs/webp`       | webmproject/libwebp                                   | `v1.6.0` tarball (was commit `d2e245ea9e959a5a79e1db0ed2085206947e98f2`) | Builds baseline and SIMD browser artifacts plus Node encoder/decoder artifacts. CVE-2023-4863; byte-identical output. |
-| `codecs/jxl`        | libjxl/libjxl                                         | `v0.12.0` (was `v0.8.5`, before that commit `9f544641ec83f6abd9da598bdd08178ee8a003e0`) | Fetches submodules recursively and builds single-thread, multithread, SIMD, and Node-targeted outputs. Encoder wrapper rewritten onto the public `JxlEncoder*` C API (2026-08-08), and given a second entrypoint `transcodeJPEG` for the lossless JPEG repack (2026-08-11, same version, no build change). Adds the 0.11.1 / 0.11.2 CVE fixes on top of CVE-2023-0645, CVE-2023-35790, CVE-2025-12474. **Output at a given quality slider position is larger than at v0.8.5**; see the note below. |
+| `codecs/jxl`        | libjxl/libjxl                                         | `v0.13.0`, commit `5a7da834` (was `v0.12.0`, before that `v0.8.5`, before that commit `9f544641ec83f6abd9da598bdd08178ee8a003e0`) | Fetches submodules recursively and builds single-thread, multithread, SIMD, and Node-targeted outputs. Encoder wrapper rewritten onto the public `JxlEncoder*` C API (2026-08-08), and given a second entrypoint `transcodeJPEG` for the lossless JPEG repack (2026-08-11, same version, no build change). v0.13.0 (2026-11-17) adds core-decoder and JPEG-reconstruction hardening and brotli 1.2.1 (CVE-2026-111497) on top of the 0.11.1 / 0.11.2 CVE fixes and CVE-2023-0645, CVE-2023-35790, CVE-2025-12474. **Output at a given quality slider position is larger than at v0.8.5**; see the notes below. |
 | `codecs/qoi`        | phoboslab/qoi                                         | commit `8d35d93cdca85d2868246c2a8a80a1e2c16ba2a8` tarball           | Builds encoder and decoder outputs. (Not upgraded — spec is frozen.)                                  |
 | `codecs/mozjpeg`    | mozilla/mozjpeg                                       | `v4.1.5` tarball (was `v3.3.1`)                                     | Build moved autotools → CMake. 9 CVEs from the libjpeg-turbo 2.x base; compression intentionally unchanged = byte-identical. |
 | `codecs/jpegli`     | google/jpegli                                         | commit `031a0077f5799a6041004267fc12b956c1f52a20` (2026-08-09 `main` HEAD) | **New 2026-08-09.** BSD-3-Clause. No release tags exist upstream, so the pin is a commit. Encode only, single variant, built with emsdk 3.1.0. |
@@ -114,6 +114,73 @@ generated from exactly these inputs.
 > v0.8.5's, and it buys the 0.11.1 / 0.11.2 CVE fixes and a wrapper that no
 > longer depends on libjxl internals.
 
+> **libjxl v0.13.0 (2026-11-17): a security upgrade. Default output is
+> pixel-identical; three opt-in options changed upstream.**
+> What reaches our build, from the release notes: core-decoder hardening
+> (`jxl_dec.wasm`), JPEG-reconstruction fixes including integer overflows in
+> JPEG coefficient buffer allocation and a use-after-free across decoder
+> resets (the encoder's `transcodeJPEG` parses untrusted JPEG bytes through
+> that code), and brotli 1.2.0 to 1.2.1 for CVE-2026-111497. v0.12.0 had
+> brotli 1.2.0. No build change was needed.
+>
+> Measured with a Node harness over the eight benchmark fixtures at eleven
+> slider positions (0 to 100), encoding with the Node artifacts, decoding,
+> and scoring with our SSIMULACRA2 build, at the app's default options:
+> **every one of the 88 encodes decodes to bit-identical pixels on v0.12.0
+> and v0.13.0**, so every SSIMULACRA2 score is unchanged and the quality
+> curve needs no recalibration. Files are 0 to 5.5% smaller (mean −1.0% at
+> the default 75, −2.3% at 0, unchanged at 100), mostly because v0.13.0's
+> default `STRIP_ALPHA` mode drops an all-opaque alpha channel on lossy
+> encodes; the wrapper always declares alpha. `transparent.png`, which has
+> real alpha, is unchanged. The app benchmark matched these sizes byte for
+> byte. At 75:
+>
+> | Fixture | v0.12.0 bytes | v0.13.0 bytes | Δ | SSIMULACRA2 (both) |
+> |---|---|---|---|---|
+> | photo | 56395 | 56285 | −0.2% | 78.44 |
+> | illustration | 6243 | 6191 | −0.8% | 89.09 |
+> | transparent | 4747 | 4747 | 0.0% | 91.47 |
+> | gradient | 2757 | 2701 | −2.0% | 92.90 |
+> | gradient-dithered | 2811 | 2754 | −2.0% | 92.37 |
+> | hard-edges | 62209 | 62125 | −0.1% | 92.73 |
+> | noise-synthetic | 149563 | 149513 | −0.0% | 40.99 |
+> | screenshot | 13030 | 12719 | −2.4% | 83.78 |
+>
+> One deliberate wrapper change: `transcodeJPEG` sets
+> `JXL_ENC_FRAME_SETTING_JPEG_RECON_LFS = 0`. v0.13.0 enables LF smoothing by
+> default for 4:4:4 JPEGs, and `djxl` 0.12 then rebuilds a JPEG that differs
+> from the original. With it off, a 4:4:4 photo's transcode is byte-identical
+> to v0.12.0's (106308 bytes) and `djxl` 0.12 and 0.13 both rebuild the
+> original bit-exactly. The 4:2:0 fixtures were never affected. The wasm
+> transcode matches a native v0.13.0 `cjxl` byte for byte. Grayscale JPEGs
+> take the smoothing default too and are covered by the same pin.
+>
+> **What did change, all opt-in, all upstream behaviour** (found by the
+> pre-merge review, which tested an option matrix the harness did not):
+>
+> - **Progressive** at quality 75: now −16 to +15% bytes depending on the
+>   image, with equal or slightly higher SSIMULACRA2 (photo 57586 → 60364,
+>   illustration 6727 → 7712, gradient 2798 → 2351, screenshot 14639 →
+>   16386). The wrapper always requested progressive DC, but libjxl ignored
+>   it while the alpha channel was present; with opaque alpha now stripped,
+>   it takes effect. Images with real alpha are unchanged.
+> - **Slight loss** (lossy palette at quality 100) is 35 to 87% larger:
+>   photo 184209 → 247911, gradient 14706 → 27279, hard-edges 12018 → 22522,
+>   transparent 3925 → 6809. A native v0.12.0 against v0.13.0 `cjxl`
+>   reproduces it, so it is libjxl's. It was already larger than plain
+>   lossless on four of six fixtures and is now on five. The option is worth
+>   reconsidering on its own.
+> - **Noise (photon noise ISO)** adds about half the grain it did (RMS
+>   against the noise-free encode at ISO 3200 on photo: 1.47 → 0.74), from
+>   the release's photon-noise luminance fix. Slider positions now mean less
+>   grain.
+> - **Slight loss together with Progressive** used to come out truly
+>   lossless (max pixel difference 0) and is now lossy (max difference 24 to
+>   41) and 27 to 69% smaller.
+>
+> The decoder API (`decode.h`) is unchanged, and the old and new decoders
+> agreed on every output the review tested (about 170).
+
 ## Source pins and how they are verified
 
 Since 2026-11-17 no codec build fetches anything it does not verify. Tarballs
@@ -140,7 +207,7 @@ pin bump never builds on top of the previous version's files.
 | mozjpeg v4.1.5, GitHub tag tarball | `codecs/mozjpeg` | sha256 `9fcbb7171f6ac383f5b391175d6fb3acde5e64c4c4727274eade84ed0998fcc1` | `fetch-verified.sh` |
 | qoi `8d35d93c`, GitHub commit tarball | `codecs/qoi` | sha256 `00f10a37021d1f75c78a94a95cf45500177b6f78e9a9b27cef49237798bd4db4` | `fetch-verified.sh` |
 | libimagequant 2.18.0, GitHub tag tarball | `codecs/imagequant` | sha256 `790d2593a587f9a27cec6245ee7a212b34b0aa63cac6383e550eda01236be636` | `fetch-verified.sh` |
-| libjxl v0.12.0 | `codecs/jxl` | commit `a7a9c787341cf703dede03c2009fa460cae5e5df`, submodules by gitlink | `fetch-git.sh --submodules` |
+| libjxl v0.13.0 | `codecs/jxl` | commit `5a7da83447212fe4900fc29ce97430b881caa67e`, submodules by gitlink (brotli is the `v1.2.1` tag commit `db24a98a`) | `fetch-git.sh --submodules` |
 | google/jpegli | `codecs/jpegli` | commit `031a0077f5799a6041004267fc12b956c1f52a20`, submodules by gitlink | `fetch-git.sh --submodules` |
 | cloudinary/ssimulacra2 | `codecs/ssimulacra2` | commit `81feacf6a5b0bbd7ec11b4a881a4615033ab0b10` | `fetch-git.sh` |
 | google/highway 1.0.2 | `codecs/ssimulacra2` | commit `f670ea580bb70b4113b63b9cdaa42ba9b10cd13a` | `fetch-git.sh` |

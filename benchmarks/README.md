@@ -83,13 +83,12 @@ human to judge; re-run on a quiet machine before believing it.
   and record here when and at which commit, because a stale baseline is worse
   than none: it reads as a codec regression long after the real cause (a changed
   default, a codec rebuild) has been forgotten. Current baseline captured
-  **2026-11-04 at commit `e86298cb`** (the worker-side pipeline, review change
-  B), on a Mac reporting 11 logical cores, with the cache-cold methodology
-  described above. It is the first capture with WebP back at method 4
-  (`555def1c`) and with jpegli as the one JPEG, so MozJPEG has no rows. It
-  replaced a 2026-08-09 capture (commit `c788155f`) whose WebP rows were made at
-  method 6 and read as a WebP size regression of up to 3 percent against today's
-  default. Every size matched a same-day run at `b437df36`, before the change.
+  **2026-11-17 at commit `e7227552`** (libjxl v0.13.0), on a Mac reporting 11
+  logical cores, with the cache-cold methodology described above. Only the
+  JPEG XL rows changed against a control run the same day on v0.12.0 (0.0 to
+  2.4 percent smaller); every other codec's size was identical. It replaced
+  the 2026-11-04 capture at `e86298cb` (the worker-side pipeline, WebP back at
+  method 4, jpegli as the one JPEG, so MozJPEG has no rows).
 - `results/`: per-run reports (gitignored).
 - Fixtures live in `tests/fixtures/` (shared with the e2e suite); see
   `tests/fixtures/README.md`. Swap `photo.jpg` / `photo-large.jpg` for your own

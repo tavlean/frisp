@@ -104,6 +104,16 @@ this doc holds the cross-cutting ones that no single file owns.
   and any C compiler in `producers`. Commit messages and docs disagreed with
   the artifacts before 2026-11-17 (the Dockerfiles said emsdk 2.0.34), so
   check the artifact, not the prose.
+- **A JPEG XL transcode can be reversible on one libjxl and not on another.**
+  From v0.13.0 libjxl smooths LF on 4:4:4 and grayscale lossless JPEG
+  transcodes by default, and older `djxl` then rebuilds a different JPEG.
+  The repo's JPEG fixtures are all 4:2:0, so no test can see it. The encoder pins the
+  smoothing off (`codecs/jxl/enc/jxl_enc.cpp`); keep it off, or test
+  reconstruction of a 4:4:4 JPEG with the oldest `djxl` you care about.
+- **A codec bump can be output-neutral at default settings and not under the
+  options.** libjxl v0.13.0 left every default encode pixel-identical but
+  changed Progressive, Slight loss and Noise. Compare old and new artifacts
+  with each encoder option switched on, not only at the defaults.
 - **`tar xz` under a make target that depends on its tarball makes the target
   permanently stale.** Plain `tar` restores each file's archive mtime, so an
   extracted `CMakeLists.txt` dated 2025 is always older than a tarball

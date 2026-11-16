@@ -4,8 +4,9 @@ Last updated: 2026-11-17.
 
 > **STATUS: all codecs rebuilt natively (no Docker) and committed on branch
 > `codec-rebuilds`.** imagequant 2.18.0, libwebp v1.6.0, libavif v1.4.2 +
-> libaom v3.12.1, libjxl **v0.12.0** (was v0.8.5; bumped 2026-08-08 with the
-> encoder wrapper rewritten onto libjxl's public C API), oxipng 10.1.1,
+> libaom v3.12.1, libjxl **v0.13.0** (was v0.8.5; bumped to v0.12.0 on 2026-08-08
+> with the encoder wrapper rewritten onto libjxl's public C API, then to
+> v0.13.0 on 2026-11-17 with no build change), oxipng 10.1.1,
 > mozjpeg v4.1.5, resize 0.8.9. All verified by the e2e suite + benchmark. The
 > per-codec sections below are the engineering record of how each was built.
 
@@ -200,7 +201,15 @@ inner archive) before blaming the linker.**
 > path IS exercised at runtime, and the artifact is correct and on the secure
 > libaom.
 
-### libjxl (✅ DONE, emcc 3.1.0, now v0.12.0 on the public C API)
+### libjxl (✅ DONE, emcc 3.1.0, now v0.13.0 on the public C API)
+
+**v0.12.0 → v0.13.0, 2026-11-17.** A pin change: the commit in
+`codecs/jxl/Makefile`, nothing else in the build. The library build took
+about four minutes for both trees on an 11-core M-series Mac (fetch included),
+and relinking the six wrappers about a minute. Results and the reasoning for
+the one wrapper change are in
+[codec-provenance.md](codec-provenance.md#local-source-references). Gotchas
+27 to 30 below are from this upgrade.
 
 **v0.8.5 → v0.12.0, 2026-08-08 (Path B).** The encoder wrapper was rewritten from
 libjxl's internal C++ API onto the public `JxlEncoder*` C API, which is what
@@ -376,6 +385,45 @@ and accept the size. Do not re-litigate this without new measurements.
     reconstruction is implied by a `.jpg` output extension: `djxl out.jxl
     back.jpg` prints "Reconstructed to JPEG." The old flag now fails with
     "Unknown argument".
+27. **v0.13.0 turns on LF smoothing for 4:4:4 and grayscale lossless JPEG
+    transcodes, and older decoders cannot reverse the result.** Decoders before v0.13.0 apply
+    the smoothing while rebuilding the JPEG (v0.13.0 fixed that, #4931), so
+    `djxl` 0.12 produces a JPEG that differs from the original. Both repo
+    JPEG fixtures are 4:2:0, so neither the e2e suite nor the benchmark can
+    see it. Make a 4:4:4 test file with `djpeg -ppm photo.jpg | cjpeg
+    -sample 1x1` (or `cjpeg -grayscale`). The wrapper pins
+    `JXL_ENC_FRAME_SETTING_JPEG_RECON_LFS = 0`, which makes those transcodes
+    byte-identical to v0.12.0's.
+28. **Check `djxl --version` before trusting it as "the old decoder".**
+    Homebrew moved from v0.11.2 to v0.12.0 between the two upgrades. A native
+    `djxl`/`cjxl` of the pinned version builds from the same checkout in a
+    few minutes: `cmake -B <dir> codecs/jxl/node_modules/jxl
+    -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=0
+    -DCMAKE_POLICY_VERSION_MINIMUM=3.5` then `cmake --build <dir> --target
+    djxl cjxl`.
+29. **The library build tree survives a pin bump only if you let it.** The
+    Makefile builds a git source only once `node_modules/jxl/.commit-<sha>`
+    exists, so a tree from the previous pin is fetched again. If you fetched
+    a commit through `../fetch-git.sh` by hand (for example with
+    `CODEC_COMMIT=<sha>` on the command line), give the stamp the source
+    tree's mtime with `touch -r node_modules/jxl/CMakeLists.txt <stamp>`;
+    a stamp newer than `build/*/Makefile` reconfigures and rebuilds both
+    library trees.
+30. **The shipped decoder is not bit-exact on lossless images.** The harness
+    found `noise-synthetic.png` at quality 100 scoring 96.15, not 100: about
+    1268 pixels come back one level off in the red channel. Homebrew `djxl`
+    decodes the same file exactly, so the encoder is lossless and the loss
+    is in the wasm decoder's float to 8-bit path (`dec/jxl_dec.cpp`, which
+    converts through skcms). Pre-existing on v0.12.0 and unchanged on
+    v0.13.0. Diagnosis is a delegate's and has not been fixed or re-checked.
+31. **A default-options harness cannot see option-dependent upstream
+    changes.** The 88-encode harness reported "pixel-identical everywhere",
+    and that was true only for the app's defaults: v0.13.0's new
+    `STRIP_ALPHA` default made the long-inert `PROGRESSIVE_DC` request live,
+    and Slight loss and Noise changed upstream. Run the option matrix (each
+    UI toggle on, old against new Node artifact) before calling a JXL bump
+    output-neutral. The results are in
+    [codec-provenance.md](codec-provenance.md#local-source-references).
 
 **The 0.8.5-era record (still current for gotchas 1–6 and the embind bug).**
 pre-0.7 commit → **v0.8.5** (CVE-2023-0645, CVE-2023-35790, CVE-2025-12474;

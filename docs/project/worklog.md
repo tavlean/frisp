@@ -4,6 +4,41 @@ Short session-by-session build log: what changed, why, and the gotchas a future
 session must know. Newest first. (Live project state stays in
 [the project brief](brief.md); this is the narrative trail.)
 
+## 2026-11-17 (Opus) - libjxl v0.12.0 to v0.13.0
+
+- Why: 0.13.0's release notes list core-decoder hardening, JPEG
+  reconstruction fixes (coefficient buffer overflows, a use-after-free across
+  decoder resets) and brotli 1.2.1 for CVE-2026-111497. All of it reaches
+  `jxl_dec.wasm` or the encoder's `transcodeJPEG`, which parses untrusted
+  JPEG bytes. Confirmed against the notes before starting.
+- Done: the Makefile pin moved to commit `5a7da834`; the six JXL artifacts
+  were rebuilt with emsdk 3.1.0 through that Makefile (glue identical but for
+  two memory offsets) and the checksum manifest updated with them.
+- Quality: a Node harness encoded the eight benchmark fixtures at eleven
+  slider positions on both versions and scored them with our SSIMULACRA2.
+  At default options all 88 decode to bit-identical pixels, so the curve
+  stands; files are 0 to 5.5 percent smaller, mostly from libjxl now
+  dropping all-opaque alpha. The app benchmark agrees byte for byte and
+  shows no other codec moving; `benchmarks/baseline.json` was re-captured.
+- The judge review then tested every option and found three opt-in changes,
+  all upstream: Progressive now applies progressive DC on opaque images
+  (−16 to +15 percent bytes at 75), Slight loss is 35 to 87 percent larger, and
+  Noise adds about half the grain. Shipped anyway: the security fixes reach
+  every visitor and the default path is unchanged. Recorded in
+  codec-provenance.md; Slight loss is worth a separate look.
+- One wrapper change: `transcodeJPEG` pins LF smoothing off. 0.13.0 enables
+  it for 4:4:4 JPEGs and `djxl` 0.12 then cannot rebuild the original. With
+  it off, 4:4:4 and grayscale transcodes are byte-identical to 0.12.0's and
+  both `djxl` versions reverse them exactly. The wasm transcode equals native `cjxl` 0.13.0.
+- Gates: check, 288 unit tests and the full e2e suite (149 passed in Chromium
+  and WebKit, both JXL threading tests among them).
+- Gotchas (build notes 27 to 31): the 4:4:4 and grayscale smoothing default
+  is invisible to our 4:2:0 fixtures; a default-options harness misses
+  option-dependent changes; Homebrew `djxl` is now 0.12.0, so check its version;
+  a hand-fetched jxl tree needs its `.commit-<sha>` stamp; and the shipped
+  JXL decoder is one level off on some pixels of lossless images (found by
+  the harness, pre-existing, not fixed).
+
 ## 2026-11-17 (Opus) - Codec build inputs pinned and verified
 
 - Why: the dependency audit's codec findings. No codec fetch checked a hash,
