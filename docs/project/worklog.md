@@ -4,6 +4,36 @@ Short session-by-session build log: what changed, why, and the gotchas a future
 session must know. Newest first. (Live project state stays in
 [the project brief](brief.md); this is the narrative trail.)
 
+## 2026-11-17 (Opus) - Codec build inputs pinned and verified
+
+- Why: the dependency audit's codec findings. No codec fetch checked a hash,
+  libjxl and lcms2 were fetched by tag, the oxipng nightly was undated, the
+  Docker images were mutable tags naming the wrong emsdk, and nothing
+  noticed a changed committed `.wasm`.
+- Done, with no artifact rebuilt:
+  - `codecs/fetch-verified.sh` (tarballs, SHA-256) and `codecs/fetch-git.sh`
+    (full commit SHA only) are the only way the Makefiles fetch. Every pin is
+    in [../codec-provenance.md](../codec-provenance.md#source-pins-and-how-they-are-verified).
+  - avif's libaom and libsharpyuv moved off googlesource `+archive` URLs,
+    which regenerate per request, to a release tarball and the GitHub libwebp
+    tarball; the extracted trees were diffed against the old ones first.
+  - Docker images are pinned by digest; `cpp.Dockerfile` now defaults to
+    emsdk 3.1.0 with the native flags. oxipng and resize pin
+    `nightly-2026-06-02`, the nightly their `.wasm` producers section names.
+  - The "Toolchain per artifact" table in codec-provenance.md is now the one
+    record of what built each artifact, from evidence in the artifacts
+    themselves (producers sections, emsdk glue fingerprints).
+  - `codecs/artifacts.sha256` lists all 93 committed codec build products;
+    `npm run verify:codecs` fails on a changed, missing or unlisted one and
+    runs first in `npm run check`. Update procedure in codec-provenance.md.
+- Left open (in codec-provenance.md's gaps): nothing rebuilds the artifacts
+  to prove reproducibility, webp's SIMD flags were passed through the
+  environment and are not in its Makefile, and four inherited Squoosh
+  artifacts have never been rebuilt here.
+- Gotchas: googlesource `+archive` tarballs cannot be hash-pinned; the
+  Emscripten `.wasm` files carry no producers section, so the glue is how to
+  tell emsdk 3.1.0 from 5.x.
+
 ## 2026-11-17 (Fable driver, Opus executor) - Dependency audit and reduction
 
 - Why: the maintainer asked for a deep audit of the dependency surface after

@@ -1,6 +1,6 @@
 # Codec build notes — engineering log
 
-Last updated: 2026-11-04.
+Last updated: 2026-11-17.
 
 > **STATUS: all codecs rebuilt natively (no Docker) and committed on branch
 > `codec-rebuilds`.** imagequant 2.18.0, libwebp v1.6.0, libavif v1.4.2 +
@@ -23,9 +23,15 @@ what breaks, and why. Distinct from the other codec docs:
 
 ## TL;DR — the toolchain decision
 
-The codecs were originally built (via `codecs/build-cpp.sh` → Docker) with
-**Emscripten `emsdk:2.0.34`** (Oct 2021). You do **not** need Docker — install
-Emscripten directly (no sudo).
+Which toolchain built each committed artifact, the pinned Docker images, and
+every source pin are recorded in one place:
+[codec-provenance.md](codec-provenance.md#toolchain-per-artifact). This doc is
+the engineering log behind those choices; when the two disagree, the
+provenance table wins and this doc is the one to fix.
+
+Upstream Squoosh built the codecs (via `codecs/build-cpp.sh` → Docker) with
+**Emscripten `emsdk:2.0.34`** (Oct 2021). Frisp's rebuilds were native and do
+**not** need Docker: install Emscripten directly (no sudo).
 
 **Toolchain version is mostly _not_ the thing that breaks a build.** We spent
 hours blaming "emcc 5.x's linker strips the inner library" — that theory was
@@ -57,6 +63,15 @@ brew install cmake                                    # avif/webp/jxl need it
 ```
 
 Switch toolchains per codec with `./emsdk activate <ver> && source ~/emsdk/emsdk_env.sh`.
+
+Every Makefile fetches its sources through `codecs/fetch-verified.sh`
+(tarballs, SHA-256 pinned) or `codecs/fetch-git.sh` (git, full commit SHA), so
+run `make` from the codec folder: the scripts are found as `../`. A hash
+mismatch stops the build; it means the pin or the upstream archive changed,
+never something to bypass. After the rebuild, update the artifact manifest as
+described in
+[codec-provenance.md](codec-provenance.md#artifact-checksum-manifest), or
+`npm run check` fails.
 
 Per C/C++ codec, replicate `codecs/cpp.Dockerfile`'s env and run the Makefile
 directly (bypassing the Docker wrapper):

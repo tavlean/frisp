@@ -1,6 +1,6 @@
 # Gotchas
 
-Last updated: 2026-11-10.
+Last updated: 2026-11-17.
 
 Traps that fail **silently**: the build stays green, the tests stay green, and
 the damage shows up later. Loud failures are deliberately absent because the
@@ -70,6 +70,23 @@ this doc holds the cross-cutting ones that no single file owns.
   main-bundle helper chunk, while SVGO itself stays in its lazy chunk. To check
   what a change pulled into the main bundle, build the previous commit too and
   compare chunk hashes and sizes, or fingerprint library-only strings.
+
+- **A googlesource `+archive` tarball cannot be pinned by hash.** Gitiles
+  generates it on every request, and two downloads of the same libaom tag
+  minutes apart hashed differently with identical contents. A checksum on one
+  fails at random; no checksum lets anything through. Pin release tarballs
+  (libaom publishes them at `storage.googleapis.com/aom-releases/`) or a
+  GitHub tag tarball, and confirm the extracted tree with `diff -r` before
+  switching. Equally, a git tag is not a pin: `codecs/fetch-git.sh` refuses
+  anything but a full commit SHA. Pins and their checks are in
+  [codec-provenance.md](codec-provenance.md#source-pins-and-how-they-are-verified).
+- **The Emscripten `.wasm` files carry no `producers` section, so the toolchain
+  that built one is read from its JS glue.** emsdk 3.1.0 glue resolves the
+  `.wasm` with `new URL(...).toString()`; 5.x uses `.href` and emits
+  `moduleRtn` / `wasmExports`. Rust `.wasm` files do name rustc, wasm-bindgen
+  and any C compiler in `producers`. Commit messages and docs disagreed with
+  the artifacts before 2026-11-17 (the Dockerfiles said emsdk 2.0.34), so
+  check the artifact, not the prose.
 
 ## Runtime
 
