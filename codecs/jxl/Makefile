@@ -1,15 +1,14 @@
 CODEC_URL = https://github.com/libjxl/libjxl.git
-# v0.12.0. The encoder wrapper is written against libjxl's PUBLIC JxlEncoder* C
-# API, so the internal-header constraint that pinned us to 0.8.x is gone (v0.9.0
-# deleted enc_file.h / enc_color_management.h / EncodeFile / GetJxlCms). Adds the
-# 0.11.1 / 0.11.2 CVE fixes on top of the 0.8.x ones. Note that 0.12 spends more
-# bits than 0.8.5 for the same butteraugli distance; see codec-provenance.md.
+# v0.13.0 (2026-11-11). The encoder wrapper is written against libjxl's PUBLIC
+# JxlEncoder* C API, so a version bump is a pin change: 0.12.0 -> 0.13.0 needed
+# no wrapper or build change. 0.13.0 adds core-decoder and JPEG-reconstruction
+# hardening and brotli 1.2.1; see codec-provenance.md for what reaches us.
 #
 # Pinned by commit SHA through ../fetch-git.sh, because a tag can be moved.
-# a7a9c787 is the commit the v0.12.0 tag points to; the submodules (brotli,
+# 5a7da834 is the commit the v0.13.0 tag points to; the submodules (brotli,
 # highway, skcms and the rest) are pinned by that commit's gitlinks.
-CODEC_VERSION = v0.12.0
-CODEC_COMMIT = a7a9c787341cf703dede03c2009fa460cae5e5df
+CODEC_VERSION = v0.13.0
+CODEC_COMMIT = 5a7da83447212fe4900fc29ce97430b881caa67e
 # Written only after a verified fetch, and named after the commit, so a tree
 # from another pin or a failed fetch is never built.
 CODEC_STAMP = $(CODEC_DIR)/.commit-$(CODEC_COMMIT)

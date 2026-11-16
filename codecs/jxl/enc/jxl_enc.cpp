@@ -321,12 +321,23 @@ val transcodeJPEG(std::string jpeg_bytes) {
     return val::null();
   }
 
-  // No frame options at all, deliberately. The JPEG supplies the basic info,
-  // the colour encoding and the coefficients, so distance, effort and modular
-  // mode have nothing to act on. The two pins encode() needs are no-ops here as
-  // well: libjxl refuses to stream a JPEG frame whatever BUFFERING says
+  // One frame option only. The JPEG supplies the basic info, the colour
+  // encoding and the coefficients, so distance, effort and modular mode have
+  // nothing to act on. The two pins encode() needs are no-ops here as well:
+  // libjxl refuses to stream a JPEG frame whatever BUFFERING says
   // (CanDoStreamingEncoding bails on IsJPEG), and resampling belongs to the
   // pixel path it never enters.
+  //
+  // LF smoothing is pinned off. v0.13.0 turns it on by default for 4:4:4
+  // JPEGs, and decoders before v0.13.0 wrongly apply it while rebuilding the
+  // JPEG, so `djxl` 0.12 cannot get the original file back from such a JXL
+  // (measured: a 4:4:4 cjpeg photo reconstructs bit-exactly from the 0.12 and
+  // the smoothing-off output, and not from the 0.13 default). Off keeps every
+  // transcode reversible by every libjxl decoder; 4:2:0 JPEGs are unaffected.
+  if (JXL_ENC_SUCCESS !=
+      JxlEncoderFrameSettingsSetOption(frame_settings, JXL_ENC_FRAME_SETTING_JPEG_RECON_LFS, 0)) {
+    return val::null();
+  }
   if (JXL_ENC_SUCCESS !=
       JxlEncoderAddJPEGFrame(frame_settings,
                              reinterpret_cast<const uint8_t*>(jpeg_bytes.data()),
