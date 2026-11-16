@@ -25,6 +25,12 @@ LCMS_DIR := node_modules/lcms2
 SRC := $(CODEC_DIR)/src
 LCMS_LIB := $(LCMS_DIR)/liblcms2.a
 
+# Each written only after a verified fetch, and named after the commit, so a
+# tree from another pin or a failed fetch is never built.
+CODEC_STAMP := $(CODEC_DIR)/.commit-$(CODEC_VERSION)
+HWY_STAMP := $(HWY_DIR)/.commit-$(HWY_VERSION)
+LCMS_STAMP := $(LCMS_DIR)/.commit-$(LCMS_VERSION)
+
 OUT_JS := ssimulacra2.js ssimulacra2_node.js
 OUT_WASM := $(OUT_JS:.js=.wasm)
 ENVIRONMENT = worker
@@ -43,7 +49,7 @@ ssimulacra2_node.js: ENVIRONMENT = node
 # the directories before the fetch rules populate them, so a make-time glob
 # comes back empty on a clean build. include/ supplies jxl_export.h, which
 # libjxl's CMake would otherwise generate.
-$(OUT_JS): ssimulacra2.cpp $(SRC)/ssimulacra2.cc $(HWY_DIR)/hwy/targets.cc $(LCMS_LIB)
+$(OUT_JS): ssimulacra2.cpp $(CODEC_STAMP) $(HWY_STAMP) $(LCMS_LIB)
 	$(CXX) \
 		-I include \
 		-I $(SRC) \
@@ -67,20 +73,23 @@ $(OUT_JS): ssimulacra2.cpp $(SRC)/ssimulacra2.cc $(HWY_DIR)/hwy/targets.cc $(LCM
 		$(LCMS_LIB)
 
 # lcms2 is C; it builds into its own archive so the C++ link line stays C++.
-$(LCMS_LIB): $(LCMS_DIR)/src/cmsxform.c
+$(LCMS_LIB): $(LCMS_STAMP)
 	cd $(LCMS_DIR) && for f in src/*.c; do \
 		$(CC) -I include ${CFLAGS} -c $$f -o $${f%.c}.o || exit 1; \
 	done && $(AR) rcs liblcms2.a src/*.o
 
 # Every source is pinned by commit SHA through ../fetch-git.sh.
-$(SRC)/ssimulacra2.cc:
+$(CODEC_STAMP):
 	../fetch-git.sh $(CODEC_URL) $(CODEC_VERSION) $(CODEC_DIR)
+	touch $@
 
-$(HWY_DIR)/hwy/targets.cc:
+$(HWY_STAMP):
 	../fetch-git.sh $(HWY_URL) $(HWY_VERSION) $(HWY_DIR)
+	touch $@
 
-$(LCMS_DIR)/src/cmsxform.c:
+$(LCMS_STAMP):
 	../fetch-git.sh $(LCMS_URL) $(LCMS_VERSION) $(LCMS_DIR)
+	touch $@
 
 clean:
 	$(RM) $(OUT_JS) $(OUT_WASM)

@@ -7,6 +7,10 @@
 # never by tag or branch: a tag can be moved, a commit id cannot. Submodules
 # need no pins of their own, because the pinned commit records each one's
 # commit id. The directory is deleted and fetched fresh every time.
+#
+# Callers make their build depend on a stamp, `<dir>/.commit-<sha>`, which
+# they touch after this script succeeds. A failed fetch or a tree left from
+# another pin then has no matching stamp, and the next make fetches again.
 set -eu
 
 if [ "$#" -lt 3 ] || [ "$#" -gt 4 ]; then
@@ -18,12 +22,21 @@ sha=$2
 dir=$3
 submodules=${4:-}
 
+if [ -n "$submodules" ] && [ "$submodules" != "--submodules" ]; then
+  echo "unknown option: $submodules" >&2
+  exit 2
+fi
+if [ -z "$dir" ]; then
+  echo "empty directory argument" >&2
+  exit 2
+fi
+
 if ! printf '%s' "$sha" | grep -Eq '^[0-9a-f]{40}$'; then
   echo "not a full commit SHA: $sha" >&2
   exit 2
 fi
 
-rm -rf "$dir"
+rm -rf -- "$dir"
 git init -q "$dir"
 git -C "$dir" fetch --depth 1 "$url" "$sha"
 git -C "$dir" checkout -q FETCH_HEAD
@@ -34,7 +47,7 @@ if [ "$actual" != "$sha" ]; then
   exit 1
 fi
 
-if [ "$submodules" = "--submodules" ]; then
+if [ -n "$submodules" ]; then
   jobs=$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 4)
   git -C "$dir" submodule update --init --depth 1 --recursive --jobs "$jobs"
 fi

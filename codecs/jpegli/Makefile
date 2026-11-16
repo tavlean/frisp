@@ -5,6 +5,9 @@
 CODEC_URL := https://github.com/google/jpegli.git
 CODEC_VERSION := 031a0077f5799a6041004267fc12b956c1f52a20
 CODEC_DIR := node_modules/jpegli
+# Written only after a verified fetch, and named after the commit, so a tree
+# from another pin or a failed fetch is never built.
+CODEC_STAMP := $(CODEC_DIR)/.commit-$(CODEC_VERSION)
 CODEC_BUILD_DIR := $(CODEC_DIR)/build
 # jpegli's encoder needs highway, which the tree vendors as a submodule and
 # builds into its own archive. The jpegli-static target does not absorb it, so
@@ -52,7 +55,7 @@ enc/jpegli_node_enc.js: ENVIRONMENT = node
 # This codec ships one single-threaded variant (like mozjpeg), so it is off:
 # a threaded build needs a pre-spawned pool to avoid the Atomics.wait deadlock
 # documented in codec-build-notes.md, and there is no threaded artifact here.
-$(LIBJPEGLI): $(CODEC_DIR)/CMakeLists.txt
+$(LIBJPEGLI): $(CODEC_STAMP)
 	emcmake cmake \
 		$(CMAKE_FLAGS) \
 		-DCMAKE_BUILD_TYPE=Release \
@@ -78,8 +81,9 @@ $(LIBJPEGLI): $(CODEC_DIR)/CMakeLists.txt
 $(LIBHWY): $(LIBJPEGLI)
 	$(MAKE) -C $(CODEC_BUILD_DIR) hwy
 
-$(CODEC_DIR)/CMakeLists.txt:
+$(CODEC_STAMP):
 	../fetch-git.sh $(CODEC_URL) $(CODEC_VERSION) $(@D) --submodules
+	touch $@
 
 clean:
 	$(RM) $(OUT_JS) $(OUT_WASM)

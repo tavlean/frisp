@@ -1,7 +1,8 @@
 # Every tarball is fetched through ../fetch-verified.sh and must match its
 # SHA-256. The pins and how each was checked are in docs/codec-provenance.md.
-# Package names carry the version so a cached tarball from an older pin is
-# never reused.
+# Package names carry the version, and each extraction starts from an empty
+# directory, so a pin bump never reuses an older tarball or builds on top of
+# the previous version's tree.
 
 # using libavif from https://github.com/AOMediaCodec/libavif
 LIBAVIF_URL = https://github.com/AOMediaCodec/libavif/archive/refs/tags/v1.4.2.tar.gz
@@ -110,6 +111,7 @@ $(LIBAOM_PACKAGE):
 # Extract libaom from the tarball. The release tarball has a top-level
 # libaom-<version>/ directory, which the old `+archive` one did not.
 $(LIBAOM_DIR)/CMakeLists.txt: $(LIBAOM_PACKAGE)
+	$(RM) -r $(@D)
 	mkdir -p $(@D)
 	tar xzm --strip 1 -C $(@D) -f $(LIBAOM_PACKAGE)
 
@@ -121,6 +123,7 @@ $(LIBAVIF_PACKAGE):
 
 # Extract libavif from the tarball
 $(CODEC_DIR)/CMakeLists.txt: $(LIBAVIF_PACKAGE)
+	$(RM) -r $(@D)
 	mkdir -p $(@D)
 	tar xzm --strip 1 -C $(@D) -f $(LIBAVIF_PACKAGE)
 
@@ -130,6 +133,7 @@ $(LIBWEBP_PACKAGE):
 
 # Create libavif/ext/libwebp
 $(LIBWEBP_DIR)/CMakeLists.txt: $(CODEC_DIR)/CMakeLists.txt $(LIBWEBP_PACKAGE)
+	$(RM) -r $(LIBWEBP_DIR)
 	mkdir -p $(LIBWEBP_DIR)
 	tar xzm --strip 1 -C $(LIBWEBP_DIR) -f $(LIBWEBP_PACKAGE)
 

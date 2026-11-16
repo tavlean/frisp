@@ -33,14 +33,15 @@ $(CODEC_DIR)/config.mk: $(CODEC_DIR)/configure
 	cd $(CODEC_DIR) && ./configure \
 		--disable-sse
 
-$(CODEC_DIR)/configure: $(CODEC_DIR)
-
 $(CODEC_PACKAGE):
 	../fetch-verified.sh $(CODEC_URL) $(CODEC_SHA256) $@
 
-$(CODEC_DIR): $(CODEC_PACKAGE)
-	mkdir -p $@
-	tar xz --strip 1 -C $@ -f $(CODEC_PACKAGE)
+# Extract into an empty directory, so a pin bump never builds on top of the
+# previous tree; `m` keeps the extracted files newer than the tarball.
+$(CODEC_DIR)/configure: $(CODEC_PACKAGE)
+	$(RM) -r $(CODEC_DIR)
+	mkdir -p $(CODEC_DIR)
+	tar xzm --strip 1 -C $(CODEC_DIR) -f $(CODEC_PACKAGE)
 
 clean:
 	$(RM) $(OUT_JS) $(OUT_WASM)

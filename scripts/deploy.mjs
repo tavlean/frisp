@@ -49,7 +49,7 @@ if (sh('git rev-parse origin/main') !== head) {
 
 requirePinnedWrangler();
 
-// check = typecheck, build, static-output audit. The e2e suite is the
+// check = codec artifact checksums, typecheck, build, static-output audit. The e2e suite is the
 // caller's job (AGENTS.md): it takes minutes and has usually just run.
 run('npm', ['run', 'check']);
 run('npm', ['run', 'test:unit']);

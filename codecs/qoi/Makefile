@@ -28,7 +28,7 @@ $(OUT_JS):
 		$+
 
 # ALL .o FILES
-%.o: %.cpp $(CODEC_DIR)
+%.o: %.cpp $(CODEC_DIR)/qoi.h
 	$(CXX) -c \
 		$(CXXFLAGS) \
 		-I $(CODEC_DIR) \
@@ -39,9 +39,12 @@ $(OUT_JS):
 $(CODEC_PACKAGE):
 	../fetch-verified.sh $(CODEC_URL) $(CODEC_SHA256) $@
 
-$(CODEC_DIR): $(CODEC_PACKAGE)
+# Extract into an empty directory, so a pin bump never builds on top of the
+# previous tree; `m` keeps the extracted files newer than the tarball.
+$(CODEC_DIR)/qoi.h: $(CODEC_PACKAGE)
+	$(RM) -r $(CODEC_DIR)
 	mkdir -p $(CODEC_DIR)
-	tar xz --strip 1 -C $(CODEC_DIR) -f $(CODEC_PACKAGE)
+	tar xzm --strip 1 -C $(CODEC_DIR) -f $(CODEC_PACKAGE)
 
 clean:
 	$(RM) $(OUT_JS) $(OUT_WASM)

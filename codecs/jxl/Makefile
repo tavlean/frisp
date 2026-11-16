@@ -10,6 +10,9 @@ CODEC_URL = https://github.com/libjxl/libjxl.git
 # highway, skcms and the rest) are pinned by that commit's gitlinks.
 CODEC_VERSION = v0.12.0
 CODEC_COMMIT = a7a9c787341cf703dede03c2009fa460cae5e5df
+# Written only after a verified fetch, and named after the commit, so a tree
+# from another pin or a failed fetch is never built.
+CODEC_STAMP = $(CODEC_DIR)/.commit-$(CODEC_COMMIT)
 CODEC_DIR = node_modules/jxl
 CODEC_BUILD_ROOT := $(CODEC_DIR)/build
 CODEC_MT_BUILD_DIR := $(CODEC_BUILD_ROOT)/mt
@@ -83,7 +86,7 @@ $(OUT_JS):
 # Enable SIMD on a SIMD build.
 $(CODEC_MT_SIMD_BUILD_DIR)/Makefile: CXXFLAGS+=-msimd128
 
-%/Makefile: $(CODEC_DIR)/CMakeLists.txt
+%/Makefile: $(CODEC_STAMP)
 	emcmake cmake \
 	$(CMAKE_FLAGS) \
 	-DBUILD_SHARED_LIBS=0 \
@@ -94,8 +97,9 @@ $(CODEC_MT_SIMD_BUILD_DIR)/Makefile: CXXFLAGS+=-msimd128
 	-B $(@D) \
 	$(<D)
 
-$(CODEC_DIR)/CMakeLists.txt:
+$(CODEC_STAMP):
 	../fetch-git.sh $(CODEC_URL) $(CODEC_COMMIT) $(@D) --submodules
+	touch $@
 
 # CODEC_BUILD_DIR is target-specific, so it is empty here; the line that used it
 # expanded to `make -C  clean` and aborted before either real build dir was

@@ -125,6 +125,13 @@ commit id cannot. Submodules need no pins of their own, because the pinned
 commit records each submodule's commit id. Every hash below was computed from
 a fresh download on 2026-11-17.
 
+A tree already on disk is never trusted on sight. Git sources are built only
+once a stamp named after the pinned commit (`<dir>/.commit-<sha>`) exists, and
+the Makefile writes it only after `fetch-git.sh` succeeds, so a failed fetch or
+a checkout from another pin is fetched again. Tarballs are extracted into an
+emptied directory whenever the versioned tarball is newer than the tree, so a
+pin bump never builds on top of the previous version's files.
+
 | Source | Used by | Pin | Verified by |
 | --- | --- | --- | --- |
 | libavif v1.4.2, GitHub tag tarball | `codecs/avif` | sha256 `2b645287340ba5a631d268b551dc2d72bd73ac33335962dd36dcdb6d8366921d` | `fetch-verified.sh` |
@@ -199,6 +206,12 @@ How the recipes match this record:
   `nightly-2026-06-02` with `rust-src` and the `wasm32-unknown-unknown` target.
   Current rustup reads them; run `rustup toolchain install` in the codec
   folder first if your rustup does not install a missing toolchain on its own.
+- **The Docker route cannot build oxipng or resize.** Their `Cargo.lock` files
+  are lockfile version 4, which the cargo in `rust:1.47.0` (the default
+  `RUST_IMG`) and in oxipng's 2020 `rustlang/rust` digest cannot read, and
+  the rustup in those images predates TOML toolchain files. This was already
+  true before the toolchain files were added. Build both natively, as the
+  committed artifacts were.
 
 ## Artifact checksum manifest
 

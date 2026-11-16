@@ -73,9 +73,14 @@ $(CODEC_SIMD_BUILD_DIR)/Makefile: CMAKE_FLAGS+=-DWEBP_ENABLE_SIMD=1
 $(CODEC_PACKAGE):
 	../fetch-verified.sh $(CODEC_URL) $(CODEC_SHA256) $@
 
+# Always extract into an empty directory, so a pin bump never builds on top
+# of the previous version's tree. `m` stamps the files with the extraction
+# time; without it CMakeLists.txt keeps its 2025 archive date, stays older
+# than the tarball, and every make re-extracts and rebuilds everything.
 $(CODEC_DIR)/CMakeLists.txt: $(CODEC_PACKAGE)
+	$(RM) -r $(CODEC_DIR)
 	mkdir -p $(CODEC_DIR)
-	tar xz --strip 1 -C $(CODEC_DIR) -f $(CODEC_PACKAGE)
+	tar xzm --strip 1 -C $(CODEC_DIR) -f $(CODEC_PACKAGE)
 
 clean:
 	$(RM) $(OUT_JS) $(OUT_WASM)

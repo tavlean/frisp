@@ -87,6 +87,12 @@ this doc holds the cross-cutting ones that no single file owns.
   and any C compiler in `producers`. Commit messages and docs disagreed with
   the artifacts before 2026-11-17 (the Dockerfiles said emsdk 2.0.34), so
   check the artifact, not the prose.
+- **`tar xz` under a make target that depends on its tarball makes the target
+  permanently stale.** Plain `tar` restores each file's archive mtime, so an
+  extracted `CMakeLists.txt` dated 2025 is always older than a tarball
+  downloaded today, and every `make` re-extracts, reconfigures and relinks
+  everything without saying why. Use `tar xzm`, which stamps files with the
+  extraction time, as the codec Makefiles now do.
 
 ## Runtime
 
