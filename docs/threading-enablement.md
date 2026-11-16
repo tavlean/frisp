@@ -220,7 +220,7 @@ needed:
 
 **1. JS-side wiring (the `?url` + `mainScriptUrlOrBlob` pattern).** The committed worker runtime
 now uses the `supportsThreads`/`loadMultiThread`(`Simd`) stubs to real detection
-(`checkThreadsSupport` + `wasm-feature-detect`'s `simd`), imports the threaded
+(`checkThreadsSupport` + `simd` from `src/shared/wasm-features.ts`), imports the threaded
 assets as `?url` records (wasm + `.worker.js` + the glue `.js`), and the audit
 asserts them. Because the codec runs inside a worker and the assets are served from
 hashed `?url` paths, the spawned pthread workers can't fall back to a relative

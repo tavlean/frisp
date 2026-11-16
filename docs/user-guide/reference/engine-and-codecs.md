@@ -137,8 +137,10 @@ never applies to this lane.
   rejected every candidate; sources above
   5 MB are rejected. Preview rasterisation reuses the shared SVG import path
   (`render.ts` → `processSvg`).
-- Libraries: **svgo `^4.0.1`**, **pixelmatch `^7.2.0`** (visual gate), **fflate
-  `^0.8.3`** (gzip sizing) — npm dependencies, not `codecs/` artifacts.
+- Libraries: **svgo `4.1.0`** and **fflate `0.8.3`** (gzip sizing) are npm
+  dependencies, not `codecs/` artifacts. The visual gate's pixel comparison is
+  pixelmatch 7.2.0's algorithm, kept as an owned copy in the app
+  (`src/shared/pixelmatch.ts`).
 
 ## Codecs / libraries
 

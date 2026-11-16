@@ -146,10 +146,22 @@ Shipped since then, newest first:
   service worker reads `$app/manifest` and drops `_headers` from its precache
   itself; the editor's shallow-route entry goes through
   `src/lib/editor/editor-route.svelte.ts` because shallow routing is now async.
-  `npm audit` still reports 4 low findings, all one advisory in `deepmerge`
-  (GHSA-gcqx-w48m-w2h4) with no patched release. `npm run audit` accepts
-  that one advisory by name (`scripts/audit-deps.mjs`) and fails on any
-  other, so the CI audit job is green and still meaningful.
+  `npm audit` reports nothing as of 2026-11-17 (the one accepted advisory,
+  deepmerge GHSA-gcqx-w48m-w2h4, was withdrawn upstream), and `npm run audit`
+  (`scripts/audit-deps.mjs`) fails on any advisory not accepted by name.
+
+- **Dependency reduction (2026-11-17).** An audit found the package count
+  already low and the exposure in what was unpinned. Now: 134 installed
+  packages (was 167), four npm packages reaching the browser (svgo, fflate,
+  comlink, client-zip), exact versions everywhere, `.npmrc` with
+  `ignore-scripts` and a 7-day release cooldown, a pinned wrangler, Actions
+  pinned by SHA, and owned copies of three small packages. Policy and the
+  list of what was kept and why:
+  [dependency-modernization.md](../dependency-modernization.md). Open from
+  the same audit: codec build fetches are not hash-verified and nothing
+  checks the committed `.wasm`; libjxl 0.13.0 has decoder hardening we do
+  not ship yet; the MozJPEG and QOI encoders are unreachable but still
+  built. Details in the [worklog](worklog.md).
 
 - **Auto quality (2026-11-04, review change D).** An Auto select under
   the Quality slider of WebP, AVIF, JPEG XL, and JPEG (Visually lossless 90,

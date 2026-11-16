@@ -254,6 +254,22 @@ this doc holds the cross-cutting ones that no single file owns.
 
 ## Environment and process
 
+- **`npm install` deletes `node_modules/$app`, and nothing puts it back on
+  install.** That folder holds the `$app/tsconfig` every tsconfig here extends;
+  only `svelte-kit sync` writes it, npm sees it as extraneous and prunes it,
+  and `.npmrc`'s `ignore-scripts` stops `prepare` from recreating it. Vite 8
+  fails every transform when an `extends` cannot be resolved
+  (`TSCONFIG_ERROR ... Tsconfig not found`), so any script that can run first
+  on a fresh install must sync itself: `check`, `test:unit` and
+  `typecheck:tests` do.
+- **`git add -- <path>` reads the path as a glob.** A SvelteKit `[param]`
+  directory matches its one-letter siblings, and a tracked file under an
+  ignored directory is refused. `scripts/format-staged.mjs` re-stages with
+  `git update-index -z --stdin`, which takes paths as written.
+- **`min-release-age` in `.npmrc` needs npm 11.10 or later.** Older npm
+  ignores the key with a warning, and `npm ci` never consults it. To take a
+  release younger than 7 days on purpose, pass `--min-release-age=0` on that
+  one install.
 - **Analytics Engine data cannot be deleted, and a preview version shares
   the production dataset.** The usage Worker therefore counts only requests
   on the production host. To test the write path, use `wrangler dev` (local,

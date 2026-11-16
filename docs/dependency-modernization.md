@@ -13,21 +13,37 @@ and no longer describe this branch.
 - Vite 8
 - TypeScript 6
 - adapter-static 4
-- Comlink
-- pointer-tracker
-- wasm-feature-detect
+- Comlink, client-zip, fflate, svgo: the four npm packages that reach the browser
+
+Three small packages are owned copies in the repo since 2026-11-17, not npm
+dependencies: `wasm-feature-detect` (`src/shared/wasm-features.ts`),
+`pointer-tracker` (`src/lib/editor/output/pointer-tracking.ts`) and `pixelmatch`
+(`src/shared/pixelmatch.ts`). Each file's header records the upstream version,
+the licence and what was trimmed.
 
 `npm install` on the root lockfile pruned the old Rollup/Preact packages.
 
 ## Policy
 
+- Every version in `package.json` is exact, and `.npmrc` sets `save-exact`,
+  `ignore-scripts` and `min-release-age=7`. Update a dependency only for a
+  change we need (a fix that reaches us, a feature we will use), and read what
+  changed in it and in anything it pulls in first. Do not update for the sake
+  of being current.
+- Before adding a package, check whether the platform or a few dozen owned
+  lines cover the use. The 2026-11-17 audit
+  ([worklog](project/worklog.md)) is the reference for which packages were
+  kept and why.
+- `wrangler` is not in the lockfile. `scripts/deploy.mjs` names the one
+  version it accepts and runs it from PATH.
+- GitHub Actions are pinned to commit SHAs, with the release in a comment.
 - Use `npm run check` after dependency changes.
 - Use `npm run audit` after lockfile changes. It runs
   `scripts/audit-deps.mjs`: `npm audit`, failing on every advisory except the
   ones accepted in that file, each with its reason and date. It also fails
   when an accepted advisory is no longer reported, so the list cannot go
-  stale. Accepted as of 2026-11-10: one, `GHSA-gcqx-w48m-w2h4` (deepmerge, no
-  patched release, build-time only).
+  stale. Accepted as of 2026-11-17: none. The one earlier entry,
+  `GHSA-gcqx-w48m-w2h4` (deepmerge), was withdrawn upstream on 2026-11-16.
 - Do not run `npm audit fix --force` blindly.
 - Do not change codec package lockfiles unless actively rebuilding that codec.
 - Keep build/dependency changes separate from product feature work.
@@ -56,6 +72,11 @@ and no longer describe this branch.
   deliberately kept out of the glob so the hook never reflows Markdown — the
   behavior that got the old Husky hook removed. This setup is lighter than Husky
   (no `.husky/` dir), so the Markdown-mangling problem does not come back.
+- Git hooks: **the hook packages were replaced by a repo-owned script on
+  2026-11-17.** `simple-git-hooks` and `lint-staged` are gone; the same
+  code-only behaviour now lives in `.githooks/pre-commit` and
+  `scripts/format-staged.mjs`. Details in
+  [build-and-runtime.md](build-and-runtime.md).
 
 ## Near-Term Follow-Up
 

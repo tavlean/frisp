@@ -4,6 +4,52 @@ Short session-by-session build log: what changed, why, and the gotchas a future
 session must know. Newest first. (Live project state stays in
 [the project brief](brief.md); this is the narrative trail.)
 
+## 2026-11-17 (Fable driver, Opus executor) - Dependency audit and reduction
+
+- Why: the maintainer asked for a deep audit of the dependency surface after
+  the "dependencies are over" discussion (rewrite what is cheap) and the
+  "fork, trim, pin, update only for a commit you need" view. Four read-only
+  auditors covered browser-shipped packages, tooling and supply chain, the
+  native codecs, and Svelte/SvelteKit leanness.
+- Finding: the package count was already low (167 installed, 7 reaching the
+  browser). The exposure was in what was unpinned and unverified, so most of
+  the work is pinning, and only small packages were taken in-house.
+- Done: the install tree is 134 packages and 4 npm packages reach the browser
+  (svgo, fflate, comlink, client-zip).
+  - Owned copies replace `wasm-feature-detect`, `pointer-tracker` and
+    `pixelmatch` (paths in
+    [../dependency-modernization.md](../dependency-modernization.md)). The
+    pixel comparison is pinned by known-answer fixtures computed once from
+    pixelmatch 7.2.0.
+  - `.githooks/pre-commit` and `scripts/format-staged.mjs` replace
+    `simple-git-hooks` and `lint-staged`.
+  - Every version in `package.json` is exact; `.npmrc` sets `ignore-scripts`,
+    `save-exact` and `min-release-age=7`; the stale `cookie` override is gone
+    (Kit 3 declares `^2.0.1`, the override forced 1.1.1).
+  - `scripts/deploy.mjs` requires wrangler 4.98.0 on PATH and no longer goes
+    through `npx`; GitHub Actions are pinned to commit SHAs.
+- Kept on purpose: svgo (the whole SVG feature; a rewrite is tens of thousands
+  of lines), fflate (native `CompressionStream` cannot set a level, so gzip
+  sizes and Auto's winner would differ per browser), comlink and client-zip
+  (no dependencies, small, tested), SvelteKit (about 15 KB gzip and 7
+  packages), vitest (`node:test` cannot compile rune modules), every codec.
+- Not done, from the codec audit: no codec source fetch verifies a checksum,
+  `codecs/oxipng/rust-toolchain` is an undated `nightly`, the Dockerfiles name
+  emsdk 2.0.34 while the shipped artifacts were built with 3.1.0, and nothing
+  rebuilds or checks the committed `.wasm`. libjxl 0.13.0 carries decoder
+  hardening that reaches our build (we ship 0.12.0). The MozJPEG and QOI
+  encoders are unreachable by visitors but still wired into the worker and
+  emitted. The SVG worker (163 KB gzip) is precached for every visitor.
+- Review: a `judge` pass on the diff found two real defects before commit,
+  both fixed: `test:unit` failed on a fresh clone once `ignore-scripts` stopped
+  `prepare` from running `svelte-kit sync`, and the hook's `git add` could
+  stage unstaged work through pathspec globbing.
+- Gates: check, 288 unit, format, audit, 147 e2e (7 skipped) green.
+- Gotchas: three new entries at the top of "Environment and process" in
+  [../gotchas.md](../gotchas.md). Also: `vite.config.ts` had a hidden
+  reference to `wasm-feature-detect` in `optimizeDeps.include`, which would
+  have broken `vite dev` after the package was removed.
+
 ## 2026-11-10 (Fable driver, Opus executor) - First-party usage counting
 
 - What: `src/shared/usage-events.ts` (the allowlist), `src/lib/usage.ts`

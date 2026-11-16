@@ -144,7 +144,7 @@ Behavior (variant-aware precache, 2026-06-10 — first-visit payload
 14.3 MB → ~6.8 MB):
 
 - install: feature-detect what this browser will actually run — WASM threads
-  and SIMD via `wasm-feature-detect`, native AVIF/WebP decode via tiny
+  and SIMD via `src/shared/wasm-features.ts`, native AVIF/WebP decode via tiny
   `createImageBitmap` probes — then precache the app shell and only the codec
   variants selected by
   `selectCodecPrecacheUrls()` in `src/sw/cache-plan.ts` (e.g. threads+SIMD
@@ -338,13 +338,19 @@ Prettier is the formatter (`.prettierrc.json`). Run it manually:
 - `npm run format:check` — the read-only CI check, split into its own GitHub
   Actions job on 2026-07-01.
 
-There is a **code-only pre-commit hook** again as of 2026-07-01
-(`7b16e0ce`): `simple-git-hooks` installs `pre-commit: npx lint-staged` via the
-npm `prepare` script (`scripts/install-git-hooks.mjs`), and lint-staged runs
-`prettier --write` only on staged `*.{js,css,json,ts,tsx,svelte}` files. The
-2026-06-02 Husky hook removal still stands historically (the old hook rewrote
-Markdown and interrupted commits), but the current hook deliberately excludes
-`*.md`.
+There is a **code-only pre-commit hook**, owned by the repo since 2026-11-17:
+`.githooks/pre-commit` runs `scripts/format-staged.mjs`, which runs
+`prettier --write` on staged `*.{js,css,json,ts,tsx,svelte}` files and stages
+them again. A file that also has unstaged edits is only checked (against its
+staged content) and stops the commit if it is unformatted, so unstaged work is
+never pulled into a commit. Git finds the hook through `core.hooksPath`, set by
+`scripts/install-git-hooks.mjs`. That is the npm `prepare` script, which
+`.npmrc`'s `ignore-scripts` keeps from running on install, so run
+`npm run prepare` once after cloning (worktrees share the setting). It replaced
+`simple-git-hooks` + `lint-staged` (2026-07-01, `7b16e0ce`), which cost about 22
+packages and the tree's only real install script. The 2026-06-02 Husky hook
+removal still stands historically (the old hook rewrote Markdown and
+interrupted commits); the current hook deliberately excludes `*.md`.
 
 `*.md` is intentionally excluded from every Prettier path — the hook, `format`,
 and `format:check`. Prettier's Markdown formatter reflows prose and mangles
