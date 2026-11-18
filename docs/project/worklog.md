@@ -4,6 +4,51 @@ Short session-by-session build log: what changed, why, and the gotchas a future
 session must know. Newest first. (Live project state stays in
 [the project brief](brief.md); this is the narrative trail.)
 
+## 2026-11-19 (Fable driver, Opus executors) - Three bugs left open by the dependency sessions
+
+- Lossless JPEG XL now decodes to the exact pixels. The wasm decoder sent
+  every image through skcms; for sRGB that was a real gamut conversion,
+  because libjxl builds its ICC matrix from the chromaticities and lands
+  three fixed-point steps from the values skcms hard-codes. The green-to-red
+  term moved dark red values under bright green down a level (1268 values in
+  `noise-synthetic.png`). sRGB and sRGB-curve grey with straight alpha are
+  now rounded directly; ICC, other primaries or curves and premultiplied
+  alpha keep skcms and decode byte-identically to before. Only the two
+  decoder `.wasm` files were relinked (emsdk 3.1.0, 1036056 to 1036491
+  bytes); glue and encoders are unchanged. Detail in build notes gotcha 30.
+- A single `.qoi` opens in the editor. `isSupportedImage` (was
+  `isSupportedBulkImage`) is the one intake check for the route,
+  `pickFiles`, the intro paste and bulk; this also fixed `.qoi` in the bulk
+  focus view. The file inputs list the supported extensions on desktop only.
+- An auto-saved MozJPEG side loads as jpegli at the same quality.
+  `readSaved` applies `migrateRetiredFormat` on read; nothing written
+  changes. It only helps a user who has not opened the app since
+  2026-11-04: anyone who has was already written back as WebP.
+- Review: two `judge` passes. One caught that extension tokens in `accept`
+  replace Chrome for Android's photo picker with an all-files chooser (read
+  from Chromium source, not tested on a device), so Android keeps
+  `image/*`. The other corrected the stated cause of the JXL error, proved
+  the committed wasm is built from the committed source by relinking it,
+  and asked for the NaN-safe clamp. Lossy JXL scores through the fixed
+  decoder move by at most 0.4 SSIMULACRA2.
+- Gates: check, 294 unit tests, and the full e2e suite. The e2e run used the
+  newer browsers in the shared cache through a scratch config, because the
+  pinned ones are gone (gotcha below). The final run was 148 passed and one
+  failed: WebKit `alpha.spec.ts` "WebP preserves transparency" read alpha 0
+  at the disc centre. It then passed 45 of 45 reruns and both executors'
+  full runs were clean, so it is recorded as a flake, cause not found.
+- Gotchas: libjxl dithers all `JXL_TYPE_UINT8` output with no switch, so
+  never use it where pixels are scored; Playwright turns `mimeType: ''` into
+  `application/octet-stream` and ignores `accept`; a scratch relink of one
+  wrapper reproduces a committed wasm byte for byte in about a minute;
+  emsdk is at `~/Development/emsdk` on this machine; the Playwright 1.60.0
+  browsers (chromium headless shell 1223, webkit 2287) are no longer in
+  `~/Library/Caches/ms-playwright`, so plain `npm run test:e2e` fails at
+  launch until they are reinstalled or the pin moves.
+- Cleanup: worktrees `Frisp-auto-quality`, `dead-encoders`,
+  `quizzical-wright` and `codec-hardening` removed with their merged
+  branches.
+
 ## 2026-11-17 (Opus) - libjxl v0.12.0 to v0.13.0
 
 - Why: 0.13.0's release notes list core-decoder hardening, JPEG
@@ -37,7 +82,7 @@ session must know. Newest first. (Live project state stays in
   option-dependent changes; Homebrew `djxl` is now 0.12.0, so check its version;
   a hand-fetched jxl tree needs its `.commit-<sha>` stamp; and the shipped
   JXL decoder is one level off on some pixels of lossless images (found by
-  the harness, pre-existing, not fixed).
+  the harness; fixed 2026-11-19, entry above).
 
 ## 2026-11-17 (Opus) - Codec build inputs pinned and verified
 
@@ -95,7 +140,7 @@ session must know. Newest first. (Live project state stays in
 - New test: `tests/e2e/qoi-decode.spec.ts` writes a 40x24 QOI image, opens
   it, saves lossless PNG and compares every pixel, in Chromium and WebKit.
   Nothing tested `.qoi` input before.
-- Found, not fixed (both predate this change):
+- Found, not fixed here (both predate this change; both fixed 2026-11-19):
   - The single-image editor rejects a `.qoi` picked from disk in most
     browsers, because the browser reports no MIME type and `pickFiles` wants
     `image/*`. Entry in [../gotchas.md](../gotchas.md). The user guide's

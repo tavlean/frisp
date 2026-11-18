@@ -64,6 +64,7 @@ brew install cmake                                    # avif/webp/jxl need it
 ```
 
 Switch toolchains per codec with `./emsdk activate <ver> && source ~/emsdk/emsdk_env.sh`.
+(On the maintainer's machine the checkout is `~/Development/emsdk`.)
 
 Every Makefile fetches its sources through `codecs/fetch-verified.sh`
 (tarballs, SHA-256 pinned) or `codecs/fetch-git.sh` (git, full commit SHA), so

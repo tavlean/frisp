@@ -371,7 +371,7 @@ cross-browser feasible today: an "Open folder" affordance via
 `<input webkitdirectory>` (works in Chrome/Edge/Safari/Firefox) plus
 `showDirectoryPicker` where available, and **dropped folders** via
 `webkitGetAsEntry()` / `getAsFileSystemHandle()` traversal. Recursive walk,
-filter through the engine's existing `isSupportedBulkImage`, and keep each
+filter through the engine's existing `isSupportedImage`, and keep each
 file's relative path (`webkitRelativePath`) so naming templates /
 structure-preserving export stay possible later.
 

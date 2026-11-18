@@ -304,12 +304,25 @@ this doc holds the cross-cutting ones that no single file owns.
 
 ## Environment and process
 
-- **Browsers give `.qoi` files an empty MIME type, and the single-image editor
-  refuses those.** `EditorSession.pickFiles` accepts only `image/*` types (or
-  SVG), so a `.qoi` picked from disk on most systems gets "doesn't look like
-  an image" before the QOI decoder is reached; bulk import also accepts by
-  extension and is not affected. `tests/e2e/qoi-decode.spec.ts` passes
-  `image/qoi` explicitly for this reason. Found 2026-11-17, not yet fixed.
+- **Browsers give `.qoi` files an empty MIME type, so never gate intake on
+  `file.type` alone.** Every production entry point (the route's `routeFiles`,
+  `EditorSession.pickFiles`, the intro's paste, bulk import) asks
+  `isSupportedImage` in `src/client/lazy-app/bulk/import.ts`, which also
+  accepts by extension; a fresh `startsWith('image/')` check rejects `.qoi`
+  with "doesn't look like an image". The lab routes still filter by type.
+  Decoding is safe: the worker picks the QOI decoder by sniffing the `qoif`
+  magic bytes, not from `file.type`.
+
+- **The file inputs' `accept` lists extensions on desktop and must not on
+  Android.** Under `accept="image/*"` a desktop picker can grey out a `.qoi`,
+  so `imageInputAccept` adds every supported extension. Chrome for Android
+  opens its photo picker only while every `accept` token maps to an image or
+  video type; one extension Android's MIME map does not know (`.qoi`, `.jfif`)
+  turns it into a chooser over every file on the device, so Android gets plain
+  `image/*`. That is read from Chromium's `SelectFileDialog.java` on
+  2026-11-19, not tested on a device. No e2e test can see either behaviour:
+  Playwright's `setInputFiles` ignores `accept`, and it also turns
+  `mimeType: ''` into `application/octet-stream`.
 
 - **`npm install` deletes `node_modules/$app`, and nothing puts it back on
   install.** That folder holds the `$app/tsconfig` every tsconfig here extends;
@@ -383,9 +396,15 @@ this doc holds the cross-cutting ones that no single file owns.
   as `wasmBinary` and define global `require` and `__dirname` around the
   factory call, as `tests/node/pipeline-worker.ts` does. Only the WebP node
   artifacts are new enough to need neither.
-- **Playwright's Chromium headless shell must be installed for e2e.** Without
-  it (`npx playwright install chromium`), every Chromium test fails at browser
-  launch, which reads like a broken app rather than a missing browser.
+- **Playwright's browsers must match the pinned `@playwright/test`.** Each
+  version wants exact browser revisions in `~/Library/Caches/ms-playwright`
+  (1.60.0: chromium headless shell 1223, webkit 2287). Without them every
+  test fails at browser launch, which reads like a broken app rather than a
+  missing browser. The cache is shared with other tools and lost those
+  revisions around 2026-11-17. `npx playwright install` restores them; until
+  then a scratch config that spreads `playwright.config.ts` and sets each
+  project's `launchOptions.executablePath` to a cached browser runs the
+  suite, on newer browsers than the pin.
 - **Playwright `context.setOffline(true)` does not cut the network for
   dedicated workers in Chromium.** A worker's fetch still succeeds, so an
   "offline" test passes even when offline is broken. Also abort every request

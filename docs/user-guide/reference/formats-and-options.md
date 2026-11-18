@@ -262,9 +262,10 @@ engine re-checks the preconditions before routing).
 ## MozJPEG (`mozJPEG`), no longer offered
 
 Not in the picker since 2026-11-04 (see the roster notes above); a saved MozJPEG
-side loads as jpegli. The panel and codec below still exist in the code until the
-codec's retirement lands, so the table records what the panel renders, not what a
-user can reach today.
+side, whether auto-saved or in a Save slot, loads as jpegli at the same quality.
+The encoder stopped shipping on 2026-11-17. The panel below stays in the code
+because the lab skins use it, so the table records what the panel renders, not
+what a user can reach today.
 
 Panel: `MozjpegOptions.svelte`. Always lossy. Booleans bind directly. Channels select
 uses the `MozJpegColorSpace` enum (GRAYSCALE 1 / RGB 2 / YCbCr 3).
