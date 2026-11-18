@@ -14,7 +14,7 @@ test('resized-down output keeps the original footprint in the two-up view', asyn
   page,
 }) => {
   await page.goto('/');
-  await page.setInputFiles('input[type=file][accept="image/*"]', photo);
+  await page.setInputFiles('input[type=file][accept^="image/*"]', photo);
 
   const panel = page.locator('.options-2');
   // Lossless PNG so the resized raster is preserved exactly (parity with resize.spec).

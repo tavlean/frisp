@@ -9,7 +9,10 @@
   import { fromFileList } from '#lib/bulk/import-sources.ts';
   import Home from '#lib/bulk/Home.svelte';
   import { trackOpen } from '#lib/usage.ts';
-  import { applyRecipeChanges } from '#client/lazy-app/bulk/index.ts';
+  import {
+    applyRecipeChanges,
+    imageInputAccept,
+  } from '#client/lazy-app/bulk/index.ts';
   import {
     recipeSignature,
     type ImageRecipe,
@@ -126,7 +129,7 @@
       bind:this={fileInput}
       class="hidden-input"
       type="file"
-      accept="image/*"
+      accept={imageInputAccept}
       multiple
       onchange={onPick}
     />

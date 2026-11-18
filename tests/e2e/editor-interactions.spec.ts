@@ -92,7 +92,7 @@ test('undo restores a previous result instantly from cache', async ({
   page,
 }) => {
   await page.goto('/');
-  await page.setInputFiles('input[type=file][accept="image/*"]', photo);
+  await page.setInputFiles('input[type=file][accept^="image/*"]', photo);
 
   // Initial WebP encode settles → hrefA.
   await waitIdle(page);
@@ -156,7 +156,7 @@ test('undo restores a previous result instantly from cache', async ({
 
 test('typed slider values clamp to the range', async ({ page }) => {
   await page.goto('/');
-  await page.setInputFiles('input[type=file][accept="image/*"]', photo);
+  await page.setInputFiles('input[type=file][accept^="image/*"]', photo);
   await waitIdle(page);
   // Make sure the WebP Quality control is actually present before typing.
   await rightDownloadHref(page);
@@ -176,7 +176,7 @@ test('divider keys ignore focused controls but work from the stage', async ({
   page,
 }) => {
   await page.goto('/');
-  await page.setInputFiles('input[type=file][accept="image/*"]', photo);
+  await page.setInputFiles('input[type=file][accept^="image/*"]', photo);
   await waitIdle(page);
   await rightDownloadHref(page);
 

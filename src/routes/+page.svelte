@@ -28,7 +28,7 @@
   } from '#lib/editor/editor-route.svelte.ts';
   import type { AutoQualityControl } from '#lib/editor/auto-quality.ts';
   import { IDENTITY, type CompressOutcome } from '#lib/compress.ts';
-  import { isSupportedBulkImage } from '#client/lazy-app/bulk/index.ts';
+  import { isSupportedImage } from '#client/lazy-app/bulk/index.ts';
   import { isMac } from '#client/lazy-app/util/index.ts';
   import { APP_NAME } from '#shared/brand.ts';
   import { track, trackFormat, trackOpen } from '#lib/usage.ts';
@@ -158,7 +158,7 @@
     imported: ImportedFile[],
     source: UsageValue<'source'>,
   ): void {
-    const files = imported.filter((item) => isSupportedBulkImage(item.file));
+    const files = imported.filter((item) => isSupportedImage(item.file));
     if (files.length === 0) {
       void snackbar.show('No supported images found.');
       return;

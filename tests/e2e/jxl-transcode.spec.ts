@@ -47,7 +47,7 @@ test('transcodes a JPEG into a smaller, valid JXL', async ({ page }) => {
   page.on('pageerror', (error) => errors.push(String(error)));
 
   await page.goto('/');
-  await page.setInputFiles('input[type=file][accept="image/*"]', photo);
+  await page.setInputFiles('input[type=file][accept^="image/*"]', photo);
 
   const panel = page.locator('.options-2');
   await panel.locator('select.builtin-select').first().selectOption('jxl');
@@ -93,7 +93,7 @@ test('disables the transcode toggle while a resize is active', async ({
   page,
 }) => {
   await page.goto('/');
-  await page.setInputFiles('input[type=file][accept="image/*"]', photo);
+  await page.setInputFiles('input[type=file][accept^="image/*"]', photo);
 
   const panel = page.locator('.options-2');
   await panel.locator('select.builtin-select').first().selectOption('jxl');

@@ -11,7 +11,7 @@ test('Reduce palette quantizes to the requested colour count', async ({
   page,
 }) => {
   await page.goto('/');
-  await page.setInputFiles('input[type=file][accept="image/*"]', photo);
+  await page.setInputFiles('input[type=file][accept^="image/*"]', photo);
 
   const panel = page.locator('.options-2');
   // A lossless output (OxiPNG) preserves the quantized palette exactly.

@@ -68,7 +68,7 @@ test('an encode posts no full-frame copy to a worker', async ({ page }) => {
   await watchWorkerPosts(page);
 
   await page.goto('/');
-  await page.setInputFiles('input[type=file][accept="image/*"]', photo);
+  await page.setInputFiles('input[type=file][accept^="image/*"]', photo);
   const panel = page.locator('.options-2');
   const download = panel.locator('a.download[href^="blob:"]');
   await expect(download).toBeVisible({ timeout: 60_000 });

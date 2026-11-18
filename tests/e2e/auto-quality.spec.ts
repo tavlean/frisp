@@ -14,7 +14,7 @@ async function openOn(page: Page, file: string, format = 'webP') {
   const errors: string[] = [];
   page.on('pageerror', (e) => errors.push(String(e)));
   await page.goto('/');
-  await page.setInputFiles('input[type=file][accept="image/*"]', file);
+  await page.setInputFiles('input[type=file][accept^="image/*"]', file);
   await page.locator(`${RIGHT} select.builtin-select`).selectOption(format);
   await expect(page.locator(`${RIGHT} a.download[href^="blob:"]`)).toBeVisible({
     timeout: 120_000,

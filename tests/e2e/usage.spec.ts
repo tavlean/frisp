@@ -17,7 +17,7 @@ test('a session off the production host sends no usage beacon', async ({
   });
 
   await page.goto('/');
-  await page.setInputFiles('input[type=file][accept="image/*"]', photo);
+  await page.setInputFiles('input[type=file][accept^="image/*"]', photo);
   const right = page.locator('.options-2 select.builtin-select');
   await expect(right).toBeVisible({ timeout: 10_000 });
   await right.selectOption('avif');

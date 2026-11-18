@@ -63,7 +63,7 @@ for (const codec of CODECS) {
     );
 
     await page.goto('/');
-    await page.setInputFiles('input[type=file][accept="image/*"]', photo);
+    await page.setInputFiles('input[type=file][accept^="image/*"]', photo);
     await page
       .locator('.options-2')
       .locator('select.builtin-select')

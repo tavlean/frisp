@@ -7,7 +7,7 @@ import { expect, test, type Page } from '@playwright/test';
 // bytes. Each test here reproduced a way that contract broke (first-principles
 // review 2026-11-02, section 1) before its fix landed.
 
-const FILE_INPUT = 'input[type=file][accept="image/*"]';
+const FILE_INPUT = 'input[type=file][accept^="image/*"]';
 const RIGHT_PANEL = '.options-2';
 const CELL = '.rich-strip .cell[data-bulk-cell-id]';
 const photo = fileURLToPath(new URL('../fixtures/photo.jpg', import.meta.url));

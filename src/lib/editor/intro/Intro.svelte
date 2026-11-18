@@ -15,6 +15,10 @@
   import { resolve } from '$app/paths';
   import { fromFileList, type ImportedFile } from '#lib/bulk/import-sources.ts';
   import { fileDrop } from '#lib/editor/file-drop.ts';
+  import {
+    imageInputAccept,
+    isSupportedImage,
+  } from '#client/lazy-app/bulk/import.ts';
   import { APP_NAME } from '#shared/brand.ts';
   import type { UsageValue } from '#shared/usage-events.ts';
   // The canonical logomark (currentColor); shared with the lab's Logomark so the
@@ -93,8 +97,8 @@
 
   // Catch a Cmd/Ctrl+V paste of an image anywhere on the landing screen.
   function onWindowPaste(event: ClipboardEvent) {
-    const file = Array.from(event.clipboardData?.files ?? []).find((f) =>
-      f.type.startsWith('image/'),
+    const file = Array.from(event.clipboardData?.files ?? []).find(
+      isSupportedImage,
     );
     if (file) {
       event.preventDefault();
@@ -269,7 +273,7 @@
       bind:this={fileInput}
       class="visually-hidden"
       type="file"
-      accept="image/*"
+      accept={imageInputAccept}
       multiple
       tabindex="-1"
       aria-hidden="true"

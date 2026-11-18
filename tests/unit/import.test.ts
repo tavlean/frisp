@@ -5,21 +5,35 @@ import {
   createImageJobs,
   createImageJobsWithMimeSniffing,
   getBulkImportSummary,
-  isSupportedBulkImage,
+  imageInputAcceptFor,
+  isSupportedImage,
 } from '../../src/client/lazy-app/bulk/import';
 import { fakeFile, recipe, session } from './fixtures';
 
 describe('bulk import helpers', () => {
   it('accepts image MIME types and known image extensions', () => {
-    expect(
-      isSupportedBulkImage(fakeFile('photo.bin', { type: 'image/png' })),
-    ).toBe(true);
-    expect(isSupportedBulkImage(fakeFile('photo.JXL', { type: '' }))).toBe(
+    expect(isSupportedImage(fakeFile('photo.bin', { type: 'image/png' }))).toBe(
       true,
     );
+    expect(isSupportedImage(fakeFile('photo.JXL', { type: '' }))).toBe(true);
     expect(
-      isSupportedBulkImage(fakeFile('notes.txt', { type: 'text/plain' })),
+      isSupportedImage(fakeFile('notes.txt', { type: 'text/plain' })),
     ).toBe(false);
+  });
+
+  it('accepts the files browsers report with an empty MIME type', () => {
+    expect(isSupportedImage(fakeFile('grid.qoi', { type: '' }))).toBe(true);
+    expect(isSupportedImage(fakeFile('icon.svg', { type: '' }))).toBe(true);
+    expect(isSupportedImage(fakeFile('README', { type: '' }))).toBe(false);
+  });
+
+  it('adds the extensions to the file inputs, except on Android', () => {
+    const accept = imageInputAcceptFor('Mozilla/5.0 (Macintosh)').split(',');
+    expect(accept[0]).toBe('image/*');
+    expect(accept).toContain('.qoi');
+    expect(
+      imageInputAcceptFor('Mozilla/5.0 (Linux; Android 16) Chrome/142'),
+    ).toBe('image/*');
   });
 
   it('partitions accepted and unsupported files synchronously', () => {

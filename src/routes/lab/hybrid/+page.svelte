@@ -17,7 +17,7 @@
   import { fileDrop } from '#lib/editor/file-drop.ts';
   import { EditorSession } from '#lib/editor/editor-session.svelte.ts';
   import { IDENTITY, type SideFormat } from '#lib/compress.ts';
-  import { isSupportedBulkImage } from '#client/lazy-app/bulk/index.ts';
+  import { isSupportedImage } from '#client/lazy-app/bulk/index.ts';
   import type { ImportedFile } from '#lib/bulk/import-sources.ts';
   import TopBar from '#lib/lab/hybrid/TopBar.svelte';
   import Rail from '#lib/lab/hybrid/Rail.svelte';
@@ -103,7 +103,7 @@
   function routeFiles(imported: ImportedFile[]): void {
     const files = imported
       .map((item) => item.file)
-      .filter((file) => isSupportedBulkImage(file));
+      .filter((file) => isSupportedImage(file));
     if (files.length === 0) return;
     addFiles(files);
   }

@@ -33,16 +33,20 @@ function qoiImage(): Buffer {
   return Buffer.from(bytes);
 }
 
-test('decodes a .qoi input', async ({ page }) => {
+test('opens and decodes a .qoi that has no image MIME type', async ({
+  page,
+}) => {
   const errors: string[] = [];
   page.on('pageerror', (e) => errors.push(String(e)));
 
   await page.goto('/');
-  await page.setInputFiles('input[type=file][accept="image/*"]', {
+  await page.setInputFiles('input[type=file][accept^="image/*"]', {
     name: 'grid.qoi',
-    // The editor's intake accepts only `image/*` types, and browsers usually
-    // report an empty type for `.qoi`, so the test names the type itself.
-    mimeType: 'image/qoi',
+    // A browser reports an empty type for a `.qoi` from disk. Playwright
+    // turns an empty type into application/octet-stream, which is as far from
+    // `image/*`: the editor must admit the file by extension and the worker
+    // must pick the decoder by sniffing bytes.
+    mimeType: '',
     buffer: qoiImage(),
   });
 

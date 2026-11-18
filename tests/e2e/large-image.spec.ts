@@ -16,7 +16,7 @@ test('encodes a large 12 MP image without crashing (WebP)', async ({
   page.on('pageerror', (e) => errors.push(String(e)));
 
   await page.goto('/');
-  await page.setInputFiles('input[type=file][accept="image/*"]', large);
+  await page.setInputFiles('input[type=file][accept^="image/*"]', large);
 
   const rightSelect = page.locator('.options-2 select.builtin-select');
   await expect(rightSelect).toBeVisible();

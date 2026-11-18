@@ -33,6 +33,7 @@ import {
   type Rotation,
 } from '#client/lazy-app/recipe.ts';
 import { getPercentChange } from '#client/lazy-app/bulk/size.ts';
+import { isSupportedImage } from '#client/lazy-app/bulk/import.ts';
 import { recipeFromSide } from './side-recipe';
 import {
   AUTO_QUALITY_BOUNDS,
@@ -1227,7 +1228,7 @@ export class EditorSession {
     const next = list?.[0];
     if (!next) return;
 
-    if (!next.type.startsWith('image/') && !isSvgSource(next)) {
+    if (!isSupportedImage(next)) {
       snackbar.show(`"${next.name}" doesn't look like an image.`);
       return;
     }

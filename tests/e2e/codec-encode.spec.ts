@@ -47,7 +47,7 @@ for (const fmt of FORMATS) {
     page.on('pageerror', (e) => errors.push(String(e)));
 
     await page.goto('/');
-    await page.setInputFiles('input[type=file][accept="image/*"]', sample);
+    await page.setInputFiles('input[type=file][accept^="image/*"]', sample);
 
     const rightSelect = page.locator('.options-2 select.builtin-select');
     await expect(rightSelect).toBeVisible();

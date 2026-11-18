@@ -18,7 +18,7 @@ const tinyFlat = fileURLToPath(
   new URL('../fixtures/tiny-flat.png', import.meta.url),
 );
 
-const INTRO_FILE_INPUT = 'input[type=file][accept="image/*"]';
+const INTRO_FILE_INPUT = 'input[type=file][accept^="image/*"]';
 const CELL = '.rich-strip .cell[data-bulk-cell-id]';
 
 type ZipEntry = {

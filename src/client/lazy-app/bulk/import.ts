@@ -27,6 +27,9 @@ export interface BulkImportSummary {
 export type BulkMimeSniffer = (file: File) => Promise<string>;
 export type BulkRelativePathGetter = (file: File) => string | undefined;
 
+// The one answer to "can Frisp open this file?", for the single editor and bulk
+// alike. The extensions admit a file whose MIME type the browser leaves empty,
+// as it does for a `.qoi`.
 const supportedImageExtensions = new Set([
   'avif',
   'bmp',
@@ -49,10 +52,28 @@ function getFileExtension(fileName: string): string {
   return fileName.slice(lastDot + 1).toLowerCase();
 }
 
-export function isSupportedBulkImage(file: File): boolean {
+export function isSupportedImage(file: Pick<File, 'type' | 'name'>): boolean {
   if (file.type.startsWith('image/')) return true;
   return supportedImageExtensions.has(getFileExtension(file.name));
 }
+
+/** The file inputs' `accept` for a browser with this user agent. A desktop
+ *  picker can grey out a file `image/*` does not match, and a `.qoi` has no
+ *  image MIME type, so the extensions are listed too. Not on Android: Chrome
+ *  there opens the photo picker only while every token maps to an image or
+ *  video type, and one extension Android's MIME map lacks (`.qoi`, `.jfif`)
+ *  swaps it for a chooser over every file on the device. */
+export function imageInputAcceptFor(userAgent: string): string {
+  if (/android/i.test(userAgent)) return 'image/*';
+  return [
+    'image/*',
+    ...Array.from(supportedImageExtensions, (extension) => `.${extension}`),
+  ].join(',');
+}
+
+export const imageInputAccept = imageInputAcceptFor(
+  typeof navigator === 'undefined' ? '' : navigator.userAgent,
+);
 
 export function createImageJobId(file: File, index: number): string {
   return `${index}-${file.name}-${file.size}-${file.lastModified}`;
@@ -100,7 +121,7 @@ export function createImageJobs(
   const result = createBulkImportResult();
 
   for (const file of files) {
-    if (!isSupportedBulkImage(file)) {
+    if (!isSupportedImage(file)) {
       rejectBulkImportFile(result, file, 'unsupported-type');
       continue;
     }
@@ -119,7 +140,7 @@ export async function createImageJobsWithMimeSniffing(
   const result = createBulkImportResult();
 
   for (const file of files) {
-    if (isSupportedBulkImage(file)) {
+    if (isSupportedImage(file)) {
       acceptBulkImportFile(result, file, getRelativePath(file) || undefined);
       continue;
     }

@@ -39,7 +39,7 @@ function animationsOnArrival(page: Page, selector: string, text: string) {
 
 async function revealFilterStrength(page: Page): Promise<number> {
   await page.goto('/');
-  await page.setInputFiles('input[type=file][accept="image/*"]', photo);
+  await page.setInputFiles('input[type=file][accept^="image/*"]', photo);
   const panel = page.locator('.options-2');
   await panel.locator('select.builtin-select').selectOption('webP');
   await panel.locator('label.option-reveal', { hasText: 'Advanced' }).click();

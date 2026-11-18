@@ -12,7 +12,7 @@ const photo = fileURLToPath(new URL('../fixtures/photo.jpg', import.meta.url));
 // the first result lands, so enabling Resize starts at 100% (a no-op encode).
 test('enabling resize starts from the image dimensions', async ({ page }) => {
   await page.goto('/');
-  await page.setInputFiles('input[type=file][accept="image/*"]', photo);
+  await page.setInputFiles('input[type=file][accept^="image/*"]', photo);
   await expect
     .poll(async () => (await page.title()).includes('⏳'), { timeout: 60_000 })
     .toBe(false);
@@ -36,7 +36,7 @@ test('WASM resize outputs the requested size and a valid image', async ({
   page,
 }) => {
   await page.goto('/');
-  await page.setInputFiles('input[type=file][accept="image/*"]', photo);
+  await page.setInputFiles('input[type=file][accept^="image/*"]', photo);
 
   const panel = page.locator('.options-2');
   // Lossless PNG (OxiPNG) preserves the resized pixels exactly.

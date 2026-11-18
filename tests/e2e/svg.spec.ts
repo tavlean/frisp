@@ -1,6 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 
-const FILE_INPUT = 'input[type=file][accept="image/*"]';
+const FILE_INPUT = 'input[type=file][accept^="image/*"]';
 const RIGHT_PANEL = '.options-2';
 const SVG = `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">

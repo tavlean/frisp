@@ -10,7 +10,7 @@ const RIGHT_SELECT = '.options-2 select.builtin-select';
 
 async function loadPhoto(page: Page): Promise<void> {
   await page.goto('/');
-  await page.setInputFiles('input[type=file][accept="image/*"]', photo);
+  await page.setInputFiles('input[type=file][accept^="image/*"]', photo);
   await expect(page.locator(LEFT_INFO)).toBeVisible({ timeout: 10_000 });
 }
 

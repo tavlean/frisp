@@ -78,10 +78,17 @@ function isValidProcessorState(value: unknown): value is SavedProcessorState {
   );
 }
 
+/** The auto-saved sides. The stored payload is frozen, so a retired format
+ *  is migrated here on read, the same way as an explicit save slot. */
 function readSaved(): { sides?: SavedSide[] } {
   if (!canUseLocalStorage()) return {};
   try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}') ?? {};
+    const saved: { sides?: SavedSide[] } =
+      JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}') ?? {};
+    if (Array.isArray(saved.sides)) {
+      for (const side of saved.sides) if (side) migrateRetiredFormat(side);
+    }
+    return saved;
   } catch {
     return {};
   }

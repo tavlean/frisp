@@ -42,7 +42,7 @@ test('film grain re-encodes with different bytes and folds out of the signature 
   page,
 }) => {
   await page.goto('/');
-  await page.setInputFiles('input[type=file][accept="image/*"]', photo);
+  await page.setInputFiles('input[type=file][accept^="image/*"]', photo);
 
   await waitIdle(page);
   const hrefPlain = await rightDownloadHref(page);
