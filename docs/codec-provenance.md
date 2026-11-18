@@ -181,6 +181,17 @@ generated from exactly these inputs.
 > The decoder API (`decode.h`) is unchanged, and the old and new decoders
 > agreed on every output the review tested (about 170).
 
+> **Decoder fix (2026-11-19, same libjxl v0.13.0).** `dec/jxl_dec.cpp` no
+> longer sends sRGB images with straight alpha through skcms, so lossless
+> JPEG XL now decodes bit-exactly (`noise-synthetic.png` at 100 had 1268
+> red values one level low; cause and measurements in
+> [codec-build-notes.md](codec-build-notes.md), libjxl gotcha 30). Only
+> `jxl_dec.wasm` and `jxl_node_dec.wasm` changed (1036056 → 1036491 bytes
+> each); their JS glue and every encoder artifact are byte-identical. The
+> SSIMULACRA2 scores in the table above were taken through the old
+> decoder; through the fixed one, lossy scores move by at most 0.4
+> (screenshot at 75: 83.78 → 83.40).
+
 ## Source pins and how they are verified
 
 Since 2026-11-17 no codec build fetches anything it does not verify. Tarballs
@@ -243,7 +254,7 @@ producers section.
 | --- | --- | --- |
 | `avif/enc/avif_enc.*`, `avif_enc_mt.*` (+ worker), `avif/dec/avif_dec.*` | emsdk 3.1.0 (release `562e3a0af169e6dea5e6dbecac2255d67c2c8b94`), native | 3.1.0 glue; build notes, 2026-06-02 |
 | `avif/*/avif_node_*` | Inherited from upstream Squoosh (2024-01-24, the `cpp.Dockerfile` of that commit named emsdk 2.0.34); not rebuilt, not in the Makefile's `all` | git history; nothing in the app imports them |
-| `jxl/**` (all six) | emsdk 3.1.0, native | 3.1.0 glue; build notes, 2026-08-08 and 2026-08-11 |
+| `jxl/**` (all six) | emsdk 3.1.0, native | 3.1.0 glue; build notes, 2026-08-08 and 2026-08-11; v0.13.0 relink 2026-11-17; decoder relinked 2026-11-19 |
 | `mozjpeg/**`, `jpegli/**`, `ssimulacra2/**` | emsdk 3.1.0, native | 3.1.0 glue; build notes |
 | `webp/**`, `imagequant/**` | emsdk 5.0.7 (release `6cd98e86d7749ff98b82b7f2ae78eb4f01942788`), native | 5.x glue; build notes, 2026-06-02 |
 | `qoi/**` | Inherited from upstream Squoosh (2023-10-20, the `cpp.Dockerfile` of that commit named emsdk 2.0.23); not rebuilt | git history |

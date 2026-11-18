@@ -209,7 +209,7 @@ about four minutes for both trees on an 11-core M-series Mac (fetch included),
 and relinking the six wrappers about a minute. Results and the reasoning for
 the one wrapper change are in
 [codec-provenance.md](codec-provenance.md#local-source-references). Gotchas
-27 to 30 below are from this upgrade.
+27 to 31 below are from this upgrade; 30 was fixed on 2026-11-19.
 
 **v0.8.5 → v0.12.0, 2026-08-08 (Path B).** The encoder wrapper was rewritten from
 libjxl's internal C++ API onto the public `JxlEncoder*` C API, which is what
@@ -409,13 +409,35 @@ and accept the size. Do not re-litigate this without new measurements.
     tree's mtime with `touch -r node_modules/jxl/CMakeLists.txt <stamp>`;
     a stamp newer than `build/*/Makefile` reconfigures and rebuilds both
     library trees.
-30. **The shipped decoder is not bit-exact on lossless images.** The harness
-    found `noise-synthetic.png` at quality 100 scoring 96.15, not 100: about
-    1268 pixels come back one level off in the red channel. Homebrew `djxl`
-    decodes the same file exactly, so the encoder is lossless and the loss
-    is in the wasm decoder's float to 8-bit path (`dec/jxl_dec.cpp`, which
-    converts through skcms). Pre-existing on v0.12.0 and unchanged on
-    v0.13.0. Diagnosis is a delegate's and has not been fixed or re-checked.
+30. **The decoder was not bit-exact on lossless images until 2026-11-19.**
+    Lossless `noise-synthetic.png` decoded with 1268 red values one level
+    low (all of them 1 to 15), so it scored 96.15 instead of 100; Homebrew
+    `djxl` decoded the same file exactly. libjxl's float output was exact.
+    The loss was in `dec/jxl_dec.cpp`, which converted every image to 8-bit
+    through `skcms_Transform` from the ICC libjxl generates for the data.
+    libjxl builds that ICC's matrix for sRGB from the chromaticities and
+    lands three 16.16 fixed-point steps from the canonical values skcms
+    hard-codes (red-to-X 0.436020 against 0.436066), so skcms runs a real
+    gamut conversion. Its green-to-red term (-0.0002) is worth up to 0.6 of
+    a level on the linear part of the curve, which is why every wrong value
+    was a dark red under a green of 226 or more. The curve differs too
+    (`g` 2.399994 against 2.4) but is harmless alone: lossless grey, which
+    has no matrix, was always exact. The fix: when `JxlDecoderGetColorAsEncodedProfile`
+    says the decoded data is sRGB or sRGB-curve grey with D65 white, and
+    alpha is straight, the wrapper rounds the floats itself (the same
+    `v * 255 + 0.5` skcms uses, with NaN from a crafted float image
+    clamped to 0) and skips skcms. Images with an ICC
+    profile, other primaries or curves, or premultiplied alpha keep the
+    skcms path unchanged. It does not ask libjxl for `JXL_TYPE_UINT8`
+    instead, because libjxl adds blue-noise dither to 8-bit output
+    (`MakeUnsigned` in `render_pipeline/stage_write.cc`, no API switch).
+    Measured against the old decoder, the dither changed 6 to 22% of the
+    values of every lossy decode, by up to 2 levels; the rounding fix
+    changes 0.1 to 1.4%, by 1 level (eight fixtures, quality 0 to 90).
+    Lossy SSIMULACRA2 through the fixed decoder moves by at most 0.4
+    (eight fixtures at 75 and 30; screenshot at 75 goes from 83.78 to
+    83.40). `tests/unit/jxl-lossless.test.ts` guards it: the old decoder
+    fails it with 174 mismatches.
 31. **A default-options harness cannot see option-dependent upstream
     changes.** The 88-encode harness reported "pixel-identical everywhere",
     and that was true only for the app's defaults: v0.13.0's new
