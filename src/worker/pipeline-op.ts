@@ -30,8 +30,7 @@ import type { ImageRecipe, Rotation } from '#client/lazy-app/recipe.ts';
  *  copy) and is decoded here; pixels (an SVG rasterized on the main thread)
  *  arrive transferred and become the cache. */
 export type WorkerSource =
-  | { kind: 'file'; file: File }
-  | { kind: 'pixels'; image: ImageData };
+  { kind: 'file'; file: File } | { kind: 'pixels'; image: ImageData };
 
 export interface OptimizeRequest {
   /** Identity of the decoded source; see src/lib/source-key.ts. */

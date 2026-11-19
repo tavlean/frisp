@@ -16,11 +16,7 @@
 // quality than the worker filters and inconsistent across browsers/OSes.
 type BrowserResizeMethods = 'browser-pixelated';
 type WorkerResizeMethods =
-  | 'triangle'
-  | 'catrom'
-  | 'mitchell'
-  | 'lanczos3'
-  | 'hqx';
+  'triangle' | 'catrom' | 'mitchell' | 'lanczos3' | 'hqx';
 
 export const workerResizeMethods: WorkerResizeMethods[] = [
   'triangle',
@@ -31,9 +27,7 @@ export const workerResizeMethods: WorkerResizeMethods[] = [
 ];
 
 export type Options =
-  | BrowserResizeOptions
-  | WorkerResizeOptions
-  | VectorResizeOptions;
+  BrowserResizeOptions | WorkerResizeOptions | VectorResizeOptions;
 
 export interface ResizeOptionsCommon {
   width: number;

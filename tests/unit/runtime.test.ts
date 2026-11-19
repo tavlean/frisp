@@ -49,17 +49,14 @@ function installControlledProcessor(starts: string[] = []) {
         reject(new DOMException('AbortError', 'AbortError'));
       };
       signal.addEventListener('abort', onAbort, { once: true });
-      resolvers.set(
-        id,
-        (output = fakeOutput({ fileName: `${id}.webp` })) => {
-          signal.removeEventListener('abort', onAbort);
-          resolve({
-            outputFile: output.file,
-            outputUrl: output.downloadUrl,
-            outputSize: output.size,
-          });
-        },
-      );
+      resolvers.set(id, (output = fakeOutput({ fileName: `${id}.webp` })) => {
+        signal.removeEventListener('abort', onAbort);
+        resolve({
+          outputFile: output.file,
+          outputUrl: output.downloadUrl,
+          outputSize: output.size,
+        });
+      });
       rejecters.set(id, (error) => {
         signal.removeEventListener('abort', onAbort);
         reject(error);

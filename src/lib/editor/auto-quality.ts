@@ -10,10 +10,7 @@
 // slightly higher quality than optimal, never a result below the target.
 
 export type AutoQualityTarget =
-  | 'visually-lossless'
-  | 'high'
-  | 'balanced'
-  | 'compact';
+  'visually-lossless' | 'high' | 'balanced' | 'compact';
 
 /** SSIMULACRA2 anchors from the reference README: 90 is visually lossless,
  *  70 high ("artifacts perceptible but not annoying"). The four presets are

@@ -282,8 +282,7 @@ export function parseBulkSessionSnapshot(
     sharedRecipe: parsedSnapshot.sharedRecipe,
     sharedSvgOptions: parsedSnapshot.sharedSvgOptions,
     resizeReference: parsedSnapshot.resizeReference as
-      | BulkSourceDimensions
-      | undefined,
+      BulkSourceDimensions | undefined,
     jobs: validJobs,
     selectedJobId: parsedSnapshot.selectedJobId,
     ...getSnapshotCounters(validJobs),

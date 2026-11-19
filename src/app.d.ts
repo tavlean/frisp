@@ -11,8 +11,7 @@ declare global {
   }
 
   var __appEmscriptenLocateFile:
-    | ((path: string, prefix?: string) => string)
-    | undefined;
+    ((path: string, prefix?: string) => string) | undefined;
 
   // The URL of a threaded (pthread) Emscripten codec's main glue, handed to the
   // pthread workers so they re-import the right module (see initEmscriptenModule

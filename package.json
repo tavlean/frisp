@@ -46,17 +46,17 @@
     "typecheck:tests": "svelte-kit sync && tsc -p tests/tsconfig.json"
   },
   "devDependencies": {
-    "@playwright/test": "1.60.0",
+    "@playwright/test": "1.65.0",
     "@sveltejs/adapter-static": "4.0.1",
-    "@sveltejs/kit": "3.1.1",
+    "@sveltejs/kit": "3.2.0",
     "@sveltejs/vite-plugin-svelte": "7.3.1",
     "@types/node": "24.13.2",
-    "prettier": "3.8.3",
-    "prettier-plugin-svelte": "4.0.1",
+    "prettier": "3.10.1",
+    "prettier-plugin-svelte": "4.1.1",
     "svelte": "5.57.3",
     "svelte-check": "4.7.8",
     "typescript": "6.0.3",
-    "vite": "8.3.7",
+    "vite": "8.3.8",
     "vitest": "4.1.12"
   },
   "prettier": {
@@ -68,7 +68,7 @@
     "trailingComma": "all"
   },
   "dependencies": {
-    "client-zip": "2.5.0",
+    "client-zip": "2.5.1",
     "comlink": "4.4.2",
     "fflate": "0.8.3",
     "svgo": "4.1.0"

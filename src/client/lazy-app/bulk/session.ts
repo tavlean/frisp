@@ -30,11 +30,7 @@ export const imageJobStatuses: readonly ImageJobStatus[] = [
 ];
 
 export type ImageJobStatusGroup =
-  | 'pending'
-  | 'active'
-  | 'complete'
-  | 'failed'
-  | 'skipped';
+  'pending' | 'active' | 'complete' | 'failed' | 'skipped';
 
 export interface ImageOutput {
   file: File;

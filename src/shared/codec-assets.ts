@@ -25,12 +25,7 @@ export type CodecAssetRole =
   | 'worker-helper';
 
 export type CodecAssetVariant =
-  | 'baseline'
-  | 'default'
-  | 'hqx'
-  | 'simd'
-  | 'single-thread'
-  | 'multi-thread';
+  'baseline' | 'default' | 'hqx' | 'simd' | 'single-thread' | 'multi-thread';
 
 export type CodecAssetCache = 'precache' | 'runtime' | 'threaded-only';
 

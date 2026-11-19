@@ -28,8 +28,7 @@ export type ConstrainMode =
   | { kind: 'ratio'; rw: number; rh: number; custom?: boolean };
 
 export type CropBackground =
-  | { kind: 'transparent' }
-  | { kind: 'color'; css: string };
+  { kind: 'transparent' } | { kind: 'color'; css: string };
 
 export type OverlayKind =
   | 'thirds'
