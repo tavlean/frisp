@@ -4,6 +4,27 @@ Short session-by-session build log: what changed, why, and the gotchas a future
 session must know. Newest first. (Live project state stays in
 [the project brief](brief.md); this is the narrative trail.)
 
+## 2026-11-19 (Opus, maintenance pass) - npm to pnpm, in-range upgrades
+
+- Moved from npm to pnpm 12.21.0. `pnpm import` carried the lockfile over and
+  every resolved version matched; the strict tree found no undeclared
+  dependency. `.npmrc` policy moved to `pnpm-workspace.yaml` (`ignoreScripts`,
+  `saveExact`, `minimumReleaseAge: 10080`).
+- `scripts/audit-deps.mjs` now parses `pnpm audit --json` (`advisories` map,
+  `github_advisory_id`), not npm's `vulnerabilities` shape.
+- Every script call that forwarded flags dropped npm's `--` separator
+  (Playwright webServer commands, the SVG bench dev server, docs), because
+  pnpm passes it through to the tool.
+- CI: `pnpm/action-setup` v6.1.1 (SHA-pinned) before `setup-node`, `cache:
+  pnpm`, `pnpm install --frozen-lockfile`, `pnpm exec playwright`.
+- Upgrades: SvelteKit 3.1.1 to 3.2.0, Vite 8.3.7 to 8.3.8, Playwright 1.60.0
+  to 1.65.0, Prettier 3.8.3 to 3.10.1, prettier-plugin-svelte 4.0.1 to
+  4.1.1, client-zip 2.5.0 to 2.5.1. Held: TypeScript 7, Vitest 5,
+  `@types/node` 26.
+- Gotchas: pnpm 12 records `packageManager` in the lockfile, so the first
+  install after adding the field must be a plain `pnpm install`;
+  `--frozen-lockfile` refuses until then. `format:check` takes about 75 s.
+
 ## 2026-11-19 (Fable driver, Opus executors) - Three bugs left open by the dependency sessions
 
 - Lossless JPEG XL now decodes to the exact pixels. The wasm decoder sent

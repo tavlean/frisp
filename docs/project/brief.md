@@ -150,11 +150,17 @@ Shipped since then, newest first:
   deepmerge GHSA-gcqx-w48m-w2h4, was withdrawn upstream), and `pnpm run audit`
   (`scripts/audit-deps.mjs`) fails on any advisory not accepted by name.
 
+- **pnpm (2026-11-19).** The package manager is pnpm, pinned once in
+  `packageManager`; `pnpm-lock.yaml` replaced `package-lock.json` at the
+  same versions. Same day: SvelteKit 3.2.0, Vite 8.3.8, Playwright 1.65.0,
+  Prettier 3.10.1. TypeScript 7, Vitest 5 and `@types/node` 26 are held
+  (majors; the Node types track the Node 24 runtime).
 - **Dependency reduction (2026-11-17).** An audit found the package count
   already low and the exposure in what was unpinned. Now: 134 installed
   packages (was 167), four npm packages reaching the browser (svgo, fflate,
-  comlink, client-zip), exact versions everywhere, `.npmrc` with
-  `ignore-scripts` and a 7-day release cooldown, a pinned wrangler, Actions
+  comlink, client-zip), exact versions everywhere, `ignoreScripts` and a
+  7-day release cooldown (in `.npmrc` then, in `pnpm-workspace.yaml` since
+  the pnpm move on 2026-11-19), a pinned wrangler, Actions
   pinned by SHA, and owned copies of three small packages. Policy and the
   list of what was kept and why:
   [dependency-modernization.md](../dependency-modernization.md). Open from
