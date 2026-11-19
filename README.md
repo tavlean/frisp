@@ -47,14 +47,17 @@ Recent Chrome, Edge, Firefox, and Safari. The [policy](docs/browser-support.md) 
 
 ## Running it locally
 
-Node 24.12 or newer and npm 11 or newer (see [.nvmrc](.nvmrc)).
+Node 24.12 or newer (see [.nvmrc](.nvmrc)) and pnpm (the version is pinned in
+`packageManager` in [package.json](package.json); corepack or pnpm itself
+switches to it).
 
 ```sh
-npm install
-npm run dev      # dev server
-npm run build    # static production build
-npm run check    # typecheck, production build, static-output audit
-npm test         # check, unit tests, Playwright e2e
+pnpm install
+pnpm run prepare  # once: installs the pre-commit format hook
+pnpm run dev      # dev server
+pnpm run build    # static production build
+pnpm run check    # typecheck, production build, static-output audit
+pnpm test         # check, unit tests, Playwright e2e
 ```
 
 ## Docs

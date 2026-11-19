@@ -13,7 +13,7 @@
 // a deliberate rebuild updates the manifest in the same commit, and the
 // manifest diff is what a reviewer reads. After a deliberate rebuild:
 //
-//   npm run verify:codecs -- --update
+//   pnpm run verify:codecs --update
 //
 // then check that every changed line in the diff is an artifact the rebuild
 // meant to produce. The procedure is in docs/codec-provenance.md.
@@ -102,7 +102,7 @@ if (problems.length > 0) {
   console.error('Codec artifacts do not match codecs/artifacts.sha256:');
   for (const problem of problems) console.error(`  ${problem}`);
   console.error(
-    '\nIf this is a deliberate rebuild, run `npm run verify:codecs -- --update`' +
+    '\nIf this is a deliberate rebuild, run `pnpm run verify:codecs --update`' +
       ' and commit the manifest with the artifacts (docs/codec-provenance.md).' +
       '\nIf it is not, restore each listed file with `git checkout -- <path>`.',
   );

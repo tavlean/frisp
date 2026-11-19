@@ -60,11 +60,10 @@ async function writeOutput(tool, relativePath, text) {
 try {
   if (!suppliedBaseUrl) {
     server = spawn(
-      'npm',
+      'pnpm',
       [
         'run',
         'dev',
-        '--',
         '--host',
         '127.0.0.1',
         '--port',

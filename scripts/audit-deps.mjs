@@ -1,7 +1,7 @@
-// The dependency audit gate: `npm audit`, with a short list of advisories
+// The dependency audit gate: `pnpm audit`, with a short list of advisories
 // that are known, cannot be fixed yet, and do not reach the shipped app.
 //
-// Plain `npm audit --audit-level=low` has no way to accept one advisory, so a
+// Plain `pnpm audit --audit-level=low` has no way to accept one advisory, so a
 // single unfixable finding kept the CI job red, and a red job hides the next
 // real advisory. This fails on every advisory that is not listed here, and
 // also when a listed one stops being reported, so the list cannot go stale.
@@ -12,27 +12,34 @@ import { spawnSync } from 'node:child_process';
 // entry is `'GHSA-id': 'why it is accepted'`, with a dated comment above it.
 const ACCEPTED = {};
 
-// npm audit exits non-zero when it finds anything; the JSON is still on stdout.
-const run = spawnSync('npm', ['audit', '--json'], { encoding: 'utf8' });
+// pnpm audit exits non-zero when it finds anything; the JSON is still on stdout.
+// The binary is called through pnpm itself, whose own output never reaches
+// stdout here, so the JSON parses clean.
+const run = spawnSync('pnpm', ['audit', '--json'], {
+  encoding: 'utf8',
+  shell: process.platform === 'win32',
+});
 let report;
 try {
   report = JSON.parse(run.stdout);
 } catch {
   console.error(run.stderr || run.stdout);
-  throw new Error('npm audit did not return JSON.');
+  throw new Error('pnpm audit did not return JSON.');
 }
 if (report.error) {
-  throw new Error(`npm audit failed: ${JSON.stringify(report.error)}`);
+  throw new Error(`pnpm audit failed: ${JSON.stringify(report.error)}`);
 }
 
 const found = new Map();
-for (const { via } of Object.values(report.vulnerabilities ?? {})) {
-  for (const advisory of via) {
-    // A string entry only names the dependency that carries the advisory.
-    if (typeof advisory === 'string') continue;
-    const id = advisory.url?.split('/').pop() ?? String(advisory.source);
-    found.set(id, `${advisory.severity}: ${advisory.name}: ${advisory.title}`);
-  }
+for (const advisory of Object.values(report.advisories ?? {})) {
+  const id =
+    advisory.github_advisory_id ??
+    advisory.url?.split('/').pop() ??
+    String(advisory.id);
+  found.set(
+    id,
+    `${advisory.severity}: ${advisory.module_name}: ${advisory.title}`,
+  );
 }
 
 const unexpected = [...found].filter(([id]) => !(id in ACCEPTED));
@@ -44,7 +51,7 @@ for (const [id, summary] of found) {
 }
 for (const id of gone) {
   console.error(
-    `${id} is accepted in scripts/audit-deps.mjs but npm audit no longer reports it. Remove the entry.`,
+    `${id} is accepted in scripts/audit-deps.mjs but pnpm audit no longer reports it. Remove the entry.`,
   );
 }
 

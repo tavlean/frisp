@@ -12,13 +12,13 @@ layers: static gates, pure unit tests, and full browser e2e.
 
 | Layer | Command | What it checks | Cadence |
 |---|---|---|---|
-| Static gate | `npm run check` | wrapper patch sync + SvelteKit sync, typecheck of the app (fails on warnings), service worker and tests, production build, static-output audit | every push/PR |
-| Unit tests | `npm run test:unit` | pure helpers and bulk-engine reducers in Vitest | every push/PR |
-| Browser e2e | `npm run test:e2e` | real production preview in Chromium + WebKit, codec bytes, threading, offline reload, bulk flows | every push/PR |
+| Static gate | `pnpm run check` | wrapper patch sync + SvelteKit sync, typecheck of the app (fails on warnings), service worker and tests, production build, static-output audit | every push/PR |
+| Unit tests | `pnpm run test:unit` | pure helpers and bulk-engine reducers in Vitest | every push/PR |
+| Browser e2e | `pnpm run test:e2e` | real production preview in Chromium + WebKit, codec bytes, threading, offline reload, bulk flows | every push/PR |
 
-`npm test` runs `check`, `test:unit`, then Playwright with
+`pnpm test` runs `check`, `test:unit`, then Playwright with
 `PLAYWRIGHT_SKIP_BUILD=1` so the e2e web server reuses the just-built output.
-Formatting is separate (`npm run format:check` in CI) and Markdown is formatted
+Formatting is separate (`pnpm run format:check` in CI) and Markdown is formatted
 by hand.
 
 ---
@@ -57,7 +57,7 @@ by hand.
   source cache, `needs-source`, the transcode fallback, and the reply transfer
   list with a fake codec host.
 - The e2e suite needs Playwright's Chromium headless shell installed
-  (`npx playwright install chromium`); without it every Chromium test fails at
+  (`pnpm exec playwright install chromium`); without it every Chromium test fails at
   launch.
 - Vitest unit tests in `tests/unit/`, focused on pure bulk-engine/helper logic
   plus shared utility contracts. Additions on 2026-11-04: `runtime.test.ts`
@@ -78,12 +78,12 @@ by hand.
   animates on its first show), and a `resize.spec.ts` case pinning that
   enabling resize starts from the image's own dimensions.
 - `tests/tsconfig.json` type-checks every test file and the three root config
-  files (`npm run typecheck:tests`, also part of `npm run typecheck`). Its
+  files (`pnpm run typecheck:tests`, also part of `pnpm run typecheck`). Its
   `include` must keep `../src/**/*.d.ts`, or the ambient app types (custom
   elements, `App` namespace) disappear from the tests' view.
 - A benchmark harness (`benchmarks/`) with a fixture corpus and before/after
   comparison for codec changes.
-- `npm run audit:static-output`, which checks emitted codec assets,
+- `pnpm run audit:static-output`, which checks emitted codec assets,
   service-worker asset selection, and duplicate-output hazards.
 
 ---
@@ -106,12 +106,12 @@ by hand.
 ## 4. Unit-test plan (Layer 1 — the new work)
 
 **Tooling:** **Vitest landed 2026-07-02** for the pure unit layer, with
-`npm run test:unit` (`vitest run`), a `vitest.config.ts` scoped to
+`pnpm run test:unit` (`vitest run`), a `vitest.config.ts` scoped to
 `tests/unit/**/*.test.ts`, and shared `fixtures.ts` fake-`File` / job / session
 builders. jsdom is not used; the tests run in the default Node environment with
 lightweight `File` fixtures. Since 2026-11-10 the config also loads the Svelte
 plugin, so tests can import `.svelte.ts` rune modules; they compile as the
-server build, where effects never run. Unit tests are in CI and `npm test`; `npm run check` remains the static gate.
+server build, where effects never run. Unit tests are in CI and `pnpm test`; `pnpm run check` remains the static gate.
 
 **Phase 2 landed 2026-07-03:** the engine unit layer added 13 cases for
 `restoreJob`, the keep-original-when-larger export option, and `relativePath`

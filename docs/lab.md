@@ -8,8 +8,8 @@ _kept for reference_ is deliberate and must never be flagged or deleted.
 
 All lab routes are dev-only. They are stripped from production builds by the
 `app-strip-dev-only-routes` Vite plugin and the removal is enforced by
-`npm run audit:static-output`. Since 2026-11-04 the same plugin also strips
-`/diagnostics` and its probe workers, which had been shipping to production. Run `npm run dev` and open `/lab`, a two-door
+`pnpm run audit:static-output`. Since 2026-11-04 the same plugin also strips
+`/diagnostics` and its probe workers, which had been shipping to production. Run `pnpm run dev` and open `/lab`, a two-door
 index (main ui / intro page) with a thin tab bar that flips variants in place.
 Skins auto-load the last file used in any skin, else a bundled sample, via
 `src/lib/lab/lab-source.ts`, so switching tabs keeps the image being judged.

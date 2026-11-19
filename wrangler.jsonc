@@ -5,7 +5,7 @@
 // navigations get the 404 page without it (compatibility date 2025-04-01 or
 // later), so `run_worker_first` is not needed.
 // Workers Builds is not connected, so a push deploys nothing. Deploy with
-// `npm run deploy` (scripts/deploy.mjs): it deploys only the pushed commit,
+// `pnpm run deploy` (scripts/deploy.mjs): it deploys only the pushed commit,
 // runs the gates first, and checks production afterwards.
 {
   "$schema": "node_modules/wrangler/config-schema.json",

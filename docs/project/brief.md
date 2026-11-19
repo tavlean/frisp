@@ -23,7 +23,7 @@ material is [../journey-and-article-notes.md](../journey-and-article-notes.md).
 Hosting is a Cloudflare Worker named `frisp`: the static build plus one small
 script (`src/edge/worker.ts`) that only counts anonymous usage events,
 configured by the root `wrangler.jsonc`. Workers Builds CI is not connected, so a push
-deploys nothing; `npm run deploy` does (it deploys only the pushed commit and
+deploys nothing; `pnpm run deploy` does (it deploys only the pushed commit and
 checks production). Agents push and deploy finished work without asking; the
 rule is in `AGENTS.md`. The retired `sqush.app` and `presk.app` zones 301
 here through a shared sunset Worker in `infra/sqush-sunset/`.
@@ -94,7 +94,7 @@ images live; images never travel to Frisp.
   `src/lib/sveltekit-worker-bridge.ts`. Each side keeps a persistent bridge
   (plus one for source frames), in-flight encodes dedup, and one canonical
   recipe signature. The main thread decodes only SVG sources.
-- Generated modules are committed source; `npm run sync` only patches the
+- Generated modules are committed source; `pnpm run sync` only patches the
   Emscripten wrappers. One JSON manifest, `src/shared/codec-asset-records.json`,
   feeds both the app and the static-output audit.
 - Threading: COOP/COEP everywhere; oxipng, AVIF, and JXL run multi-core with a
@@ -108,7 +108,7 @@ images live; images never travel to Frisp.
 The SvelteKit migration is concluded and `main` is the production app. All seven
 WASM codecs were rebuilt from source natively in 2026-06, closing 14 CVEs, and
 the multi-threaded runtime is verified in Chromium and WebKit. Gates are green:
-`npm run check` reports 0 errors and 0 warnings, the unit suite passes, and
+`pnpm run check` reports 0 errors and 0 warnings, the unit suite passes, and
 Prettier is clean.
 
 Shipped since then, newest first:
@@ -133,7 +133,7 @@ Shipped since then, newest first:
   `POST /api/usage` on its own host; the Worker stores a count in Workers
   Analytics Engine with the visitor's country, and nothing else: no cookie,
   identifier, IP address or user agent. It is off under Do Not Track and
-  Global Privacy Control and anywhere but `frisp.app`. `npm run stats` prints
+  Global Privacy Control and anywhere but `frisp.app`. `pnpm run stats` prints
   the numbers; "sessions" (page loads that opened an image) is the real-user
   count. The public wording changed from "Nothing uploads" to "Your images
   never leave your device", and the README has a Privacy section. Cloudflare
@@ -147,7 +147,7 @@ Shipped since then, newest first:
   itself; the editor's shallow-route entry goes through
   `src/lib/editor/editor-route.svelte.ts` because shallow routing is now async.
   `npm audit` reports nothing as of 2026-11-17 (the one accepted advisory,
-  deepmerge GHSA-gcqx-w48m-w2h4, was withdrawn upstream), and `npm run audit`
+  deepmerge GHSA-gcqx-w48m-w2h4, was withdrawn upstream), and `pnpm run audit`
   (`scripts/audit-deps.mjs`) fails on any advisory not accepted by name.
 
 - **Dependency reduction (2026-11-17).** An audit found the package count
@@ -160,7 +160,7 @@ Shipped since then, newest first:
   [dependency-modernization.md](../dependency-modernization.md). Open from
   the same audit and closed the same day: every codec source fetch is now
   hash- or commit-verified, every committed codec artifact is checksummed
-  by `npm run verify:codecs` inside `npm run check`, and libjxl is on
+  by `pnpm run verify:codecs` inside `pnpm run check`, and libjxl is on
   v0.13.0 (decoder and JPEG-reconstruction hardening, brotli CVE). The
   unreachable MozJPEG and QOI encoders stopped shipping the same day.
   Details in the [worklog](worklog.md) and

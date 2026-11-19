@@ -1,0 +1,9 @@
+# pnpm settings (pnpm reads these here, not from .npmrc).
+# Installing a package must not run its code: no dependency lifecycle scripts.
+ignoreScripts: true
+# New dependencies are saved at an exact version; updates are deliberate.
+saveExact: true
+# Never resolve to a version published in the last 7 days (in minutes). Most
+# hijacked releases are caught and pulled inside that window.
+# `pnpm install --frozen-lockfile` installs the lockfile and never asks.
+minimumReleaseAge: 10080

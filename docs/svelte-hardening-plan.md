@@ -31,7 +31,7 @@ Findings below were produced by two independent automated review passes and cros
 - Behavior-preserving only. Protect import → decode → process → encode →
   preview → export → service-worker/offline. Regressions there are blockers.
 - Use the Svelte MCP docs and run the Svelte autofixer after meaningful Svelte
-  edits. Keep `npm run check` green and browser-verify UI changes.
+  edits. Keep `pnpm run check` green and browser-verify UI changes.
 - Land in small, reviewable tranches (one wave or a few related items per
   commit). Re-run the parity expectations from
   [parity-audit.md](parity-audit.md) after editor changes.
@@ -75,7 +75,7 @@ Findings below were produced by two independent automated review passes and cros
       `dispose()` flushes any pending write so the last edit is never dropped.
       _
 
-## Wave 1 — Dead-code purge (pure subtraction; verify with `npm run check`)
+## Wave 1 — Dead-code purge (pure subtraction; verify with `pnpm run check`)
 
 > **Done 2026-06-01** (commit `25fe0669`). 187 lines removed; gate green;
 > browser-verified (clean reload boots + encodes + settings persist).
@@ -252,7 +252,7 @@ Highest leverage — one change at the primitives ripples through every panel.
 
 > **Done 2026-07-07** (WS-F in
 > [specs/2026-07-07-first-principles-execution.md](project/specs/2026-07-07-first-principles-execution.md)).
-> Gate green: `npm run check`, `npm run test:unit`, and full `npm run test:e2e`
+> Gate green: `pnpm run check`, `pnpm run test:unit`, and full `pnpm run test:e2e`
 > (61 passed / 1 known WebKit offline skip). Svelte MCP/autofixer was requested
 > by the spec but no Svelte-specific MCP/autofixer tool was available in this
 > session.
@@ -304,7 +304,7 @@ Highest leverage — one change at the primitives ripples through every panel.
   `cache-all`) + `sw-bridge/support.ts` had zero callers and no SW message
   handlers (only `registerServiceWorkerUrl` survives), and the Squoosh
   entry-data modeling in `src/sw/cache-plan.ts` was replaced by the
-  variant-aware precache selection. Verified by `npm run check` + the full
+  variant-aware precache selection. Verified by `pnpm run check` + the full
   Playwright e2e incl. offline reload. See [the project brief](project/brief.md) and
   [build-and-runtime.md](build-and-runtime.md).
 

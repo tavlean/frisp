@@ -26,7 +26,7 @@ rename now touches ONLY:
 2. `package.json` — `name` + `homepage`.
 3. Brand art: `static/logo.svg`, `static/favicon.svg`,
    `src/lib/brand/logomark.svg` (+ the `static/favicon.png` raster if
-   restyled; re-run `npm run pwa-icons` so `static/icon-192.png`,
+   restyled; re-run `pnpm run pwa-icons` so `static/icon-192.png`,
    `static/icon-512.png`, and `static/apple-touch-icon.png` pick up the new
    mark).
 4. Prose docs / README — a grep-replace of the old name (attribution excluded).
@@ -36,7 +36,7 @@ rename now touches ONLY:
    the ONE place outside `brand.ts` where the brand is written in code, because a
    static HTML template cannot import a module and those tags have to be in the
    prerendered shell for crawlers to see them (`docs/seo.md` has the reasoning
-   and the rejected alternatives). Re-run `npm run social-card` afterwards so the
+   and the rejected alternatives). Re-run `pnpm run social-card` afterwards so the
    card picks up the new wordmark.
 6. Domain + repo + deployment plumbing (see `docs/rename-record.md` for
    the full external checklist: GitHub rename, DNS, old-domain sunset Worker —

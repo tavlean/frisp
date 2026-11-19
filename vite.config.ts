@@ -54,7 +54,7 @@ const crossOriginIsolation: Plugin = {
 // takes 20-40s in dev. A `vite build` emits these as raw hashed assets, so the bug
 // is dev-only — which is why it never showed in the deployed app and only bites
 // contributors running the dev server. This middleware serves the worker files
-// from disk untransformed, matching prod, so `npm run dev` "just works" with no
+// from disk untransformed, matching prod, so `pnpm run dev` "just works" with no
 // per-developer setup. The `?url` / `?worker` *module* forms (which must return the
 // JS that exports the asset URL, not the raw bytes) are left to Vite.
 const RAW_CODEC_WORKER_RE = /^\/codecs\/.+_mt(_simd)?\.worker\.js$/;

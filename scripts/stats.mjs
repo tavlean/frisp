@@ -1,6 +1,6 @@
 // Usage counts from the `frisp_usage` Analytics Engine dataset, the one the
-// Worker (src/edge/worker.ts) writes: `npm run stats`, or
-// `npm run stats -- --days 7`. Reads CLOUDFLARE_API_TOKEN (needs Account
+// Worker (src/edge/worker.ts) writes: `pnpm run stats`, or
+// `pnpm run stats --days 7`. Reads CLOUDFLARE_API_TOKEN (needs Account
 // Analytics Read) and CLOUDFLARE_ACCOUNT_ID, falling back to the first account
 // the token can see. Columns: blob1 = event, blob2 = value, blob3 = country.
 // Counts use SUM(_sample_interval) because Analytics Engine samples at volume.

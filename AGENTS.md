@@ -12,7 +12,7 @@ Match the surrounding code by default. When the surroundings are mixed or absent
 ## Hard rules (every task; all how-to detail lives in docs/)
 
 - Commit checkpoint-sized changes regularly, straight to `main` unless the change is risky enough to need a branch.
-- Ship without asking. When a piece of work is finished and its gates pass, push `main`. If the change touches anything a visitor loads or runs (`src/`, `static/`, `codecs/`, the build or host config), also run the full `npm run test:e2e` and then `npm run deploy`, which deploys only the pushed commit and checks production afterwards. Docs, tests and tooling alone are pushed without a deploy, because every deploy shows returning users an update prompt. Never force-push, and never push or deploy a tree whose gates fail.
+- Ship without asking. When a piece of work is finished and its gates pass, push `main`. If the change touches anything a visitor loads or runs (`src/`, `static/`, `codecs/`, the build or host config), also run the full `pnpm run test:e2e` and then `pnpm run deploy`, which deploys only the pushed commit and checks production afterwards. Docs, tests and tooling alone are pushed without a deploy, because every deploy shows returning users an update prompt. Never force-push, and never push or deploy a tree whose gates fail.
 - One source of truth per topic.
 - Never introduce server-side image processing or an upload path. Offline must keep working after first load.
 - Never delete or move anything under `codecs/`, the codec asset manifest, the workers, or the WASM assets without proving the build AND runtime consequences. A green build is not sufficient; only the e2e suite catches a broken WASM import name.
@@ -20,10 +20,10 @@ Match the surrounding code by default. When the surroundings are mixed or absent
 - Never delete lab code that [docs/lab.md](docs/lab.md) marks ongoing or kept-for-reference, and never delete branch `claude/clever-swartz-2b34ed`.
 - Never auto-format `*.md`, and never add Markdown to a Prettier or hook glob.
 - Merge worktree branches with a fast-forward local merge or `--merge`, never `gh pr merge --rebase`; rebasing strips the maintainer's SSH signatures.
-- Before finishing code work: `npm run check` and `npm run test:unit`. After any codec, build, worker, or service-worker change also run `npm run test:e2e`. Add nothing, break nothing (silent traps: [docs/gotchas.md](docs/gotchas.md)).
+- Before finishing code work: `pnpm run check` and `pnpm run test:unit`. After any codec, build, worker, or service-worker change also run `pnpm run test:e2e`. Add nothing, break nothing (silent traps: [docs/gotchas.md](docs/gotchas.md)).
 - No em dashes in anything you write; rewrite the sentence to be simpler instead.
 - Note your gotcha discoveries in your final report so the worklog can capture them.
 
 ## Svelte work
 
-SvelteKit 3 and several Svelte 5 features are newer than most training data, so read the docs for anything you are not sure of before relying on memory. With the Svelte MCP server: `list-sections` to find the pages, then `get-documentation`. Without it: `npx -y @sveltejs/mcp list-sections` and `npx -y @sveltejs/mcp get-documentation "<section>"`. The gate is `npm run check`, which runs `svelte-check` and fails on warnings. Do not run `svelte-autofixer` as a routine step: it is slow and finds nothing on code that passes the check. The maintainer's own notes are in `~/.agents/svelte-mcp.md`.
+SvelteKit 3 and several Svelte 5 features are newer than most training data, so read the docs for anything you are not sure of before relying on memory. With the Svelte MCP server: `list-sections` to find the pages, then `get-documentation`. Without it: `pnpm exec -y @sveltejs/mcp list-sections` and `pnpm exec -y @sveltejs/mcp get-documentation "<section>"`. The gate is `pnpm run check`, which runs `svelte-check` and fails on warnings. Do not run `svelte-autofixer` as a routine step: it is slow and finds nothing on code that passes the check. The maintainer's own notes are in `~/.agents/svelte-mcp.md`.

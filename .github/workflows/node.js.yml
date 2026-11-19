@@ -24,12 +24,15 @@ jobs:
 
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      # pnpm before setup-node: `cache: pnpm` needs pnpm on PATH. The pnpm
+      # version comes from packageManager in package.json.
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version-file: .nvmrc
-          cache: npm
-      - run: npm ci
-      - run: npm run check
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run check
 
   audit:
     runs-on: ubuntu-latest
@@ -37,12 +40,15 @@ jobs:
 
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      # pnpm before setup-node: `cache: pnpm` needs pnpm on PATH. The pnpm
+      # version comes from packageManager in package.json.
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version-file: .nvmrc
-          cache: npm
-      - run: npm ci
-      - run: npm run audit
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run audit
 
   unit:
     runs-on: ubuntu-latest
@@ -50,12 +56,15 @@ jobs:
 
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      # pnpm before setup-node: `cache: pnpm` needs pnpm on PATH. The pnpm
+      # version comes from packageManager in package.json.
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version-file: .nvmrc
-          cache: npm
-      - run: npm ci
-      - run: npm run test:unit
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run test:unit
 
   # Formatting is its own job, not part of `check`, so a Prettier nit can never
   # mask (or block) a real type/build failure — the two report independently. A
@@ -68,12 +77,15 @@ jobs:
 
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      # pnpm before setup-node: `cache: pnpm` needs pnpm on PATH. The pnpm
+      # version comes from packageManager in package.json.
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version-file: .nvmrc
-          cache: npm
-      - run: npm ci
-      - run: npm run format:check
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run format:check
 
   # The Playwright e2e suite. Exists because a spec sat silently red for four
   # days — nothing ran it automatically, so a real regression shipped unnoticed
@@ -90,11 +102,14 @@ jobs:
 
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      # pnpm before setup-node: `cache: pnpm` needs pnpm on PATH. The pnpm
+      # version comes from packageManager in package.json.
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version-file: .nvmrc
-          cache: npm
-      - run: npm ci
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
       # Cache the downloaded browser binaries, keyed on the Playwright version so
       # a version bump busts the cache. playwright.config.ts's webServer builds
       # and previews the app itself, so there's no separate build step here.
@@ -102,8 +117,8 @@ jobs:
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
           path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-${{ hashFiles('package-lock.json') }}
+          key: ${{ runner.os }}-playwright-${{ hashFiles('pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-playwright-
-      - run: npx playwright install --with-deps chromium webkit
-      - run: npx playwright test
+      - run: pnpm exec playwright install --with-deps chromium webkit
+      - run: pnpm exec playwright test

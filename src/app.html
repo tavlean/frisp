@@ -15,7 +15,7 @@
     <!-- The web-app manifest is what makes Chrome offer "Install app" in the
          omnibox (a linked manifest with 192/512 icons plus the controlling
          service worker satisfies the installability criteria). Icons are
-         regenerated with `npm run pwa-icons` after any brand change. -->
+         regenerated with `pnpm run pwa-icons` after any brand change. -->
     <link rel="manifest" href="%sveltekit.assets%/manifest.webmanifest" />
     <!-- Starts the font download before the CSS that names it is parsed. The
          path is literal, not %sveltekit.assets% (which renders relative), so
@@ -74,7 +74,7 @@
     />
     <meta property="og:url" content="https://frisp.app/" />
     <!-- Absolute URL required: crawlers do not resolve relative image paths.
-         Regenerate with `npm run social-card` after any brand change. -->
+         Regenerate with `pnpm run social-card` after any brand change. -->
     <meta property="og:image" content="https://frisp.app/social-card.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />

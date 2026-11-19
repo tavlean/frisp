@@ -10,13 +10,13 @@ import { defineConfig, devices } from '@playwright/test';
 // checkout's preview server.
 const PORT = Number(process.env.PLAYWRIGHT_PORT) || 4317;
 // PLAYWRIGHT_SKIP_BUILD=1 serves the existing build/ without rebuilding. Set
-// it ONLY when a fresh build is guaranteed — `npm test` sets it because
+// it ONLY when a fresh build is guaranteed — `pnpm test` sets it because
 // `check` just built. Never inferred from build/ merely existing: a stale dir
 // would silently test old code.
 const webServerCommand =
   process.env.PLAYWRIGHT_SKIP_BUILD === '1' && !process.env.CI
-    ? `npm run preview -- --port ${PORT} --strictPort`
-    : `npm run build && npm run preview -- --port ${PORT} --strictPort`;
+    ? `pnpm run preview --port ${PORT} --strictPort`
+    : `pnpm run build && pnpm run preview --port ${PORT} --strictPort`;
 
 export default defineConfig({
   testDir: 'tests/e2e',

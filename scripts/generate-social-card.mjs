@@ -5,7 +5,7 @@
  * from source: the logomark comes from the one canonical file, the palette from
  * the dark half of the same --i-* token contract Intro.svelte declares, the format
  * list from the same array the landing renders, and the wordmark from the shipped
- * Satoshi face. Re-run after any brand change (`npm run social-card`).
+ * Satoshi face. Re-run after any brand change (`pnpm run social-card`).
  *
  * It borrows the landing's LANGUAGE (dark viewfinder, dashed frame, Satoshi at
  * weight 900, quiet uppercase format row) but not its LAYOUT. A web page can hang

@@ -1,7 +1,7 @@
 // Points git at the committed hooks in .githooks/ (one hook: pre-commit, which
-// runs scripts/format-staged.mjs). It is the npm `prepare` step, but .npmrc
-// sets ignore-scripts, so on a fresh clone it runs only when asked:
-// `npm run prepare`, once. The setting lives in the repository's git config,
+// runs scripts/format-staged.mjs). It is the `prepare` step, but
+// pnpm-workspace.yaml sets ignoreScripts, so on a fresh clone it runs only when asked:
+// `pnpm run prepare`, once. The setting lives in the repository's git config,
 // which every worktree shares.
 //
 // Skipped when CI is set: a hook is useless there. Never throws: a checkout

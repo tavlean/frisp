@@ -63,7 +63,7 @@ For Svelte/SvelteKit planning:
 
 Before claiming support for a browser version:
 
-- run `npm run check`;
+- run `pnpm run check`;
 - run a production preview smoke test;
 - import and optimize at least one JPEG or PNG;
 - export WebP successfully;

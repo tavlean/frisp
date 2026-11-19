@@ -8,30 +8,30 @@ Vite as a static SPA. The retired Preact/Rollup app is preserved only on the
 
 ## Commands
 
-`npm run dev` starts the SvelteKit dev server.
+`pnpm run dev` starts the SvelteKit dev server.
 
-`npm run build` runs:
+`pnpm run build` runs:
 
-1. `npm run sync`
+1. `pnpm run sync`
 2. `vite build`
 
-`npm run check` runs:
+`pnpm run check` runs:
 
-1. `npm run typecheck` (`npm run sync`, `svelte-kit sync`,
+1. `pnpm run typecheck` (`pnpm run sync`, `svelte-kit sync`,
    `svelte-check --tsconfig ./tsconfig.json --fail-on-warnings`, then
    `tsc -p tsconfig.service-worker.json` for the service worker, which is its
    own TypeScript project because it needs WebWorker types, then
    `tsc -p tests/tsconfig.json` for the tests and the three root config files)
 2. `vite build`
-3. `npm run audit:static-output`
+3. `pnpm run audit:static-output`
 
-`npm run preview` serves the generated `build/` folder with Vite preview.
+`pnpm run preview` serves the generated `build/` folder with Vite preview.
 
-`npm run deploy` (`scripts/deploy.mjs`) is the only deploy path; a push alone
+`pnpm run deploy` (`scripts/deploy.mjs`) is the only deploy path; a push alone
 deploys nothing. It refuses a dirty tree or a HEAD that is not `origin/main`,
 runs `check` and the unit tests, runs `wrangler deploy`, then waits until
 production's `_app/version.json` names the deployed commit and checks that `/`
-answers 200 and an unknown path answers 404. `npm run deploy -- --dry-run`
+answers 200 and an unknown path answers 404. `pnpm run deploy --dry-run`
 goes through the same steps without changing production. Run the full e2e
 suite before a deploy; the script does not. When to push and deploy is a rule
 in [AGENTS.md](../AGENTS.md).
@@ -101,12 +101,12 @@ Former generated runtime modules are committed source now:
   service-worker module remains curated so it avoids `?worker` imports and
   sub-inline-limit assets like rotate WASM and `*_mt.worker.js` pthread stubs.
 
-`npm run sync` now runs `scripts/patch-codec-wrappers.mjs` only. It writes
+`pnpm run sync` now runs `scripts/patch-codec-wrappers.mjs` only. It writes
 patched Emscripten/wasm-bindgen wrapper copies under
 `.svelte-kit/app-generated/codecs/**` so Vite does not emit duplicate
 worker-local WASM assets. The `#app-generated/*` import points at that wrapper tree.
 
-The patched wrapper files are ignored and can be deleted; `npm run sync`
+The patched wrapper files are ignored and can be deleted; `pnpm run sync`
 recreates them. The committed runtime modules above are ordinary source files.
 
 ## The Worker Pipeline
@@ -260,7 +260,7 @@ Anonymous and first-party, decided 2026-11-10. Three files hold all of it:
   the country Cloudflare reports. It reads no IP address or user agent and
   always answers 204. Every other request goes to `env.ASSETS.fetch`.
 
-`npm run stats` (`scripts/stats.mjs`, `-- --days N`) prints sessions per day
+`pnpm run stats` (`scripts/stats.mjs`, `-- --days N`) prints sessions per day
 and the counts per event from the Analytics Engine SQL API; it needs
 `CLOUDFLARE_API_TOKEN`. A "session" is a page load that opened an image, which
 is the closest thing to a count of real users: bots load pages but do not
@@ -275,7 +275,7 @@ them during ordinary migration cleanup. The committed codec-asset source modules
 import these assets through Vite `?url` modules and pass explicit URLs into
 worker runtimes or Emscripten `locateFile`.
 
-`npm run audit:static-output` verifies the build emits one physical WASM copy
+`pnpm run audit:static-output` verifies the build emits one physical WASM copy
 per logical asset, that the service worker references the expected assets and
 carries the variant-aware precache machinery, and that the service-worker
 build emits **no** duplicate worker chunks of its own (top-level
@@ -283,7 +283,7 @@ build emits **no** duplicate worker chunks of its own (top-level
 app workers actually emitted, if the service worker does not read that list, or
 if a diagnostics probe worker reaches the build: `/diagnostics` and its probes
 are stripped from production by `app-strip-dev-only-routes`, like `/lab`, and
-remain available under `npm run dev`. Since 2026-11-10 `/diagnostics` is not
+remain available under `pnpm run dev`. Since 2026-11-10 `/diagnostics` is not
 prerendered either (`src/routes/diagnostics/+page.ts`), so nothing of it is
 precached and the path answers 404 in production. The audit also asserts that
 `404.html` exists, that the built `service-worker.js` parses as a classic
@@ -314,19 +314,19 @@ prod build unaffected). Details in
 
 ## Tests
 
-- `npm run check` — static gate (`typecheck`, production build, static-output audit).
-- `npm run typecheck:fast` is the incremental svelte-check alone, for quick
-  loops; `npm run typecheck:tests` checks the tests project alone.
-- `npm run test:unit` is `vitest run` over `tests/unit/`. `svelte-kit sync` now
+- `pnpm run check` — static gate (`typecheck`, production build, static-output audit).
+- `pnpm run typecheck:fast` is the incremental svelte-check alone, for quick
+  loops; `pnpm run typecheck:tests` checks the tests project alone.
+- `pnpm run test:unit` is `vitest run` over `tests/unit/`. `svelte-kit sync` now
   runs from `prepare` (on install), not from this script.
-- `npm run test:e2e` — Playwright browser regression (`tests/e2e/`): boots the
+- `pnpm run test:e2e` — Playwright browser regression (`tests/e2e/`): boots the
   production preview (port 4317, or `PLAYWRIGHT_PORT`), asserts cross-origin isolation, encodes through every
   codec asserting valid output magic bytes, and tests SW offline reload and a
   first offline encode (`export-contract.spec.ts`). Needs the Chromium headless
-  shell installed (`npx playwright install chromium`). The
+  shell installed (`pnpm exec playwright install chromium`). The
   webServer builds + previews automatically. **Run after any codec/build change.**
-- `npm test` runs `check`, `test:unit`, and `test:e2e`.
-- `npm run bench` / `npm run bench:compare` — codec benchmark (`benchmarks/`):
+- `pnpm test` runs `check`, `test:unit`, and `test:e2e`.
+- `pnpm run bench` / `pnpm run bench:compare` — codec benchmark (`benchmarks/`):
   per-codec output size + encode time + reliability, with a before/after diff to
   gate codec upgrades and produce performance numbers. See `benchmarks/README.md`.
 
@@ -334,8 +334,8 @@ prod build unaffected). Details in
 
 Prettier is the formatter (`.prettierrc.json`). Run it manually:
 
-- `npm run format` — write fixes across `**/*.{js,css,json,ts,tsx,svelte}`.
-- `npm run format:check` — the read-only CI check, split into its own GitHub
+- `pnpm run format` — write fixes across `**/*.{js,css,json,ts,tsx,svelte}`.
+- `pnpm run format:check` — the read-only CI check, split into its own GitHub
   Actions job on 2026-07-01.
 
 There is a **code-only pre-commit hook**, owned by the repo since 2026-11-17:
@@ -344,9 +344,9 @@ There is a **code-only pre-commit hook**, owned by the repo since 2026-11-17:
 them again. A file that also has unstaged edits is only checked (against its
 staged content) and stops the commit if it is unformatted, so unstaged work is
 never pulled into a commit. Git finds the hook through `core.hooksPath`, set by
-`scripts/install-git-hooks.mjs`. That is the npm `prepare` script, which
-`.npmrc`'s `ignore-scripts` keeps from running on install, so run
-`npm run prepare` once after cloning (worktrees share the setting). It replaced
+`scripts/install-git-hooks.mjs`. That is the `prepare` script, which
+`ignoreScripts` in `pnpm-workspace.yaml` keeps from running on install, so run
+`pnpm run prepare` once after cloning (worktrees share the setting). It replaced
 `simple-git-hooks` + `lint-staged` (2026-07-01, `7b16e0ce`), which cost about 22
 packages and the tree's only real install script. The 2026-06-02 Husky hook
 removal still stands historically (the old hook rewrote Markdown and

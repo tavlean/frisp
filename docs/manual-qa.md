@@ -3,7 +3,7 @@
 Use this before releases and after changes touching build tooling, workers,
 codecs, service workers, image processing, or editor behavior.
 
-> **Much of the per-format encode smoke is now automated** — `npm run test:e2e`
+> **Much of the per-format encode smoke is now automated** — `pnpm run test:e2e`
 > (Playwright, `tests/e2e/`) loads an image and encodes through every codec
 > asserting valid output bytes, checks cross-origin isolation, and tests offline
 > reload, all against the production preview. Run it first; this manual checklist
@@ -13,8 +13,8 @@ codecs, service workers, image processing, or editor behavior.
 ## Setup
 
 ```sh
-npm run check
-npm run preview -- --host 127.0.0.1 --port 5189 --strictPort
+pnpm run check
+pnpm run preview --host 127.0.0.1 --port 5189 --strictPort
 ```
 
 Open `http://127.0.0.1:5189` in a fresh browser context when possible.
@@ -24,7 +24,7 @@ Open `http://127.0.0.1:5189` in a fresh browser context when possible.
 - Logo renders on the intro screen.
 - File picker is available.
 - Drag/drop overlay appears when dragging an image.
-- `/diagnostics` loads under `npm run dev` (it is dev-only; a production build
+- `/diagnostics` loads under `pnpm run dev` (it is dev-only; a production build
   answers 404 there).
 - An unknown nested URL (for example `/a/b`) shows the not-found page with a
   way home, not a blank page.
@@ -103,7 +103,7 @@ Use a production preview.
 
 ## Playwright Smoke Shape
 
-The repo ships a Playwright suite. Use `npm run test:e2e` for automated browser regression; use this checklist for visual quality, release, and cross-browser manual checks. The browser smoke runs against the production preview.
+The repo ships a Playwright suite. Use `pnpm run test:e2e` for automated browser regression; use this checklist for visual quality, release, and cross-browser manual checks. The browser smoke runs against the production preview.
 
 Current smoke coverage:
 

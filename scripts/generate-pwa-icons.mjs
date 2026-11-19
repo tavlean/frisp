@@ -7,7 +7,7 @@
  * generate-social-card.mjs: the icons are reproducible from source, with the
  * logomark coming from the one canonical file and the ground from the dark
  * half of Intro's --i-* token contract. Re-run after any brand change
- * (`npm run pwa-icons`).
+ * (`pnpm run pwa-icons`).
  *
  * One manifest set serves both `purpose: any` and `purpose: maskable`. The
  * mark's bounding box is sized so its corners stay inside the maskable safe

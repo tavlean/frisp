@@ -27,7 +27,7 @@ old bulk lab: `prerender=false`, `dev` guard) and `src/lib/lab/<name>/`.
 
 ## How to run
 
-`npm run dev`, then open **`/lab`** (the card gallery) — or directly
+`pnpm run dev`, then open **`/lab`** (the card gallery) — or directly
 `/lab/porcelain`, `/lab/darkroom`, `/lab/hybrid`. All follow the system
 light/dark preference and have a manual override (porcelain: a
 System|Light|Dark pill top-right; darkroom & hybrid: a sun/moon rail button
@@ -123,7 +123,7 @@ raised/inset depth. Its own signatures beyond the parents:
   subagents in parallel worktrees, merged, and verified in the dev preview at
   1440×900 in BOTH modes (real encodes, compare flow, dropdowns, filmstrip
   switching, eye-enable, flyouts). Commits: doc `791104cd`, porcelain
-  `4e0cff81`, darkroom `7827b86f`. `npm run check` clean after each merge
+  `4e0cff81`, darkroom `7827b86f`. `pnpm run check` clean after each merge
   (porcelain adds 14 benign `corner-shape` CSS-lint warnings, gated behind
   `@supports`). One live fix during verification: porcelain's theme pill
   moved bottom-left → top-right (it collided with the left panel's results
@@ -132,7 +132,7 @@ raised/inset depth. Its own signatures beyond the parents:
 - 2026-07-07 round 2 (maintainer follow-up): hybrid built (`fe578225`),
   `/lab` index gallery (`f1c44129`, squircle cards `544726d7`), porcelain
   toolbar-dock + both-lab light purity (`ac2d992a`). All verified in dev at
-  1440×900, both modes, real encode flows. `npm run check` clean throughout
+  1440×900, both modes, real encode flows. `pnpm run check` clean throughout
   (corner-shape lint warnings only, `@supports`-gated).
 
 - 2026-07-07 round 3 (maintainer request): PORCELAIN gained a full

@@ -119,19 +119,19 @@ status), [worklog.md](project/worklog.md) (the session narrative, newest first),
 
 ## Testing commands
 
-- `npm run check`: typecheck, production build, static-output audit. The gate for
+- `pnpm run check`: typecheck, production build, static-output audit. The gate for
   any app, build, runtime, service-worker, or tooling change.
-- `npm run typecheck:fast`: the incremental svelte-check alone, for quick loops.
-  `npm run typecheck` (part of `check`) also checks the service worker and the
+- `pnpm run typecheck:fast`: the incremental svelte-check alone, for quick loops.
+  `pnpm run typecheck` (part of `check`) also checks the service worker and the
   tests, and fails on any warning.
-- `npm run typecheck:tests`: type-checks `tests/` and the three root config
+- `pnpm run typecheck:tests`: type-checks `tests/` and the three root config
   files alone.
-- `npm run test:unit`: Vitest over `tests/unit/`. Fast; does not boot a browser.
-- `npm run test:e2e`: Playwright over `tests/e2e/`. Boots the production preview
+- `pnpm run test:unit`: Vitest over `tests/unit/`. Fast; does not boot a browser.
+- `pnpm run test:e2e`: Playwright over `tests/e2e/`. Boots the production preview
   cross-origin-isolated and encodes through every codec. Required after any
   codec, build, worker, or service-worker change. Set `PLAYWRIGHT_PORT` to run
   a second checkout's suite at the same time.
-- `npm test`: check, unit, then e2e.
-- `npm run bench` and `npm run bench:compare`: codec size and time regression
+- `pnpm test`: check, unit, then e2e.
+- `pnpm run bench` and `pnpm run bench:compare`: codec size and time regression
   gate. Read the benchmark caveat in [gotchas.md](gotchas.md) before trusting a
   warm number.

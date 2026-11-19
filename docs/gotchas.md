@@ -13,7 +13,7 @@ this doc holds the cross-cutting ones that no single file owns.
   out of the production bundle.** Dev-only routes still emit and precache their
   chunks. Only the build-time `app-strip-dev-only-routes` plugin (or a
   `dev`-gated dynamic import that dead-code elimination can drop) removes them.
-  `npm run audit:static-output` is the tripwire; keep it passing.
+  `pnpm run audit:static-output` is the tripwire; keep it passing.
 - **`vitest.config.ts` does not inherit `vite.config.ts`.** A standalone
   Vitest config takes full precedence, so anything a test's imports need must
   be set there too. Import aliases were the trap once: the two configs
@@ -64,7 +64,7 @@ this doc holds the cross-cutting ones that no single file owns.
   `scripts/patch-codec-wrappers.mjs` writes into `.svelte-kit/`. Then update
   the asset checks in `scripts/audit-static-output.mjs`, which cross-checks the records, the
   manifest imports and the emitted files. Generated wrappers outlive their
-  source: `npm run sync` only writes files, so a retired wrapper stays
+  source: `pnpm run sync` only writes files, so a retired wrapper stays
   importable in a reused checkout unless the patch script deletes it (it now
   deletes the MozJPEG and QOI encoder ones).
 - **`codecs/mozjpeg` is not only the MozJPEG encoder.** Its one Makefile also
@@ -324,10 +324,11 @@ this doc holds the cross-cutting ones that no single file owns.
   Playwright's `setInputFiles` ignores `accept`, and it also turns
   `mimeType: ''` into `application/octet-stream`.
 
-- **`npm install` deletes `node_modules/$app`, and nothing puts it back on
+- **An install can delete `node_modules/$app`, and nothing puts it back on
   install.** That folder holds the `$app/tsconfig` every tsconfig here extends;
-  only `svelte-kit sync` writes it, npm sees it as extraneous and prunes it,
-  and `.npmrc`'s `ignore-scripts` stops `prepare` from recreating it. Vite 8
+  only `svelte-kit sync` writes it, the package manager sees it as extraneous
+  and prunes it, and `ignoreScripts` in `pnpm-workspace.yaml` stops `prepare`
+  from recreating it. Vite 8
   fails every transform when an `extends` cannot be resolved
   (`TSCONFIG_ERROR ... Tsconfig not found`), so any script that can run first
   on a fresh install must sync itself: `check`, `test:unit` and
@@ -336,10 +337,15 @@ this doc holds the cross-cutting ones that no single file owns.
   directory matches its one-letter siblings, and a tracked file under an
   ignored directory is refused. `scripts/format-staged.mjs` re-stages with
   `git update-index -z --stdin`, which takes paths as written.
-- **`min-release-age` in `.npmrc` needs npm 11.10 or later.** Older npm
-  ignores the key with a warning, and `npm ci` never consults it. To take a
-  release younger than 7 days on purpose, pass `--min-release-age=0` on that
-  one install.
+- **`minimumReleaseAge` in `pnpm-workspace.yaml` blocks fresh releases.**
+  It is in minutes (10080 = 7 days), and `pnpm install --frozen-lockfile`
+  never consults it. To take a release younger than 7 days on purpose, add it
+  to `minimumReleaseAgeExclude` for that one update, then remove the entry.
+- **pnpm passes `--` through to the script.** `pnpm run deploy --dry-run`,
+  not `pnpm run deploy -- --dry-run`: the literal `--` reaches the tool,
+  which often ignores the flags after it without failing.
+- **pnpm settings live in `pnpm-workspace.yaml`, not `.npmrc`.** pnpm 11 and
+  later read `.npmrc` only for registry and auth.
 - **Analytics Engine data cannot be deleted, and a preview version shares
   the production dataset.** The usage Worker therefore counts only requests
   on the production host. To test the write path, use `wrangler dev` (local,
@@ -367,12 +373,12 @@ this doc holds the cross-cutting ones that no single file owns.
   `src/service-worker.ts`, which the root `tsconfig.json` excludes, so the
   lookup walks up past the worktree into the parent checkout's `tsconfig.json`.
   If `node_modules/$app` is missing there, the build fails with "Tsconfig not
-  found $app/tsconfig". Run `npm ci` and `npx svelte-kit sync` in the main
+  found $app/tsconfig". Run `pnpm install --frozen-lockfile` and `pnpm exec svelte-kit sync` in the main
   checkout.
-- **In a fresh checkout or worktree, run `npm run sync` before `vite dev`.**
+- **In a fresh checkout or worktree, run `pnpm run sync` before `vite dev`.**
   Without the generated codec wrappers the page loads, but every encode hangs
-  with no console error. `npm run build` and `npm run typecheck` run `sync`
-  themselves; `npm run dev` does not.
+  with no console error. `pnpm run build` and `pnpm run typecheck` run `sync`
+  themselves; `pnpm run dev` does not.
 - **`git add <dir>` while a parallel agent is editing that directory stages its
   half-finished work under your commit message.** `git add src` takes whatever is
   on disk at that instant, not what you reviewed a moment earlier, so a diff you
@@ -414,7 +420,7 @@ this doc holds the cross-cutting ones that no single file owns.
   test fails at browser launch, which reads like a broken app rather than a
   missing browser. The cache is shared with other tools and can lose those
   revisions (it did around 2026-11-17). Restore them the way CI installs
-  them: `npx playwright install chromium webkit`, run in this repo so it
+  them: `pnpm exec playwright install chromium webkit`, run in this repo so it
   resolves the pinned version.
 - **Playwright `context.setOffline(true)` does not cut the network for
   dedicated workers in Chromium.** A worker's fetch still succeeds, so an

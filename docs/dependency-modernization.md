@@ -25,8 +25,10 @@ the licence and what was trimmed.
 
 ## Policy
 
-- Every version in `package.json` is exact, and `.npmrc` sets `save-exact`,
-  `ignore-scripts` and `min-release-age=7`. Update a dependency only for a
+- The package manager is pnpm, pinned once in `packageManager` in
+  `package.json` (npm until 2026-11-19). Every version in `package.json` is
+  exact, and `pnpm-workspace.yaml` sets `saveExact`, `ignoreScripts` and
+  `minimumReleaseAge` (7 days). Update a dependency only for a
   change we need (a fix that reaches us, a feature we will use), and read what
   changed in it and in anything it pulls in first. Do not update for the sake
   of being current.
@@ -37,14 +39,14 @@ the licence and what was trimmed.
 - `wrangler` is not in the lockfile. `scripts/deploy.mjs` names the one
   version it accepts and runs it from PATH.
 - GitHub Actions are pinned to commit SHAs, with the release in a comment.
-- Use `npm run check` after dependency changes.
-- Use `npm run audit` after lockfile changes. It runs
-  `scripts/audit-deps.mjs`: `npm audit`, failing on every advisory except the
+- Use `pnpm run check` after dependency changes.
+- Use `pnpm run audit` after lockfile changes. It runs
+  `scripts/audit-deps.mjs`: `pnpm audit`, failing on every advisory except the
   ones accepted in that file, each with its reason and date. It also fails
   when an accepted advisory is no longer reported, so the list cannot go
   stale. Accepted as of 2026-11-17: none. The one earlier entry,
   `GHSA-gcqx-w48m-w2h4` (deepmerge), was withdrawn upstream on 2026-11-16.
-- Do not run `npm audit fix --force` blindly.
+- Do not run `pnpm audit --fix` blindly.
 - Do not change codec package lockfiles unless actively rebuilding that codec.
 - Keep build/dependency changes separate from product feature work.
 
@@ -65,7 +67,7 @@ the licence and what was trimmed.
   devDeps, the `prepare` script, and the `lint-staged` config; also dropped `md`
   from the Prettier globs. See [the project brief](project/brief.md).
 - Git hooks: **re-added a code-only pre-commit hook on 2026-07-01.**
-  `package.json` now uses `simple-git-hooks` (`pre-commit: npx lint-staged`) with
+  `package.json` now uses `simple-git-hooks` (`pre-commit: pnpm exec lint-staged`) with
   a `lint-staged` config that formats code globs only
   (`*.{js,css,json,ts,tsx,svelte}`), plus a `prepare` script
   (`node scripts/install-git-hooks.mjs`) that installs the hook. `*.md` is

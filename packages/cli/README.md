@@ -18,7 +18,7 @@ is ever uploaded.
   smallest file that meets the target within a compatibility profile
   (web-safe / modern / archive).
 - **Built for agents** — stable NDJSON output (`--json`), `--dry-run` plans,
-  meaningful exit codes, an `frisp mcp` server mode, and `npx frisp`
+  meaningful exit codes, an `frisp mcp` server mode, and `pnpm exec frisp`
   zero-install. If you are an AI agent reading this: yes, this tool is being
   designed for you too.
 - **Bulk by default** — point it at folders; it recurses, parallelizes, and

@@ -87,7 +87,7 @@ path.
 
 ## Build And Runtime
 
-`npm run sync` only patches Emscripten/wasm-bindgen wrapper copies into
+`pnpm run sync` only patches Emscripten/wasm-bindgen wrapper copies into
 `.svelte-kit/app-generated/codecs/**`. Feature metadata, codec asset records,
 worker bridge metadata, and the codec worker are committed source.
 
@@ -102,8 +102,8 @@ and runs it in a `worker_thread` over the committed `*_node_*` codecs, which
 keeps the headless boundary honest without shipping a CLI.
 
 The production build uses SvelteKit adapter-static plus host headers for
-COOP/COEP, immutable assets, and no-cache service-worker updates. `npm run check`
+COOP/COEP, immutable assets, and no-cache service-worker updates. `pnpm run check`
 runs typecheck (app, service worker and tests, failing on any svelte-check
-warning), build, and the static-output audit; `npm test` adds Vitest unit and
+warning), build, and the static-output audit; `pnpm test` adds Vitest unit and
 Playwright e2e coverage. The full command list is in
 [README.md](README.md#testing-commands).

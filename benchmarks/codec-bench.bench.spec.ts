@@ -15,7 +15,7 @@ import { expect, test } from '@playwright/test';
  * Multiple image types matter because a codec change can help photos but hurt
  * flat illustrations, break alpha, or behave differently on huge images; this
  * surfaces all of that. Writes benchmarks/results/<label>.json; capture one
- * before a codec upgrade and one after, then `npm run bench:compare` them.
+ * before a codec upgrade and one after, then `pnpm run bench:compare` them.
  *
  * Timing measures the editor's working window (excludes the ~100ms debounce) and
  * is machine-dependent; only compare reports captured on the same machine.

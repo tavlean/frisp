@@ -190,7 +190,7 @@ error map: missing TLS exports → `failed to prepare module for threading`; mis
 
 ### Verification (2026-06-03)
 
-`npm run check` green; full e2e (`tests/e2e/`, **chromium + webkit**) green
+`pnpm run check` green; full e2e (`tests/e2e/`, **chromium + webkit**) green
 (37 passed, the 1 skip is the pre-existing WebKit offline-SW skip). The new
 `tests/e2e/oxipng-threads.spec.ts` asserts threading ENGAGES, not just that the
 asset exists:
@@ -293,7 +293,7 @@ Vite (those must return the JS that *exports* the asset URL, not the raw bytes),
 and short-circuits before Vite's internal middleware (registered in the
 `configureServer` body, not a returned post-hook). It's `configureServer`-only,
 so `vite build` ignores it entirely (prod output unchanged), needs no new
-dependency, and requires no per-developer setup — `npm run dev` "just works".
+dependency, and requires no per-developer setup — `pnpm run dev` "just works".
 
 **Scope.** Only the Emscripten **classic** pthread workers need this. oxipng's
 wasm-bindgen-rayon worker (`workerHelpers.js`) is a **module** worker, which

@@ -1,11 +1,11 @@
-// Production deploy, start to finish: `npm run deploy`.
+// Production deploy, start to finish: `pnpm run deploy`.
 //
 // It deploys only what is already on origin/main, from a clean tree, so the
 // live build always matches a pushed commit (the build is named after that
 // commit; see commitVersionName in vite.config.ts). It runs the gates, hands
 // the build to wrangler, then asks production what it is serving.
 //
-// `npm run deploy -- --dry-run` does everything except change production.
+// `pnpm run deploy --dry-run` does everything except change production.
 import { execSync, spawnSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 
@@ -21,7 +21,7 @@ function stop(message) {
 }
 
 // wrangler holds the Cloudflare token and pushes production, and it is not in
-// package-lock.json (it would add its own large tree). So the version is
+// pnpm-lock.yaml (it would add its own large tree). So the version is
 // pinned here instead, and the binary on PATH is run directly: `npx` would
 // fetch whatever the registry serves on a machine that lacks it. To move the
 // pin, read the wrangler changelog for the versions in between, install the
@@ -51,8 +51,8 @@ requirePinnedWrangler();
 
 // check = codec artifact checksums, typecheck, build, static-output audit. The e2e suite is the
 // caller's job (AGENTS.md): it takes minutes and has usually just run.
-run('npm', ['run', 'check']);
-run('npm', ['run', 'test:unit']);
+run('pnpm', ['run', 'check']);
+run('pnpm', ['run', 'test:unit']);
 run('wrangler', ['deploy', ...(dryRun ? ['--dry-run'] : [])]);
 if (dryRun) {
   console.log('deploy: dry run finished; production was not changed.');

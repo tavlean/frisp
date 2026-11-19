@@ -35,7 +35,7 @@ those aliases is a real refactor, not a rename.
 - **Theming uses CSS `light-dark()`**, not a class-swapped theme or a JS
   variable. A surface that needs both modes declares both values in one place.
 - **Squircles use the CSS `corner-shape` property**, paired with a radius.
-  `svelte-check` reports 0 warnings and `npm run typecheck` fails on any
+  `svelte-check` reports 0 warnings and `pnpm run typecheck` fails on any
   warning (since 2026-11-10), so a new warning is a real failure.
 - **Icons are Nucleo**, exported as `currentColor` SVGs. The lab set is 27
   pure-stroke 18px glyphs in `src/lib/lab/icons/` behind `LabIcon.svelte`. The

@@ -24,8 +24,8 @@ Individual provenance, exact source URL, byte count, and digest are recorded in 
 
 ## Harness
 
-Run `npm run bench:svg` to start a Vite dev server on port 5190 and drive Chromium through Frisp's real SVG worker, renderer, visual gate, and auto-search pipeline. Use `npm run bench:svg -- --limit 10` for a smoke run, or `--base-url http://host:port` with an existing development server.
+Run `pnpm run bench:svg` to start a Vite dev server on port 5190 and drive Chromium through Frisp's real SVG worker, renderer, visual gate, and auto-search pipeline. Use `pnpm run bench:svg --limit 10` for a smoke run, or `--base-url http://host:port` with an existing development server.
 
 Runs write metadata to `results/frisp-<git-short-sha>.json` and optimized files under `external/frisp-safe/` and `external/frisp-auto/`, preserving corpus-relative paths. Browser gzip sizes in the JSON are informational because fflate and Node zlib can differ slightly.
 
-Add an external tool by placing outputs in `external/<tool>/<same-relative-path>.svg`; never overwrite the corpus. Run `npm run bench:svg:compare -- results/frisp-<sha>.json` (N result JSONs are accepted) to generate `RESULTS.md`. Comparison reads every tool's files from disk and recompresses all outputs with Node zlib gzip level 9. It reports raw and gzip totals, median/geomean ratios to input, pairwise gzip win/tie/loss, and per-stratum tables. A tie is within `max(4 bytes, 0.1%)`.
+Add an external tool by placing outputs in `external/<tool>/<same-relative-path>.svg`; never overwrite the corpus. Run `pnpm run bench:svg:compare -- results/frisp-<sha>.json` (N result JSONs are accepted) to generate `RESULTS.md`. Comparison reads every tool's files from disk and recompresses all outputs with Node zlib gzip level 9. It reports raw and gzip totals, median/geomean ratios to input, pairwise gzip win/tie/loss, and per-stratum tables. A tie is within `max(4 bytes, 0.1%)`.

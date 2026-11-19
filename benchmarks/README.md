@@ -10,8 +10,8 @@ when writing up "we got X% smaller / Y% faster."
 ## Run
 
 ```sh
-npm run bench                         # writes benchmarks/results/current.json
-BENCH_LABEL=webp-1.6 npm run bench    # custom label → results/webp-1.6.json
+pnpm run bench                         # writes benchmarks/results/current.json
+BENCH_LABEL=webp-1.6 pnpm run bench    # custom label → results/webp-1.6.json
 ```
 
 It boots the production build (cross-origin isolated) and, for each **image type**
@@ -59,9 +59,9 @@ explained.
 # 1. Before touching a codec, capture the baseline (already committed):
 #    benchmarks/baseline.json
 # 2. After rebuilding the codec:
-npm run bench
+pnpm run bench
 # 3. Diff:
-npm run bench:compare
+pnpm run bench:compare
 #    (defaults to baseline.json vs results/current.json)
 #    or: node benchmarks/compare.mjs <before.json> <after.json>
 ```

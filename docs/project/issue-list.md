@@ -16,7 +16,7 @@ Small backlog seed. The big tracks live in their own plans — see
 - `landing.spec.ts` drop and paste flake fixed 2026-08-11 (commit `e0c58f50`):
   `dispatchDrag` raced the Intro mount; the helper now waits for the Intro
   before dispatching. Verified 60 of 60 under `--repeat-each=3`.
-- Migration closeout verification: `npm run check`, `npm run audit`, production
+- Migration closeout verification: `pnpm run check`, `pnpm run audit`, production
   preview browser smoke, and offline-reload-after-SW-install all passed
   (2026-06-01; the archived record is in
   [history/status-archive-pre-2026-07.md](../history/status-archive-pre-2026-07.md)).

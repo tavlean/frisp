@@ -73,7 +73,7 @@ mismatch stops the build; it means the pin or the upstream archive changed,
 never something to bypass. After the rebuild, update the artifact manifest as
 described in
 [codec-provenance.md](codec-provenance.md#artifact-checksum-manifest), or
-`npm run check` fails.
+`pnpm run check` fails.
 
 Per C/C++ codec, replicate `codecs/cpp.Dockerfile`'s env and run the Makefile
 directly (bypassing the Docker wrapper):
@@ -100,7 +100,7 @@ Emscripten's `new URL("x.wasm", import.meta.url)` with a bare string (so Vite
 doesn't emit a duplicate WASM). The suffix differs by toolchain
 (`.toString()` on 2.0.x, `.href` on 5.x). **Fixed 2026-06-02** to be
 toolchain-agnostic (regex matches both). Without this, a modern-emcc rebuild
-fails `npm run check` with "Expected … wrapper fallback URL pattern".
+fails `pnpm run check` with "Expected … wrapper fallback URL pattern".
 
 ## Per-codec build findings
 
@@ -335,7 +335,7 @@ and accept the size. Do not re-litigate this without new measurements.
     the glue to `.cjs`. (b) Pulling a 12 MP `getImageData` back from Chromium in
     one `page.evaluate` exhausts the Node heap; stash it in a page global and
     read it in slices. (c) Chromium is the right decoder for fixture pixels
-    anyway, because it handles the JPEG fixtures and matches what `npm run bench`
+    anyway, because it handles the JPEG fixtures and matches what `pnpm run bench`
     actually measures.
 
 20. **The libjxl checkout is gitignored, so a fresh worktree has no build tree
@@ -711,8 +711,8 @@ that functional test is the only guard.
 
 ## Verification loop (every codec)
 
-`npm run check` (integration) → `npm run test:e2e` (does it *encode*? — the
-AVIF/quantize tests caught silent breakage) → `npm run bench` + `npm run
+`pnpm run check` (integration) → `pnpm run test:e2e` (does it *encode*? — the
+AVIF/quantize tests caught silent breakage) → `pnpm run bench` + `pnpm run
 bench:compare` (improvement, not regression; size is exact, time is noisy).
 **A build that "succeeds" can still produce a broken codec** — always run the
 e2e + benchmark, never trust the build exit code alone.

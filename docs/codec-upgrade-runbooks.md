@@ -24,10 +24,10 @@ follow its build / generated-metadata / service-worker / browser verification
 rules.
 
 Every runbook ends the same way: after rebuilding the codec artifacts, run the
-app build gate `npm run check` (`typecheck` → vite build →
+app build gate `pnpm run check` (`typecheck` → vite build →
 audit:static-output). Codec `.wasm`/`.js` files are `?url`-imported through
 `src/shared/codec-assets/`, with records in
-`src/shared/codec-asset-records.json`; `npm run check` confirms the worker
+`src/shared/codec-asset-records.json`; `pnpm run check` confirms the worker
 bridge and service-worker selections still resolve. Because
 `.wasm` sizes shift on every rebuild, **re-check the `audit:static-output` size
 budget** if it asserts exact sizes.
@@ -35,8 +35,8 @@ budget** if it asserts exact sizes.
 ## Future codec-update loop
 
 The retired handoff doc was merged here before deletion. For a future codec
-update, build one codec at a time, then run `npm run check`, `npm run test:e2e`,
-`npm run bench`, and `npm run bench:compare`. Commit codec artifacts and any
+update, build one codec at a time, then run `pnpm run check`, `pnpm run test:e2e`,
+`pnpm run bench`, and `pnpm run bench:compare`. Commit codec artifacts and any
 benchmark re-baseline separately after the gates pass. The modern-emcc wrapper
 patch lives in `scripts/patch-codec-wrappers.mjs`; it handles both
 `new URL(...).toString()` and `.href` wrapper styles.
@@ -113,7 +113,7 @@ rm -rf node_modules            # purge old 2.12.1 source + build
    pipeline before the harder webp/avif/jxl builds.
 2. Confirm regenerated `imagequant.wasm` + `imagequant.js` in `git status`
    (committed `.wasm` is ~66 KB).
-3. `npm run check` — imagequant is wired as a processor/quantizer; confirm
+3. `pnpm run check` — imagequant is wired as a processor/quantizer; confirm
    codec-assets + worker bridge + SW plan still resolve it.
 4. Functional: run "reduce palette" on a photo at several color counts and
    dithering levels in the dev preview; compare against pre-upgrade. 2.14's
@@ -176,7 +176,7 @@ rm -rf node_modules            # purge old vendored libwebp source + build dirs
 2. Sanity-check the baked-in encoder version: grep the regenerated
    `enc/webp_enc.js` for a version constant, or run the node variant and call
    `version()` (`WebPGetEncoderVersion`) — v1.6.0 returns `0x010600`.
-3. `npm run check`.
+3. `pnpm run check`.
 4. Functional: encode a lossy and a lossless WebP, and decode a WebP input;
    compare to the pre-upgrade build. Lossless decode should be unchanged or
    slightly faster (v1.6.0 enables `VP8L_USE_FAST_LOAD` for WASM).
@@ -254,7 +254,7 @@ rm -rf node_modules            # purge old libavif, libaom, libwebp ext, node_mo
    the ST target by design (libsharpyuv copy conflict) — both must succeed.
 2. `git status` shows `dec/avif_dec.wasm`, `enc/avif_enc.wasm`,
    `enc/avif_enc_mt.wasm` + `.js` + `.worker.js`.
-3. `npm run check` — verifies the worker bridge, codec-assets manifest, and SW
+3. `pnpm run check` — verifies the worker bridge, codec-assets manifest, and SW
    cache plan still resolve the avif `_mt` / `_node` variants by `?url`.
 4. Functional: encode a photo to AVIF at a few quality points and decode an AVIF
    input; compare against pre-upgrade. Expect ~12–17% better compression at equal
@@ -370,18 +370,18 @@ emmake make -j8
 
 1. Confirm all six regenerated artifacts in `git status`, with fresh timestamps
    on both `jxl_enc_mt.wasm` and `jxl_enc_mt_simd.wasm`.
-2. `npm run sync`. The app imports the *patched* wrappers, so skipping this
+2. `pnpm run sync`. The app imports the *patched* wrappers, so skipping this
    silently keeps the old codec in the build.
-3. `npm run check` — the JXL `_mt` and `_mt_simd` variants are `?url`-referenced
+3. `pnpm run check` — the JXL `_mt` and `_mt_simd` variants are `?url`-referenced
    through codec-assets + worker bridge + SW cache plan; confirm all resolve.
-4. `npm run test:e2e` in **both** Chromium and WebKit. The threading spec is the
+4. `pnpm run test:e2e` in **both** Chromium and WebKit. The threading spec is the
    one that catches a broken `_mt` pthread pool; the encode spec is the one that
    catches a broken WASM import name. A green build proves neither.
 5. Functional: encode lossy, lossless (quality 100 / lossyModular), and
    progressive JXL; decode a JXL input. The fastest way to do this is a Node
    harness linked against the cached `build/mt/lib/*.a` (~40s per relink versus
    ~20 minutes for the library), which is also how you bisect an option mapping.
-6. `npm run bench` + `npm run bench:compare` against the committed baseline.
+6. `pnpm run bench` + `pnpm run bench:compare` against the committed baseline.
 
 **Risk, in hindsight.** The risk estimate above was right about the API mismatch
 and wrong about where the pain would be. The public-API rewrite itself was
@@ -460,7 +460,7 @@ rm -rf pkg pkg-parallel target
    the (now `bool`) interlace field — a clean build proves the wrapper edit.
 2. Confirm regenerated `pkg/` and `pkg-parallel/` artifacts
    (`squoosh_oxipng_bg.wasm` + JS glue in both).
-3. `npm run check` — OxiPNG loads `pkg` (ST) or `pkg-parallel` (`_mt`) by thread
+3. `pnpm run check` — OxiPNG loads `pkg` (ST) or `pkg-parallel` (`_mt`) by thread
    detection; both are `?url`-referenced. Confirm both variants resolve.
 4. Functional: optimize PNGs at the levels Frisp exposes, with interlace toggled
    both ways; compare size/correctness to pre-upgrade. v10.1.1's Bigrams change
@@ -555,7 +555,7 @@ rm -rf node_modules
 2. CMake configure + `jpeg-static` build produces `libjpeg.a`; the wrapper links
    cleanly (resolve rdswitch/cdjpeg symbols first).
 3. Confirm regenerated `enc/mozjpeg_enc.wasm` + `.js` in `git status`.
-4. `npm run check`.
+4. `pnpm run check`.
 5. Functional: encode JPEGs across quality, with trellis / `optimize_coding` /
    quant-table options toggled; output should be **byte-similar** to v3.3.1
    (compression is intentionally UNCHANGED) — a large size delta signals a wiring
@@ -653,7 +653,7 @@ RUST_IMG=rust:1.85 ../build-rust.sh
 3. Wrapper compiles for `wasm32-unknown-unknown` with the typed-pixel + Result
    API; a clean build validates the rgb-crate casts and unwrap handling.
 4. Confirm regenerated `pkg/squoosh_resize_bg.wasm` + JS in `git status`.
-5. `npm run check`.
+5. `pnpm run check`.
 6. **Functional (CRITICAL for correctness):** resize with each filter
    (Triangle/Catrom/Mitchell/Lanczos3), AND exercise both the fast path
    (premultiply=false, color_space_conversion=false → RGBA8) and the f32 path
