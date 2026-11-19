@@ -3,6 +3,7 @@
 // documents. The existing import pipeline owns those compatibility rules.
 
 import { processSvg } from '#client/lazy-app/svg-source.ts';
+import { readPixels } from '#shared/canvas-readback.ts';
 
 export async function renderSvgToImageData(
   svgText: string,
@@ -16,7 +17,15 @@ export async function renderSvgToImageData(
     new Blob([svgText], { type: 'image/svg+xml' }),
   );
   signal.throwIfAborted();
+  return readPixels(() => draw(image, width, height, background));
+}
 
+function draw(
+  image: HTMLImageElement,
+  width: number,
+  height: number,
+  background: string | null,
+): ImageData {
   const canvas = document.createElement('canvas');
   canvas.width = width;
   canvas.height = height;

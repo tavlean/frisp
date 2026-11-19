@@ -1,3 +1,5 @@
+import { readPixels } from '#shared/canvas-readback.ts';
+
 /** Replace the contents of a canvas with the given data */
 export function drawDataToCanvas(canvas: HTMLCanvasElement, data: ImageData) {
   const ctx = canvas.getContext('2d');
@@ -15,9 +17,18 @@ interface DrawableToImageDataOptions {
   sh?: number;
 }
 
+/** The drawable's pixels through a fresh canvas, protected by readPixels
+ *  (src/shared/canvas-readback.ts). */
 export function drawableToImageData(
   drawable: ImageBitmap | HTMLImageElement,
   opts: DrawableToImageDataOptions = {},
+): Promise<ImageData> {
+  return readPixels(() => drawToImageData(drawable, opts));
+}
+
+function drawToImageData(
+  drawable: ImageBitmap | HTMLImageElement,
+  opts: DrawableToImageDataOptions,
 ): ImageData {
   const {
     width = drawable.width,

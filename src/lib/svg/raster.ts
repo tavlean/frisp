@@ -21,7 +21,7 @@ export async function rasterizeSvg(
   file: File,
 ): Promise<SvgRaster> {
   const image = await abortable(signal, processSvg(signal, file));
-  return { image, raster: drawableToImageData(image) };
+  return { image, raster: await drawableToImageData(image) };
 }
 
 /** The SVG drawn at a resize target, in the source's own orientation: the
@@ -30,7 +30,7 @@ export function vectorResize(
   image: HTMLImageElement,
   options: VectorResizeOptions,
   rotate: Rotation,
-): ImageData {
+): Promise<ImageData> {
   const quarter = rotate % 180 !== 0;
   const width = quarter ? options.height : options.width;
   const height = quarter ? options.width : options.height;

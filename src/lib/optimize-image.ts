@@ -202,7 +202,7 @@ async function encodeSvgPixels(
   // A copy the worker owns: the caller keeps `raster` for its own views.
   const pixels =
     vector && resize.method === 'vector'
-      ? vectorResize(image, resize, recipe.rotate)
+      ? await vectorResize(image, resize, recipe.rotate)
       : new ImageData(
           new Uint8ClampedArray(raster.data),
           raster.width,
