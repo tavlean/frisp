@@ -398,9 +398,13 @@ this doc holds the cross-cutting ones that no single file owns.
   artifacts are new enough to need neither.
 - **WebKit returns an all-zero `getImageData`, with no exception, when its
   GPU process dies mid-draw.** In workers and on the main thread, with or
-  without `willReadFrequently`. `nativeDecode` (`src/worker/offscreen.ts`)
-  decodes again on a blank frame for this reason; any new canvas readback
-  whose pixels get encoded or scored needs the same check. Headless Chromium
+  without `willReadFrequently`. Depending on timing the readback throws instead,
+  which used to surface as "Couldn't decode image". Drawing again at once
+  fails the same way; one task later the process is back and the draw works.
+  Every canvas readback whose pixels get encoded, scored or shown as output
+  goes through `readPixels` (`src/shared/canvas-readback.ts`), which does
+  exactly that retry; a new one must too. A decode retry needs a new bitmap,
+  not a redraw of the old one. Headless Chromium
   on macOS has a software-only 2D canvas and is not affected. Related:
   WebKit's `createImageBitmap` resolves a truncated PNG to a blank bitmap
   where Chromium rejects.

@@ -41,16 +41,23 @@ session must know. Newest first. (Live project state stays in
   `getImageData`, the readback is all zero bytes with no error, so
   `nativeDecode` handed the encoder a blank frame and the user got a fully
   transparent file with Save enabled. Reproduced by killing the process
-  mid-decode on a 6000x6000 PNG: 12 of 37 loads came out blank before, 0 of
-  37 after. `nativeDecode` now decodes once more when a frame is all zero;
+  mid-decode on a 6000x6000 PNG: 12 of 37 loads came out blank before, 0
+  after. `nativeDecode` now decodes once more when a frame is all zero;
   the alpha test's own re-decode does the same. Whether this is what failed
   the two runs is not proven: no GPU crash was recorded, and it does not
   explain the Chromium failure, whose 2D canvas is software-only here.
   Not a test race: the download link exists only for a finished encode.
-  Still open: a GPU kill earlier in the load leaves the encode stuck for 20
-  to 60 s (a decode timeout would fix it), and `src/lib/svg/render.ts` uses
-  the same readback with no blank check. Final gates: check, 297 unit
-  tests, e2e 149 passed.
+  A follow-up the same day generalized it. The "stuck encode" first
+  reported was a misreading: the readback throws on some timings and the
+  app shows "Couldn't decode image" within half a second; nothing hangs.
+  Drawing again at once fails the same way, one task later it works, so
+  `readPixels` in `src/shared/canvas-readback.ts` retries once after a task
+  on a throw or a blank frame. `nativeDecode`, `pixelatedResize`,
+  `drawableToImageData` (SVG raster and vector resize) and
+  `renderSvgToImageData` go through it; the bulk thumbnail does not, since
+  it is not an output. Kill runs in WebKit went from 11 good and 20 errors
+  to 31 good and none. SVG through the UI was not exercised under a kill.
+  Final gates: check, 305 unit tests, e2e 149 passed.
 - Gotchas: libjxl dithers all `JXL_TYPE_UINT8` output with no switch, so
   never use it where pixels are scored; Playwright turns `mimeType: ''` into
   `application/octet-stream` and ignores `accept`; a scratch relink of one
