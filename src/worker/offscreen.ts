@@ -19,8 +19,25 @@ function context2d(
 }
 
 /** Decode with the browser, honoring EXIF orientation as an <img> would
- *  (createImageBitmap's default), the same pixels the main thread got. */
+ *  (createImageBitmap's default), the same pixels the main thread got.
+ *
+ *  WebKit draws through its GPU process, and when that process dies during
+ *  a decode the readback is all zero bytes with no error: a blank frame the
+ *  encoder turns into a fully transparent file the user can save (measured
+ *  2026-11-19 by killing the process mid-decode). So an all-zero frame is
+ *  decoded once more. A source that really is transparent black decodes the
+ *  same twice and is kept. */
 export async function nativeDecode(blob: Blob): Promise<ImageData> {
+  const image = await drawDecoded(blob);
+  return isAllZero(image) ? drawDecoded(blob) : image;
+}
+
+/** Stops at the first nonzero pixel, so a normal frame costs a few reads. */
+function isAllZero(image: ImageData): boolean {
+  return new Uint32Array(image.data.buffer).every((word) => word === 0);
+}
+
+async function drawDecoded(blob: Blob): Promise<ImageData> {
   const bitmap = await createImageBitmap(blob);
   try {
     const ctx = context2d(bitmap.width, bitmap.height);

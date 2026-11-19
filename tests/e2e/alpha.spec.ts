@@ -41,16 +41,26 @@ for (const fmt of ALPHA_FORMATS) {
     const href = await download.getAttribute('href');
 
     // Re-decode the encoded output and sample the (transparent) corner and the
-    // (opaque) disc centre.
+    // (opaque) disc centre. WebKit's decode can come back all zero bytes when
+    // its GPU process dies mid-draw (see nativeDecode in src/worker/
+    // offscreen.ts), so a blank readback is decoded once more: a blank OUTPUT
+    // stays blank and still fails below.
     const { cornerAlpha, centreAlpha } = await page.evaluate(async (url) => {
-      const bmp = await createImageBitmap(await (await fetch(url!)).blob());
-      const cv = new OffscreenCanvas(bmp.width, bmp.height);
-      const ctx = cv.getContext('2d', { willReadFrequently: true })!;
-      ctx.drawImage(bmp, 0, 0);
+      const blob = await (await fetch(url!)).blob();
+      const decode = async () => {
+        const bmp = await createImageBitmap(blob);
+        const cv = new OffscreenCanvas(bmp.width, bmp.height);
+        const ctx = cv.getContext('2d', { willReadFrequently: true })!;
+        ctx.drawImage(bmp, 0, 0);
+        return ctx.getImageData(0, 0, bmp.width, bmp.height);
+      };
+      let image = await decode();
+      if (image.data.every((byte) => byte === 0)) image = await decode();
+      const alphaAt = (x: number, y: number) =>
+        image.data[(y * image.width + x) * 4 + 3];
       return {
-        cornerAlpha: ctx.getImageData(2, 2, 1, 1).data[3],
-        centreAlpha: ctx.getImageData(bmp.width >> 1, bmp.height >> 1, 1, 1)
-          .data[3],
+        cornerAlpha: alphaAt(2, 2),
+        centreAlpha: alphaAt(image.width >> 1, image.height >> 1),
       };
     }, href);
 
