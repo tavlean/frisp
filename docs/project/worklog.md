@@ -56,8 +56,21 @@ session must know. Newest first. (Live project state stays in
   `drawableToImageData` (SVG raster and vector resize) and
   `renderSvgToImageData` go through it; the bulk thumbnail does not, since
   it is not an output. Kill runs in WebKit went from 11 good and 20 errors
-  to 31 good and none. SVG through the UI was not exercised under a kill.
+  to 31 good and none.
   Final gates: check, 305 unit tests, e2e 149 passed.
+- Closing pass, same day. JXL "Slight loss" (`lossyPalette`) is retired: the
+  panel no longer offers it and the encoder runtime forces it off, so a
+  saved side that carries it encodes plain lossless. Measured against plain
+  lossless at effort 7 it made graphics 137 to 420 percent larger and only
+  shrank the two noisy fixtures, with values off by up to 71 levels. The SVG
+  path was then exercised under a GPU kill through the UI: 16 loads of a
+  4000-shape SVG with the kill at 0 to 1000 ms all produced the identical
+  complete optimized file and no error. One display-only effect remains: after
+  a kill the first preview canvas can stay blank until it is redrawn. The
+  alpha test now prints the output's byte size, dimensions and opaque pixel
+  count when it fails, so a recurrence of the unexplained Chromium failure
+  says whether the output or the check was blank. Gates: check, 306 unit
+  tests, e2e 149 passed.
 - Gotchas: libjxl dithers all `JXL_TYPE_UINT8` output with no switch, so
   never use it where pixels are scored; Playwright turns `mimeType: ''` into
   `application/octet-stream` and ignores `accept`; a scratch relink of one

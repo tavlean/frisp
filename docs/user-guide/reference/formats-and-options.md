@@ -230,11 +230,8 @@ transcode lane.
 | Progressive rendering | `progressive`             | checkbox | bool             | false            |
 | Effort                | `effort`                  | range    | 1–9, step 1      | 7                |
 
-**Lossless on**
-
-| UI label    | key            | control  | values                             | default |
-| ----------- | -------------- | -------- | ---------------------------------- | ------- |
-| Slight loss | `lossyPalette` | checkbox | bool (only applied while lossless) | false   |
+**Lossless on**: no further control. "Slight loss" (`lossyPalette`) was retired
+on 2026-11-19; see the quirks below.
 
 **Lossless off**
 
@@ -249,9 +246,12 @@ transcode lane.
 
 **Auto** (an action, not a stored option): the shared Auto row under Quality, searching `quality` 7–99 (100 is Lossless; below 7 the panel forces `lossyModular`); only when lossy and not transcoding. Search rules as in WebP's Lossy → Auto above; bounds in `AUTO_QUALITY_BOUNDS` (`src/lib/editor/auto-quality.ts`).
 
-**Hidden / quirks** — all `EncodeOptions` fields are exposed. `lossyModular` is
-coerced to `true` whenever `quality < 7` (apply() override, checkbox also disabled).
-`lossyPalette` only takes effect in lossless mode (`apply()` sets it false otherwise).
+**Hidden / quirks** — every `EncodeOptions` field but `lossyPalette` is exposed.
+`lossyModular` is coerced to `true` whenever `quality < 7` (apply() override,
+checkbox also disabled). `lossyPalette` stays in the options type because saved
+settings carry it, but the panel always writes `false` and the encoder runtime
+forces it off: under libjxl v0.13.0 it made graphics two to five times larger
+than plain lossless.
 `jpegTranscode` is the one field the wasm encoder never reads: it lives in the
 options object so it reaches the encode signature that keys the result cache and
 the undo history, and it survives on a non-JPEG source (harmlessly, since the

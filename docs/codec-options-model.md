@@ -35,7 +35,7 @@ different style:
 
 - **One toggle → many fields.** AVIF "Lossless" is not a field; turning it on sets
   `quality = MAX`, `subsample = 4:4:4`, and changes alpha handling. JXL "Lossless"
-  forces `quality = 100` and couples `lossyPalette`/`lossyModular`.
+  forces `quality = 100` and couples `lossyModular`.
 - **Inversions / renames.** WebP/AVIF "Effort" is the inverse of the stored
   `speed`; WebP "Slight loss" is `100 - near_lossless`; "Filter sharpness" is
   `7 - filter_sharpness`.
@@ -99,8 +99,8 @@ Treat these as the regression checklist; re-run the editor parity expectations
   that has Lossless).
 - AVIF Lossless → `quality = MAX`, `subsample = 4:4:4`, alpha handling; Effort is
   `MAX_EFFORT - speed`.
-- JXL Lossless ↔ `quality = 100`; `quality < 7` forces `lossyModular`; Slight loss
-  ↔ `lossyPalette`.
+- JXL Lossless ↔ `quality = 100`; `quality < 7` forces `lossyModular`; `lossyPalette`
+  (the retired "Slight loss") is always written `false`.
 - WebP inverted sliders (`near_lossless`, `filter_sharpness`), `0/1` flags, lossless
   Effort preset table.
 - AVIF/JXL inferred toggles seed correctly at mount and after copy/import (the

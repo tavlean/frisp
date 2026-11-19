@@ -27,19 +27,10 @@ _(Only shown when the image you loaded is a JPEG.)_
 
 ### Lossless
 
-- **What it does:** Switches the encoder into perfect, no-quality-loss mode — the saved image is mathematically identical to the input. When it is on, the Quality slider (and most of the lossy tuning) is replaced by a single "Slight loss" option.
+- **What it does:** Switches the encoder into perfect, no-quality-loss mode — the saved image is mathematically identical to the input. When it is on, the Quality slider (and most of the lossy tuning) is hidden.
 - **Range & default:** On / Off checkbox. **Default Off.** It is a derived control: turning it on sets `quality = 100`; the panel considers itself "lossless" whenever `quality === 100`.
 - **How to choose:** Turn it **on** when you need an exact copy — line art, screenshots, diagrams, text-heavy images, or master files you intend to keep. Leave it **off** for photographs, where lossy compression gives dramatically smaller files for a quality drop you usually cannot see.
 - **Recommended starting point:** **Off** for photos; **On** only when exact reproduction matters. Expect lossless files to be much larger than lossy ones.
-
-### Slight loss
-
-_(Only shown when Lossless is on.)_
-
-- **What it does:** Allows a tiny, near-invisible amount of loss in the otherwise-lossless image to shave off some file size. It is a "lossy palette" trick that can help on images with limited colors.
-- **Range & default:** On / Off checkbox (option key `lossyPalette`). **Default Off.** It only has any effect while Lossless is on; in lossy mode the panel forces it off.
-- **How to choose:** Leave it **off** if you truly want bit-exact output. Turn it **on** if you want "basically lossless" but a bit smaller, and you're comfortable with an imperceptible change.
-- **Recommended starting point:** **Off.** Only enable it if file size is tight and the image has flat areas or few colors.
 
 ### Quality
 
@@ -144,11 +135,10 @@ _Sources: [cjxl man page](https://manpages.debian.org/unstable/libjxl-tools/cjxl
 - **"Lossless transcode" and "Lossless" are different things.** Lossless transcode keeps your existing JPEG exactly as it is, just packed smaller. Lossless re-compresses the decoded pixels perfectly, which is a bigger file than the JPEG you started from, because a JPEG has already thrown detail away and lossless has to preserve every last artifact of it.
 - **The transcode toggle only appears for JPEG sources**, and only while nothing is editing the pixels. If you cannot find it, check what you loaded, then check Resize, Rotate, Film grain and Reduce palette.
 - **Lossless is just Quality = 100.** There's no separate lossless flag in the file. Ticking Lossless maxes out quality; the Quality slider only goes to 99 precisely so the two states stay distinct.
-- **Most lossy tuning lives under Advanced — and all of it vanishes in lossless mode.** If you can't find Alternative lossy mode, Edge filter, decoding speed, ISO noise, or Progressive, open **Advanced settings** (only Quality and Effort sit up front). If even those are gone, Lossless is on — it hides the lossy controls and shows only "Slight loss".
+- **Most lossy tuning lives under Advanced — and all of it vanishes in lossless mode.** If you can't find Alternative lossy mode, Edge filter, decoding speed, ISO noise, or Progressive, open **Advanced settings** (only Quality and Effort sit up front). If even those are gone, Lossless is on — it hides the lossy controls.
 - **Very low quality locks Alternative lossy mode on.** Below Quality 7 the "Alternative lossy mode" checkbox is forced on and greyed out; that's expected.
 - **Quality numbers aren't comparable across formats.** A JPEG XL "75" is not the same as a JPEG "75" or a WebP "75". Judge by the preview, not by matching numbers.
 - **Effort changes file size, not the look.** Two files at the same Quality but different Effort should look the same; the higher-Effort one is just smaller (and took longer to make).
-- **"Slight loss" only does anything in lossless mode.** In lossy mode the panel forces it off, so toggling it there has no effect.
 - **Watch the encode time on big images.** High Effort plus a large image is the slowest combination, since the work happens on your own device.
 
 ## Browser support reality

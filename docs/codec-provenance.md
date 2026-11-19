@@ -168,8 +168,12 @@ generated from exactly these inputs.
 >   photo 184209 → 247911, gradient 14706 → 27279, hard-edges 12018 → 22522,
 >   transparent 3925 → 6809. A native v0.12.0 against v0.13.0 `cjxl`
 >   reproduces it, so it is libjxl's. It was already larger than plain
->   lossless on four of six fixtures and is now on five. The option is worth
->   reconsidering on its own.
+>   lossless on four of six fixtures and is now on five. Retired on
+>   2026-11-19: the panel no longer offers it and the encoder runtime forces
+>   it off. Measured that day against plain lossless at effort 7:
+>   illustration +137%, screenshot +230%, transparent +365%, hard-edges
+>   +420%, gradient +27% with half the values changed; only the two noisy
+>   fixtures shrank (about −65%), with values off by up to 71 levels.
 > - **Noise (photon noise ISO)** adds about half the grain it did (RMS
 >   against the noise-free encode at ISO 3200 on photo: 1.47 → 0.74), from
 >   the release's photon-noise luminance fix. Slider positions now mean less
