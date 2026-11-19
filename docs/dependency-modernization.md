@@ -67,7 +67,7 @@ the licence and what was trimmed.
   devDeps, the `prepare` script, and the `lint-staged` config; also dropped `md`
   from the Prettier globs. See [the project brief](project/brief.md).
 - Git hooks: **re-added a code-only pre-commit hook on 2026-07-01.**
-  `package.json` now uses `simple-git-hooks` (`pre-commit: pnpm exec lint-staged`) with
+  `package.json` now uses `simple-git-hooks` (`pre-commit: npx lint-staged`) with
   a `lint-staged` config that formats code globs only
   (`*.{js,css,json,ts,tsx,svelte}`), plus a `prepare` script
   (`node scripts/install-git-hooks.mjs`) that installs the hook. `*.md` is
