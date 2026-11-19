@@ -246,7 +246,7 @@ on 2026-11-19; see the quirks below.
 
 **Auto** (an action, not a stored option): the shared Auto row under Quality, searching `quality` 7–99 (100 is Lossless; below 7 the panel forces `lossyModular`); only when lossy and not transcoding. Search rules as in WebP's Lossy → Auto above; bounds in `AUTO_QUALITY_BOUNDS` (`src/lib/editor/auto-quality.ts`).
 
-**Hidden / quirks** — every `EncodeOptions` field but `lossyPalette` is exposed.
+**Hidden / quirks**: every `EncodeOptions` field but `lossyPalette` is exposed.
 `lossyModular` is coerced to `true` whenever `quality < 7` (apply() override,
 checkbox also disabled). `lossyPalette` stays in the options type because saved
 settings carry it, but the panel always writes `false` and the encoder runtime
