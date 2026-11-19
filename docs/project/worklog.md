@@ -31,20 +31,35 @@ session must know. Newest first. (Live project state stays in
   the committed wasm is built from the committed source by relinking it,
   and asked for the NaN-safe clamp. Lossy JXL scores through the fixed
   decoder move by at most 0.4 SSIMULACRA2.
-- Gates: check, 294 unit tests, and the full e2e suite. The e2e run used the
-  newer browsers in the shared cache through a scratch config, because the
-  pinned ones are gone (gotcha below). The final run was 148 passed and one
-  failed: WebKit `alpha.spec.ts` "WebP preserves transparency" read alpha 0
-  at the disc centre. It then passed 45 of 45 reruns and both executors'
-  full runs were clean, so it is recorded as a flake, cause not found.
+- Gates: check, 294 unit tests, and the full e2e suite, first on the newer
+  browsers in the shared cache through a scratch config and then with the
+  pinned ones. Two of the first three full runs failed one test: `alpha.spec.ts`
+  "WebP preserves transparency" read alpha 0 at the disc centre, once in
+  WebKit and once in Chromium; 185 isolated reruns passed.
+- That failure led to a real WebKit bug, fixed the same day. When WebKit's
+  GPU process dies during `createImageBitmap`, `drawImage` and
+  `getImageData`, the readback is all zero bytes with no error, so
+  `nativeDecode` handed the encoder a blank frame and the user got a fully
+  transparent file with Save enabled. Reproduced by killing the process
+  mid-decode on a 6000x6000 PNG: 12 of 37 loads came out blank before, 0 of
+  37 after. `nativeDecode` now decodes once more when a frame is all zero;
+  the alpha test's own re-decode does the same. Whether this is what failed
+  the two runs is not proven: no GPU crash was recorded, and it does not
+  explain the Chromium failure, whose 2D canvas is software-only here.
+  Not a test race: the download link exists only for a finished encode.
+  Still open: a GPU kill earlier in the load leaves the encode stuck for 20
+  to 60 s (a decode timeout would fix it), and `src/lib/svg/render.ts` uses
+  the same readback with no blank check. Final gates: check, 297 unit
+  tests, e2e 149 passed.
 - Gotchas: libjxl dithers all `JXL_TYPE_UINT8` output with no switch, so
   never use it where pixels are scored; Playwright turns `mimeType: ''` into
   `application/octet-stream` and ignores `accept`; a scratch relink of one
   wrapper reproduces a committed wasm byte for byte in about a minute;
   emsdk is at `~/Development/emsdk` on this machine; the Playwright 1.60.0
-  browsers (chromium headless shell 1223, webkit 2287) are no longer in
-  `~/Library/Caches/ms-playwright`, so plain `npm run test:e2e` fails at
-  launch until they are reinstalled or the pin moves.
+  browsers (chromium headless shell 1223, webkit 2287) had gone from
+  `~/Library/Caches/ms-playwright`, so `npm run test:e2e` failed at launch
+  until `npx playwright install chromium webkit` restored them later the
+  same day.
 - Cleanup: worktrees `Frisp-auto-quality`, `dead-encoders`,
   `quizzical-wright` and `codec-hardening` removed with their merged
   branches.

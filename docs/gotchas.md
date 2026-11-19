@@ -396,15 +396,22 @@ this doc holds the cross-cutting ones that no single file owns.
   as `wasmBinary` and define global `require` and `__dirname` around the
   factory call, as `tests/node/pipeline-worker.ts` does. Only the WebP node
   artifacts are new enough to need neither.
+- **WebKit returns an all-zero `getImageData`, with no exception, when its
+  GPU process dies mid-draw.** In workers and on the main thread, with or
+  without `willReadFrequently`. `nativeDecode` (`src/worker/offscreen.ts`)
+  decodes again on a blank frame for this reason; any new canvas readback
+  whose pixels get encoded or scored needs the same check. Headless Chromium
+  on macOS has a software-only 2D canvas and is not affected. Related:
+  WebKit's `createImageBitmap` resolves a truncated PNG to a blank bitmap
+  where Chromium rejects.
 - **Playwright's browsers must match the pinned `@playwright/test`.** Each
   version wants exact browser revisions in `~/Library/Caches/ms-playwright`
   (1.60.0: chromium headless shell 1223, webkit 2287). Without them every
   test fails at browser launch, which reads like a broken app rather than a
-  missing browser. The cache is shared with other tools and lost those
-  revisions around 2026-11-17. `npx playwright install` restores them; until
-  then a scratch config that spreads `playwright.config.ts` and sets each
-  project's `launchOptions.executablePath` to a cached browser runs the
-  suite, on newer browsers than the pin.
+  missing browser. The cache is shared with other tools and can lose those
+  revisions (it did around 2026-11-17). Restore them the way CI installs
+  them: `npx playwright install chromium webkit`, run in this repo so it
+  resolves the pinned version.
 - **Playwright `context.setOffline(true)` does not cut the network for
   dedicated workers in Chromium.** A worker's fetch still succeeds, so an
   "offline" test passes even when offline is broken. Also abort every request
