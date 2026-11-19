@@ -88,7 +88,15 @@ export function createJxlEncoderRuntime({
       runtimeOptions?: JxlEncodeRuntimeOptions,
     ): Promise<ArrayBuffer> {
       const module = await load(runtimeOptions);
-      const result = module.encode(data.data, data.width, data.height, options);
+      // lossyPalette ("Slight loss") was retired on 2026-11-19: under libjxl
+      // v0.13.0 it made graphics two to five times larger than plain
+      // lossless and changed noisy images by up to 71 levels. A saved side
+      // can still carry it, so it is switched off here, where every encode
+      // passes.
+      const result = module.encode(data.data, data.width, data.height, {
+        ...options,
+        lossyPalette: false,
+      });
 
       if (!result) throw new Error('Encoding error.');
 

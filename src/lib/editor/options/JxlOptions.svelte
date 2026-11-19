@@ -41,7 +41,6 @@
   let progressive = $state(o.progressive);
   let edgePreservingFilter = $state(o.epf === -1 ? 2 : o.epf);
   let lossless = $state(o.quality === 100);
-  let slightLoss = $state(o.lossyPalette);
   let autoEdgePreservingFilter = $state(o.epf === -1);
   let decodingSpeedTier = $state(o.decodingSpeedTier);
   let photonNoiseIso = $state(o.photonNoiseIso);
@@ -60,7 +59,7 @@
     options.quality = lossless ? 100 : quality;
     options.progressive = progressive;
     options.epf = autoEdgePreservingFilter ? -1 : edgePreservingFilter;
-    options.lossyPalette = lossless ? slightLoss : false;
+    options.lossyPalette = false;
     options.decodingSpeedTier = decodingSpeedTier;
     options.photonNoiseIso = photonNoiseIso;
     options.lossyModular = quality < 7 ? true : alternativeLossy;
@@ -94,12 +93,7 @@
       <Checkbox bind:checked={lossless} onchange={apply} />
     </label>
 
-    {#if lossless}
-      <label class="option-toggle" transition:reveal>
-        Slight loss
-        <Checkbox bind:checked={slightLoss} onchange={apply} />
-      </label>
-    {:else}
+    {#if !lossless}
       <div class="option-one-cell" transition:reveal>
         <Range min={0} max={99} bind:value={quality} oninput={apply}
           >Quality:</Range

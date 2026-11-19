@@ -45,32 +45,43 @@ for (const fmt of ALPHA_FORMATS) {
     // its GPU process dies mid-draw (see nativeDecode in src/worker/
     // offscreen.ts), so a blank readback is decoded once more: a blank OUTPUT
     // stays blank and still fails below.
-    const { cornerAlpha, centreAlpha } = await page.evaluate(async (url) => {
-      const blob = await (await fetch(url!)).blob();
-      const decode = async () => {
-        const bmp = await createImageBitmap(blob);
-        const cv = new OffscreenCanvas(bmp.width, bmp.height);
-        const ctx = cv.getContext('2d', { willReadFrequently: true })!;
-        ctx.drawImage(bmp, 0, 0);
-        return ctx.getImageData(0, 0, bmp.width, bmp.height);
-      };
-      let image = await decode();
-      if (image.data.every((byte) => byte === 0)) image = await decode();
-      const alphaAt = (x: number, y: number) =>
-        image.data[(y * image.width + x) * 4 + 3];
-      return {
-        cornerAlpha: alphaAt(2, 2),
-        centreAlpha: alphaAt(image.width >> 1, image.height >> 1),
-      };
-    }, href);
+    const { cornerAlpha, centreAlpha, seen } = await page.evaluate(
+      async (url) => {
+        const blob = await (await fetch(url!)).blob();
+        const decode = async () => {
+          const bmp = await createImageBitmap(blob);
+          const cv = new OffscreenCanvas(bmp.width, bmp.height);
+          const ctx = cv.getContext('2d', { willReadFrequently: true })!;
+          ctx.drawImage(bmp, 0, 0);
+          return ctx.getImageData(0, 0, bmp.width, bmp.height);
+        };
+        let image = await decode();
+        if (image.data.every((byte) => byte === 0)) image = await decode();
+        const alphaAt = (x: number, y: number) =>
+          image.data[(y * image.width + x) * 4 + 3];
+        let opaque = 0;
+        for (let i = 3; i < image.data.length; i += 4) {
+          if (image.data[i] > 200) opaque++;
+        }
+        return {
+          cornerAlpha: alphaAt(2, 2),
+          centreAlpha: alphaAt(image.width >> 1, image.height >> 1),
+          // Printed on failure. This test failed twice on 2026-11-19 with a
+          // centre alpha of 0 and no cause found; a blank output is about 65
+          // bytes per megapixel with no opaque pixels.
+          seen: `${blob.size} bytes, ${image.width}x${image.height}, ${opaque} opaque pixels`,
+        };
+      },
+      href,
+    );
 
     expect(
       cornerAlpha,
-      `${fmt.label}: a transparent source pixel should stay transparent`,
+      `${fmt.label}: a transparent source pixel should stay transparent (${seen})`,
     ).toBeLessThan(128);
     expect(
       centreAlpha,
-      `${fmt.label}: an opaque source pixel should stay opaque`,
+      `${fmt.label}: an opaque source pixel should stay opaque (${seen})`,
     ).toBeGreaterThan(200);
   });
 }
